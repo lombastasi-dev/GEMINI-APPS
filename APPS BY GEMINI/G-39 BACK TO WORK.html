@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Back to Work Parent — Re-entry Toolkit</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --forest: #2D6A4F;
+      --forest-dark: #1B4332;
+      --forest-light: #52B788;
+      --forest-bg: #E8F5E9;
+      --peach: #F4A261;
+      --peach-dark: #E76F51;
+      --peach-light: #FFE8D6;
+      --bg-start: #F8FAF9;
+      --bg-end: #FFF5EB;
+      --card-bg: #FFFFFF;
+      --text-main: #2D3748;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --radius-xl: 0.75rem; /* 12px */
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Mobile Header */
+    .mobile-header {
+      display: none;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1rem;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .mobile-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      color: var(--forest);
+      font-size: 1.1rem;
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--text-main);
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+    }
+
+    /* Layout Wrapper */
+    .app-layout {
+      display: flex;
+      flex: 1;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Overlay for Mobile */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 45;
+      backdrop-filter: blur(2px);
+    }
+
+    /* Fixed Left Sidebar */
+    .sidebar {
+      width: 240px;
+      background: var(--card-bg);
+      border-right: 1px solid var(--border-color);
+      box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 50;
+      transition: transform 0.25s ease;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem 1.25rem 1rem 1.25rem;
+      border-bottom: 1px solid #F1F5F9;
+    }
+
+    .sidebar-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--forest);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .sidebar-title i {
+      color: var(--peach);
+    }
+
+    .sidebar-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    .sidebar-nav {
+      padding: 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 0.85rem;
+      border-radius: 0.5rem;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+    }
+
+    .nav-item i {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .nav-item:hover {
+      background: #F8FAFC;
+      color: var(--forest);
+    }
+
+    .nav-item:hover i {
+      color: var(--forest);
+    }
+
+    .nav-item.active {
+      background: var(--forest);
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .nav-item.active i {
+      color: var(--peach);
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 240px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      padding: 2rem 1.5rem;
+    }
+
+    .content-container {
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      flex: 1;
+    }
+
+    /* Footer */
+    .app-footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--forest-dark);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      line-height: 1.4;
+    }
+
+    /* Form UI Elements */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-hint {
+      font-size: 0.775rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control, .form-select, textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.9rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      background-color: #FFFFFF;
+      color: var(--text-main);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-control:focus, .form-select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--forest);
+      box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.15);
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.6rem;
+      margin-top: 0.4rem;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      background: #F8FAFC;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border-color);
+      transition: background 0.15s;
+    }
+
+    .checkbox-label:hover {
+      background: #F1F5F9;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      margin-top: 0.2rem;
+      accent-color: var(--forest);
+    }
+
+    /* Slider styling */
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .slider-container input[type="range"] {
+      flex: 1;
+      accent-color: var(--forest);
+    }
+
+    .slider-value {
+      font-weight: 700;
+      color: var(--forest);
+      font-size: 1rem;
+      min-width: 2.5rem;
+      text-align: center;
+      background: var(--forest-bg);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--forest);
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+      background: var(--forest-dark);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-secondary {
+      background: #FFFFFF;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+    }
+
+    .btn-sample {
+      background: var(--peach-light);
+      color: #9C4221;
+      border: 1px solid #FCD34D;
+    }
+
+    .btn-sample:hover {
+      background: #FDE68A;
+    }
+
+    .btn-copy {
+      background: #F1F5F9;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      font-size: 0.775rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 0.375rem;
+    }
+
+    .btn-copy:hover {
+      background: var(--forest-bg);
+      color: var(--forest);
+    }
+
+    /* Dashboard Grid */
+    .hero-banner {
+      background: linear-gradient(135deg, var(--forest), var(--forest-dark));
+      color: #FFFFFF;
+      border-radius: var(--radius-xl);
+      padding: 2.25rem 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      right: -30px;
+      bottom: -30px;
+      width: 180px;
+      height: 180px;
+      background: var(--peach);
+      opacity: 0.15;
+      border-radius: 50%;
+    }
+
+    .hero-title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-tagline {
+      font-size: 1.1rem;
+      color: var(--peach);
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .hero-desc {
+      font-size: 0.925rem;
+      color: #E2E8F0;
+      max-width: 620px;
+      line-height: 1.5;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .dash-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-color);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--forest-light);
+    }
+
+    .dash-card-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 0.6rem;
+      background: var(--forest-bg);
+      color: var(--forest);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .dash-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--forest-dark);
+      margin-bottom: 0.35rem;
+    }
+
+    .dash-card-desc {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .dash-card-action {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--forest);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* Output Section Formatting */
+    .output-container {
+      margin-top: 2rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .output-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      border-left: 4px solid var(--forest);
+    }
+
+    .output-card.accent-peach {
+      border-left-color: var(--peach-dark);
+    }
+
+    .output-card.accent-blue {
+      border-left-color: #3B82F6;
+    }
+
+    .output-card.accent-purple {
+      border-left-color: #8B5CF6;
+    }
+
+    .output-section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--forest-dark);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      letter-spacing: -0.01em;
+    }
+
+    .script-box {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      position: relative;
+      margin: 0.75rem 0;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: #1E293B;
+      white-space: pre-line;
+    }
+
+    .script-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .script-title {
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .score-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.4rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 1.1rem;
+      font-weight: 800;
+      background: var(--forest-bg);
+      color: var(--forest);
+
+    }
+
+    .score-bar-bg {
+      height: 10px;
+      background: #E2E8F0;
+      border-radius: 5px;
+      overflow: hidden;
+      margin: 0.75rem 0;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--peach), var(--forest));
+      border-radius: 5px;
+      transition: width 0.6s ease;
+    }
+
+    .badge-tag {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      background: #F1F5F9;
+      color: var(--text-main);
+      border-radius: 0.35rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin: 0.2rem;
+    }
+
+    /* History Accordion */
+    .history-section {
+      margin-top: 2rem;
+      border-top: 1px dashed var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .history-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .history-item {
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.825rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.15s;
+    }
+
+    .history-item:hover {
+      background: #F8FAFC;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--forest-dark);
+      color: #FFFFFF;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-md);
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Helper utilities */
+    .hidden { display: none !important; }
+    .text-forest { color: var(--forest); }
+    .text-peach { color: var(--peach-dark); }
+    .bold { font-weight: 600; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .mobile-header { display: flex; }
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .sidebar-overlay.open {
+        display: block;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 1.25rem 1rem;
+      }
+      .hero-title {
+        font-size: 1.5rem;
+      }
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <div class="mobile-logo">
+      <i class="fa-solid fa-heart-pulse text-peach"></i> BackToWork Parent
+    </div>
+    <button class="hamburger-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="app-layout">
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Fixed Left Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">
+          <i class="fa-solid fa-heart-pulse"></i> Back To Work
+        </div>
+        <div class="sidebar-subtitle">Parental Leave Re-entry Toolkit</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item active" onclick="switchView('dashboard')">
+          <i class="fa-solid fa-house"></i> Dashboard
+        </a>
+        <a class="nav-item" onclick="switchView('tool1')">
+          <i class="fa-solid fa-clipboard-check"></i> Return Readiness
+        </a>
+        <a class="nav-item" onclick="switchView('tool2')">
+          <i class="fa-solid fa-baby-carriage"></i> Childcare Solver
+        </a>
+        <a class="nav-item" onclick="switchView('tool3')">
+          <i class="fa-solid fa-face-smile-beam"></i> Guilt Check
+        </a>
+        <a class="nav-item" onclick="switchView('tool4')">
+          <i class="fa-solid fa-briefcase"></i> Work Reentry
+        </a>
+        <a class="nav-item" onclick="switchView('tool5')">
+          <i class="fa-solid fa-clock"></i> Routine Builder
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="content-container">
+
+        <!-- ================= DASHBOARD VIEW ================= -->
+        <section id="view-dashboard" class="view-section">
+          <div class="hero-banner">
+            <h1 class="hero-title">Back to Work Parent</h1>
+            <div class="hero-tagline">Return with confidence, not guilt.</div>
+            <p class="hero-desc">
+              Returning to work after parental leave is a major life pivot, not just a career step. This practical toolkit provides actionable scripts, tailored routines, and cognitive reframes to help you navigate logistics and emotion seamlessly.
+            </p>
+          </div>
+
+          <h2 style="font-size: 1.1rem; font-weight: 700; color: var(--forest-dark); margin-bottom: 1rem;">
+            Interactive Planning Tools
+          </h2>
+
+          <div class="dashboard-grid">
+            <!-- Tool 1 Card -->
+            <div class="dash-card" onclick="switchView('tool1')">
+              <div class="dash-card-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+              <div class="dash-card-title">1. Return Readiness</div>
+              <div class="dash-card-desc">Evaluate emotional and logistical preparedness, get pumping rights, and draft return scripts.</div>
+              <div class="dash-card-action">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Tool 2 Card -->
+            <div class="dash-card" onclick="switchView('tool2')">
+              <div class="dash-card-icon"><i class="fa-solid fa-baby-carriage"></i></div>
+              <div class="dash-card-title">2. Childcare Solver</div>
+              <div class="dash-card-desc">Map care gaps, establish a 3-tier backup ladder, and plan gradual transition days.</div>
+              <div class="dash-card-action">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Tool 3 Card -->
+            <div class="dash-card" onclick="switchView('tool3')">
+              <div class="dash-card-icon"><i class="fa-solid fa-face-smile-beam"></i></div>
+              <div class="dash-card-title">3. Guilt Check</div>
+              <div class="dash-card-desc">Reframe working guilt, identify hidden wins for your baby, and claim simple personal grace.</div>
+              <div class="dash-card-action">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Tool 4 Card -->
+            <div class="dash-card" onclick="switchView('tool4')">
+              <div class="dash-card-icon"><i class="fa-solid fa-briefcase"></i></div>
+              <div class="dash-card-title">4. Work Reentry</div>
+              <div class="dash-card-desc">Design a 30-60-90 day plan, negotiate flexibility, and structure new boss syncs.</div>
+              <div class="dash-card-action">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Tool 5 Card -->
+            <div class="dash-card" onclick="switchView('tool5')">
+              <div class="dash-card-icon"><i class="fa-solid fa-clock"></i></div>
+              <div class="dash-card-title">5. Routine Builder</div>
+              <div class="dash-card-desc">Build minute-by-minute morning flows, evening prep checklists, and partner handoffs.</div>
+              <div class="dash-card-action">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TOOL 1: RETURN READINESS ================= -->
+        <section id="view-tool1" class="view-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fa-solid fa-clipboard-check text-forest"></i> Return Readiness Assessment
+              </div>
+              <div class="card-subtitle">
+                Problem solved: "I'm not sure I'm emotionally or logistically ready to go back."
+              </div>
+            </div>
+
+            <form id="form-tool1" onsubmit="event.preventDefault(); analyzeTool1();">
+              <div class="form-group">
+                <label class="form-label" for="t1-leave">Leave Length</label>
+                <select id="t1-leave" class="form-select">
+                  <option value="6 weeks">6 weeks</option>
+                  <option value="3 months">3 months</option>
+                  <option value="6 months" selected>6 months</option>
+                  <option value="1 year">1 year</option>
+                  <option value="2+ years">2+ years</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t1-childcare">Childcare Secured?</label>
+                <select id="t1-childcare" class="form-select">
+                  <option value="Yes, confident">Yes, confident</option>
+                  <option value="Yes, but worried">Yes, but worried</option>
+                  <option value="Partial">Partial coverage</option>
+                  <option value="Not yet">Not yet secured</option>
+                  <option value="Family help">Family help</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Emotional Readiness Scale (1 = Terrified, 10 = Fully ready)</label>
+                <div class="slider-container">
+                  <input type="range" id="t1-emotional" min="1" max="10" value="4" oninput="document.getElementById('t1-emotional-val').innerText = this.value">
+                  <span class="slider-value" id="t1-emotional-val">4</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t1-work-changes">Work Changes While Away</label>
+                <div class="form-hint">E.g., new manager, team restructures, project pivots, tech updates</div>
+                <textarea id="t1-work-changes" placeholder="Mention any team or role changes..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t1-pumping">Breastfeeding / Pumping Plan (Optional)</label>
+                <textarea id="t1-pumping" placeholder="E.g., Need to pump 2x daily at 10am and 2pm for 20 mins"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Partner Support Level (1 = Doing it all myself, 10 = Equal partner)</label>
+                <div class="slider-container">
+                  <input type="range" id="t1-partner" min="1" max="10" value="6" oninput="document.getElementById('t1-partner-val').innerText = this.value">
+                  <span class="slider-value" id="t1-partner-val">6</span>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Calculate Readiness Plan</button>
+                <button type="button" class="btn btn-sample" onclick="loadSample1()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool1" class="output-container hidden"></div>
+
+          <!-- History Accordion -->
+          <div class="history-section">
+            <div class="history-header">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Tool 1 History</span>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="clearToolHistory('tool1')">Clear History</button>
+            </div>
+            <div id="history-tool1"></div>
+          </div>
+        </section>
+
+        <!-- ================= TOOL 2: CHILDCARE SOLVER ================= -->
+        <section id="view-tool2" class="view-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fa-solid fa-baby-carriage text-forest"></i> Childcare Gap & Transition Solver
+              </div>
+              <div class="card-subtitle">
+                Problem solved: "I don't have reliable care and the thought of leaving my baby terrifies me."
+              </div>
+            </div>
+
+            <form id="form-tool2" onsubmit="event.preventDefault(); analyzeTool2();">
+              <div class="form-group">
+                <label class="form-label" for="t2-primary">Primary Care Arrangement</label>
+                <select id="t2-primary" class="form-select">
+                  <option value="Daycare">Daycare Center</option>
+                  <option value="Nanny">Nanny / Au Pair</option>
+                  <option value="Family">Family Member</option>
+                  <option value="Split schedule">Split Schedule with Partner</option>
+                  <option value="Not secured">Not Secured Yet</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t2-gaps">Gaps in Coverage</label>
+                <textarea id="t2-gaps" placeholder="E.g., Early morning calls before daycare opens, sick days, late meetings..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t2-budget">Monthly Childcare Budget ($ USD)</label>
+                <input type="number" id="t2-budget" class="form-control" placeholder="1500" value="1800">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Available Backup Options (Check all that apply)</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-label"><input type="checkbox" id="t2-bk-family" value="Family"> Family Nearby</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t2-bk-friend" value="Friend"> Trusted Friend/Neighbor</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t2-bk-daycare" value="Backup daycare"> Drop-in Backup Daycare</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t2-bk-sitter" value="Sitter"> On-call Babysitter</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t2-bk-partner" value="Partner flexibility"> Partner PTO / Flex Hours</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t2-quality">Quality & Safety Concerns</label>
+                <textarea id="t2-quality" placeholder="E.g., Will they respond quickly when baby cries? Feeding schedule adherence..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t2-temperament">Child's Temperament</label>
+                <select id="t2-temperament" class="form-select">
+                  <option value="Easy transition">Easy transition (Adaptable / Calm)</option>
+                  <option value="Slow to warm" selected>Slow to warm (Needs gradual steps)</option>
+                  <option value="High needs">High needs (Intense / Sensitive)</option>
+                  <option value="Unknown">Unknown / First time away</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-shield-halved"></i> Generate Childcare Strategy</button>
+                <button type="button" class="btn btn-sample" onclick="loadSample2()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool2" class="output-container hidden"></div>
+
+          <!-- History Accordion -->
+          <div class="history-section">
+            <div class="history-header">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Tool 2 History</span>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="clearToolHistory('tool2')">Clear History</button>
+            </div>
+            <div id="history-tool2"></div>
+          </div>
+        </section>
+
+        <!-- ================= TOOL 3: GUILT CHECK ================= -->
+        <section id="view-tool3" class="view-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fa-solid fa-face-smile-beam text-forest"></i> Working Parent Guilt Check
+              </div>
+              <div class="card-subtitle">
+                Problem solved: "I feel terrible about leaving my baby with someone else."
+              </div>
+            </div>
+
+            <form id="form-tool3" onsubmit="event.preventDefault(); analyzeTool3();">
+              <div class="form-group">
+                <label class="form-label">Primary Sources of Guilt (Check all that apply)</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-label"><input type="checkbox" id="t3-g1" value="Missing milestones"> Missing milestones</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t3-g2" value="Someone else raising my child"> Someone else raising my child</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t3-g3" value="Not breastfeeding enough"> Not breastfeeding enough/weaning</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t3-g4" value="Should want to stay home"> Feeling I 'should' want to stay home</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t3-g5" value="Child crying at dropoff"> Child crying at dropoff</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t3-g6" value="Other moms judge me"> Feeling judged by other parents</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t3-g7" value="I want to work, which feels wrong"> I actually WANT to work (and feel guilty for it)</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t3-friend">What would you tell a close friend who expressed these exact feelings?</label>
+                <textarea id="t3-friend" placeholder="Write out what compassionate advice you'd offer a good friend..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t3-partner-view">Partner's View on Return to Work</label>
+                <select id="t3-partner-view" class="form-select">
+                  <option value="Supportive">Fully Supportive</option>
+                  <option value="Neutral">Neutral / Indifferent</option>
+                  <option value="Wants me home">Prefers I stay home</option>
+                  <option value="Wants me working">Pushes me to work</option>
+                  <option value="Hasn't said">Hasn't explicitly shared</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t3-meaning">What does work mean to you personally?</label>
+                <textarea id="t3-meaning" placeholder="Identity, intellectual growth, financial security, independence..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t3-response">Child's Observed Response to Care</label>
+                <select id="t3-response" class="form-select">
+                  <option value="Thrives">Thrives and gets excited</option>
+                  <option value="Adjusts">Adjusts after a few minutes</option>
+                  <option value="Cries but recovers">Cries at drop-off but recovers quickly</option>
+                  <option value="Constantly distressed">Constantly distressed throughout day</option>
+                  <option value="Unknown">Unknown / Haven't started yet</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-heart-circle-check"></i> Reframe My Perspective</button>
+                <button type="button" class="btn btn-sample" onclick="loadSample3()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool3" class="output-container hidden"></div>
+
+          <!-- History Accordion -->
+          <div class="history-section">
+            <div class="history-header">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Tool 3 History</span>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="clearToolHistory('tool3')">Clear History</button>
+            </div>
+            <div id="history-tool3"></div>
+          </div>
+        </section>
+
+        <!-- ================= TOOL 4: WORK REENTRY ================= -->
+        <section id="view-tool4" class="view-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fa-solid fa-briefcase text-forest"></i> Workplace Reentry Strategy
+              </div>
+              <div class="card-subtitle">
+                Problem solved: "My job changed while I was gone or I need to negotiate flexibility."
+              </div>
+            </div>
+
+            <form id="form-tool4" onsubmit="event.preventDefault(); analyzeTool4();">
+              <div class="form-group">
+                <label class="form-label" for="t4-status">Current Role Status</label>
+                <select id="t4-status" class="form-select">
+                  <option value="Same role waiting">Same exact role waiting</option>
+                  <option value="Role changed">Role changed / restructured</option>
+                  <option value="Demoted">Demoted / shifts in responsibility</option>
+                  <option value="Promoted">Promoted into higher role</option>
+                  <option value="Laid off">Laid off / looking for work</option>
+                  <option value="Unclear">Unclear status</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Flexibility Needed (Check all that apply)</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-label"><input type="checkbox" id="t4-f1" value="Remote days"> Hybrid / Remote days</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t4-f2" value="Earlier/later hours"> Flex start/end hours</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t4-f3" value="Reduced hours"> Part-time / Reduced hours</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t4-f4" value="No travel"> Travel restrictions</label>
+                  <label class="checkbox-label"><input type="checkbox" id="t4-f5" value="Protected pump time"> Blocked pumping calendar</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t4-anxiety">Performance & Confidence Anxiety</label>
+                <textarea id="t4-anxiety" placeholder="Worries about focus, brain fog, pace, keeping up with projects..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t4-colleagues">Colleague Relationships</label>
+                <select id="t4-colleagues" class="form-select">
+                  <option value="Strong">Strong / Warm</option>
+                  <option value="Distant">Distant / Cold</option>
+                  <option value="Competitive">Competitive / Tense</option>
+                  <option value="Supportive">Supportive</option>
+                  <option value="Unknown">Unknown / New team members</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t4-boss">Direct Manager Relationship</label>
+                <select id="t4-boss" class="form-select">
+                  <option value="Supportive">Supportive & understanding</option>
+                  <option value="Neutral">Neutral / Results-only</option>
+                  <option value="Hostile">Demanding / Unsympathetic</option>
+                  <option value="Changed">Manager changed while away</option>
+                  <option value="New boss">Brand new manager to build rapport with</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Build Reentry Plan & Scripts</button>
+                <button type="button" class="btn btn-sample" onclick="loadSample4()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool4" class="output-container hidden"></div>
+
+          <!-- History Accordion -->
+          <div class="history-section">
+            <div class="history-header">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Tool 4 History</span>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="clearToolHistory('tool4')">Clear History</button>
+            </div>
+            <div id="history-tool4"></div>
+          </div>
+        </section>
+
+        <!-- ================= TOOL 5: ROUTINE BUILDER ================= -->
+        <section id="view-tool5" class="view-section hidden">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fa-solid fa-clock text-forest"></i> Working Parent Routine Architect
+              </div>
+              <div class="card-subtitle">
+                Problem solved: "The morning and evening logistics are overwhelming."
+              </div>
+            </div>
+
+            <form id="form-tool5" onsubmit="event.preventDefault(); analyzeTool5();">
+              <div class="form-group">
+                <label class="form-label" for="t5-start">Work Start Time</label>
+                <input type="text" id="t5-start" class="form-control" placeholder="E.g., 8:30 AM" value="8:30 AM">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t5-dropoff">Childcare Drop-off Time</label>
+                <input type="text" id="t5-dropoff" class="form-control" placeholder="E.g., 7:45 AM" value="7:45 AM">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t5-partner-schedule">Partner's Work Schedule & Availability</label>
+                <input type="text" id="t5-partner-schedule" class="form-control" placeholder="E.g., Leaves at 7am, home by 6pm" value="Leaves at 7:00 AM, returns at 6:00 PM">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t5-morning-tasks">Morning Tasks You Currently Handle Alone</label>
+                <textarea id="t5-morning-tasks" placeholder="Feeding, packing bag, dressing, coffee, getting yourself ready..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t5-evening-tasks">Evening Tasks That Pile Up</label>
+                <textarea id="t5-evening-tasks" placeholder="Washing bottles/pumping parts, dinner, bath, laundry, tomorrow prep..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t5-energy">Energy Level Trajectory</label>
+                <select id="t5-energy" class="form-select">
+                  <option value="High">Consistently high throughout day</option>
+                  <option value="Medium">Moderate with steady pace</option>
+                  <option value="Low">Low overall / Sleep deprived</option>
+                  <option value="Crashes by 3pm" selected>Crashes by 3:00 PM - 4:00 PM</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-list-check"></i> Generate Master Schedule</button>
+                <button type="button" class="btn btn-sample" onclick="loadSample5()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool5" class="output-container hidden"></div>
+
+          <!-- History Accordion -->
+          <div class="history-section">
+            <div class="history-header">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Tool 5 History</span>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="clearToolHistory('tool5')">Clear History</button>
+            </div>
+            <div id="history-tool5"></div>
+          </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+          <p class="bold mb-2">Back To Work Parent — Self-Contained Re-entry Toolkit</p>
+          <p>For practical planning purposes only. Not legal, financial, or therapeutic advice.</p>
+        </footer>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-check-circle text-peach"></i> <span id="toast-msg">Copied!</span>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // --- Navigation & Sidebar Toggle ---
+    function switchView(viewId) {
+      // Hide all sections
+      document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+      
+      // Remove active class from nav items
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      
+      // Show selected section
+      const targetSection = document.getElementById('view-' + viewId);
+      if (targetSection) targetSection.classList.remove('hidden');
+
+      // Update active nav button
+      const activeNav = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick').includes(viewId));
+      if (activeNav) activeNav.classList.add('active');
+
+      // Close mobile menu if open
+      closeMobileMenu();
+
+      // Scroll top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Render history for the active view
+      if (viewId !== 'dashboard') {
+        renderToolHistory(viewId);
+      }
+    }
+
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+    if (mobileMenuBtn) {
+      mobileMenuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('open');
+      });
+    }
+
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener('click', closeMobileMenu);
+    }
+
+    function closeMobileMenu() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    }
+
+    // --- Toast & Copy Utility ---
+    function showToast(message = "Copied to clipboard!") {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toast-msg');
+      msgEl.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    function copyScriptText(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Copied script to clipboard!");
+      }).catch(() => {
+        // Fallback
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showToast("Copied script to clipboard!");
+      });
+    }
+
+    // --- LocalStorage History Management ---
+    function getToolHistory(toolId) {
+      try {
+        return JSON.parse(localStorage.getItem('backtowork_history_' + toolId)) || [];
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function saveToolHistory(toolId, summary, outputHtml) {
+      let history = getToolHistory(toolId);
+      const newItem = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        summary: summary,
+        html: outputHtml
+      };
+      history.unshift(newItem);
+      if (history.length > 30) history = history.slice(0, 30); // limit 30
+      localStorage.setItem('backtowork_history_' + toolId, JSON.stringify(history));
+      renderToolHistory(toolId);
+    }
+
+    function clearToolHistory(toolId) {
+      localStorage.removeItem('backtowork_history_' + toolId);
+      renderToolHistory(toolId);
+      showToast("History cleared");
+    }
+
+    function renderToolHistory(toolId) {
+      const historyContainer = document.getElementById('history-' + toolId);
+      if (!historyContainer) return;
+
+      const history = getToolHistory(toolId);
+      if (history.length === 0) {
+        historyContainer.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); font-style:italic;">No saved analysis history.</div>';
+        return;
+      }
+
+      historyContainer.innerHTML = history.map((item, idx) => `
+        <div class="history-item" onclick="loadHistoryItem('${toolId}', ${item.id})">
+          <div>
+            <strong style="color:var(--forest);">${item.summary}</strong>
+            <div style="font-size:0.75rem; color:var(--text-muted);">${item.date}</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-muted"></i>
+        </div>
+      `).join('');
+    }
+
+    function loadHistoryItem(toolId, itemId) {
+      const history = getToolHistory(toolId);
+      const item = history.find(i => i.id === itemId);
+      if (item) {
+        const out = document.getElementById('output-' + toolId);
+        out.innerHTML = item.html;
+        out.classList.remove('hidden');
+        out.scrollIntoView({ behavior: 'smooth' });
+        showToast("Loaded saved scenario");
+      }
+    }
+
+    // ================= TOOL 1 LOGIC =================
+    function loadSample1() {
+      document.getElementById('t1-leave').value = '6 months';
+      document.getElementById('t1-childcare').value = 'Yes, but worried';
+      document.getElementById('t1-emotional').value = 4;
+      document.getElementById('t1-emotional-val').innerText = '4';
+      document.getElementById('t1-work-changes').value = 'Team restructured, direct manager left, new tools adopted during leave.';
+      document.getElementById('t1-pumping').value = 'Need to pump twice daily at 10:30 AM and 2:30 PM for 20 minutes.';
+      document.getElementById('t1-partner').value = 6;
+      document.getElementById('t1-partner-val').innerText = '6';
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function analyzeTool1() {
+      const leave = document.getElementById('t1-leave').value;
+      const childcare = document.getElementById('t1-childcare').value;
+      const emotional = parseInt(document.getElementById('t1-emotional').value);
+      const changes = document.getElementById('t1-work-changes').value.trim();
+      const pumping = document.getElementById('t1-pumping').value.trim();
+      const partner = parseInt(document.getElementById('t1-partner').value);
+
+      // Score logic
+      let childcarePts = childcare === 'Yes, confident' ? 35 : childcare === 'Yes, but worried' ? 25 : childcare === 'Family help' ? 25 : childcare === 'Partial' ? 15 : 5;
+      let emotionalPts = emotional * 4; // max 40
+      let partnerPts = partner * 2.5; // max 25
+      let totalScore = Math.min(100, Math.round(childcarePts + emotionalPts + partnerPts));
+
+      let scoreCategory = totalScore > 75 ? "High Readiness" : totalScore > 45 ? "Moderate Readiness (Needs Setup)" : "High Transition Adjustment Needed";
+
+      let html = `
+        <div class="output-card">
+          <div class="output-section-title">
+            <span><i class="fa-solid fa-gauge-high text-forest"></i> THE READINESS SCORE</span>
+            <span class="score-badge">${totalScore}/100</span>
+          </div>
+          <div style="font-weight: 600; color: var(--forest);">${scoreCategory}</div>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width: ${totalScore}%;"></div></div>
+          <p style="font-size: 0.875rem; color: var(--text-muted);">Composite rating based on emotional comfort (${emotional}/10), childcare certainty, and support systems (${partner}/10).</p>
+        </div>
+
+        <div class="output-card accent-peach">
+          <div class="output-section-title"><i class="fa-solid fa-shield-cat text-peach"></i> THE CHILDCARE CHECK</div>
+          <p style="font-size: 0.9rem; margin-bottom: 0.5rem;"><strong>Status:</strong> ${childcare}</p>
+          <ul style="font-size: 0.875rem; line-height: 1.5; padding-left: 1.2rem; color: var(--text-main);">
+            <li><strong>Transition Days:</strong> Schedule 2-3 trial half-days before full work reentry.</li>
+            <li><strong>Backup Plan:</strong> Ensure at least 1 secondary caregiver is on call for unexpected illness.</li>
+            <li><strong>Communication:</strong> Establish a daily drop-off check-in ritual with your provider.</li>
+          </ul>
+        </div>
+
+        <div class="output-card accent-purple">
+          <div class="output-section-title"><i class="fa-solid fa-brain text-purple"></i> THE EMOTIONAL PREP</div>
+          <p style="font-size: 0.875rem; line-height: 1.5;">
+            Feeling <strong>${emotional}/10 ready</strong> is completely normal. Remember: <em>Returning to work is a valid personal and financial choice, not a betrayal of your baby.</em> You are expanding your child's world while continuing your professional identity.
+          </p>
+        </div>
+
+        <div class="output-card">
+          <div class="output-section-title">
+            <span><i class="fa-solid fa-comment-dots text-forest"></i> THE WORKPLACE REENTRY SCRIPT</span>
+            <button class="btn btn-copy" onclick="copyScriptText('t1-script-text')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+          </div>
+          <div class="script-box" id="t1-script-text">"Hi Team,
+
+I'm looking forward to returning on [Date] after my leave! 
+
+To ensure a smooth transition, I'd love to schedule a brief 30-minute sync during my first week to catch up on ${changes ? 'recent team changes (' + changes + ')' : 'key priorities'} and align on upcoming goals.
+
+Thank you all for your support while I was away!"</div>
+        </div>
+
+        ${pumping ? `
+        <div class="output-card accent-blue">
+          <div class="output-section-title"><i class="fa-solid fa-pump-soap text-blue"></i> THE PUMPING PROTOCOL</div>
+          <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Your Plan:</strong> ${pumping}</p>
+          <ul style="font-size: 0.85rem; line-height: 1.5; padding-left: 1.2rem; color: var(--text-main);">
+            <li><strong>Workplace Rights:</strong> Federal/Local labor laws guarantee protected time and a private, non-bathroom space.</li>
+            <li><strong>Calendar Block:</strong> Label calendar holds as "Private Block" or "Health & Wellness Block".</li>
+            <li><strong>Setup Kit:</strong> Double pump parts, cooler bag, microwave sanitizing bags, spare valves.</li>
+          </ul>
+        </div>` : ''}
+
+        <div class="output-card">
+          <div class="output-section-title"><i class="fa-solid fa-handshake text-forest"></i> THE PARTNER CHECK</div>
+          <p style="font-size: 0.875rem; line-height: 1.5;">
+            Partner support score: <strong>${partner}/10</strong>. Explicitly assign default responsibilities. Don't rely on "helping out"—designate full ownership (e.g., Partner owns morning bottle prep; you own evening bath).
+          </p>
+        </div>
+      `;
+
+      const outContainer = document.getElementById('output-tool1');
+      outContainer.innerHTML = html;
+      outContainer.classList.remove('hidden');
+
+      // Save History
+      saveToolHistory('tool1', `Readiness ${totalScore}% (${leave})`, html);
+    }
+
+
+    // ================= TOOL 2 LOGIC =================
+    function loadSample2() {
+      document.getElementById('t2-primary').value = 'Daycare';
+      document.getElementById('t2-gaps').value = 'Daycare closes at 5:30 PM, but client calls run late on Tuesdays. Sick day coverage is needed.';
+      document.getElementById('t2-budget').value = '1800';
+      document.getElementById('t2-bk-family').checked = false;
+      document.getElementById('t2-bk-friend').checked = false;
+      document.getElementById('t2-bk-daycare').checked = false;
+      document.getElementById('t2-bk-sitter').checked = false;
+      document.getElementById('t2-bk-partner').checked = true;
+      document.getElementById('t2-quality').value = 'Worrying if caregivers will comfort baby fast enough when crying.';
+      document.getElementById('t2-temperament').value = 'Slow to warm';
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function analyzeTool2() {
+      const primary = document.getElementById('t2-primary').value;
+      const gaps = document.getElementById('t2-gaps').value.trim();
+      const budget = document.getElementById('t2-budget').value;
+      const temperament = document.getElementById('t2-temperament').value;
+      const quality = document.getElementById('t2-quality').value.trim();
+
+      // Get checked backups
+      let backups = [];
+      if (document.getElementById('t2-bk-family').checked) backups.push('Family');
+      if (document.getElementById('t2-bk-friend').checked) backups.push('Friend');
+      if (document.getElementById('t2-bk-daycare').checked) backups.push('Backup daycare');
+      if (document.getElementById('t2-bk-sitter').checked) backups.push('Babysitter');
+      if (document.getElementById('t2-bk-partner').checked) backups.push('Partner flexibility');
+
+      let html = `
+        <div class="output-card">
+          <div class="output-section-title"><i class="fa-solid fa-map-location-dot text-forest"></i> THE CARE MAP</div>
+          <div style="margin-bottom: 0.75rem;">
+            <span class="badge-tag" style="background:var(--forest-bg); color:var(--forest);">Primary: ${primary}</span>
+            <span class="badge-tag" style="background:var(--peach-light); color:var(--peach-dark);">Budget: $${budget}/mo</span>
+            <span class="badge-tag" style="background:#F1F5F9;">Temperament: ${temperament}</span>
+          </div>
+          <p style="font-size: 0.875rem; color: var(--text-main);">
+            <strong>Coverage Gaps Identified:</strong> ${gaps || 'No major gaps specified.'}
+          </p>
+        </div>
+
+        <div class="output-card accent-peach">
+          <div class="output-section-title"><i class="fa-solid fa-ladder-water text-peach"></i> THE BACKUP LADDER (3-TIER PLAN)</div>
+          <div style="font-size: 0.875rem; line-height: 1.6;">
+            <p><strong>Tier 1 (First Call):</strong> ${backups.length > 0 ? backups[0] : 'Partner PTO / Emergency Flex'}</p>
+            <p><strong>Tier 2 (Secondary):</strong> ${backups.length > 1 ? backups[1] : 'Drop-in Care or On-call Babysitter'}</p>
+            <p><strong>Tier 3 (Last Resort):</strong> Work from home with blocked calendar / Manager PTO notification</p>
+          </div>
+        </div>
+
+        <div class="output-card accent-purple">
+          <div class="output-section-title"><i class="fa-solid fa-stairs text-purple"></i> THE TRANSITION PLAN (${temperament.toUpperCase()})</div>
+          <ul style="font-size: 0.875rem; line-height: 1.5; padding-left: 1.2rem;">
+            <li><strong>Day 1-2:</strong> 1-2 hours together with caregiver at care site.</li>
+            <li><strong>Day 3-4:</strong> Half-days solo (pick up right after lunch/nap).</li>
+            <li><strong>Day 5:</strong> Full trial day before your formal first day of work.</li>
+          </ul>
+        </div>
+
+        <div class="output-card accent-blue">
+          <div class="output-section-title"><i class="fa-solid fa-list-check text-blue"></i> THE QUALITY CHECKLIST</div>
+          <p style="font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--text-muted);">Address concerns: "${quality || 'General comfort'}"</p>
+          <ul style="font-size: 0.85rem; line-height: 1.5; padding-left: 1.2rem;">
+            <li>Ask caregiver: "How do you soothe babies during the afternoon transition?"</li>
+            <li>Set expectation for daily log: feedings, sleep windows, and wet diapers.</li>
+            <li>Perform unannounced drop-in or phone check during week 1.</li>
+          </ul>
+        </div>
+
+        <div class="output-card">
+          <div class="output-section-title">
+            <span><i class="fa-solid fa-comment-heart text-forest"></i> THE SEPARATION SCRIPT</span>
+            <button class="btn btn-copy" onclick="copyScriptText('t2-script-text')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+          </div>
+          <div class="script-box" id="t2-script-text">"I love you so much! You are safe with [Caregiver's Name], and you are going to have a wonderful day. 
+
+I will always come back for you right after [Naptime / 4:00 PM]. 
+
+Big hug, goodbye!"</div>
+          <p style="font-size:0.775rem; color:var(--text-muted); margin-top:0.3rem;">Tip: Keep drop-offs under 60 seconds. Prolonged goodbyes increase anxiety for both you and your baby.</p>
+        </div>
+      `;
+
+      const outContainer = document.getElementById('output-tool2');
+      outContainer.innerHTML = html;
+      outContainer.classList.remove('hidden');
+
+      // Save History
+      saveToolHistory('tool2', `Care Map (${primary})`, html);
+    }
+
+
+    // ================= TOOL 3 LOGIC =================
+    function loadSample3() {
+      document.getElementById('t3-g1').checked = false;
+      document.getElementById('t3-g2').checked = true; // someone else raising
+      document.getElementById('t3-g3').checked = false;
+      document.getElementById('t3-g4').checked = false;
+      document.getElementById('t3-g5').checked = false;
+      document.getElementById('t3-g6').checked = false;
+      document.getElementById('t3-g7').checked = true; // want to work which feels wrong
+      
+      document.getElementById('t3-friend').value = "You are giving your baby a financially secure environment and showing them a passionate, fulfilled parent. You are doing an amazing job!";
+      document.getElementById('t3-partner-view').value = 'Supportive';
+      document.getElementById('t3-meaning').value = 'Career gives me intellectual stimulation, independence, and pride.';
+      document.getElementById('t3-response').value = 'Adjusts';
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function analyzeTool3() {
+      const friendText = document.getElementById('t3-friend').value.trim();
+      const partnerView = document.getElementById('t3-partner-view').value;
+      const meaning = document.getElementById('t3-meaning').value.trim();
+      const childResponse = document.getElementById('t3-response').value;
+
+      let guiltSources = [];
+      if (document.getElementById('t3-g1').checked) guiltSources.push("Missing milestones");
+      if (document.getElementById('t3-g2').checked) guiltSources.push("Someone else raising my child");
+      if (document.getElementById('t3-g3').checked) guiltSources.push("Not breastfeeding enough");
+      if (document.getElementById('t3-g4').checked) guiltSources.push("Should want to stay home");
+      if (document.getElementById('t3-g5').checked) guiltSources.push("Child crying at dropoff");
+      if (document.getElementById('t3-g6').checked) guiltSources.push("Other moms judge me");
+      if (document.getElementById('t3-g7').checked) guiltSources.push("Wanting to work feels wrong");
+
+      let html = `
+        <div class="output-card accent-peach">
+          <div class="output-section-title"><i class="fa-solid fa-mirror text-peach"></i> THE REALITY CHECK</div>
+          <p style="font-size: 0.875rem; line-height: 1.5; margin-bottom: 0.75rem;">
+            <strong>What you would tell a friend:</strong><br>
+            <em style="color: var(--forest-dark);">"${friendText || 'You are doing amazing, and working makes you a better parent!'}"</em>
+          </p>
+          <p style="font-size: 0.875rem; color: var(--text-main);">
+            <strong>Now apply this to yourself:</strong> You extend grace and wisdom to others easily. Grant yourself the exact same perspective.
+          </p>
+        </div>
+
+        <div class="output-card">
+          <div class="output-section-title"><i class="fa-solid fa-gift text-forest"></i> THE HIDDEN WINS FOR YOUR CHILD</div>
+          <ul style="font-size: 0.875rem; line-height: 1.5; padding-left: 1.2rem;">
+            <li><strong>Role Modeling:</strong> Children of working parents develop strong independence, empathy, and gender-egalitarian views.</li>
+            <li><strong>Expanded Circle of Trust:</strong> Learning to trust other caring adults builds resilience and social agility.</li>
+            <li><strong>A Fulfilled Parent:</strong> ${meaning ? 'Work provides you with ' + meaning + '.' : 'Your personal fulfillment directly enriches the quality of time spent with your baby.'}</li>
+          </ul>
+        </div>
+
+        <div class="output-card accent-purple">
+          <div class="output-section-title"><i class="fa-solid fa-scale-unbalanced text-purple"></i> EXPECTATION VS. REALITY</div>
+          <p style="font-size: 0.875rem; line-height: 1.5;">
+            <strong>Your guilt triggers:</strong> ${guiltSources.length > 0 ? guiltSources.join(', ') : 'General return-to-work worry'}.<br>
+            <strong>Child's actual state:</strong> ${childResponse}. Babies thrive when their primary relationships are secure, even if care is shared during daytime hours.
+          </p>
+        </div>
+
+        <div class="output-card accent-blue">
+          <div class="output-section-title"><i class="fa-solid fa-feather text-blue"></i> ONE GRACE TO GIVE YOURSELF THIS WEEK</div>
+          <p style="font-size: 0.9rem; font-weight: 600; color: var(--forest-dark);">
+            "Give yourself permission to let dinner be simple, laundry be unfolded, and drop-offs be emotional. Perfect parenting is a myth; present parenting is real."
+          </p>
+        </div>
+
+        <div class="output-card">
+          <div class="output-section-title"><i class="fa-solid fa-award text-peach"></i> ONE WIN TO CLAIM</div>
+          <p style="font-size: 0.875rem; color: var(--text-main);">
+            Claim this today: <strong>You are making courageous choices for your family's future, health, and stability.</strong>
+          </p>
+        </div>
+
+        <div class="output-card" style="background: var(--forest-bg); border-left-color: var(--forest);">
+          <div class="output-section-title" style="color: var(--forest-dark);"><i class="fa-solid fa-quote-left text-forest"></i> THE IDENTITY REFRAME</div>
+          <p style="font-size: 1rem; font-weight: 700; color: var(--forest-dark); text-align: center; padding: 0.5rem 0;">
+            "You are still their parent. You are also yourself."
+          </p>
+        </div>
+      `;
+
+      const outContainer = document.getElementById('output-tool3');
+      outContainer.innerHTML = html;
+      outContainer.classList.remove('hidden');
+
+      // Save History
+      saveToolHistory('tool3', `Guilt Check Reframe`, html);
+    }
+
+
+    // ================= TOOL 4 LOGIC =================
+    function loadSample4() {
+      document.getElementById('t4-status').value = 'Same role waiting';
+      document.getElementById('t4-f1').checked = true; // remote days
+      document.getElementById('t4-f2').checked = false;
+      document.getElementById('t4-f3').checked = false;
+      document.getElementById('t4-f4').checked = true; // no travel
+      document.getElementById('t4-f5').checked = false;
+      document.getElementById('t4-anxiety').value = 'Afraid my brain speed is slower and I wont remember systems.';
+      document.getElementById('t4-colleagues').value = 'Supportive';
+      document.getElementById('t4-boss').value = 'New boss';
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function analyzeTool4() {
+      const status = document.getElementById('t4-status').value;
+      const anxiety = document.getElementById('t4-anxiety').value.trim();
+      const colleagues = document.getElementById('t4-colleagues').value;
+      const boss = document.getElementById('t4-boss').value;
+
+      let flexList = [];
+      if (document.getElementById('t4-f1').checked) flexList.push("Hybrid/Remote days");
+      if (document.getElementById('t4-f2').checked) flexList.push("Flex start/end hours");
+      if (document.getElementById('t4-f3').checked) flexList.push("Reduced hours");
+      if (document.getElementById('t4-f4').checked) flexList.push("No travel");
+      if (document.getElementById('t4-f5').checked) flexList.push("Protected pumping time");
+
+      let html = `
+        <div class="output-card">
+          <div class="output-section-title"><i class="fa-solid fa-map text-forest"></i> THE 30-60-90 DAY REENTRY ROADMAP</div>
+          <div style="font-size: 0.875rem; line-height: 1.6;">
+            <p><strong>Days 1–30 (Listen & Orient):</strong> Focus on reconnecting, absorbing workflow changes, and setting boundaries. Do not feel pressured to fix everything immediately.</p>
+            <p><strong>Days 31–60 (Ramp Up):</strong> Take ownership of 1-2 key deliverables. Fine-tune your daily routine with your manager.</p>
+            <p><strong>Days 61–90 (Full Velocity):</strong> Evaluate your work arrangement and request adjustments if workload vs caregiving friction occurs.</p>
+          </div>
+        </div>
+
+        <div class="output-card accent-peach">
+          <div class="output-section-title">
+            <span><i class="fa-solid fa-pen-to-square text-peach"></i> THE FLEXIBILITY ASK SCRIPT</span>
+            <button class="btn btn-copy" onclick="copyScriptText('t4-flex-script')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+          </div>
+          <div class="script-box" id="t4-flex-script">"Hi [Manager Name],
+
+I am excited to be ramping back up into my role! To optimize my productivity and maintain seamless deliverable execution, I would like to propose a flexible arrangement:
+
+Key adjustments requested: ${flexList.length > 0 ? flexList.join(', ') : 'Hybrid schedule'}.
+
+I will ensure all team channels remain informed and deadlines are met. Let's trial this for 30 days and review together during our 1-on-1."</div>
+        </div>
+
+        <div class="output-card accent-blue">
+          <div class="output-section-title"><i class="fa-solid fa-rocket text-blue"></i> CATCH-UP STRATEGY (NO APOLOGIES)</div>
+          <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Address anxiety: "${anxiety || 'Pace adjustment'}"</p>
+          <ul style="font-size: 0.85rem; line-height: 1.5; padding-left: 1.2rem;">
+            <li>Never apologize for taking leave. Say "Thank you for holding down the fort" instead of "Sorry I was away."</li>
+            <li>Schedule 15-min coffee catch-ups with 3 core stakeholders in Week 1.</li>
+            <li>Create a "Questions & Wins" document to track your progress objectively.</li>
+          </ul>
+        </div>
+
+        <div class="output-card">
+          <div class="output-section-title">
+            <span><i class="fa-solid fa-user-tie text-forest"></i> NEW BOSS / MANAGER SYNC AGENDA</span>
+            <button class="btn btn-copy" onclick="copyScriptText('t4-boss-script')"><i class="fa-regular fa-copy"></i> Copy Agenda</button>
+          </div>
+          <div class="script-box" id="t4-boss-script">1-ON-1 MEETING AGENDA (${boss.toUpperCase()})
+1. Strategic priorities for our department over the next 3-6 months.
+2. My immediate focus areas for Month 1.
+3. Communication norms (Slack vs Email vs Emergency calls).
+4. Mutual expectations for working hours and flexibility.</div>
+        </div>
+
+        <div class="output-card accent-purple">
+          <div class="output-section-title"><i class="fa-solid fa-calendar-xmark text-purple"></i> PROTECTED TIME CALENDAR STRATEGY</div>
+          <p style="font-size: 0.875rem; line-height: 1.5;">
+            Block your calendar explicitly for daycare pickup (e.g., "5:00 PM - Focus / End of Day Block"). Set automatic decline rules for invites sent past your hard end-time.
+          </p>
+        </div>
+      `;
+
+      const outContainer = document.getElementById('output-tool4');
+      outContainer.innerHTML = html;
+      outContainer.classList.remove('hidden');
+
+      // Save History
+      saveToolHistory('tool4', `Reentry Strategy (${status})`, html);
+    }
+
+
+    // ================= TOOL 5 LOGIC =================
+    function loadSample5() {
+      document.getElementById('t5-start').value = '8:00 AM';
+      document.getElementById('t5-dropoff').value = '7:30 AM';
+      document.getElementById('t5-partner-schedule').value = 'Leaves for office at 7:00 AM, returns at 6:30 PM';
+      document.getElementById('t5-morning-tasks').value = 'Feed baby, dress baby, pack diaper bag, make coffee, get dressed, commute.';
+      document.getElementById('t5-evening-tasks').value = 'Unpack bag, wash bottles, prep meals for tomorrow, bath time, bedtime routine, laundry.';
+      document.getElementById('t5-energy').value = 'Crashes by 3pm';
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function analyzeTool5() {
+      const start = document.getElementById('t5-start').value;
+      const dropoff = document.getElementById('t5-dropoff').value;
+      const partner = document.getElementById('t5-partner-schedule').value;
+      const morningTasks = document.getElementById('t5-morning-tasks').value.trim();
+      const eveningTasks = document.getElementById('t5-evening-tasks').value.trim();
+      const energy = document.getElementById('t5-energy').value;
+
+      let html = `
+        <div class="output-card">
+          <div class="output-section-title"><i class="fa-solid fa-sun text-peach"></i> THE MORNING FLOW</div>
+          <div style="font-size: 0.875rem; line-height: 1.6;">
+            <p><strong>6:15 AM:</strong> Parent wake-up & personal prep (get dressed BEFORE baby wakes).</p>
+            <p><strong>6:45 AM:</strong> Wake baby, feed, and dress.</p>
+            <p><strong>7:15 AM:</strong> Out the door with pre-packed bags.</p>
+            <p><strong>${dropoff}:</strong> Drop-off care complete.</p>
+            <p><strong>${start}:</strong> Workday start with clear focus block.</p>
+          </div>
+        </div>
+
+        <div class="output-card accent-peach">
+          <div class="output-section-title"><i class="fa-solid fa-moon text-purple"></i> THE EVENING PREP CHECKLIST (NIGHT BEFORE)</div>
+          <ul style="font-size: 0.875rem; line-height: 1.5; padding-left: 1.2rem;">
+            <li><strong>Rule 1:</strong> Pack diaper bag, outfit, and bottles completely before sleeping.</li>
+            <li><strong>Rule 2:</strong> Lay out your own work outfit and shoes.</li>
+            <li><strong>Rule 3:</strong> Set coffee machine on timer for automatic brew.</li>
+          </ul>
+        </div>
+
+        <div class="output-card accent-blue">
+          <div class="output-section-title"><i class="fa-solid fa-people-arrows text-blue"></i> THE PARTNER HANDOFF BLUEPRINT</div>
+          <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">Partner availability: <em>"${partner}"</em></p>
+          <ul style="font-size: 0.85rem; line-height: 1.5; padding-left: 1.2rem;">
+            <li><strong>Morning Shift:</strong> Partner handles trash, pet duty, or early baby wake-up before leaving.</li>
+            <li><strong>Evening Shift:</strong> Partner owns post-dinner bottle washing and bath duty upon return.</li>
+          </ul>
+        </div>
+
+        <div class="output-card accent-purple">
+          <div class="output-section-title"><i class="fa-solid fa-battery-half text-peach"></i> THE SELF-CARE SLOT (${energy.toUpperCase()})</div>
+          <p style="font-size: 0.875rem; line-height: 1.5;">
+            Since energy drops around afternoon, schedule a non-negotiable <strong>15-minute micro-break at 2:45 PM</strong> (walk outside, stretch, or quiet coffee without screens).
+          </p>
+        </div>
+
+        <div class="output-card">
+          <div class="output-section-title"><i class="fa-solid fa-calendar-week text-forest"></i> SUNDAY EVENING PREP (PROTECT MONDAY)</div>
+          <p style="font-size: 0.875rem; line-height: 1.5;">
+            Spend 20 minutes every Sunday evening reviewing the family calendar, meal plan for 3 days, and verifying childcare coverage for the week.
+          </p>
+        </div>
+
+        <div class="output-card" style="background: var(--peach-light); border-left-color: var(--peach-dark);">
+          <div class="output-section-title" style="color: var(--peach-dark);"><i class="fa-solid fa-heart text-peach"></i> THE GRACE CLAUSE</div>
+          <p style="font-size: 0.9rem; font-weight: 600; color: #7C2D12; text-align: center;">
+            "Not every day will be smooth. That's normal. A chaotic morning does not define your quality as a parent or employee."
+          </p>
+        </div>
+      `;
+
+      const outContainer = document.getElementById('output-tool5');
+      outContainer.innerHTML = html;
+      outContainer.classList.remove('hidden');
+
+      // Save History
+      saveToolHistory('tool5', `Routine Flow (${start} start)`, html);
+    }
+
+    // Initialize View on Page Load
+    document.addEventListener("DOMContentLoaded", () => {
+      switchView('dashboard');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreditProtector — Visibility & Documentation Toolkit</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* BASE & RESETS */
+        :root {
+            --espresso: #4A2C2A;
+            --espresso-hover: #36201E;
+            --espresso-light: #6E4441;
+            --amber: #FF9F1C;
+            --amber-hover: #F08E0B;
+            --amber-light: #FFF5E6;
+            --bg-gradient: linear-gradient(135deg, #FFF8F0 0%, #FFF3E0 100%);
+            --card-bg: #FFFFFF;
+            --text-main: #2D2727;
+            --text-muted: #665C5B;
+            --border-color: #E8DFD8;
+            --sidebar-width: 250px;
+            --radius-xl: 1rem;
+            --radius-md: 0.5rem;
+            --shadow-sm: 0 2px 8px rgba(74, 44, 42, 0.06);
+            --shadow-md: 0 4px 16px rgba(74, 44, 42, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            line-height: 1.5;
+        }
+
+        /* LAYOUT & SIDEBAR */
+        #sidebar {
+            width: var(--sidebar-width);
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-brand i {
+            color: var(--amber);
+            font-size: 1.5rem;
+        }
+
+        .sidebar-brand h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--espresso);
+            letter-spacing: -0.02em;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 1rem 0.75rem;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background-color: var(--amber-light);
+            color: var(--espresso);
+        }
+
+        .nav-link.active {
+            background-color: var(--espresso);
+            color: #FFFFFF;
+        }
+
+        .nav-link.active i {
+            color: var(--amber);
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* MOBILE HEADER & OVERLAY */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 1rem;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 900;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-toggle {
+            background: none;
+            border: none;
+            font-size: 1.35rem;
+            color: var(--espresso);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 950;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* MAIN CONTENT AREA */
+        #main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 2.5rem 1.5rem 4rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* CARDS & UI COMPONENTS */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.75rem;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, var(--espresso) 0%, #36201E 100%);
+            color: #FFFFFF;
+            border: none;
+            text-align: center;
+            padding: 2.5rem 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .hero-card h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #FFFFFF;
+        }
+
+        .hero-card p {
+            font-size: 1.1rem;
+            color: #E8DFD8;
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .dash-card {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+            height: 100%;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--amber);
+        }
+
+        .dash-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--amber-light);
+            color: var(--espresso);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            color: var(--espresso);
+        }
+
+        .dash-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* FORM ELEMENTS */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--espresso);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, select, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #FAFAFA;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .form-control:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--amber);
+            background-color: #FFFFFF;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 400;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        .checkbox-label input, .radio-label input {
+            accent-color: var(--espresso);
+            width: 16px;
+            height: 16px;
+        }
+
+        /* BUTTONS */
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--espresso);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--espresso-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--amber-light);
+            color: var(--espresso);
+            border: 1px solid rgba(255, 159, 28, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background-color: #FFEAD0;
+        }
+
+        .btn-copy {
+            padding: 0.35rem 0.65rem;
+            font-size: 0.75rem;
+            background-color: #F0ECE9;
+            color: var(--espresso);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--espresso);
+            color: #FFFFFF;
+        }
+
+        /* OUTPUT SECTIONS */
+        .output-container {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+        }
+
+        .output-section {
+            background: #FAFAFA;
+            border-left: 4px solid var(--amber);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .output-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--espresso);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .output-content {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .script-box {
+            background: #FFFFFF;
+            border: 1px dashed var(--border-color);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            white-space: pre-wrap;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+
+        /* HISTORY ACCORDION */
+        .history-section {
+            margin-top: 2.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--espresso);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .history-summary {
+            padding: 0.75rem 1rem;
+            background: #FAFAFA;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-summary:hover {
+            background: #F0ECE9;
+        }
+
+        .history-details {
+            padding: 1rem;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            background: #FFFFFF;
+        }
+
+        .history-details.open {
+            display: block;
+        }
+
+        /* DIAGRAM FOR ALLY MAPPER */
+        .ally-map-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem 0;
+        }
+
+        .ally-tier {
+            width: 100%;
+            text-align: center;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            position: relative;
+        }
+
+        .tier-core { background: #FFE8CC; border: 2px solid var(--amber); }
+        .tier-influence { background: #F0ECE9; border: 2px solid var(--espresso-light); }
+        .tier-network { background: #FAFAFA; border: 1px solid var(--border-color); }
+
+        .ally-tier h4 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+            color: var(--espresso);
+        }
+
+        /* ESCALATION LADDER */
+        .ladder-step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+
+        .ladder-badge {
+            background: var(--espresso);
+            color: var(--amber);
+            font-weight: 700;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+        }
+
+        /* TOAST NOTIFICATION */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--espresso);
+            color: #FFFFFF;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--amber);
+            box-shadow: var(--shadow-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* FOOTER */
+        footer {
+            margin-top: auto;
+            width: 100%;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* TOOL DISPLAY STATE */
+        .tool-page {
+            display: none;
+        }
+
+        .tool-page.active {
+            display: block;
+        }
+
+        .tool-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-header h2 {
+            font-size: 1.5rem;
+            color: var(--espresso);
+            margin-bottom: 0.25rem;
+        }
+
+        .tool-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+            }
+
+            #sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+                opacity: 1;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            #main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 5rem 1rem 2rem;
+            }
+
+            .hero-card h2 {
+                font-size: 1.5rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MOBILE HEADER -->
+    <header class="mobile-header">
+        <div class="sidebar-brand" style="border:none; padding:0;">
+            <i class="fa-solid fa-shield-halved"></i>
+            <h1>CreditProtector</h1>
+        </div>
+        <button class="mobile-toggle" id="mobile-menu-btn" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <nav id="sidebar">
+        <div class="sidebar-brand">
+            <i class="fa-solid fa-shield-halved"></i>
+            <h1>CreditProtector</h1>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a class="nav-link active" data-target="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-target="tool1">
+                    <i class="fa-solid fa-eye"></i>
+                    <span>Visibility Builder</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-target="tool2">
+                    <i class="fa-solid fa-file-shield"></i>
+                    <span>Documentation Shield</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-target="tool3">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    <span>Correction Script</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-target="tool4">
+                    <i class="fa-solid fa-network-wired"></i>
+                    <span>Ally Mapper</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-target="tool5">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Escalation Planner</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main id="main-content">
+        <div class="container">
+
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="tool-page active">
+                <div class="card hero-card">
+                    <h2>Credit Protector</h2>
+                    <p>"Your work should speak for itself—but sometimes it needs a microphone."</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card dash-card" data-navigate="tool1">
+                        <div class="dash-card-icon"><i class="fa-solid fa-eye"></i></div>
+                        <h3>Visibility Builder</h3>
+                        <p>Proactively embed your authorship into ideas and workflows before they reach executive rooms.</p>
+                    </div>
+
+                    <div class="card dash-card" data-navigate="tool2">
+                        <div class="dash-card-icon"><i class="fa-solid fa-file-shield"></i></div>
+                        <h3>Documentation Shield</h3>
+                        <p>Build an undeniable paper trail and timestamp system to defend your technical output.</p>
+                    </div>
+
+                    <div class="card dash-card" data-navigate="tool3">
+                        <div class="dash-card-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                        <h3>Correction Script</h3>
+                        <p>Gracefully reclaim stolen credit in real-time or post-meeting without seeming defensive.</p>
+                    </div>
+
+                    <div class="card dash-card" data-navigate="tool4">
+                        <div class="dash-card-icon"><i class="fa-solid fa-network-wired"></i></div>
+                        <h3>Ally Mapper</h3>
+                        <p>Identify, cultivate, and deploy key witnesses who reinforce your contributions externally.</p>
+                    </div>
+
+                    <div class="card dash-card" data-navigate="tool5">
+                        <div class="dash-card-icon"><i class="fa-solid fa-layer-group"></i></div>
+                        <h3>Escalation Planner</h3>
+                        <p>Methodically address repeated pattern theft via structured management and HR channels.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 1: VISIBILITY BUILDER -->
+            <section id="tool1" class="tool-page">
+                <div class="tool-header">
+                    <h2>Visibility Builder</h2>
+                    <p>Problem: "I do great work but nobody sees it until someone else presents it."</p>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool1">
+                        <div class="form-group">
+                            <label for="t1-type">What type of work gets taken?</label>
+                            <select id="t1-type" required>
+                                <option value="">Select option...</option>
+                                <option value="Ideas">Ideas & Concepts</option>
+                                <option value="Analysis">Analysis & Data Modeling</option>
+                                <option value="Process improvements">Process Improvements & Workflows</option>
+                                <option value="Creative output">Creative Output & Designs</option>
+                                <option value="Client work">Client Deliverables & Strategy</option>
+                                <option value="Administrative wins">Administrative Wins & Operational Fixes</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t1-who">Who presents it?</label>
+                            <select id="t1-who" required>
+                                <option value="">Select option...</option>
+                                <option value="My boss">My Direct Boss</option>
+                                <option value="A peer">A Peer / Colleague</option>
+                                <option value="Another team">Another Team or Department</option>
+                                <option value="I don't know until it happens">I don't know until it happens</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>How is your work shared now? (Select all that apply)</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label"><input type="checkbox" name="t1-sharing" value="Email"> Email updates</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t1-sharing" value="Shared docs"> Shared digital documents (Docs/Sheets)</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t1-sharing" value="Meetings"> Live internal meetings</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t1-sharing" value="I work silently"> I work silently until finished</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t1-sharing" value="Through my boss"> Passed through my boss directly</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Are you in the meetings where decisions happen?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t1-meetings" value="Always" required> Always</label>
+                                <label class="radio-label"><input type="radio" name="t1-meetings" value="Sometimes"> Sometimes</label>
+                                <label class="radio-label"><input type="radio" name="t1-meetings" value="Rarely"> Rarely</label>
+                                <label class="radio-label"><input type="radio" name="t1-meetings" value="Never"> Never</label>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Strategy</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool1" class="output-container">
+                    <div class="card">
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-triangle-exclamation"></i> Visibility Gaps</span></div>
+                            <div class="output-content" id="t1-out-gaps"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header">
+                                <span class="output-title"><i class="fa-solid fa-envelope"></i> The Pre-Meeting Email</span>
+                                <button class="btn btn-copy" onclick="copyText('t1-out-email')"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </div>
+                            <div class="output-content">
+                                Send this prior to key decision sessions to establish a publicly timestamped baseline.
+                                <div class="script-box" id="t1-out-email"></div>
+                            </div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-file-contract"></i> Shared Document Strategy</span></div>
+                            <div class="output-content" id="t1-out-docstrat"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-door-open"></i> Meeting Insertion Tactics</span></div>
+                            <div class="output-content" id="t1-out-meeting"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-calendar-check"></i> The Update Habit</span></div>
+                            <div class="output-content" id="t1-out-habit"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="history-section" id="history-tool1"></div>
+            </section>
+
+            <!-- TOOL 2: DOCUMENTATION SHIELD -->
+            <section id="tool2" class="tool-page">
+                <div class="tool-header">
+                    <h2>Documentation Shield</h2>
+                    <p>Problem: "They claim my work was their idea or that I didn't do it."</p>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool2">
+                        <div class="form-group">
+                            <label for="t2-protect">What do you need to protect?</label>
+                            <textarea id="t2-protect" placeholder="Describe the specific deliverable, codebase, framework, or concept..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t2-habits">Current documentation habits:</label>
+                            <select id="t2-habits" required>
+                                <option value="">Select option...</option>
+                                <option value="I save everything">I meticulously save everything</option>
+                                <option value="I save some things">I save major milestones/some emails</option>
+                                <option value="I rely on memory">I mostly rely on memory/verbal agreement</option>
+                                <option value="I didn't think I needed to">I didn't think I needed to document</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Where does the work live? (Select all that apply)</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label"><input type="checkbox" name="t2-location" value="Email"> Corporate Email</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t2-location" value="Chat"> Team Chat (Slack/Teams)</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t2-location" value="Cloud docs"> Cloud Workspace (Google Drive/SharePoint)</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t2-location" value="Local files"> Local Hard Drive</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t2-location" value="Project management tool"> Project Management Tools (Jira/Asana/Trello)</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Have you been explicitly denied credit?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t2-denied" value="Yes" required> Yes, explicitly</label>
+                                <label class="radio-label"><input type="radio" name="t2-denied" value="Suspected"> Suspected / Implied</label>
+                                <label class="radio-label"><input type="radio" name="t2-denied" value="No, preventing future"> No, proactive prevention</label>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-shield"></i> Build Shield</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool2" class="output-container">
+                    <div class="card">
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-list-check"></i> Paper Trail Checklist</span></div>
+                            <div class="output-content" id="t2-out-checklist"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-clock"></i> Timestamp Strategy</span></div>
+                            <div class="output-content" id="t2-out-timestamp"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header">
+                                <span class="output-title"><i class="fa-solid fa-paper-plane"></i> The Email Summary Protocol</span>
+                                <button class="btn btn-copy" onclick="copyText('t2-out-email')"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </div>
+                            <div class="output-content">
+                                Use this recap model immediately after verbal handoffs or dynamic discussions.
+                                <div class="script-box" id="t2-out-email"></div>
+                            </div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-code-branch"></i> Version History Verification</span></div>
+                            <div class="output-content" id="t2-out-version"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-folder-tree"></i> Evidence Folder Architecture</span></div>
+                            <div class="output-content" id="t2-out-folder"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="history-section" id="history-tool2"></div>
+            </section>
+
+            <!-- TOOL 3: THE CORRECTION SCRIPT -->
+            <section id="tool3" class="tool-page">
+                <div class="tool-header">
+                    <h2>The Correction Script</h2>
+                    <p>Problem: "Someone just took credit for my work in a meeting. What do I say?"</p>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool3">
+                        <div class="form-group">
+                            <label for="t3-happened">What happened?</label>
+                            <textarea id="t3-happened" placeholder="Briefly detail the incident..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t3-room">Who was in the room?</label>
+                            <select id="t3-room" required>
+                                <option value="">Select option...</option>
+                                <option value="Just us">Just us (1-on-1)</option>
+                                <option value="Small team">Small team / Core project group</option>
+                                <option value="Large meeting">Large department-wide meeting</option>
+                                <option value="Leadership present">Executive / Leadership present</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Your relationship with the credit-taker:</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t3-rel" value="Boss" required> Direct Boss / Manager</label>
+                                <label class="radio-label"><input type="radio" name="t3-rel" value="Peer"> Peer / Colleague</label>
+                                <label class="radio-label"><input type="radio" name="t3-rel" value="Junior"> Junior / Subordinate</label>
+                                <label class="radio-label"><input type="radio" name="t3-rel" value="Don't know them well"> Unfamiliar / Cross-functional</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t3-emotion">Your current emotional state:</label>
+                            <select id="t3-emotion" required>
+                                <option value="">Select option...</option>
+                                <option value="Furious">Furious / Angry</option>
+                                <option value="Hurt">Hurt / Betrayed</option>
+                                <option value="Resigned">Resigned / Exhausted</option>
+                                <option value="Determined">Determined / Strategic</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Do you want to correct it publicly or privately?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t3-forum" value="Public" required> Publicly (Immediate)</label>
+                                <label class="radio-label"><input type="radio" name="t3-forum" value="Private"> Privately (Post-meeting)</label>
+                                <label class="radio-label"><input type="radio" name="t3-forum" value="Not sure"> Not sure (Evaluate both)</label>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-comment-slash"></i> Generate Scripts</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool3" class="output-container">
+                    <div class="card">
+                        <div class="output-section">
+                            <div class="output-header">
+                                <span class="output-title"><i class="fa-solid fa-bullhorn"></i> In-The-Moment Public Script</span>
+                                <button class="btn btn-copy" onclick="copyText('t3-out-public')"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </div>
+                            <div class="output-content">
+                                Seamless, low-friction spoken intervention to reclaim context live.
+                                <div class="script-box" id="t3-out-public"></div>
+                            </div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header">
+                                <span class="output-title"><i class="fa-solid fa-user-lock"></i> Private Follow-Up Script</span>
+                                <button class="btn btn-copy" onclick="copyText('t3-out-private')"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </div>
+                            <div class="output-content">
+                                Professional message to realign boundary conditions 1-on-1.
+                                <div class="script-box" id="t3-out-private"></div>
+                            </div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-puzzle-piece"></i> The "Build On It" Technique</span></div>
+                            <div class="output-content" id="t3-out-build"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-shield-cat"></i> Response Strategy If They Deny It</span></div>
+                            <div class="output-content" id="t3-out-deny"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-crown"></i> Power Dynamic Protocols (Manager Specific)</span></div>
+                            <div class="output-content" id="t3-out-power"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="history-section" id="history-tool3"></div>
+            </section>
+
+            <!-- TOOL 4: ALLY MAPPER -->
+            <section id="tool4" class="tool-page">
+                <div class="tool-header">
+                    <h2>Ally Mapper</h2>
+                    <p>Problem: "I can't protect myself alone. I need people who know what I actually do."</p>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool4">
+                        <div class="form-group">
+                            <label for="t4-quality">Who already knows your work quality?</label>
+                            <textarea id="t4-quality" placeholder="List names, roles, or cross-functional peers who witness your output..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-influence">Who influences decisions about your career?</label>
+                            <select id="t4-influence" required>
+                                <option value="">Select option...</option>
+                                <option value="Direct boss">Direct Manager</option>
+                                <option value="Skip-level">Skip-level Manager (Boss's Boss)</option>
+                                <option value="HR">HR / Talent Management</option>
+                                <option value="Project leads">Project Leads / Product Managers</option>
+                                <option value="Cross-functional partners">Cross-Functional Stakeholders</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Do you have a mentor or sponsor?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t4-mentor" value="Yes" required> Yes, formally assigned</label>
+                                <label class="radio-label"><input type="radio" name="t4-mentor" value="Informally"> Informally / Ad-hoc advisor</label>
+                                <label class="radio-label"><input type="radio" name="t4-mentor" value="No"> No mentor or sponsor</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-frequency">How often do you talk about your work with others?</label>
+                            <select id="t4-frequency" required>
+                                <option value="">Select option...</option>
+                                <option value="Daily">Daily organic discussions</option>
+                                <option value="Weekly">Weekly formal syncs</option>
+                                <option value="Rarely">Rarely / Only when forced</option>
+                                <option value="Only when asked">Only when directly asked</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-users"></i> Map Network</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool4" class="output-container">
+                    <div class="card">
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-sitemap"></i> Custom Strategic Ally Map</span></div>
+                            <div class="output-content">
+                                <div class="ally-map-visual">
+                                    <div class="ally-tier tier-core">
+                                        <h4>Tier 1: Senior Advocates & Sponsors</h4>
+                                        <div id="t4-map-tier1"></div>
+                                    </div>
+                                    <div class="ally-tier tier-influence">
+                                        <h4>Tier 2: Key Influencers & Decision Makers</h4>
+                                        <div id="t4-map-tier2"></div>
+                                    </div>
+                                    <div class="ally-tier tier-network">
+                                        <h4>Tier 3: Horizontal Peer Witness Network</h4>
+                                        <div id="t4-map-tier3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header">
+                                <span class="output-title"><i class="fa-solid fa-mug-hot"></i> The 15-Minute Coffee Chat Template</span>
+                                <button class="btn btn-copy" onclick="copyText('t4-out-coffee')"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </div>
+                            <div class="output-content">
+                                Outreach email to schedule a low-stakes visibility conversation.
+                                <div class="script-box" id="t4-out-coffee"></div>
+                            </div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-handshake"></i> Senior Advocacy Request</span></div>
+                            <div class="output-content" id="t4-out-senior"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-people-arrows"></i> Peer Witness Strategy</span></div>
+                            <div class="output-content" id="t4-out-peer"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header">
+                                <span class="output-title"><i class="fa-solid fa-user-plus"></i> The Mentor Pitch</span>
+                                <button class="btn btn-copy" onclick="copyText('t4-out-mentor')"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </div>
+                            <div class="output-content">
+                                Precise language to secure structured career sponsorship.
+                                <div class="script-box" id="t4-out-mentor"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="history-section" id="history-tool4"></div>
+            </section>
+
+            <!-- TOOL 5: ESCALATION PLANNER -->
+            <section id="tool5" class="tool-page">
+                <div class="tool-header">
+                    <h2>Escalation Planner</h2>
+                    <p>Problem: "This keeps happening and I need to do something bigger."</p>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool5">
+                        <div class="form-group">
+                            <label for="t5-frequency">How many times has credit been taken?</label>
+                            <select id="t5-frequency" required>
+                                <option value="">Select option...</option>
+                                <option value="Once">Isolated Incident (1 time)</option>
+                                <option value="2-3 times">Repeated Occurrence (2-3 times)</option>
+                                <option value="Regularly">Regular Habit (4+ times)</option>
+                                <option value="Systematically">Systematic Culture / Standard Operating Practice</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Who is doing it?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t5-who" value="My boss" required> Direct Manager</label>
+                                <label class="radio-label"><input type="radio" name="t5-who" value="A peer"> Peer / Colleague</label>
+                                <label class="radio-label"><input type="radio" name="t5-who" value="A subordinate"> Direct Report / Subordinate</label>
+                                <label class="radio-label"><input type="radio" name="t5-who" value="Multiple people"> Multiple Cross-Functional Parties</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t5-evidence">What evidence do you have?</label>
+                            <select id="t5-evidence" required>
+                                <option value="">Select option...</option>
+                                <option value="Verifiable documentation">Verifiable primary documentation (timestamps, source files, emails)</option>
+                                <option value="Some records">Partial records / Indirect email chains</option>
+                                <option value="My word">Verbal memory only / He-said-she-said</option>
+                                <option value="None">No records currently compiled</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Have you tried addressing it directly?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t5-direct" value="Yes" required> Yes, attempted direct conversation</label>
+                                <label class="radio-label"><input type="radio" name="t5-direct" value="No"> No, avoiding direct confrontation</label>
+                                <label class="radio-label"><input type="radio" name="t5-direct" value="Not yet"> Not yet, preparing strategy first</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t5-goal">What's your primary goal?</label>
+                            <select id="t5-goal" required>
+                                <option value="">Select option...</option>
+                                <option value="Stop the behavior">Stop the behavior immediately</option>
+                                <option value="Get acknowledged">Get public acknowledgment & attribution</option>
+                                <option value="Protect future work">Protect future IP & work product</option>
+                                <option value="Leave">Prepare documented exit strategy</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-arrow-up-right-dots"></i> Map Escalation Path</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool5" class="output-container">
+                    <div class="card">
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-stairs"></i> Escalation Ladder</span></div>
+                            <div class="output-content" id="t5-out-ladder"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header">
+                                <span class="output-title"><i class="fa-solid fa-user-tie"></i> Skip-Level / Manager's Boss Protocol</span>
+                                <button class="btn btn-copy" onclick="copyText('t5-out-manager')"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </div>
+                            <div class="output-content">
+                                Framing conversation scripts for skip-level intervention when direct management is compromised.
+                                <div class="script-box" id="t5-out-manager"></div>
+                            </div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-building-user"></i> HR Engagement Protocol</span></div>
+                            <div class="output-content" id="t5-out-hr"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-chart-line"></i> The Business Case Framework</span></div>
+                            <div class="output-content" id="t5-out-business"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-header"><span class="output-title"><i class="fa-solid fa-door-open"></i> Contingency Exit Strategy</span></div>
+                            <div class="output-content" id="t5-out-exit"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="history-section" id="history-tool5"></div>
+            </section>
+
+        </div>
+
+        <!-- FOOTER ON EVERY PAGE -->
+        <footer>
+            For professional self-advocacy only. Not legal advice. For intellectual property theft or contractual disputes, consult an attorney.
+        </footer>
+    </main>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast"><i class="fa-solid fa-check-circle"></i> Copied to clipboard!</div>
+
+    <script>
+        /* APP STATE & DOM NAVIGATION */
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            initFormListeners();
+            loadAllHistories();
+        });
+
+        // Navigation Engine
+        function initNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const dashCards = document.querySelectorAll('.dash-card');
+            const pages = document.querySelectorAll('.tool-page');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+
+            function switchPage(targetId) {
+                pages.forEach(p => p.classList.remove('active'));
+                navLinks.forEach(l => l.classList.remove('active'));
+
+                const targetPage = document.getElementById(targetId);
+                if (targetPage) targetPage.classList.add('active');
+
+                const activeLink = document.querySelector(`.nav-link[data-target="${targetId}"]`);
+                if (activeLink) activeLink.classList.add('active');
+
+                // Close mobile menu
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchPage(link.getAttribute('data-target'));
+                });
+            });
+
+            dashCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    switchPage(card.getAttribute('data-navigate'));
+                });
+            });
+
+            mobileBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('open');
+            });
+
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            });
+        }
+
+        // Toast Helper
+        function copyText(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const textToCopy = el.innerText;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            });
+        }
+
+        /* STORAGE ENGINE (LOCALSTORAGE) */
+        const MAX_HISTORY = 30;
+
+        function saveToHistory(toolId, inputData, outputData) {
+            const key = `credit_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const entry = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString(),
+                summary: getHistorySummary(toolId, inputData),
+                input: inputData,
+                output: outputData
+            };
+
+            history.unshift(entry);
+            if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistoryUI(toolId);
+        }
+
+        function getHistorySummary(toolId, input) {
+            switch(toolId) {
+                case 'tool1': return `Work: ${input.type} | Presenter: ${input.who}`;
+                case 'tool2': return `Protecting: ${input.protect.substring(0, 30)}...`;
+                case 'tool3': return `Incident in ${input.room} | Rel: ${input.rel}`;
+                case 'tool4': return `Influencers: ${input.influence} | Mentor: ${input.mentor}`;
+                case 'tool5': return `Pattern: ${input.frequency} | Target: ${input.who}`;
+                default: return `Entry ${new Date().toLocaleDateString()}`;
+            }
+        }
+
+        function loadAllHistories() {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistoryUI);
+        }
+
+        function renderHistoryUI(toolId) {
+            const key = `credit_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const container = document.getElementById(`history-${toolId}`);
+            if (!container) return;
+
+            if (history.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <div class="history-header">
+                    <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Analysis History (${history.length})</span>
+                    <button class="btn btn-copy" onclick="clearHistory('${toolId}')"><i class="fa-solid fa-trash-can"></i> Clear History</button>
+                </div>
+                <div class="history-list">
+            `;
+
+            history.forEach(item => {
+                html += `
+                    <div class="history-item">
+                        <div class="history-summary" onclick="toggleHistoryDetails('${item.id}')">
+                            <span><i class="fa-solid fa-file-lines"></i> ${escapeHtml(item.summary)}</span>
+                            <small>${item.timestamp} <i class="fa-solid fa-chevron-down"></i></small>
+                        </div>
+                        <div class="history-details" id="hist-detail-${item.id}">
+                            <p><strong>Input Parameters:</strong> ${escapeHtml(JSON.stringify(item.input))}</p>
+                            <br>
+                            <p><em>Recorded output available in original format.</em></p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function toggleHistoryDetails(id) {
+            const el = document.getElementById(`hist-detail-${id}`);
+            if (el) el.classList.toggle('open');
+        }
+
+        function clearHistory(toolId) {
+            localStorage.removeItem(`credit_history_${toolId}`);
+            renderHistoryUI(toolId);
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        /* TOOL SAMPLE LOADERS & FORM LOGIC */
+
+        // TOOL 1 LOGIC
+        function loadSampleTool1() {
+            document.getElementById('t1-type').value = 'Process improvements';
+            document.getElementById('t1-who').value = 'My boss';
+            
+            document.querySelectorAll('input[name="t1-sharing"]').forEach(cb => cb.checked = false);
+            document.querySelector('input[name="t1-sharing"][value="Shared docs"]').checked = true;
+            document.querySelector('input[name="t1-sharing"][value="Through my boss"]').checked = true;
+            
+            document.querySelector('input[name="t1-meetings"][value="Rarely"]').checked = true;
+        }
+
+        // TOOL 2 LOGIC
+        function loadSampleTool2() {
+            document.getElementById('t2-protect').value = 'Q3 Marketing Campaign Framework & Channel Optimization Strategy';
+            document.getElementById('t2-habits').value = 'I save some things';
+            
+            document.querySelectorAll('input[name="t2-location"]').forEach(cb => cb.checked = false);
+            document.querySelector('input[name="t2-location"][value="Cloud docs"]').checked = true;
+            document.querySelector('input[name="t2-location"][value="Chat"]').checked = true;
+            
+            document.querySelector('input[name="t2-denied"][value="Suspected"]').checked = true;
+        }
+
+        // TOOL 3 LOGIC
+        function loadSampleTool3() {
+            document.getElementById('t3-happened').value = 'In the product sync, my peer presented my customer segmentation research model directly to leadership as their own weekend project.';
+            document.getElementById('t3-room').value = 'Small team';
+            
+            document.querySelector('input[name="t3-rel"][value="Peer"]').checked = true;
+            document.getElementById('t3-emotion').value = 'Furious';
+            document.querySelector('input[name="t3-forum"][value="Not sure"]').checked = true;
+        }
+
+        // TOOL 4 LOGIC
+        function loadSampleTool4() {
+            document.getElementById('t4-quality').value = 'Senior Lead Architect Sarah and Product Manager Dave who reviewed my early system designs.';
+            document.getElementById('t4-influence').value = 'Skip-level';
+            
+            document.querySelector('input[name="t4-mentor"][value="No"]').checked = true;
+            document.getElementById('t4-frequency').value = 'Only when asked';
+        }
+
+        // TOOL 5 LOGIC
+        function loadSampleTool5() {
+            document.getElementById('t5-frequency').value = 'Regularly';
+            document.querySelector('input[name="t5-who"][value="My boss"]').checked = true;
+            document.getElementById('t5-evidence').value = 'Some records';
+            document.querySelector('input[name="t5-direct"][value="Not yet"]').checked = true;
+            document.getElementById('t5-goal').value = 'Protect future work';
+        }
+
+        /* FORM SUBMISSION HANDLERS & TEMPLATE LOGIC */
+
+        function initFormListeners() {
+            
+            // TOOL 1 SUBMIT
+            document.getElementById('form-tool1').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const type = document.getElementById('t1-type').value;
+                const who = document.getElementById('t1-who').value;
+                const sharing = Array.from(document.querySelectorAll('input[name="t1-sharing"]:checked')).map(c => c.value);
+                const meetings = document.querySelector('input[name="t1-meetings"]:checked')?.value || 'Rarely';
+
+                const gaps = `Primary failure point: Work originating via <strong>${sharing.join(', ') || 'private routes'}</strong> and filtered through <strong>${who}</strong> creates a shadow barrier. Because decision meetings are attended <strong>${meetings.toLowerCase()}</strong>, your identity is detached from the asset prior to final review.`;
+                
+                const email = `Subject: Pre-Sync Briefing: ${type} Infrastructure Overview\n\nHi team,\n\nAhead of our upcoming decision sync, I have finalized the core parameters for the ${type.toLowerCase()} framework. \n\nYou can review the working draft directly here: [Link to Document]. \n\nKey elements implemented:\n- Primary framework architecture\n- Optimization benchmarks\n\nI look forward to walking everyone through these points in our meeting.\n\nBest,\n[Your Name]`;
+
+                const docstrat = `Implement explicit **Header Watermarking & Version Metadata**: Embed a persistent 'Author/Owner: [Your Name]' block in the top margin of all ${type}. Set document permissions to 'View/Comment Only' when sending to ${who}; never send raw editable templates prior to broad distribution.`;
+
+                const meetingScript = meetings === 'Never' || meetings === 'Rarely' ?
+                    `Submit a formal calendar request: "Hi ${who}, regarding the ${type} deck—I’d like to sit in for the first 10 minutes to address any granular questions leadership has on the data structure."` :
+                    `Pre-claim agenda real estate: Email the host 24 hours prior: "I will be presenting the core updates on ${type} during slot 2."`;
+
+                const habit = `Establish a mandatory Friday 4:00 PM **"Executive Micro-Summary"**: Send a 3-bullet email to your manager and project partners detailing wins, completed assets, and active ownership for the week.`;
+
+                document.getElementById('t1-out-gaps').innerHTML = gaps;
+                document.getElementById('t1-out-email').innerText = email;
+                document.getElementById('t1-out-docstrat').innerHTML = docstrat;
+                document.getElementById('t1-out-meeting').innerText = meetingScript;
+                document.getElementById('t1-out-habit').innerHTML = habit;
+
+                document.getElementById('output-tool1').classList.add('active');
+                saveToHistory('tool1', {type, who, sharing, meetings}, {gaps, email});
+            });
+
+            // TOOL 2 SUBMIT
+            document.getElementById('form-tool2').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const protect = document.getElementById('t2-protect').value;
+                const habits = document.getElementById('t2-habits').value;
+                const locations = Array.from(document.querySelectorAll('input[name="t2-location"]:checked')).map(c => c.value);
+                const denied = document.querySelector('input[name="t2-denied"]:checked')?.value;
+
+                const checklist = `
+                    1. <strong>Local Archive Mirroring:</strong> Export all assets stored in ${locations.join(', ') || 'cloud platforms'} to an offline, date-stamped local drive weekly.<br>
+                    2. <strong>Asynchronous Audit Trails:</strong> Replace verbal approvals with quick written confirmations.<br>
+                    3. <strong>Metadata Preservation:</strong> Never overwrite original seed files; use sequential version naming (v0.1_AuthorInitials).<br>
+                    4. <strong>Cross-Department Copying:</strong> CC a neutral cross-functional partner on significant milestones.<br>
+                    5. <strong>Self-Sent Digital Ledger:</strong> BCC or email finalized architectural plans to your work address upon completion.
+                `;
+
+                const timestamp = `When working in platform environments, generate cryptographic hash proofs or utilize cloud commit histories (e.g., Git commit logs, Google Drive revision details). Ensure early working drafts show clear modification logs preceding any external review.`;
+
+                const email = `Subject: Summary & Action Items: ${protect.substring(0, 30)}...\n\nHi [Name],\n\nTo ensure we are aligned following our discussion regarding ${protect}, here is a recap of the contributions and next steps I am driving:\n\n1. Completed Deliverable: [Specific Component]\n2. Key Decisions Made: [Decision Details]\n3. My Immediate Next Steps: [Action Item]\n\nPlease let me know by EOD if any adjustments are needed.\n\nBest,\n[Your Name]`;
+
+                const version = `Leverage platform version records. In Microsoft Office or Google Workspace, navigate to File > Version History. This creates an unalterable log proving your account initiated the file structure before subsequent edits.`;
+
+                const folder = `Organize your shield directory as follows:<br><code>/PROTECTION_ARCHIVE/${new Date().getFullYear()}/${protect.replace(/[^a-zA-0-9]/g, '_').substring(0,15)}/</code><br>&nbsp;&nbsp;├── <code>01_RAW_IDEATION_TIMESTAMPED/</code><br>&nbsp;&nbsp;├── <code>02_CORRESPONDENCE_LOGS/</code><br>&nbsp;&nbsp;└── <code>03_FINAL_DELIVERABLES/</code>`;
+
+                document.getElementById('t2-out-checklist').innerHTML = checklist;
+                document.getElementById('t2-out-timestamp').innerText = timestamp;
+                document.getElementById('t2-out-email').innerText = email;
+                document.getElementById('t2-out-version').innerText = version;
+                document.getElementById('t2-out-folder').innerHTML = folder;
+
+                document.getElementById('output-tool2').classList.add('active');
+                saveToHistory('tool2', {protect, habits, locations, denied}, {checklist, email});
+            });
+
+            // TOOL 3 SUBMIT
+            document.getElementById('form-tool3').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const happened = document.getElementById('t3-happened').value;
+                const room = document.getElementById('t3-room').value;
+                const rel = document.querySelector('input[name="t3-rel"]:checked')?.value;
+                const emotion = document.getElementById('t3-emotion').value;
+                const forum = document.querySelector('input[name="t3-forum"]:checked')?.value;
+
+                const publicScript = rel === 'Boss' ?
+                    `"Thanks for introducing that overview, [Boss Name]. As I was building out the core models last week, I specifically structured the data to handle [Specific Technical Detail]. I’d be glad to walk everyone through the underlying mechanics now."` :
+                    `"Great summary, [Name]! To add context to the model I put together on Thursday: the key reason I chose this approach was to address [Specific Goal]. Let me jump in on the technical specifics."`;
+
+                const privateScript = `Subject: Quick Follow-Up: ${room} Presentation Alignment\n\nHi [Name],\n\nI noticed during our meeting that you walked through the ${happened.substring(0, 30)}... framework. \n\nBecause I spent significant time developing this asset, I want to ensure visibility on ownership remains clear to the team moving forward. \n\nIn future presentations, I’d appreciate a direct hat-tip, or I can present my portions directly. Let’s sync briefly tomorrow to align on how we credit collaborative work.\n\nBest,\n[Your Name]`;
+
+                const buildOn = `<strong>The 'Generous Authority' Pivot:</strong> Do not attack the individual. Instead, immediately jump in to expand on their statement by revealing deep, granular backend knowledge that only the true creator could know: <em>"That’s a great highlight, [Name]. When I was executing phase one of this design, the main technical hurdle I solved was..."</em>`;
+
+                const deny = `If challenged with <em>"We worked on this together"</em> or outright denial: Maintain an even, flat tone. State calmly: <em>"To clarify, the initial architecture, source files, and draft were compiled on my end. I’m happy to step through the version history offline to clear up any confusion."</em>`;
+
+                const power = rel === 'Boss' ?
+                    `<strong>Managing Upward Credit Loss:</strong> Direct public confrontation with a manager can backfire politically. Frame your reclamation around taking workload off their plate: <em>"I know you have high-level visibility across the whole department, so I’m happy to present my technical assets directly in future meetings to save you time."</em>` :
+                    `<strong>Peer Dynamics:</strong> With peers, establish firm peer-to-peer boundaries early. Publicly reclaiming context establishes you as the subject matter expert in front of leadership.`;
+
+                document.getElementById('t3-out-public').innerText = publicScript;
+                document.getElementById('t3-out-private').innerText = privateScript;
+                document.getElementById('t3-out-build').innerHTML = buildOn;
+                document.getElementById('t3-out-deny').innerHTML = deny;
+                document.getElementById('t3-out-power').innerHTML = power;
+
+                document.getElementById('output-tool3').classList.add('active');
+                saveToHistory('tool3', {happened, room, rel, emotion, forum}, {publicScript, privateScript});
+            });
+
+            // TOOL 4 SUBMIT
+            document.getElementById('form-tool4').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const quality = document.getElementById('t4-quality').value;
+                const influence = document.getElementById('t4-influence').value;
+                const mentor = document.querySelector('input[name="t4-mentor"]:checked')?.value;
+                const frequency = document.getElementById('t4-frequency').value;
+
+                document.getElementById('t4-map-tier1').innerText = `${influence} / Executive Leadership`;
+                document.getElementById('t4-map-tier2').innerText = `${quality.substring(0, 40)}...`;
+                document.getElementById('t4-map-tier3').innerText = `Cross-functional Peers & Project Collaborators`;
+
+                const coffee = `Subject: Catch up / Brief 15-Min Sync\n\nHi [Name],\n\nI’ve been following the recent updates on [Project/Department Initiative] and really admire your team's approach. \n\nI’ve been leading our internal work on [Your Key Work/Skill] and would love to grab a quick 15-minute virtual coffee to share perspectives and learn more about your strategic priorities.\n\nLet me know if you have any open slots next week.\n\nBest,\n[Your Name]`;
+
+                const senior = `When engaging ${influence}, ask for advice rather than credit directly: <em>"I’m currently focusing on scaling the visibility of our technical deliverables. Given your perspective across the organization, how can I best position my work product so leadership sees its direct business impact?"</em>`;
+
+                const peer = `Establish a **Mutual Attribution Pact**: Build informal reciprocity with 2-3 trusted colleagues. Agree to explicitly validate and attribute each other’s contributions live in group meetings (e.g., <em>"Building on what [Your Name] developed in their recent analysis..."</em>).`;
+
+                const mentorPitch = `Subject: Mentorship Request: Strategic Alignment & Career Development\n\nHi [Name],\n\nHaving observed your leadership across [Department/Domain], I am seeking guidance on navigating high-impact contributions within the organization.\n\nI would greatly value 30 minutes of your time once a month to get your feedback on my career progression and tactical project positioning.\n\nWould you be open to an initial conversation next week?\n\nBest,\n[Your Name]`;
+
+                document.getElementById('t4-out-coffee').innerText = coffee;
+                document.getElementById('t4-out-senior').innerHTML = senior;
+                document.getElementById('t4-out-peer').innerHTML = peer;
+                document.getElementById('t4-out-mentor').innerText = mentorPitch;
+
+                document.getElementById('output-tool4').classList.add('active');
+                saveToHistory('tool4', {quality, influence, mentor, frequency}, {coffee, mentorPitch});
+            });
+
+            // TOOL 5 SUBMIT
+            document.getElementById('form-tool5').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const frequency = document.getElementById('t5-frequency').value;
+                const who = document.querySelector('input[name="t5-who"]:checked')?.value;
+                const evidence = document.getElementById('t5-evidence').value;
+                const direct = document.querySelector('input[name="t5-direct"]:checked')?.value;
+                const goal = document.getElementById('t5-goal').value;
+
+                const ladder = `
+                    <div class="ladder-step"><div class="ladder-badge">1</div><div><strong>Internal Audit:</strong> Assemble structured evidence folder. Compile timestamps and source files.</div></div>
+                    <div class="ladder-step"><div class="ladder-badge">2</div><div><strong>1-on-1 Boundary Alignment:</strong> Execute direct conversation specifying pattern details.</div></div>
+                    <div class="ladder-step"><div class="ladder-badge">3</div><div><strong>Skip-Level Escalation:</strong> Frame misattribution as operational risk to talent retention and data integrity.</div></div>
+                    <div class="ladder-step"><div class="ladder-badge">4</div><div><strong>Formal HR Inquiry:</strong> Present objective paper trail demonstrating IP appropriation.</div></div>
+                `;
+
+                const managerScript = `Subject: Confidential Sync: Operational Visibility & Deliverable Attribution\n\nHi [Skip-Level Manager Name],\n\nI am requesting a brief 1-on-1 conversation to discuss workflow optimization and ensuring accurate attribution on core deliverables.\n\nMy goal is to support the department’s broader strategic targets while maintaining clear line-of-sight on my work product (${goal.toLowerCase()}).\n\nI look forward to sharing a few quick observations with you.\n\nBest,\n[Your Name]`;
+
+                const hr = `HR should be engaged when there is a systematic pattern combined with <strong>${evidence}</strong>. Frame the issue legally and operationally: focus on <em>organisational standards, accuracy of performance reviews, and professional ethical guidelines</em> rather than personal distress.`;
+
+                const business = `Frame the situation using business metrics:<br>
+                • <strong>Risk:</strong> Inaccurate tracking of subject matter expertise leads to misallocated resources.<br>
+                • <strong>Retention:</strong> High-performing talent pipeline decay due to structural attribution failure.<br>
+                • <strong>Governance:</strong> Lack of true version history impairs auditability.`;
+
+                const exit = goal === 'Leave' || frequency === 'Systematically' ?
+                    `<strong>Strategic Off-Ramp:</strong> If the culture systematically rewards credit-theft, prepare your exit quietly. Update your portfolio using verifiable metrics from your private evidence folder. Secure external references from allies mapped in Tool 4 before taking action.` :
+                    `<strong>Protective Containment:</strong> Maintain strict digital hygiene. Limit preliminary distribution of work products until formal launch channels are locked.`;
+
+                document.getElementById('t5-out-ladder').innerHTML = ladder;
+                document.getElementById('t5-out-manager').innerText = managerScript;
+                document.getElementById('t5-out-hr').innerHTML = hr;
+                document.getElementById('t5-out-business').innerHTML = business;
+                document.getElementById('t5-out-exit').innerHTML = exit;
+
+                document.getElementById('output-tool5').classList.add('active');
+                saveToHistory('tool5', {frequency, who, evidence, direct, goal}, {ladder, managerScript});
+            });
+        }
+    </script>
+</body>
+</html>

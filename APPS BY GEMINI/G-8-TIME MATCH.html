@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TimeMatch — Relationship Time Toolkit</title>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #264653;
+      --primary-hover: #1e3742;
+      --accent: #E9C46A;
+      --accent-hover: #d8b256;
+      --bg-gradient: linear-gradient(135deg, #F8F9FA 0%, #FFF3E0 100%);
+      --card-bg: #FFFFFF;
+      --text-main: #2D3748;
+      --text-muted: #718096;
+      --border-color: #E2E8F0;
+      --danger: #E76F51;
+      --success: #2A9D8F;
+      --warning: #F4A261;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --sidebar-width: 250px;
+      --radius-xl: 1rem;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Layout Structure */
+    .app-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* Mobile Header & Hamburger */
+    .mobile-header {
+      display: none;
+      background: var(--card-bg);
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .mobile-header .brand {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--card-bg);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 50;
+      transition: transform 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .nav-links {
+      list-style: none;
+      padding: 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .nav-item button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.95rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .nav-item button:hover {
+      background: #F1F5F9;
+      color: var(--primary);
+    }
+
+    .nav-item.active button {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+
+    .nav-item button i {
+      width: 1.25rem;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    /* Main Content Area */
+    .main-wrapper {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin 0.3s ease;
+    }
+
+    .content-container {
+      max-width: 850px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      flex: 1;
+    }
+
+    /* Section Visibility */
+    .tool-section {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .tool-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card Components */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .card-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      color: var(--primary);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Dashboard Styles */
+    .hero-card {
+      background: linear-gradient(135deg, var(--primary) 0%, #344e41 100%);
+      color: white;
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      border-radius: var(--radius-xl);
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    .hero-card h2 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .hero-card p {
+      font-size: 1.05rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .dash-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--accent);
+    }
+
+    .dash-card-icon {
+      width: 48px;
+      height: 48px;
+      background: #FFF8E7;
+      color: #D97706;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .dash-card h3 {
+      font-size: 1.1rem;
+      color: var(--primary);
+      margin-bottom: 0.4rem;
+    }
+
+    .dash-card p {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      line-height: 1.4;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control, select, textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      background: #FAFAFA;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(38, 70, 83, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .checkbox-group, .radio-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .choice-tile {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      background: #FAFAFA;
+      cursor: pointer;
+      font-size: 0.875rem;
+      user-select: none;
+    }
+
+    .choice-tile:hover {
+      background: #F1F5F9;
+    }
+
+    .choice-tile input {
+      accent-color: var(--primary);
+    }
+
+    /* Range / Slider Customization */
+    .slider-container {
+      margin-bottom: 1.25rem;
+      background: #F8FAFC;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .slider-val {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 0.5rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: #E2E8F0;
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: #CBD5E1;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .btn-outline:hover {
+      background: #F8FAFC;
+      color: var(--text-main);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.825rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    /* Outputs & Results */
+    .output-container {
+      margin-top: 2rem;
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .output-container.active {
+      display: block;
+    }
+
+    .output-box {
+      background: #F8FAFC;
+      border-left: 4px solid var(--primary);
+      padding: 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin-bottom: 1rem;
+    }
+
+    .output-box.warning {
+      border-left-color: var(--warning);
+      background: #FFFBEB;
+    }
+
+    .output-box.accent {
+      border-left-color: var(--accent);
+      background: #FEFCE8;
+    }
+
+    .output-box.success {
+      border-left-color: var(--success);
+      background: #F0FDF4;
+    }
+
+    .output-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .script-box {
+      background: #FFFFFF;
+      border: 1px dashed var(--primary);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: #1E293B;
+      line-height: 1.5;
+      position: relative;
+      margin-top: 0.5rem;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+    }
+
+    /* Heatmap / Progress Bar Component */
+    .metric-bar-container {
+      margin-bottom: 1rem;
+    }
+
+    .metric-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+
+    .metric-track {
+      height: 10px;
+      background: #E2E8F0;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .metric-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.5s ease;
+    }
+
+    .bg-green { background: var(--success); }
+    .bg-yellow { background: var(--warning); }
+    .bg-red { background: var(--danger); }
+
+    /* History Accordion */
+    .accordion {
+      margin-top: 2rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .accordion-title {
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .accordion-content {
+      display: none;
+      padding-top: 1rem;
+    }
+
+    .accordion-content.open {
+      display: block;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .history-item {
+      background: #FAFAFA;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    .history-date {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1E293B;
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Footer */
+    footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      padding: 1.25rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-top: auto;
+    }
+
+    /* Overlay for Mobile Sidebar */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 45;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .mobile-header {
+        display: flex;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay.open {
+        display: block;
+      }
+
+      .main-wrapper {
+        margin-left: 0;
+      }
+
+      .content-container {
+        padding: 1.25rem 1rem;
+      }
+
+      .hero-card h2 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+      <div class="brand">
+        <i class="fa-solid fa-hourglass-half" style="color: var(--accent);"></i>
+        <span>TimeMatch</span>
+      </div>
+      <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1>
+          <i class="fa-solid fa-hourglass-half" style="color: var(--accent);"></i>
+          <span>TimeMatch</span>
+        </h1>
+      </div>
+      <ul class="nav-links">
+        <li class="nav-item active">
+          <button onclick="switchTab('dashboard')">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button onclick="switchTab('time-audit')">
+            <i class="fa-solid fa-clock"></i>
+            <span>Time Audit</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button onclick="switchTab('the-ask')">
+            <i class="fa-solid fa-comment-dots"></i>
+            <span>The Ask</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button onclick="switchTab('schedule-sync')">
+            <i class="fa-solid fa-calendar-days"></i>
+            <span>Schedule Sync</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button onclick="switchTab('solo-together')">
+            <i class="fa-solid fa-battery-half"></i>
+            <span>Solo vs Together</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button onclick="switchTab('check-in')">
+            <i class="fa-solid fa-sliders"></i>
+            <span>The Check-In</span>
+          </button>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <main class="content-container">
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="tool-section active">
+          <div class="hero-card">
+            <h2>Time Match</h2>
+            <p>Balance togetherness and independence without guilt or pressure.</p>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="dash-card" onclick="switchTab('time-audit')">
+              <div>
+                <div class="dash-card-icon"><i class="fa-solid fa-clock"></i></div>
+                <h3>Time Audit</h3>
+                <p>Uncover where your hours actually go and map the gap between actual and ideal connection time.</p>
+              </div>
+            </div>
+
+            <div class="dash-card" onclick="switchTab('the-ask')">
+              <div>
+                <div class="dash-card-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                <h3>The Ask</h3>
+                <p>Learn to ask for connection constructively without sounding needy, accusatory, or demanding.</p>
+              </div>
+            </div>
+
+            <div class="dash-card" onclick="switchTab('schedule-sync')">
+              <div>
+                <div class="dash-card-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                <h3>Schedule Sync</h3>
+                <p>Align busy routines, protect solo time, and discover hidden windows for meaningful togetherness.</p>
+              </div>
+            </div>
+
+            <div class="dash-card" onclick="switchTab('solo-together')">
+              <div>
+                <div class="dash-card-icon"><i class="fa-solid fa-battery-half"></i></div>
+                <h3>Solo vs Together</h3>
+                <p>Decode differences in recharge styles and turn personality clashes into practical compromises.</p>
+              </div>
+            </div>
+
+            <div class="dash-card" onclick="switchTab('check-in')">
+              <div>
+                <div class="dash-card-icon"><i class="fa-solid fa-sliders"></i></div>
+                <h3>The Check-In</h3>
+                <p>Weekly calibration tool to review time satisfaction, identify tension early, and stay aligned.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 1: TIME AUDIT -->
+        <section id="time-audit" class="tool-section">
+          <div class="card">
+            <div class="card-header-flex">
+              <h2 class="card-title"><i class="fa-solid fa-clock"></i> Tool 1: Time Audit</h2>
+              <button class="btn btn-outline btn-sm" onclick="loadSampleAudit()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+              </button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+              <strong>Problem:</strong> "Where does all our time actually go?" Identify mismatches between actual togetherness and ideal connection time.
+            </p>
+
+            <form id="auditForm" onsubmit="event.preventDefault(); processAudit();">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                  <label for="auditAWork">Partner A Work Hours + Commute:</label>
+                  <input type="text" id="auditAWork" class="form-control" placeholder="e.g. 8am–6pm (10 hrs)">
+                </div>
+                <div class="form-group">
+                  <label for="auditBWork">Partner B Work Hours + Commute:</label>
+                  <input type="text" id="auditBWork" class="form-control" placeholder="e.g. 7am–4pm (9 hrs)">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="auditAObligations">Partner A Evening / Personal Obligations:</label>
+                <textarea id="auditAObligations" placeholder="e.g., Gym Mon/Wed/Fri (2 hrs), side project, chores"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="auditBObligations">Partner B Evening / Personal Obligations:</label>
+                <textarea id="auditBObligations" placeholder="e.g., Cooking, evening calls, reading, relaxing solo"></textarea>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                  <label for="auditActualWeekday">Current Shared Time (Weekday):</label>
+                  <select id="auditActualWeekday" class="form-control">
+                    <option value="None">None</option>
+                    <option value="30 min">30 minutes</option>
+                    <option value="1 hr" selected>1 hour</option>
+                    <option value="2 hr">2 hours</option>
+                    <option value="3+ hr">3+ hours</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="auditActualWeekend">Current Shared Time (Weekend Day):</label>
+                  <select id="auditActualWeekend" class="form-control">
+                    <option value="None">None</option>
+                    <option value="1-2 hr">1–2 hours</option>
+                    <option value="3-5 hr" selected>3–5 hours</option>
+                    <option value="6+ hr">6+ hours</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                  <label for="auditIdealA">Partner A's Ideal Daily Together Time:</label>
+                  <select id="auditIdealA" class="form-control">
+                    <option value="30 min">30 minutes</option>
+                    <option value="1 hr">1 hour</option>
+                    <option value="2 hr" selected>2 hours</option>
+                    <option value="3+ hr">3+ hours</option>
+                    <option value="Quality over quantity">Quality over quantity</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="auditIdealB">Partner B's Ideal Daily Together Time:</label>
+                  <select id="auditIdealB" class="form-control">
+                    <option value="30 min">30 minutes</option>
+                    <option value="1 hr" selected>1 hour</option>
+                    <option value="2 hr">2 hours</option>
+                    <option value="3+ hr">3+ hours</option>
+                    <option value="Quality over quantity">Quality over quantity</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-simple"></i> Analyze Time Inventory</button>
+              </div>
+            </form>
+
+            <div id="auditOutput" class="output-container">
+              <div class="output-box accent">
+                <div class="output-title">The Gap Analysis</div>
+                <div id="auditGapText"></div>
+              </div>
+
+              <div class="output-box">
+                <div class="output-title">Time Inventory Breakdown</div>
+                <div id="auditInventoryText"></div>
+              </div>
+
+              <div class="output-box warning">
+                <div class="output-title">Primary Mismatch Type</div>
+                <div id="auditMismatchText" style="font-weight: 600; font-size: 1.05rem;"></div>
+              </div>
+
+              <div class="output-box success">
+                <div class="output-title">Low-Hanging Fruit (Quick Wins)</div>
+                <ul id="auditWinsList" style="padding-left: 1.25rem; line-height: 1.6;"></ul>
+              </div>
+
+              <div class="output-box">
+                <div class="output-title">1-Week Micro Experiment</div>
+                <div id="auditExperimentText" style="line-height: 1.5;"></div>
+              </div>
+            </div>
+
+            <!-- History Accordion -->
+            <div class="accordion">
+              <div class="accordion-header" onclick="toggleAccordion('auditHistory')">
+                <span class="accordion-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Audits History</span>
+                <i class="fa-solid fa-chevron-down" id="auditHistoryIcon"></i>
+              </div>
+              <div class="accordion-content" id="auditHistory">
+                <div id="auditHistoryList" class="history-list" style="margin-top:0.75rem;"></div>
+                <button class="btn btn-outline btn-sm" style="margin-top:0.75rem;" onclick="clearToolHistory('audit')">Clear History</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 2: THE ASK -->
+        <section id="the-ask" class="tool-section">
+          <div class="card">
+            <div class="card-header-flex">
+              <h2 class="card-title"><i class="fa-solid fa-comment-dots"></i> Tool 2: The Ask</h2>
+              <button class="btn btn-outline btn-sm" onclick="loadSampleAsk()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+              </button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+              <strong>Problem:</strong> "How do I ask for more time without sounding needy or demanding?" Frame requests with warmth and clarity.
+            </p>
+
+            <form id="askForm" onsubmit="event.preventDefault(); processAsk();">
+              <div class="form-group">
+                <label for="askDesired">What do you want more of?</label>
+                <select id="askDesired" class="form-control">
+                  <option value="Evening downtime">Evening downtime & unhurried relaxation</option>
+                  <option value="Weekend activities">Weekend activities & shared adventures</option>
+                  <option value="Morning connection">Morning connection (coffee, brief check-in)</option>
+                  <option value="Deep conversation">Deep conversation without distractions</option>
+                  <option value="Physical affection">Physical affection & quiet closeness</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="askPastAttempt">When you tried asking before, what happened?</label>
+                <select id="askPastAttempt" class="form-control">
+                  <option value="They agreed but didn't follow through">They agreed but didn't follow through</option>
+                  <option value="They got defensive">They got defensive ("I work hard all day!")</option>
+                  <option value="It turned into a fight">It turned into a fight or lingering tension</option>
+                  <option value="I didn't ask — I just hoped they'd notice">I didn't ask — I just hoped they'd notice</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="askFear">What are you afraid they'll say?</label>
+                <textarea id="askFear" placeholder="e.g., That I'm suffocating them or asking for too much."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="askPartnerNeed">What do you think they need that they're not getting?</label>
+                <textarea id="askPartnerNeed" placeholder="e.g., Decompression time after stressful work hours."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Generate Reframed Script</button>
+              </div>
+            </form>
+
+            <div id="askOutput" class="output-container">
+              <div class="output-box">
+                <div class="output-title">Your Current Ask Pattern</div>
+                <div id="askStyleText" style="font-weight: 500;"></div>
+              </div>
+
+              <div class="output-box accent">
+                <div class="output-title">The Reframed Script (Focus on Desire, Not Complaint)</div>
+                <div class="script-box">
+                  <span id="askScriptText"></span>
+                  <button class="btn btn-secondary btn-sm copy-btn" onclick="copyToClipboard('askScriptText')">
+                    <i class="fa-regular fa-copy"></i> Copy Script
+                  </button>
+                </div>
+              </div>
+
+              <div class="output-box">
+                <div class="output-title">Timing Tip</div>
+                <div id="askTimingText" style="line-height: 1.5;"></div>
+              </div>
+
+              <div class="output-box warning">
+                <div class="output-title">If They Say "No" (Dignity-Preserving Response)</div>
+                <div class="script-box">
+                  <span id="askNoScriptText"></span>
+                  <button class="btn btn-secondary btn-sm copy-btn" onclick="copyToClipboard('askNoScriptText')">
+                    <i class="fa-regular fa-copy"></i> Copy
+                  </button>
+                </div>
+              </div>
+
+              <div class="output-box success">
+                <div class="output-title">If They Say "Yes" But Don't Follow Through</div>
+                <div class="script-box">
+                  <span id="askFollowupScriptText"></span>
+                  <button class="btn btn-secondary btn-sm copy-btn" onclick="copyToClipboard('askFollowupScriptText')">
+                    <i class="fa-regular fa-copy"></i> Copy
+                  </button>
+                </div>
+              </div>
+
+              <div class="output-box">
+                <div class="output-title">Space-Partner Perspective</div>
+                <div id="askPerspectiveText" style="font-style: italic; color: var(--text-muted);"></div>
+              </div>
+            </div>
+
+            <!-- History Accordion -->
+            <div class="accordion">
+              <div class="accordion-header" onclick="toggleAccordion('askHistory')">
+                <span class="accordion-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Asks History</span>
+                <i class="fa-solid fa-chevron-down" id="askHistoryIcon"></i>
+              </div>
+              <div class="accordion-content" id="askHistory">
+                <div id="askHistoryList" class="history-list" style="margin-top:0.75rem;"></div>
+                <button class="btn btn-outline btn-sm" style="margin-top:0.75rem;" onclick="clearToolHistory('ask')">Clear History</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 3: SCHEDULE SYNC -->
+        <section id="schedule-sync" class="tool-section">
+          <div class="card">
+            <div class="card-header-flex">
+              <h2 class="card-title"><i class="fa-solid fa-calendar-days"></i> Tool 3: Schedule Sync</h2>
+              <button class="btn btn-outline btn-sm" onclick="loadSampleSync()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+              </button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+              <strong>Problem:</strong> "Our calendars never align." Uncover hidden free windows and manage the logistics burden fairly.
+            </p>
+
+            <form id="syncForm" onsubmit="event.preventDefault(); processSync();">
+              <div class="form-group">
+                <label for="syncASolo">Partner A Non-Negotiable Solo Time:</label>
+                <textarea id="syncASolo" placeholder="e.g., Gym Mon/Wed 6-7:30pm, Sunday morning gaming"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="syncBSolo">Partner B Non-Negotiable Solo Time:</label>
+                <textarea id="syncBSolo" placeholder="e.g., Book club Tues evening, Saturday long run"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="syncObligations">Recurring Obligations That Steal Connection Time:</label>
+                <textarea id="syncObligations" placeholder="e.g., Late work emails, household chores, grocery shopping, commuting"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Preferred Connection Formats (Select all that apply):</label>
+                <div class="checkbox-group">
+                  <label class="choice-tile"><input type="checkbox" name="syncFormat" value="Meals" checked> Meals together</label>
+                  <label class="choice-tile"><input type="checkbox" name="syncFormat" value="TV together" checked> TV / Movies</label>
+                  <label class="choice-tile"><input type="checkbox" name="syncFormat" value="Walks"> Evening walks</label>
+                  <label class="choice-tile"><input type="checkbox" name="syncFormat" value="Deep talk"> Deep talk</label>
+                  <label class="choice-tile"><input type="checkbox" name="syncFormat" value="Activities"> Weekend outings</label>
+                  <label class="choice-tile"><input type="checkbox" name="syncFormat" value="Parallel play"> Parallel play (reading side-by-side)</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Who currently handles planning & logistics?</label>
+                <div class="radio-group">
+                  <label class="choice-tile"><input type="radio" name="syncLogistics" value="Partner A" checked> Partner A</label>
+                  <label class="choice-tile"><input type="radio" name="syncLogistics" value="Partner B"> Partner B</label>
+                  <label class="choice-tile"><input type="radio" name="syncLogistics" value="Both"> Equally Shared</label>
+                  <label class="choice-tile"><input type="radio" name="syncLogistics" value="Nobody"> Nobody (Spontaneous)</label>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calendar-check"></i> Sync Schedules</button>
+              </div>
+            </form>
+
+            <div id="syncOutput" class="output-container">
+              <div class="output-box">
+                <div class="output-title">Schedule Visual Blocks</div>
+                <div id="syncHeatmapText"></div>
+              </div>
+
+              <div class="output-box success">
+                <div class="output-title">Protected "Us Time" Windows</div>
+                <ul id="syncWindowsList" style="padding-left: 1.25rem; line-height: 1.6;"></ul>
+              </div>
+
+              <div class="output-box warning">
+                <div class="output-title">Logistics Burden Assessment</div>
+                <div id="syncLogisticsText" style="line-height: 1.5;"></div>
+              </div>
+
+              <div class="output-box accent">
+                <div class="output-title">7-Day Connection Plan</div>
+                <div id="sync7DayPlan" style="display: grid; gap: 0.5rem; margin-top: 0.5rem;"></div>
+              </div>
+
+              <div class="output-box">
+                <div class="output-title">No-Go Zones (Avoid Asking For Connection Here)</div>
+                <div id="syncNoGoText" style="color: var(--danger); font-weight: 500;"></div>
+              </div>
+            </div>
+
+            <!-- History Accordion -->
+            <div class="accordion">
+              <div class="accordion-header" onclick="toggleAccordion('syncHistory')">
+                <span class="accordion-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Schedule Syncs</span>
+                <i class="fa-solid fa-chevron-down" id="syncHistoryIcon"></i>
+              </div>
+              <div class="accordion-content" id="syncHistory">
+                <div id="syncHistoryList" class="history-list" style="margin-top:0.75rem;"></div>
+                <button class="btn btn-outline btn-sm" style="margin-top:0.75rem;" onclick="clearToolHistory('sync')">Clear History</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 4: SOLO VS TOGETHER -->
+        <section id="solo-together" class="tool-section">
+          <div class="card">
+            <div class="card-header-flex">
+              <h2 class="card-title"><i class="fa-solid fa-battery-half"></i> Tool 4: Solo vs Together</h2>
+              <button class="btn btn-outline btn-sm" onclick="loadSampleSolo()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+              </button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+              <strong>Problem:</strong> "I need space, they need closeness — or vice versa." Align different energy recharge profiles without taking it personally.
+            </p>
+
+            <form id="soloForm" onsubmit="event.preventDefault(); processSolo();">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                  <label for="soloRechargeA">Partner A Recharges By:</label>
+                  <select id="soloRechargeA" class="form-control">
+                    <option value="Alone time">Alone time (Solitude, gaming, reading)</option>
+                    <option value="Social time">Social time with friends/groups</option>
+                    <option value="Physical activity">Physical activity / Sports</option>
+                    <option value="Quiet togetherness" selected>Quiet togetherness (Co-existing)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="soloRechargeB">Partner B Recharges By:</label>
+                  <select id="soloRechargeB" class="form-control">
+                    <option value="Alone time" selected>Alone time (Solitude, gaming, reading)</option>
+                    <option value="Social time">Social time with friends/groups</option>
+                    <option value="Physical activity">Physical activity / Sports</option>
+                    <option value="Quiet togetherness">Quiet togetherness (Co-existing)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                  <label for="soloDrainA">Partner A Feels Drained By:</label>
+                  <select id="soloDrainA" class="form-control">
+                    <option value="Not enough personal time">Not enough personal / solo time</option>
+                    <option value="Too much unstructured together time">Too much unstructured togetherness</option>
+                    <option value="Too much scheduled activity" selected>Too much scheduled activity</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="soloDrainB">Partner B Feels Drained By:</label>
+                  <select id="soloDrainB" class="form-control">
+                    <option value="Not enough personal time" selected>Not enough personal / solo time</option>
+                    <option value="Too much unstructured together time">Too much unstructured togetherness</option>
+                    <option value="Too much scheduled activity">Too much scheduled activity</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="soloConflictPattern">Current Conflict Pattern:</label>
+                <textarea id="soloConflictPattern" placeholder="e.g., Partner A gets upset when Partner B retreats to the bedroom after work."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-scale-balanced"></i> Map Energy Styles</button>
+              </div>
+            </form>
+
+            <div id="soloOutput" class="output-container">
+              <div class="output-box accent">
+                <div class="output-title">The Core Difference</div>
+                <div id="soloCoreDiffText" style="line-height: 1.5; font-weight: 500;"></div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+                <div class="output-box">
+                  <div class="output-title">Partner A's Needs</div>
+                  <div id="soloNeedsAText"></div>
+                </div>
+                <div class="output-box">
+                  <div class="output-title">Partner B's Needs</div>
+                  <div id="soloNeedsBText"></div>
+                </div>
+              </div>
+
+              <div class="output-box success">
+                <div class="output-title">The Compromise Formula</div>
+                <div id="soloFormulaText" style="font-weight: 600; font-size: 1.05rem; color: var(--primary);"></div>
+              </div>
+
+              <div class="output-box">
+                <div class="output-title">Quality-Over-Quantity Checklist</div>
+                <ul id="soloChecklist" style="padding-left: 1.25rem; line-height: 1.6;"></ul>
+              </div>
+
+              <div class="output-box warning">
+                <div class="output-title">One Golden Rule To Try This Week</div>
+                <div id="soloRuleText" style="font-weight: 600; font-size: 1rem;"></div>
+              </div>
+            </div>
+
+            <!-- History Accordion -->
+            <div class="accordion">
+              <div class="accordion-header" onclick="toggleAccordion('soloHistory')">
+                <span class="accordion-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Energy Assessments</span>
+                <i class="fa-solid fa-chevron-down" id="soloHistoryIcon"></i>
+              </div>
+              <div class="accordion-content" id="soloHistory">
+                <div id="soloHistoryList" class="history-list" style="margin-top:0.75rem;"></div>
+                <button class="btn btn-outline btn-sm" style="margin-top:0.75rem;" onclick="clearToolHistory('solo')">Clear History</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 5: THE CHECK-IN -->
+        <section id="check-in" class="tool-section">
+          <div class="card">
+            <div class="card-header-flex">
+              <h2 class="card-title"><i class="fa-solid fa-sliders"></i> Tool 5: The Check-In</h2>
+              <button class="btn btn-outline btn-sm" onclick="loadSampleCheckin()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+              </button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+              <strong>Problem:</strong> "We agreed to changes but never review if they're working." Rate your weekly experience to adjust proactively.
+            </p>
+
+            <form id="checkinForm" onsubmit="event.preventDefault(); processCheckin();">
+              <div class="slider-container">
+                <div class="slider-header">
+                  <span>This week: I got enough together time</span>
+                  <span class="slider-val" id="val1">5</span>
+                </div>
+                <input type="range" id="check1" min="1" max="10" value="5" oninput="document.getElementById('val1').innerText = this.value">
+              </div>
+
+              <div class="slider-container">
+                <div class="slider-header">
+                  <span>This week: I got enough alone time</span>
+                  <span class="slider-val" id="val2">5</span>
+                </div>
+                <input type="range" id="check2" min="1" max="10" value="5" oninput="document.getElementById('val2').innerText = this.value">
+              </div>
+
+              <div class="slider-container">
+                <div class="slider-header">
+                  <span>This week: Our time felt quality, not just quantity</span>
+                  <span class="slider-val" id="val3">5</span>
+                </div>
+                <input type="range" id="check3" min="1" max="10" value="5" oninput="document.getElementById('val3').innerText = this.value">
+              </div>
+
+              <div class="slider-container">
+                <div class="slider-header">
+                  <span>This week: I felt resentful about time</span>
+                  <span class="slider-val" id="val4">3</span>
+                </div>
+                <input type="range" id="check4" min="1" max="10" value="3" oninput="document.getElementById('val4').innerText = this.value">
+              </div>
+
+              <div class="slider-container">
+                <div class="slider-header">
+                  <span>This week: I felt guilty about needing space</span>
+                  <span class="slider-val" id="val5">3</span>
+                </div>
+                <input type="range" id="check5" min="1" max="10" value="3" oninput="document.getElementById('val5').innerText = this.value">
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-square-poll-vertical"></i> Calculate Weekly Satisfaction</button>
+              </div>
+            </form>
+
+            <div id="checkinOutput" class="output-container">
+              <div class="output-box">
+                <div class="output-title">Time Satisfaction Dashboard</div>
+                <div id="checkinDashboardBars"></div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+                <div class="output-box success">
+                  <div class="output-title">Alignment Zones (High / Balanced)</div>
+                  <div id="checkinAlignmentText"></div>
+                </div>
+                <div class="output-box warning">
+                  <div class="output-title">Tension Zones (Friction / High Scores)</div>
+                  <div id="checkinTensionText"></div>
+                </div>
+              </div>
+
+              <div class="output-box accent">
+                <div class="output-title">Recommended Adjustment For Next Week</div>
+                <div id="checkinAdjustmentText" style="line-height: 1.5; font-weight: 500;"></div>
+              </div>
+
+              <div class="output-box">
+                <div class="output-title">Conversation Starter Script</div>
+                <div class="script-box">
+                  <span id="checkinScriptText"></span>
+                  <button class="btn btn-secondary btn-sm copy-btn" onclick="copyToClipboard('checkinScriptText')">
+                    <i class="fa-regular fa-copy"></i> Copy Script
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- History Accordion -->
+            <div class="accordion">
+              <div class="accordion-header" onclick="toggleAccordion('checkinHistory')">
+                <span class="accordion-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Check-Ins History</span>
+                <i class="fa-solid fa-chevron-down" id="checkinHistoryIcon"></i>
+              </div>
+              <div class="accordion-content" id="checkinHistory">
+                <div id="checkinHistoryList" class="history-list" style="margin-top:0.75rem;"></div>
+                <button class="btn btn-outline btn-sm" style="margin-top:0.75rem;" onclick="clearToolHistory('checkin')">Clear History</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Footer Disclaimer -->
+      <footer>
+        For entertainment and reflection purposes only. Not therapy or professional advice.
+      </footer>
+    </div>
+  </div>
+
+  <!-- Toast Notification element -->
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-circle-check" style="color: var(--accent);"></i>
+    <span id="toastMsg">Copied!</span>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       GLOBAL APP STATE & NAVIGATION
+       ========================================================================== */
+    function switchTab(tabId) {
+      // Hide all sections
+      document.querySelectorAll('.tool-section').forEach(sec => sec.classList.remove('active'));
+      
+      // Deactivate all nav items
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
+      // Show selected section
+      const targetSec = document.getElementById(tabId);
+      if (targetSec) targetSec.classList.add('active');
+
+      // Highlight corresponding sidebar button
+      const navButtons = document.querySelectorAll('.nav-links button');
+      navButtons.forEach(btn => {
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
+          btn.parentElement.classList.add('active');
+        }
+      });
+
+      // Close mobile sidebar if open
+      closeSidebar();
+
+      // Load histories when switching
+      if (tabId === 'time-audit') renderHistory('audit');
+      if (tabId === 'the-ask') renderHistory('ask');
+      if (tabId === 'schedule-sync') renderHistory('sync');
+      if (tabId === 'solo-together') renderHistory('solo');
+      if (tabId === 'check-in') renderHistory('checkin');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    function toggleAccordion(id) {
+      const content = document.getElementById(id);
+      const icon = document.getElementById(id + 'Icon');
+      if (content) {
+        content.classList.toggle('open');
+        if (icon) {
+          icon.classList.toggle('fa-chevron-down');
+          icon.classList.toggle('fa-chevron-up');
+        }
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    function copyToClipboard(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Copied to clipboard!");
+      }).catch(() => {
+        showToast("Failed to copy");
+      });
+    }
+
+    /* ==========================================================================
+       LOCALSTORAGE HISTORY MANAGEMENT (MAX 30 ITEMS PER TOOL)
+       ========================================================================== */
+    function saveToHistory(toolId, summary, details) {
+      const storageKey = `timematch_history_${toolId}`;
+      let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      
+      const newItem = {
+        id: Date.now(),
+        timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        summary: summary,
+        details: details
+      };
+
+      history.unshift(newItem);
+      if (history.length > 30) history = history.slice(0, 30); // Max 30 items
+
+      localStorage.setItem(storageKey, JSON.stringify(history));
+      renderHistory(toolId);
+    }
+
+    function renderHistory(toolId) {
+      const storageKey = `timematch_history_${toolId}`;
+      const container = document.getElementById(`${toolId}HistoryList`);
+      if (!container) return;
+
+      const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      if (history.length === 0) {
+        container.innerHTML = `<div style="color:var(--text-muted); font-size:0.85rem; font-style:italic;">No saved entries yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = history.map(item => `
+        <div class="history-item">
+          <div class="history-date">${item.timestamp}</div>
+          <div style="font-weight:600; color:var(--primary);">${item.summary}</div>
+          <div style="color:var(--text-muted); margin-top:0.2rem;">${item.details}</div>
+        </div>
+      `).join('');
+    }
+
+    function clearToolHistory(toolId) {
+      const storageKey = `timematch_history_${toolId}`;
+      localStorage.removeItem(storageKey);
+      renderHistory(toolId);
+      showToast("History cleared");
+    }
+
+
+    /* ==========================================================================
+       TOOL 1: TIME AUDIT LOGIC & SAMPLES
+       ========================================================================== */
+    function loadSampleAudit() {
+      document.getElementById('auditAWork').value = "8:30am–6:30pm (10 hrs including commute)";
+      document.getElementById('auditBWork').value = "7:00am–3:30pm (8.5 hrs including commute)";
+      document.getElementById('auditAObligations').value = "Gym Tue/Thu till 8pm, catching up on emails";
+      document.getElementById('auditBObligations').value = "Prepping dinner, winding down early, reading in bed by 9:30pm";
+      document.getElementById('auditActualWeekday').value = "30 min";
+      document.getElementById('auditActualWeekend').value = "1-2 hr";
+      document.getElementById('auditIdealA').value = "2 hr";
+      document.getElementById('auditIdealB').value = "1 hr";
+      showToast("Sample audit scenario loaded");
+    }
+
+    function processAudit() {
+      const workA = document.getElementById('auditAWork').value || "Unspecified";
+      const workB = document.getElementById('auditBWork').value || "Unspecified";
+      const actualWkday = document.getElementById('auditActualWeekday').value;
+      const actualWkend = document.getElementById('auditActualWeekend').value;
+      const idealA = document.getElementById('auditIdealA').value;
+      const idealB = document.getElementById('auditIdealB').value;
+
+      // Calculate Mismatch Type
+      let mismatchType = "Mismatched Schedules & Rhythms";
+      if (idealA === "3+ hr" || idealA === "2 hr") {
+        mismatchType = "More-Time Partner vs. More-Space Partner Dynamic";
+      } else if (workA.toLowerCase().includes("late") || workB.toLowerCase().includes("early")) {
+        mismatchType = "Opposing Work Windows";
+      }
+
+      // Render Outputs
+      document.getElementById('auditGapText').innerHTML = `
+        Partner A ideal daily togetherness: <strong>${idealA}</strong><br>
+        Partner B ideal daily togetherness: <strong>${idealB}</strong><br>
+        Current reality: <strong>${actualWkday}</strong> on weekdays, <strong>${actualWkend}</strong> on weekend days.
+      `;
+
+      document.getElementById('auditInventoryText').innerHTML = `
+        • <strong>Partner A Work/Commute:</strong> ${workA}<br>
+        • <strong>Partner B Work/Commute:</strong> ${workB}<br>
+        • Primary energy window collision occurs on weekday evenings due to shifting finish times.
+      `;
+
+      document.getElementById('auditMismatchText').innerText = mismatchType;
+
+      document.getElementById('auditWinsList').innerHTML = `
+        <li><strong>Synchronized Breakfast/Coffee:</strong> Reclaim a 15-minute connection window in the morning before work routines diverge.</li>
+        <li><strong>Intentional Evening Transition:</strong> Swap individual phone scrolling for a 20-minute post-dinner wind-down check-in.</li>
+        <li><strong>Protected Weekend Anchor:</strong> Block out Saturday morning for brunch together before solo errands begin.</li>
+      `;
+
+      document.getElementById('auditExperimentText').innerHTML = `
+        <strong>The 20-Minute Weekday Anchor:</strong> For the next 7 days, commit to 20 uninterrupted minutes together right after dinner with phones placed in another room. No talk about chores or logistics allowed.
+      `;
+
+      document.getElementById('auditOutput').classList.add('active');
+
+      saveToHistory('audit', `Mismatch: ${mismatchType}`, `Actual: ${actualWkday}/wkday | Ideal A: ${idealA}, B: ${idealB}`);
+    }
+
+
+    /* ==========================================================================
+       TOOL 2: THE ASK LOGIC & SAMPLES
+       ========================================================================== */
+    function loadSampleAsk() {
+      document.getElementById('askDesired').value = "Evening downtime";
+      document.getElementById('askPastAttempt').value = "They got defensive";
+      document.getElementById('askFear').value = "That they think I'm demanding too much after they've had a long workday at the office.";
+      document.getElementById('askPartnerNeed').value = "Uninterrupted quiet time right after work to decompress before talking.";
+      showToast("Sample ask scenario loaded");
+    }
+
+    function processAsk() {
+      const desired = document.getElementById('askDesired').value;
+      const pastAttempt = document.getElementById('askPastAttempt').value;
+      const fear = document.getElementById('askFear').value || "rejection or conflict";
+      const partnerNeed = document.getElementById('askPartnerNeed').value || "decompression time";
+
+      // Pattern text
+      let styleText = "You tend to express needs when feeling accumulated frustration, which can trigger defensiveness.";
+      if (pastAttempt.includes("didn't ask")) {
+        styleText = "You tend to keep expectations unspoken, leading to silent resentment when they aren't met automatically.";
+      } else if (pastAttempt.includes("didn't follow through")) {
+        styleText = "You get initial agreement without structural commitment or clear timing anchors.";
+      }
+
+      // Script formulation
+      const mainScript = `"I love our relationship and I really miss having dedicated ${desired.toLowerCase()} with you. I know how hard you work and that you need ${partnerNeed.toLowerCase()}. Could we set aside 30 quiet minutes around 8:00pm this Thursday just to catch up and unwind together?"`;
+      
+      const noScript = `"I understand tonight isn't a good time and you're drained. Let's keep tonight relaxed, but can we lock in a 30-minute block tomorrow evening instead?"`;
+
+      const followupScript = `"Hey! I loved that we agreed to get more ${desired.toLowerCase()} together. I know schedule shifts happen, but it really matters to me. Can we pick two specific days this week to put on our calendars?"`;
+
+      document.getElementById('askStyleText').innerText = styleText;
+      document.getElementById('askScriptText').innerText = mainScript;
+      document.getElementById('askTimingText').innerHTML = `
+        <strong>Best Timing:</strong> Bring this up during a calm moment over the weekend or on a relaxing morning.<br>
+        <strong>Avoid:</strong> Right as they walk through the door, immediately after a stressful work call, or right before sleep.
+      `;
+      document.getElementById('askNoScriptText').innerText = noScript;
+      document.getElementById('askFollowupScriptText').innerText = followupScript;
+      document.getElementById('askPerspectiveText').innerText = `"Remember: When a partner pulls back for space, it is usually a self-preservation mechanism to recharge, not a withdrawal of affection for you."`;
+
+      document.getElementById('askOutput').classList.add('active');
+
+      saveToHistory('ask', `Focus: ${desired}`, `Style: ${pastAttempt}`);
+    }
+
+
+    /* ==========================================================================
+       TOOL 3: SCHEDULE SYNC LOGIC & SAMPLES
+       ========================================================================== */
+    function loadSampleSync() {
+      document.getElementById('syncASolo').value = "Gym Mon/Wed/Fri 6:00pm - 7:30pm";
+      document.getElementById('syncBSolo').value = "Tuesday evening pottery class, Sunday morning cycling";
+      document.getElementById('syncObligations').value = "Late work emails on Thursday nights, laundry & groceries on Saturday mornings";
+      
+      // Checkboxes
+      const checkboxes = document.getElementsByName('syncFormat');
+      checkboxes.forEach(cb => cb.checked = (cb.value === 'Meals' || cb.value === 'Walks' || cb.value === 'TV together'));
+
+      // Radio
+      const radios = document.getElementsByName('syncLogistics');
+      radios.forEach(r => r.checked = (r.value === 'Partner A'));
+
+      showToast("Sample schedule scenario loaded");
+    }
+
+    function processSync() {
+      const aSolo = document.getElementById('syncASolo').value || "None specified";
+      const bSolo = document.getElementById('syncBSolo').value || "None specified";
+      const logistics = document.querySelector('input[name="syncLogistics"]:checked').value;
+
+      const checkedFormats = Array.from(document.querySelectorAll('input[name="syncFormat"]:checked'))
+                                  .map(cb => cb.value);
+      const formatStr = checkedFormats.join(', ') || "Shared relaxation";
+
+      // Heatmap Representation
+      document.getElementById('syncHeatmapText').innerHTML = `
+        <div style="font-size:0.875rem; line-height:1.6;">
+          <span style="display:inline-block; width:12px; height:12px; background:var(--danger); border-radius:2px; margin-right:4px;"></span> <strong>Solo / Busy Blocks:</strong> Partner A (${aSolo}) | Partner B (${bSolo})<br>
+          <span style="display:inline-block; width:12px; height:12px; background:var(--success); border-radius:2px; margin-right:4px;"></span> <strong>Available Connection Windows:</strong> Weekday dinners (7:45pm–8:30pm), Sunday afternoons.
+        </div>
+      `;
+
+      document.getElementById('syncWindowsList').innerHTML = `
+        <li><strong>The 8:00 PM Post-Gym Reset:</strong> Fixed 45-minute window Mon/Wed for dinner and low-key conversation.</li>
+        <li><strong>Saturday Afternoon Walk & Coffee:</strong> Dedicated 1-hour outing centered around ${formatStr.toLowerCase()}.</li>
+      `;
+
+      let logisticsEval = "";
+      if (logistics === 'Partner A' || logistics === 'Partner B') {
+        logisticsEval = `<strong>Logistics Imbalance Detected:</strong> ${logistics} is currently carrying the mental load of organizing dates and scheduling time. Try alternating planning duty week by week.`;
+      } else {
+        logisticsEval = `<strong>Balanced Logistics:</strong> You share or alternate logistics responsibility. Keep maintaining clear communication on plans.`;
+      }
+      document.getElementById('syncLogisticsText').innerHTML = logisticsEval;
+
+      // 7-Day Plan Table/List
+      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      const activities = [
+        '30-min shared dinner & catch-up',
+        'Parallel play: reading together in living room',
+        'Quick evening walk around the block',
+        'No-phone 20-min dessert & tea',
+        'Movie night / favorite TV show episode',
+        'Weekend coffee outing or brunch',
+        'Sunday evening weekly check-in & prep'
+      ];
+
+      document.getElementById('sync7DayPlan').innerHTML = days.map((day, idx) => `
+        <div style="background:#FFFFFF; padding:0.5rem 0.75rem; border-radius:0.375rem; border:1px solid var(--border-color); display:flex; justify-shadow:space-between; font-size:0.875rem;">
+          <strong style="width:100px; color:var(--primary);">${day}:</strong>
+          <span style="color:var(--text-main);">${activities[idx]}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('syncNoGoText').innerText = "Immediately upon waking, or within 30 minutes of returning home from high-stress work/gym sessions.";
+
+      document.getElementById('syncOutput').classList.add('active');
+
+      saveToHistory('sync', `Formats: ${formatStr}`, `Logistics: ${logistics}`);
+    }
+
+
+    /* ==========================================================================
+       TOOL 4: SOLO VS TOGETHER LOGIC & SAMPLES
+       ========================================================================== */
+    function loadSampleSolo() {
+      document.getElementById('soloRechargeA').value = "Quiet togetherness";
+      document.getElementById('soloRechargeB').value = "Alone time";
+      document.getElementById('soloDrainA').value = "Not enough personal time";
+      document.getElementById('soloDrainB').value = "Too much structured activity";
+      document.getElementById('soloConflictPattern').value = "Partner A feels hurt when Partner B wants to sit in another room with headphones after work.";
+      showToast("Sample energy scenario loaded");
+    }
+
+    function processSolo() {
+      const rechargeA = document.getElementById('soloRechargeA').value;
+      const rechargeB = document.getElementById('soloRechargeB').value;
+
+      document.getElementById('soloCoreDiffText').innerText = 
+        `Partner A recharges best through ${rechargeA.toLowerCase()}, whereas Partner B recharges through ${rechargeB.toLowerCase()}. This is a fundamental neuro-energy difference, not a measurement of relationship devotion.`;
+
+      document.getElementById('soloNeedsAText').innerHTML = `
+        • Clear signals of warmth and connection.<br>
+        • Quality time where devices are put away.<br>
+        • Reassurance that space isn't rejection.
+      `;
+
+      document.getElementById('soloNeedsBText').innerHTML = `
+        • Zero-demand solo downtime after social hours.<br>
+        • Freedom to enjoy hobbies without guilt.<br>
+        • Predictable quiet time to recharge battery.
+      `;
+
+      document.getElementById('soloFormulaText').innerText = 
+        `"60 Minutes of Uninterrupted Solo Decompression = 30 Minutes of Fully Engaged, High-Quality Us Time."`;
+
+      document.getElementById('soloChecklist').innerHTML = `
+        <li><strong>Parallel Play:</strong> Sit in the same room reading or relaxing without pressure to converse continuously.</li>
+        <li><strong>Focused 15:</strong> 15 minutes of 100% eye contact and conversation beats 3 hours of half-attentive TV watching.</li>
+        <li><strong>Clear Entry/Exit Signals:</strong> Say "I need 45 mins of solo recharge, then I'm all yours for dinner!"</li>
+      `;
+
+      document.getElementById('soloRuleText').innerText = 
+        `The "20-Minute Transition Buffer": Allow 20 minutes of complete solo quiet time upon coming home before jumping into shared activities.`;
+
+      document.getElementById('soloOutput').classList.add('active');
+
+      saveToHistory('solo', `Recharge: A (${rechargeA}) vs B (${rechargeB})`, `Focus on structured buffers`);
+    }
+
+
+    /* ==========================================================================
+       TOOL 5: THE CHECK-IN LOGIC & SAMPLES
+       ========================================================================== */
+    function loadSampleCheckin() {
+      document.getElementById('check1').value = 4;
+      document.getElementById('val1').innerText = 4;
+      document.getElementById('check2').value = 7;
+      document.getElementById('val2').innerText = 7;
+      document.getElementById('check3').value = 5;
+      document.getElementById('val3').innerText = 5;
+      document.getElementById('check4').value = 6;
+      document.getElementById('val4').innerText = 6;
+      document.getElementById('check5').value = 3;
+      document.getElementById('val5').innerText = 3;
+      showToast("Sample check-in scores loaded");
+    }
+
+    function processCheckin() {
+      const c1 = parseInt(document.getElementById('check1').value);
+      const c2 = parseInt(document.getElementById('check2').value);
+      const c3 = parseInt(document.getElementById('check3').value);
+      const c4 = parseInt(document.getElementById('check4').value);
+      const c5 = parseInt(document.getElementById('check5').value);
+
+      const items = [
+        { name: "Together Time Satisfaction", score: c1, inverse: false },
+        { name: "Alone Time Satisfaction", score: c2, inverse: false },
+        { name: "Quality of Time", score: c3, inverse: false },
+        { name: "Resentment Level", score: c4, inverse: true },
+        { name: "Guilt Level", score: c5, inverse: true }
+      ];
+
+      // Render Bar Dashboards
+      document.getElementById('checkinDashboardBars').innerHTML = items.map(item => {
+        let colorClass = "bg-green";
+        if (item.inverse) {
+          if (item.score >= 7) colorClass = "bg-red";
+          else if (item.score >= 4) colorClass = "bg-yellow";
+        } else {
+          if (item.score <= 3) colorClass = "bg-red";
+          else if (item.score <= 6) colorClass = "bg-yellow";
+        }
+
+        return `
+          <div class="metric-bar-container">
+            <div class="metric-label">
+              <span>${item.name}</span>
+              <span>${item.score}/10</span>
+            </div>
+            <div class="metric-track">
+              <div class="metric-fill ${colorClass}" style="width: ${item.score * 10}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Tension vs Alignment
+      let alignMsg = "Good balance in individual space and guilt-free boundaries.";
+      let tensionMsg = "No severe tension flags detected this week.";
+
+      if (c4 >= 5) {
+        tensionMsg = "Resentment score is elevated (≥5). Unsatisfied expectations regarding shared time may be lingering.";
+      }
+      if (c1 <= 4 && c2 <= 4) {
+        tensionMsg = "Both togetherness and solo time felt insufficient. Schedule overcrowding is likely overall.";
+      }
+
+      document.getElementById('checkinAlignmentText').innerText = alignMsg;
+      document.getElementById('checkinTensionText').innerText = tensionMsg;
+
+      // Adjustment recommendation
+      let adjustment = "Maintain current momentum and schedule one spontaneous micro-date next week.";
+      if (c4 >= 5 || c1 <= 4) {
+        adjustment = "Protect one non-negotiable 45-minute quality date night without screens this coming week.";
+      } else if (c2 <= 4 || c5 >= 5) {
+        adjustment = "Explicitly schedule two 1-hour blocks of guilt-free solo time for each partner next week.";
+      }
+      document.getElementById('checkinAdjustmentText').innerText = adjustment;
+
+      // Script
+      document.getElementById('checkinScriptText').innerText = 
+        `"Hey, looking back at this week, I felt like we had a rating of ${c1}/10 on together time and ${c4}/10 on friction. I'd love to make next week feel even better by trying: '${adjustment}'. What do you think?"`;
+
+      document.getElementById('checkinOutput').classList.add('active');
+
+      saveToHistory('checkin', `Together: ${c1}/10 | Alone: ${c2}/10 | Resentment: ${c4}/10`, `Adjustment: ${adjustment}`);
+    }
+
+    // Initialize default tab on load
+    document.addEventListener('DOMContentLoaded', () => {
+      switchTab('dashboard');
+    });
+  </script>
+</body>
+</html>

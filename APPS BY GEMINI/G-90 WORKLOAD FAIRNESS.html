@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workload Fairness — Confrontation & Redistribution Toolkit</title>
+  
+  <!-- Google Fonts & Font Awesome CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* RESET & BASE STYLES */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #F8F9FA 0%, #FFF5F2 100%);
+      color: #212529;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* COLOR PALETTE VARIABLES */
+    :root {
+      --slate-gray: #495057;
+      --slate-hover: #343a40;
+      --energetic-orange: #E76F51;
+      --orange-light: #F4A261;
+      --orange-bg: #FDF0ED;
+      --bg-gradient: linear-gradient(135deg, #F8F9FA 0%, #FFF5F2 100%);
+      --card-bg: #FFFFFF;
+      --text-main: #212529;
+      --text-muted: #6C757D;
+      --border-color: #E9ECEF;
+      --sidebar-width: 260px;
+    }
+
+    /* LAYOUT STRUCTURE */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* SIDEBAR STYLES */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: #FFFFFF;
+      border-right: 1px solid var(--border-color);
+      box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-header i {
+      font-size: 24px;
+      color: var(--energetic-orange);
+    }
+
+    .sidebar-header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--slate-gray);
+      letter-spacing: -0.3px;
+    }
+
+    .sidebar-nav {
+      padding: 20px 12px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      margin-bottom: 6px;
+      border-radius: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover {
+      background-color: #F8F9FA;
+      color: var(--slate-gray);
+    }
+
+    .nav-item.active {
+      background-color: var(--slate-gray);
+      color: #FFFFFF;
+    }
+
+    .nav-item.active i {
+      color: var(--energetic-orange);
+    }
+
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    /* MOBILE HEADER & OVERLAY */
+    .mobile-header {
+      display: none;
+      height: 60px;
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 20px;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 900;
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--slate-gray);
+      cursor: pointer;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 950;
+      backdrop-filter: blur(2px);
+    }
+
+    /* MAIN CONTENT AREA */
+    .main-wrapper {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      width: calc(100% - var(--sidebar-width));
+    }
+
+    .content-container {
+      max-width: 840px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 24px;
+      flex: 1;
+    }
+
+    /* CARDS & UI COMPONENTS */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--slate-gray);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title i {
+      color: var(--energetic-orange);
+    }
+
+    /* FORM STYLES */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--slate-gray);
+      margin-bottom: 8px;
+    }
+
+    .form-control, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text-main);
+      background-color: #FAFAFA;
+      transition: all 0.2s ease;
+    }
+
+    .form-control:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--energetic-orange);
+      background-color: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(231, 111, 81, 0.15);
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .radio-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: #F8F9FA;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--slate-gray);
+      transition: all 0.2s ease;
+    }
+
+    .radio-label:hover {
+      border-color: var(--energetic-orange);
+    }
+
+    .radio-label input[type="radio"] {
+      accent-color: var(--energetic-orange);
+    }
+
+    /* BUTTONS */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--energetic-orange);
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+      background-color: #D65A3C;
+      box-shadow: 0 4px 12px rgba(231, 111, 81, 0.25);
+    }
+
+    .btn-secondary {
+      background-color: #E9ECEF;
+      color: var(--slate-gray);
+    }
+
+    .btn-secondary:hover {
+      background-color: #DEE2E6;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--slate-gray);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--slate-gray);
+      background-color: #F8F9FA;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    /* OUTPUT & RESULT DISPLAY */
+    .output-section {
+      margin-top: 32px;
+      display: none;
+    }
+
+    .output-section.active {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .script-box {
+      background: #F8F9FA;
+      border-left: 4px solid var(--energetic-orange);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      position: relative;
+      margin: 12px 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+      white-space: pre-line;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--slate-gray);
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--energetic-orange);
+      color: #FFF;
+      border-color: var(--energetic-orange);
+    }
+
+    /* VISUAL PROGRESS / BARS */
+    .progress-bar-container {
+      background: #E9ECEF;
+      border-radius: 20px;
+      height: 12px;
+      width: 100%;
+      overflow: hidden;
+      margin: 8px 0 16px 0;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--orange-light), var(--energetic-orange));
+      border-radius: 20px;
+      transition: width 0.5s ease;
+    }
+
+    /* HISTORY ACCORDION */
+    .history-accordion {
+      margin-top: 40px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 24px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      padding: 8px 0;
+    }
+
+    .history-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--slate-gray);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-content {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .history-content.open {
+      display: block;
+    }
+
+    .history-item {
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* DASHBOARD GRID */
+    .hero-banner {
+      text-align: center;
+      padding: 32px 20px;
+      background: #FFFFFF;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+      margin-bottom: 32px;
+      border: 1px solid rgba(231, 111, 81, 0.1);
+    }
+
+    .hero-banner h2 {
+      font-size: 28px;
+      color: var(--slate-gray);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .hero-banner p {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .dash-card {
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      border-color: var(--energetic-orange);
+    }
+
+    .dash-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: var(--orange-bg);
+      color: var(--energetic-orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .dash-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--slate-gray);
+    }
+
+    .dash-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* FOOTER */
+    .app-footer {
+      padding: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      background: #FFFFFF;
+      margin-top: auto;
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--slate-gray);
+      color: #FFFFFF;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .mobile-header {
+        display: flex;
+      }
+      .sidebar-overlay.open {
+        display: block;
+      }
+      .main-wrapper {
+        margin-left: 0;
+        width: 100%;
+      }
+      .content-container {
+        padding: 20px 16px;
+      }
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MOBILE HEADER -->
+  <div class="mobile-header">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <i class="fa-solid fa-scale-balanced" style="color:var(--energetic-orange); font-size:20px;"></i>
+      <span style="font-weight:700; color:var(--slate-gray);">Workload Fairness</span>
+    </div>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-container">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-scale-balanced"></i>
+        <h1>Workload Fairness</h1>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-tool="dashboard">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" data-tool="tool1">
+          <i class="fa-solid fa-magnifying-glass-chart"></i>
+          <span>1. Evidence Gatherer</span>
+        </a>
+        <a class="nav-item" data-tool="tool2">
+          <i class="fa-solid fa-comments"></i>
+          <span>2. Peer Conversation</span>
+        </a>
+        <a class="nav-item" data-tool="tool3">
+          <i class="fa-solid fa-user-tie"></i>
+          <span>3. Manager Escalation</span>
+        </a>
+        <a class="nav-item" data-tool="tool4">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>4. Self-Protection Plan</span>
+        </a>
+        <a class="nav-item" data-tool="tool5">
+          <i class="fa-solid fa-diagram-project"></i>
+          <span>5. The Team Fix</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-wrapper">
+      <main class="content-container">
+
+        <!-- DASHBOARD VIEW -->
+        <section id="dashboard" class="tool-view active">
+          <div class="hero-banner">
+            <h2>Workload Fairness</h2>
+            <p>"When one person doesn't pull their weight, the whole team breaks."</p>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="dash-card" onclick="switchTool('tool1')">
+              <div class="dash-card-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+              <h3>1. The Evidence Gatherer</h3>
+              <p>Audit split of responsibilities, quantify extra hours, and assess work patterns objectively.</p>
+            </div>
+            <div class="dash-card" onclick="switchTool('tool2')">
+              <div class="dash-card-icon"><i class="fa-solid fa-comments"></i></div>
+              <h3>2. The Peer Conversation</h3>
+              <p>Generate non-accusatory opening scripts and strategies to talk directly with your coworker.</p>
+            </div>
+            <div class="dash-card" onclick="switchTool('tool3')">
+              <div class="dash-card-icon"><i class="fa-solid fa-user-tie"></i></div>
+              <h3>3. The Manager Conversation</h3>
+              <p>Escalate to management cleanly using facts, business impact, and proposed solutions.</p>
+            </div>
+            <div class="dash-card" onclick="switchTool('tool4')">
+              <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+              <h3>4. The Self-Protection Plan</h3>
+              <p>Stop over-functioning and covering gaps safely without harming your own standing.</p>
+            </div>
+            <div class="dash-card" onclick="switchTool('tool5')">
+              <div class="dash-card-icon"><i class="fa-solid fa-diagram-project"></i></div>
+              <h3>5. The Team Fix</h3>
+              <p>Propose structural team improvements like RACI boards to make accountability systemic.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 1: EVIDENCE GATHERER -->
+        <section id="tool1" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="card-title">
+              <i class="fa-solid fa-magnifying-glass-chart"></i>
+              Tool 1: The Evidence Gatherer
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+              Problem: "I feel like I'm doing everything, but I need proof before I say anything."
+            </p>
+
+            <form id="form-tool1" onsubmit="event.preventDefault(); runTool1();">
+              <div class="form-group">
+                <label class="form-label">Team tasks (comma or newline separated):</label>
+                <textarea id="t1-tasks" required placeholder="e.g. Client Onboarding, Weekly Metrics Report, Bug Triaging, Code Review"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Who is assigned / responsible for each:</label>
+                <textarea id="t1-assigned" required placeholder="e.g. Coworker responsible for Metrics Report and Bug Triaging; I do Client Onboarding"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Who actually does each (actual execution):</label>
+                <textarea id="t1-actual" required placeholder="e.g. I end up finishing 80% of Metrics Report and doing all Bug Triaging"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Frequency of missed deliverables:</label>
+                <select id="t1-frequency">
+                  <option value="Weekly">Weekly</option>
+                  <option value="Monthly">Monthly</option>
+                  <option value="Rarely">Rarely</option>
+                  <option value="Constantly">Constantly</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Impact on your work & schedule:</label>
+                <textarea id="t1-impact" required placeholder="e.g. Staying late 3 days/week, missing my own strategic task deadlines"></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Analyze Evidence</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSample1()"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool1" class="output-section">
+            <div class="card">
+              <div class="card-title"><i class="fa-solid fa-chart-bar"></i> Analysis & Findings</div>
+              
+              <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 6px;">THE WORK SPLIT</h4>
+                <p id="t1-out-split" style="font-size: 13px; color: var(--text-muted);"></p>
+                <div class="progress-bar-container">
+                  <div id="t1-bar" class="progress-bar-fill" style="width: 75%;"></div>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 6px;">THE IMPACT CALCULATOR</h4>
+                <p id="t1-out-impact" style="font-size: 13px; color: #333; background: #FFF5F2; padding: 12px; border-radius: 8px;"></p>
+              </div>
+
+              <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 6px;">THE PATTERN DIAGNOSIS</h4>
+                <p id="t1-out-pattern" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 6px;">THE DOCUMENTATION LOG</h4>
+                <p id="t1-out-doc" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div>
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 6px;">THE SELF-CHECK</h4>
+                <p id="t1-out-self" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- History Accordion -->
+          <div class="history-accordion">
+            <div class="history-header" onclick="toggleHistory('tool1')">
+              <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History Log (Tool 1)</span>
+              <i class="fa-solid fa-chevron-down" id="hist-icon-tool1"></i>
+            </div>
+            <div class="history-content" id="hist-content-tool1"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 2: PEER CONVERSATION -->
+        <section id="tool2" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="card-title">
+              <i class="fa-solid fa-comments"></i>
+              Tool 2: The Peer Conversation
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+              Problem: "I want to talk to them directly before going to the boss."
+            </p>
+
+            <form id="form-tool2" onsubmit="event.preventDefault(); runTool2();">
+              <div class="form-group">
+                <label class="form-label">Your relationship with coworker:</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="t2-rel" value="Friendly"> Friendly</label>
+                  <label class="radio-label"><input type="radio" name="t2-rel" value="Neutral" checked> Neutral</label>
+                  <label class="radio-label"><input type="radio" name="t2-rel" value="Strained"> Strained</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">What do you specifically want them to do?</label>
+                <textarea id="t2-want" required placeholder="e.g. Complete their assigned portion of client reports by Thursday end-of-day"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">What have you already tried?</label>
+                <textarea id="t2-tried" required placeholder="e.g. Doing it myself, hinting in meetings, sending gentle Slack reminders"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Their likely reaction:</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="t2-react" value="Defensive" checked> Defensive</label>
+                  <label class="radio-label"><input type="radio" name="t2-react" value="Open"> Open</label>
+                  <label class="radio-label"><input type="radio" name="t2-react" value="Dismissive"> Dismissive</label>
+                  <label class="radio-label"><input type="radio" name="t2-react" value="Escalate"> Will escalate to boss</label>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Conversation Script</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSample2()"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool2" class="output-section">
+            <div class="card">
+              <div class="card-title"><i class="fa-solid fa-comment-dots"></i> Conversation Strategy & Script</div>
+
+              <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray);">THE OPENING SCRIPT</h4>
+                <div class="script-box">
+                  <button class="copy-btn" onclick="copyText('t2-script-text')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                  <span id="t2-script-text"></span>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">THE "WE" FRAME</h4>
+                <p id="t2-out-we" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">THE SPECIFIC ASK</h4>
+                <p id="t2-out-ask" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">IF THEY AGREE</h4>
+                <p id="t2-out-agree" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">IF THEY DEFLECT</h4>
+                <p id="t2-out-deflect" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div>
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">IF THEY ESCALATE</h4>
+                <p id="t2-out-escalate" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- History Accordion -->
+          <div class="history-accordion">
+            <div class="history-header" onclick="toggleHistory('tool2')">
+              <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History Log (Tool 2)</span>
+              <i class="fa-solid fa-chevron-down" id="hist-icon-tool2"></i>
+            </div>
+            <div class="history-content" id="hist-content-tool2"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 3: MANAGER CONVERSATION -->
+        <section id="tool3" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="card-title">
+              <i class="fa-solid fa-user-tie"></i>
+              Tool 3: The Manager Conversation
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+              Problem: "The direct conversation didn't work or isn't safe. I need to tell my boss."
+            </p>
+
+            <form id="form-tool3" onsubmit="event.preventDefault(); runTool3();">
+              <div class="form-group">
+                <label class="form-label">What documented evidence do you have?</label>
+                <textarea id="t3-evidence" required placeholder="e.g. Log of 3 weeks of missed client reports, emails taking over tasks"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">How is this affecting team outcomes & business goals?</label>
+                <textarea id="t3-outcomes" required placeholder="e.g. Delayed deliverables to top clients, team burnout, risk of error"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Your boss's management style:</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="t3-style" value="Action-oriented" checked> Action-oriented</label>
+                  <label class="radio-label"><input type="radio" name="t3-style" value="Avoids conflict"> Avoids conflict</label>
+                  <label class="radio-label"><input type="radio" name="t3-style" value="Needs data"> Needs data</label>
+                  <label class="radio-label"><input type="radio" name="t3-style" value="Protects the team"> Protects the team</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Have other team members raised this?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="t3-others" value="Yes"> Yes</label>
+                  <label class="radio-label"><input type="radio" name="t3-others" value="No"> No</label>
+                  <label class="radio-label"><input type="radio" name="t3-others" value="Not sure" checked> Not sure</label>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-briefcase"></i> Generate Escalation Plan</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSample3()"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool3" class="output-section">
+            <div class="card">
+              <div class="card-title"><i class="fa-solid fa-clipboard-check"></i> Escalation Brief & Script</div>
+
+              <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray);">THE MANAGER SCRIPT (BUSINESS IMPACT FOCUS)</h4>
+                <div class="script-box">
+                  <button class="copy-btn" onclick="copyText('t3-script-text')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                  <span id="t3-script-text"></span>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">DATA PRESENTATION APPROACH</h4>
+                <p id="t3-out-data" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">THE SOLUTION OFFER</h4>
+                <p id="t3-out-solution" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">IF BOSS ACTS</h4>
+                <p id="t3-out-acts" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">IF BOSS IGNORES / HESITATES</h4>
+                <p id="t3-out-ignores" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div>
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">THE RETALIATION SHIELD</h4>
+                <p id="t3-out-shield" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- History Accordion -->
+          <div class="history-accordion">
+            <div class="history-header" onclick="toggleHistory('tool3')">
+              <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History Log (Tool 3)</span>
+              <i class="fa-solid fa-chevron-down" id="hist-icon-tool3"></i>
+            </div>
+            <div class="history-content" id="hist-content-tool3"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 4: SELF-PROTECTION PLAN -->
+        <section id="tool4" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="card-title">
+              <i class="fa-solid fa-shield-halved"></i>
+              Tool 4: The Self-Protection Plan
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+              Problem: "I need to stop covering for them without sabotaging the team or my reputation."
+            </p>
+
+            <form id="form-tool4" onsubmit="event.preventDefault(); runTool4();">
+              <div class="form-group">
+                <label class="form-label">What tasks/deliverables are you currently covering?</label>
+                <textarea id="t4-covering" required placeholder="e.g. Client reporting, presentation slides, meeting preparation"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">What happens immediately if you stop covering?</label>
+                <textarea id="t4-happens" required placeholder="e.g. Client report is delayed, meeting starts without deck"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Are you willing to let something fail to expose the gap?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="t4-fail" value="Yes"> Yes</label>
+                  <label class="radio-label"><input type="radio" name="t4-fail" value="Selectively" checked> Selectively</label>
+                  <label class="radio-label"><input type="radio" name="t4-fail" value="No"> No</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Your primary objective / priority:</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="t4-prio" value="Protect my work" checked> Protect my work</label>
+                  <label class="radio-label"><input type="radio" name="t4-prio" value="Fix the team"> Fix the team</label>
+                  <label class="radio-label"><input type="radio" name="t4-prio" value="Just survive"> Just survive</label>
+                  <label class="radio-label"><input type="radio" name="t4-prio" value="Find an exit"> Find an exit</label>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-user-shield"></i> Build Protection Plan</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSample4()"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool4" class="output-section">
+            <div class="card">
+              <div class="card-title"><i class="fa-solid fa-list-check"></i> Protection & Boundary Strategy</div>
+
+              <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">THE COVERAGE WITHDRAWAL PLAN</h4>
+                <p id="t4-out-withdraw" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">THE TRANSPARENT HANDOFF</h4>
+                <p id="t4-out-handoff" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray);">THE BOUNDARY STATEMENT</h4>
+                <div class="script-box">
+                  <button class="copy-btn" onclick="copyText('t4-boundary-text')"><i class="fa-regular fa-copy"></i> Copy Statement</button>
+                  <span id="t4-boundary-text"></span>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">DOCUMENTATION TECHNIQUE</h4>
+                <p id="t4-out-doc" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div>
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">THE TEAM SYSTEM PROPOSAL</h4>
+                <p id="t4-out-proposal" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- History Accordion -->
+          <div class="history-accordion">
+            <div class="history-header" onclick="toggleHistory('tool4')">
+              <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History Log (Tool 4)</span>
+              <i class="fa-solid fa-chevron-down" id="hist-icon-tool4"></i>
+            </div>
+            <div class="history-content" id="hist-content-tool4"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 5: THE TEAM FIX -->
+        <section id="tool5" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="card-title">
+              <i class="fa-solid fa-diagram-project"></i>
+              Tool 5: The Team Fix
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+              Problem: "This isn't just one person. The whole system lets them get away with it."
+            </p>
+
+            <form id="form-tool5" onsubmit="event.preventDefault(); runTool5();">
+              <div class="form-group">
+                <label class="form-label">How is work currently assigned?</label>
+                <select id="t5-assigned">
+                  <option value="Clear roles">Clear roles</option>
+                  <option value="Rotating">Rotating</option>
+                  <option value="Voluntary">Voluntary / Grab-bag</option>
+                  <option value="Unclear" selected>Unclear / Ad-hoc</option>
+                  <option value="Boss assigns">Boss assigns top-down</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">How is accountability tracked?</label>
+                <select id="t5-tracked">
+                  <option value="Public dashboard">Public dashboard / Board</option>
+                  <option value="Manager check">Manager 1-on-1 check</option>
+                  <option value="Self-reported">Self-reported status</option>
+                  <option value="Not tracked" selected>Not tracked / Informal</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">What would fair look like in your ideal setup?</label>
+                <textarea id="t5-fair" required placeholder="e.g. Visible task board, clear single ownership per task, clear deadlines"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Are you willing to help redesign the system?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="t5-redesign" value="Yes"> Yes</label>
+                  <label class="radio-label"><input type="radio" name="t5-redesign" value="No"> No</label>
+                  <label class="radio-label"><input type="radio" name="t5-redesign" value="Only if boss leads" checked> Only if boss leads</label>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-sitemap"></i> Generate Process Redesign</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSample5()"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool5" class="output-section">
+            <div class="card">
+              <div class="card-title"><i class="fa-solid fa-gears"></i> System Redesign & Implementation Blueprint</div>
+
+              <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">THE PROCESS PROPOSAL (RACI & DASHBOARD)</h4>
+                <p id="t5-out-proposal" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray);">THE TEAM MEETING PROPOSAL SCRIPT</h4>
+                <div class="script-box">
+                  <button class="copy-btn" onclick="copyText('t5-meeting-text')"><i class="fa-regular fa-copy"></i> Copy Pitch</button>
+                  <span id="t5-meeting-text"></span>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">THE ACCOUNTABILITY TOOL</h4>
+                <p id="t5-out-tool" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">CULTURE SHIFT STRATEGY</h4>
+                <p id="t5-out-culture" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+
+              <div>
+                <h4 style="font-size: 14px; color: var(--slate-gray); margin-bottom: 4px;">IF SYSTEMS FAIL (LEADERSHIP DIAGNOSIS)</h4>
+                <p id="t5-out-fail" style="font-size: 13px; color: var(--text-muted);"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- History Accordion -->
+          <div class="history-accordion">
+            <div class="history-header" onclick="toggleHistory('tool5')">
+              <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History Log (Tool 5)</span>
+              <i class="fa-solid fa-chevron-down" id="hist-icon-tool5"></i>
+            </div>
+            <div class="history-content" id="hist-content-tool5"></div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- GLOBAL FOOTER -->
+      <footer class="app-footer">
+        For workplace workload management only. Not legal, HR, or mediation advice. For harassment or team dysfunction, consult your manager or HR.
+      </footer>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast">
+    <i class="fa-solid fa-circle-check" style="color:var(--energetic-orange);"></i>
+    <span id="toast-message">Copied!</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    /* NAVIGATION & UI CONTROLS */
+    const navItems = document.querySelectorAll('.nav-item');
+    const toolViews = document.querySelectorAll('.tool-view');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+
+    function switchTool(toolId) {
+      navItems.forEach(item => {
+        if (item.getAttribute('data-tool') === toolId) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
+      toolViews.forEach(view => {
+        if (view.id === toolId) {
+          view.style.display = 'block';
+        } else {
+          view.style.display = 'none';
+        }
+      });
+
+      // Close mobile sidebar if open
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      renderHistory(toolId);
+    }
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const toolId = item.getAttribute('data-tool');
+        switchTool(toolId);
+      });
+    });
+
+    hamburgerBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('open');
+    });
+
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    });
+
+    /* TOAST NOTIFICATION */
+    function showToast(msg = 'Copied!') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    function copyText(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard!');
+      });
+    }
+
+    /* LOCALSTORAGE HISTORY MANAGEMENT */
+    function saveToHistory(toolId, summary, data) {
+      const key = `workloadfair_history_${toolId}`;
+      let history = JSON.parse(localStorage.getItem(key) || '[]');
+      
+      const newItem = {
+        id: Date.now(),
+        timestamp: new Date().toLocaleString(),
+        summary: summary,
+        data: data
+      };
+
+      history.unshift(newItem);
+      if (history.length > 30) history = history.slice(0, 30); // Max 30 items
+      localStorage.setItem(key, JSON.stringify(history));
+      renderHistory(toolId);
+    }
+
+    function renderHistory(toolId) {
+      if (toolId === 'dashboard') return;
+      const contentDiv = document.getElementById(`hist-content-${toolId}`);
+      if (!contentDiv) return;
+
+      const key = `workloadfair_history_${toolId}`;
+      const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+      if (history.length === 0) {
+        contentDiv.innerHTML = '<p style="font-size:12px; color:var(--text-muted); padding:8px 0;">No saved records yet.</p>';
+        return;
+      }
+
+      let html = `<div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+        <button class="btn btn-outline btn-sm" onclick="clearHistory('${toolId}')"><i class="fa-solid fa-trash-can"></i> Clear History</button>
+      </div>`;
+
+      history.forEach(item => {
+        html += `
+          <div class="history-item">
+            <div>
+              <strong style="color:var(--slate-gray);">${item.summary}</strong>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${item.timestamp}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      contentDiv.innerHTML = html;
+    }
+
+    function clearHistory(toolId) {
+      const key = `workloadfair_history_${toolId}`;
+      localStorage.removeItem(key);
+      renderHistory(toolId);
+      showToast('History cleared');
+    }
+
+    function toggleHistory(toolId) {
+      const content = document.getElementById(`hist-content-${toolId}`);
+      const icon = document.getElementById(`hist-icon-${toolId}`);
+      if (content.classList.contains('open')) {
+        content.classList.remove('open');
+        icon.className = 'fa-solid fa-chevron-down';
+      } else {
+        content.classList.add('open');
+        icon.className = 'fa-solid fa-chevron-up';
+      }
+    }
+
+    /* SAMPLE SCENARIO LOADERS */
+    function loadSample1() {
+      document.getElementById('t1-tasks').value = '1. Client Onboarding\n2. Weekly Performance Dashboard\n3. Customer Escalation Triaging\n4. Code Review & QA\n5. Vendor Invoicing\n6. Monthly Strategy Slides';
+      document.getElementById('t1-assigned').value = 'Coworker assigned to: Weekly Performance Dashboard & Vendor Invoicing. I am assigned to Client Onboarding & Strategy Slides.';
+      document.getElementById('t1-actual').value = 'Coworker does ~20% of Performance Dashboard and ignores Invoicing. I complete 80% of Dashboard and full Invoicing to prevent system lockouts.';
+      document.getElementById('t1-frequency').value = 'Weekly';
+      document.getElementById('t1-impact').value = 'Forced to stay late 2.5 hours every Thursday. My own strategic slide deliverables were delayed twice this month.';
+      showToast('Sample scenario loaded');
+    }
+
+    function loadSample2() {
+      document.querySelectorAll('input[name="t2-rel"]').forEach(r => r.checked = (r.value === 'Neutral'));
+      document.getElementById('t2-want').value = 'Complete their assigned section of the client reports by Thursday 3 PM so I can aggregate without staying late.';
+      document.getElementById('t2-tried').value = 'Doing it myself to meet deadlines, leaving gentle Slack reminders, and making indirect comments in team meetings.';
+      document.querySelectorAll('input[name="t2-react"]').forEach(r => r.checked = (r.value === 'Defensive'));
+      showToast('Sample scenario loaded');
+    }
+
+    function loadSample3() {
+      document.getElementById('t3-evidence').value = 'Documented log over 3 consecutive weeks showing 4 missed report deadlines, 8 hours of absorbed overtime, and emails showing direct requests sent without response.';
+      document.getElementById('t3-outcomes').value = 'Client report submission delayed by 24 hours twice, high team frustration, and my capacity reduced by 25%.';
+      document.querySelectorAll('input[name="t3-style"]').forEach(r => r.checked = (r.value === 'Action-oriented'));
+      document.querySelectorAll('input[name="t3-others"]').forEach(r => r.checked = (r.value === 'Not sure'));
+      showToast('Sample scenario loaded');
+    }
+
+    function loadSample4() {
+      document.getElementById('t4-covering').value = 'Client reporting aggregation, vendor follow-ups, and meeting slide preparation.';
+      document.getElementById('t4-happens').value = 'The client report will miss its deadline and the client will email management asking for an update.';
+      document.querySelectorAll('input[name="t4-fail"]').forEach(r => r.checked = (r.value === 'Selectively'));
+      document.querySelectorAll('input[name="t4-prio"]').forEach(r => r.checked = (r.value === 'Protect my work'));
+      showToast('Sample scenario loaded');
+    }
+
+    function loadSample5() {
+      document.getElementById('t5-assigned').value = 'Unclear';
+      document.getElementById('t5-tracked').value = 'Not tracked';
+      document.getElementById('t5-fair').value = 'Visible digital task board with single point of accountability for each deliverable and hard weekly deadlines.';
+      document.querySelectorAll('input[name="t5-redesign"]').forEach(r => r.checked = (r.value === 'Only if boss leads'));
+      showToast('Sample scenario loaded');
+    }
+
+    /* TOOL 1 LOGIC */
+    function runTool1() {
+      const tasks = document.getElementById('t1-tasks').value;
+      const assigned = document.getElementById('t1-assigned').value;
+      const actual = document.getElementById('t1-actual').value;
+      const freq = document.getElementById('t1-frequency').value;
+      const impact = document.getElementById('t1-impact').value;
+
+      document.getElementById('t1-out-split').innerHTML = `<strong>Assigned Split vs Actual Execution:</strong> You are covering significant gaps in assigned tasks. While assignments were set as [${assigned.slice(0, 60)}...], actual execution shows you absorbing substantial extra workload.`;
+      
+      let estHours = freq === 'Weekly' ? '4–6 hours/week' : freq === 'Constantly' ? '8+ hours/week' : '2–3 hours/month';
+      document.getElementById('t1-out-impact').innerHTML = `<strong>Estimated Overhead Absorbed:</strong> ${estHours}.<br><strong>Direct Cost:</strong> ${impact}`;
+
+      document.getElementById('t1-out-pattern').innerHTML = `<strong>Diagnosis:</strong> High likelihood of <em>Structured Free-Riding / Disengagement</em>. Because tasks are completed regardless of who does them, an incentive gap exists where missed deliverables carry no immediate consequences for the non-performing party.`;
+
+      document.getElementById('t1-out-doc').innerHTML = `Keep an objective 3-column log: <strong>[Date] | [Assigned Owner vs Actual Doer] | [Business Consequence]</strong>. Focus strictly on facts, timestamps, and task completion metrics without speculating on intent.`;
+
+      document.getElementById('t1-out-self').innerHTML = `<strong>Enabling Check:</strong> By quietly completing deliverables without logging a transparent blocker or escalation, you are masking system failure. Step back from 'silent rescues'.`;
+
+      document.getElementById('output-tool1').classList.add('active');
+      saveToHistory('tool1', `Audit: ${freq} missed deliverables (${estHours})`, { tasks, freq });
+    }
+
+    /* TOOL 2 LOGIC */
+    function runTool2() {
+      const rel = document.querySelector('input[name="t2-rel"]:checked').value;
+      const want = document.getElementById('t2-want').value;
+      const tried = document.getElementById('t2-tried').value;
+      const react = document.querySelector('input[name="t2-react"]:checked').value;
+
+      let script = `Hey [Name], I wanted to touch base regarding our workflow on client deliverables.
+
+Lately, I’ve been picking up the remaining parts of ${want.slice(0, 40)}... to make sure we hit our deadlines. However, it’s taking up a significant portion of my bandwidth, and I won't be able to continue stepping in to finish these.
+
+Can we agree on a clear handoff so you can fully own this going forward?`;
+
+      document.getElementById('t2-script-text').innerText = script;
+      document.getElementById('t2-out-we').innerText = `"We both want our team deliverables to go out smoothly without anyone having to work unexpected overtime."`;
+      document.getElementById('t2-out-ask').innerText = `Specific Request: "${want}"`;
+      document.getElementById('t2-out-agree').innerText = `Confirm via email/Slack immediately after: "Thanks for syncing today! Just to confirm, you'll take full ownership of [task] starting this Thursday."`;
+      document.getElementById('t2-out-deflect').innerText = `Hold the line: "I understand bandwidth is tight, but I cannot take this on without dropping my primary core tasks. We should bring this to [Manager] if prioritization is needed."`;
+      document.getElementById('t2-out-escalate').innerText = `If they react defensively/escalate: Keep your cool. Send a brief recap to your manager outlining workload alignment discussion points.`;
+
+      document.getElementById('output-tool2').classList.add('active');
+      saveToHistory('tool2', `Peer Script (${rel} relationship, ${react} reaction)`, { want, react });
+    }
+
+    /* TOOL 3 LOGIC */
+    function runTool3() {
+      const evidence = document.getElementById('t3-evidence').value;
+      const outcomes = document.getElementById('t3-outcomes').value;
+      const style = document.querySelector('input[name="t3-style"]:checked').value;
+
+      let script = `Hi [Manager Name], I wanted to request 15 minutes to discuss workload alignment and capacity on our team deliverables.
+
+Over the past few weeks, I’ve had to absorb additional tasks outside my primary responsibilities (${evidence.slice(0, 50)}...).
+
+This is impacting team outcomes by ${outcomes.slice(0, 50)}... I want to ensure my primary focus remains on high-value priority goals, so I'd like your guidance on how we can structure task ownership cleanly.`;
+
+      document.getElementById('t3-script-text').innerText = script;
+      document.getElementById('t3-out-data').innerText = `Present evidence neutrally: Use dates, missed deadlines, and capacity hours absorbed. Tailored for a manager who is "${style}".`;
+      document.getElementById('t3-out-solution').innerText = `Propose 2 actionable options: 1) Re-assign specific deliverables on the board, or 2) Establish a clear single-owner RACI framework.`;
+      document.getElementById('t3-out-acts').innerText = `Support them by sticking strictly to agreed task boundaries and providing clear weekly progress updates.`;
+      document.getElementById('t3-out-ignores').innerText = `If manager hesitates: Ask for formal prioritization: "Which of my core goals should I put on hold to cover these secondary tasks?"`;
+      document.getElementById('t3-out-shield').innerText = `Retaliation Shield: Keep all communications focused 100% on operational efficiency, team capacity, and client outcomes — never on personal friction.`;
+
+      document.getElementById('output-tool3').classList.add('active');
+      saveToHistory('tool3', `Manager Brief (${style} manager style)`, { evidence, style });
+    }
+
+    /* TOOL 4 LOGIC */
+    function runTool4() {
+      const covering = document.getElementById('t4-covering').value;
+      const happens = document.getElementById('t4-happens').value;
+      const fail = document.querySelector('input[name="t4-fail"]:checked').value;
+      const prio = document.querySelector('input[name="t4-prio"]:checked').value;
+
+      document.getElementById('t4-out-withdraw').innerText = `Phase out informal support over 2 weeks. Stop unsolicited checks on their assigned deliverables. Direct inquiries straight to the designated task owner.`;
+      document.getElementById('t4-out-handoff').innerText = `Send a polite, transparent handoff note: "Hi [Name], I’ve completed my portion of [Project]. Handing over to you for [Their Part] due on [Date]."`;
+      
+      let boundary = `I am currently fully booked with my core deliverables (${prio}). To ensure quality standards, I won't be able to assist with secondary tasks outside my assigned scope going forward.`;
+      document.getElementById('t4-boundary-text').innerText = boundary;
+
+      document.getElementById('t4-out-doc').innerText = `Maintain a timestamped work log. If deliverables are delayed when you stop covering, allow the gap to be visible without making noise.`;
+      document.getElementById('t4-out-proposal').innerText = `Propose setting up a shared board where task status (Not Started / In Progress / Blocked / Done) is visible to the entire team.`;
+
+      document.getElementById('output-tool4').classList.add('active');
+      saveToHistory('tool4', `Protection Strategy (Priority: ${prio}, Fail Willingness: ${fail})`, { covering, prio });
+    }
+
+    /* TOOL 5 LOGIC */
+    function runTool5() {
+      const assigned = document.getElementById('t5-assigned').value;
+      const tracked = document.getElementById('t5-tracked').value;
+      const fair = document.getElementById('t5-fair').value;
+      const redesign = document.querySelector('input[name="t5-redesign"]:checked').value;
+
+      document.getElementById('t5-out-proposal').innerText = `Implement a RACI Framework (Responsible, Accountable, Consulted, Informed) and transition task management to a shared visual Kanban board. Current system (${assigned} assignment / ${tracked} tracking) creates accountability blindspots.`;
+
+      let script = `Team, as our project volume scales, I think it would be great to streamline our workflow tracking. 
+
+I’d love to propose using a shared dashboard where each task has a single assigned owner and explicit weekly status updates. This will give everyone full visibility and make handoffs seamless.`;
+
+      document.getElementById('t5-meeting-text').innerText = script;
+      document.getElementById('t5-out-tool').innerText = `Adopt a standard Kanban board (e.g., Backlog -> To Do -> In Progress -> Review -> Done). Every ticket MUST have exactly ONE assigned owner.`;
+      document.getElementById('t5-out-culture').innerText = `Shift team norms from 'silent rescues' to public blocker flagging during weekly standups or check-ins.`;
+      document.getElementById('t5-out-fail').innerText = `If management resists basic tracking tools or transparent accountability, recognize that the bottleneck lies in leadership culture rather than individual coworkers. Focus on protecting your personal workload scope.`;
+
+      document.getElementById('output-tool5').classList.add('active');
+      saveToHistory('tool5', `System Redesign (Assigned: ${assigned}, Tracked: ${tracked})`, { fair, redesign });
+    }
+
+    // Initial render check
+    document.addEventListener('DOMContentLoaded', () => {
+      renderHistory('tool1');
+    });
+  </script>
+</body>
+</html>

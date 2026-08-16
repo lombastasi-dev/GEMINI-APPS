@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workplace Fairness Planner</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --burgundy: #6D2E46;
+            --burgundy-hover: #572336;
+            --burgundy-light: #F4EBEF;
+            --gold: #D4A373;
+            --gold-light: #F9F0E6;
+            --bg-start: #FAF3F5;
+            --bg-end: #FDF6EC;
+            --text-main: #2D3748;
+            --text-muted: #718096;
+            --border-color: #E2E8F0;
+            --card-bg: #FFFFFF;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #FFFFFF;
+            border-right: 1px solid var(--border-color);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--burgundy);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--burgundy);
+            line-height: 1.2;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+        }
+
+        .nav-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .nav-item button:hover {
+            background-color: var(--burgundy-light);
+            color: var(--burgundy);
+        }
+
+        .nav-item button.active {
+            background-color: var(--burgundy);
+            color: #FFFFFF;
+        }
+
+        .nav-item button i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        /* Mobile Header & Hamburger */
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            background-color: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            z-index: 90;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .mobile-title {
+            font-weight: 700;
+            color: var(--burgundy);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--burgundy);
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 95;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 800px;
+            flex: 1;
+        }
+
+        /* Views */
+        .view {
+            display: none;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard View Styling */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 24px 0;
+        }
+
+        .hero-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--burgundy);
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-tagline {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .tool-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(109, 46, 70, 0.08);
+            border-color: var(--gold);
+        }
+
+        .tool-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background-color: var(--burgundy-light);
+            color: var(--burgundy);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .tool-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--burgundy);
+        }
+
+        .tool-card-desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Tool Form & Output UI Elements */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .tool-header {
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--burgundy-light);
+            padding-bottom: 16px;
+        }
+
+        .tool-header h2 {
+            font-size: 1.6rem;
+            color: var(--burgundy);
+            font-weight: 700;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .problem-statement {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-style: italic;
+            background: var(--gold-light);
+            padding: 10px 14px;
+            border-radius: 6px;
+            border-left: 3px solid var(--gold);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            color: var(--text-main);
+            background-color: #FFFFFF;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--burgundy);
+            box-shadow: 0 0 0 3px rgba(109, 46, 70, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        .radio-label, .checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            padding: 6px 12px;
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .radio-label:hover, .checkbox-label:hover {
+            background: var(--burgundy-light);
+        }
+
+        .radio-label input, .checkbox-label input {
+            accent-color: var(--burgundy);
+        }
+
+        .button-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background-color: var(--burgundy);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--burgundy-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--gold-light);
+            color: #7A5328;
+            border: 1px solid var(--gold);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--gold);
+            color: #FFFFFF;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background-color: #F1F5F9;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Output Card & Sections */
+        .output-container {
+            margin-top: 32px;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .section-box {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--burgundy);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-annoying { background: #E2E8F0; color: #475569; }
+        .badge-problematic { background: #FEF3C7; color: #92400E; }
+        .badge-actionable { background: #FFEDD5; color: #C2410C; }
+        .badge-legal { background: #FEE2E2; color: #991B1B; }
+
+        /* Tables */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 0.875rem;
+        }
+
+        .comparison-table th, .comparison-table td {
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .comparison-table th {
+            background-color: var(--burgundy-light);
+            color: var(--burgundy);
+            font-weight: 600;
+        }
+
+        .code-box {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 14px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #334155;
+            position: relative;
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .history-header h3 {
+            font-size: 1.1rem;
+            color: var(--burgundy);
+        }
+
+        .history-item {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: #FFFFFF;
+            overflow: hidden;
+        }
+
+        .history-item-header {
+            padding: 12px 16px;
+            background: #F8FAFC;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .history-item-header:hover {
+            background: #F1F5F9;
+        }
+
+        .history-item-body {
+            padding: 16px;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .history-item.open .history-item-body {
+            display: block;
+        }
+
+        /* Footer */
+        .app-footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 24px;
+            font-size: 0.775rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: #1E293B;
+            color: #FFFFFF;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            animation: toastIn 0.2s ease;
+        }
+
+        @keyframes toastIn {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px 12px;
+            }
+
+            .hero-title {
+                font-size: 1.75rem;
+            }
+
+            .hero-tagline {
+                font-size: 0.95rem;
+            }
+
+            .card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="mobile-title">
+            <i class="fa-solid fa-scale-balanced"></i>
+            <span>Fairness Planner</span>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Overlay for Mobile Sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <h1>Workplace Fairness Planner</h1>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <button class="active" data-target="dashboard">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Dashboard</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-target="tool1">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i>
+                        <span>Fairness Audit</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-target="tool2">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        <span>Documentation Log</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-target="tool3">
+                        <i class="fa-solid fa-comments"></i>
+                        <span>Direct Conversation</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-target="tool4">
+                        <i class="fa-solid fa-sitemap"></i>
+                        <span>Escalation Path</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-target="tool5">
+                        <i class="fa-solid fa-shield-heart"></i>
+                        <span>Emotional Protection</span>
+                    </button>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-container">
+
+                <!-- DASHBOARD VIEW -->
+                <section id="dashboard" class="view active">
+                    <div class="hero-section">
+                        <h1 class="hero-title">Workplace Fairness Planner</h1>
+                        <p class="hero-tagline">When the rules aren't the same for everyone, protect yourself with facts.</p>
+                    </div>
+
+                    <div class="tools-grid">
+                        <div class="tool-card" onclick="switchView('tool1')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                            <div class="tool-card-title">1. The Fairness Audit</div>
+                            <div class="tool-card-desc">Evaluate treatment disparities objectively and determine provability.</div>
+                        </div>
+
+                        <div class="tool-card" onclick="switchView('tool2')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                            <div class="tool-card-title">2. Documentation Log</div>
+                            <div class="tool-card-desc">Build a structured, factual record of incidents that holds up under review.</div>
+                        </div>
+
+                        <div class="tool-card" onclick="switchView('tool3')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-comments"></i></div>
+                            <div class="tool-card-title">3. Direct Conversation</div>
+                            <div class="tool-card-desc">Prepare a professional, non-inflammatory script to address issues with your manager.</div>
+                        </div>
+
+                        <div class="tool-card" onclick="switchView('tool4')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-sitemap"></i></div>
+                            <div class="tool-card-title">4. Escalation Path</div>
+                            <div class="tool-card-desc">Navigate HR, skip-level management, and internal transfer strategies safely.</div>
+                        </div>
+
+                        <div class="tool-card" onclick="switchView('tool5')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-shield-heart"></i></div>
+                            <div class="tool-card-title">5. Emotional Protection</div>
+                            <div class="tool-card-desc">Protect your mental energy, maintain detachment, and plan your next steps.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: FAIRNESS AUDIT -->
+                <section id="tool1" class="view">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-magnifying-glass-chart"></i> The Fairness Audit</h2>
+                            <div class="problem-statement">
+                                "I feel like I'm being treated unfairly but I need to know if it's real or just perception."
+                            </div>
+                        </div>
+
+                        <form id="form1">
+                            <div class="form-group">
+                                <label for="t1_treatment">What treatment feels unfair?</label>
+                                <textarea id="t1_treatment" class="form-control" placeholder="Describe the behavior or pattern..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1_who">Who receives different treatment?</label>
+                                <textarea id="t1_who" class="form-control" placeholder="Name role(s) or individual(s)..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1_they_get">What do they get that you don't?</label>
+                                <textarea id="t1_they_get" class="form-control" placeholder="Assignments, praise, flexibility, resources..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1_you_get">What do you get that they don't?</label>
+                                <textarea id="t1_you_get" class="form-control" placeholder="Extra workload, strict deadlines, silence..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1_duration">How long has this been happening?</label>
+                                <select id="t1_duration" class="form-control">
+                                    <option value="<1mo">&lt; 1 month</option>
+                                    <option value="1-3mo">1 - 3 months</option>
+                                    <option value="3-6mo">3 - 6 months</option>
+                                    <option value="6mo+">6+ months</option>
+                                </select>
+                            </div>
+
+                            <div class="button-bar">
+                                <button type="button" class="btn btn-primary" onclick="runTool1()">
+                                    <i class="fa-solid fa-chart-pie"></i> Analyze Disparity
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSample1()">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output1" class="output-container">
+                        <!-- Rendered Output -->
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> History Log</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool1')">Clear History</button>
+                        </div>
+                        <div id="history1"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: DOCUMENTATION LOG -->
+                <section id="tool2" class="view">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-clipboard-list"></i> The Documentation Log</h2>
+                            <div class="problem-statement">
+                                "If I need to escalate this, I need proof that holds up."
+                            </div>
+                        </div>
+
+                        <form id="form2">
+                            <div class="form-group">
+                                <label for="t2_incidents">Specific incidents (include dates and clear details):</label>
+                                <textarea id="t2_incidents" class="form-control" placeholder="- [Date]: Description of event..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Were there witnesses?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2_witnesses" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t2_witnesses" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t2_witnesses" value="Sometimes" checked> Sometimes</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Is there written evidence?</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="t2_evidence" value="Email"> Email</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t2_evidence" value="Chat"> Chat / Messaging</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t2_evidence" value="Assignment records"> Assignment Records</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t2_evidence" value="Calendar invites"> Calendar Invites</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t2_evidence" value="None"> None</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Have you received feedback explaining the disparity?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2_feedback" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t2_feedback" value="No" checked> No</label>
+                                    <label class="radio-label"><input type="radio" name="t2_feedback" value="Vague"> Vague</label>
+                                    <label class="radio-label"><input type="radio" name="t2_feedback" value="Retaliatory"> Retaliatory</label>
+                                </div>
+                            </div>
+
+                            <div class="button-bar">
+                                <button type="button" class="btn btn-primary" onclick="runTool2()">
+                                    <i class="fa-solid fa-file-lines"></i> Generate Record
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSample2()">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output2" class="output-container">
+                        <!-- Rendered Output -->
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> History Log</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool2')">Clear History</button>
+                        </div>
+                        <div id="history2"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: DIRECT CONVERSATION -->
+                <section id="tool3" class="view">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-comments"></i> The Direct Conversation</h2>
+                            <div class="problem-statement">
+                                "I want to address this with my boss before escalating, but I don't know how."
+                            </div>
+                        </div>
+
+                        <form id="form3">
+                            <div class="form-group">
+                                <label for="t3_outcome">What outcome do you want?</label>
+                                <select id="t3_outcome" class="form-control">
+                                    <option value="Equal treatment">Equal treatment / Fair distribution</option>
+                                    <option value="Explanation">Clear explanation of decision criteria</option>
+                                    <option value="Change in specific practice">Change in specific workflow/practice</option>
+                                    <option value="Just want it documented">Establish initial record / Put on notice</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Your boss's likely reaction:</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t3_reaction" value="Defensive" checked> Defensive</label>
+                                    <label class="radio-label"><input type="radio" name="t3_reaction" value="Open"> Open</label>
+                                    <label class="radio-label"><input type="radio" name="t3_reaction" value="Dismissive"> Dismissive</label>
+                                    <label class="radio-label"><input type="radio" name="t3_reaction" value="Punitive"> Punitive</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Your relationship strength:</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t3_relationship" value="Strong"> Strong</label>
+                                    <label class="radio-label"><input type="radio" name="t3_relationship" value="Neutral" checked> Neutral</label>
+                                    <label class="radio-label"><input type="radio" name="t3_relationship" value="Strained"> Strained</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3_example">One specific example to use:</label>
+                                <textarea id="t3_example" class="form-control" placeholder="Detail one objective, clear example..."></textarea>
+                            </div>
+
+                            <div class="button-bar">
+                                <button type="button" class="btn btn-primary" onclick="runTool3()">
+                                    <i class="fa-solid fa-comment-dots"></i> Build Conversation Script
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSample3()">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output3" class="output-container">
+                        <!-- Rendered Output -->
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> History Log</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool3')">Clear History</button>
+                        </div>
+                        <div id="history3"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: ESCALATION PATH -->
+                <section id="tool4" class="view">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-sitemap"></i> The Escalation Path</h2>
+                            <div class="problem-statement">
+                                "My boss won't change or is the source of the unfairness. What do I do now?"
+                            </div>
+                        </div>
+
+                        <form id="form4">
+                            <div class="form-group">
+                                <label for="t4_source">Who is the source?</label>
+                                <select id="t4_source" class="form-control">
+                                    <option value="My boss">My Direct Boss</option>
+                                    <option value="A peer">A Peer / Coworker</option>
+                                    <option value="Senior leader">Senior Leader / Executive</option>
+                                    <option value="Systemic">Systemic / Department Culture</option>
+                                    <option value="Not sure">Not Sure</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Have you addressed it directly?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t4_addressed" value="Yes and failed" checked> Yes &amp; failed</label>
+                                    <label class="radio-label"><input type="radio" name="t4_addressed" value="Yes and partly resolved"> Yes &amp; partly resolved</label>
+                                    <label class="radio-label"><input type="radio" name="t4_addressed" value="Not yet"> Not yet</label>
+                                    <label class="radio-label"><input type="radio" name="t4_addressed" value="Not safe"> Not safe to do so</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Is this potentially illegal? (e.g. protected class discrimination/harassment)</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t4_illegal" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t4_illegal" value="Maybe" checked> Maybe</label>
+                                    <label class="radio-label"><input type="radio" name="t4_illegal" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t4_illegal" value="Not sure"> Not sure</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4_goal">Your primary goal:</label>
+                                <select id="t4_goal" class="form-control">
+                                    <option value="Fix the situation">Fix the situation in place</option>
+                                    <option value="Transfer">Internal transfer</option>
+                                    <option value="Leave">Prepare exit strategy</option>
+                                    <option value="Document for protection">Document for legal/protection purposes</option>
+                                </select>
+                            </div>
+
+                            <div class="button-bar">
+                                <button type="button" class="btn btn-primary" onclick="runTool4()">
+                                    <i class="fa-solid fa-route"></i> Chart Escalation Strategy
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSample4()">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output4" class="output-container">
+                        <!-- Rendered Output -->
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> History Log</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool4')">Clear History</button>
+                        </div>
+                        <div id="history4"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: EMOTIONAL PROTECTION -->
+                <section id="tool5" class="view">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-shield-heart"></i> Emotional Protection</h2>
+                            <div class="problem-statement">
+                                "The unfairness is making me angry, cynical, and exhausted."
+                            </div>
+                        </div>
+
+                        <form id="form5">
+                            <div class="form-group">
+                                <label>How is this affecting you?</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_impact" value="Sleep"> Sleep disturbance</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_impact" value="Anxiety"> Anxiety</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_impact" value="Anger" checked> Anger / Irritability</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_impact" value="Cynicism" checked> Cynicism</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_impact" value="Performance" checked> Performance drops</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_impact" value="Relationships"> Strained personal life</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_impact" value="Health"> Physical health issues</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5_duration">How long have you felt this way?</label>
+                                <select id="t5_duration" class="form-control">
+                                    <option value="<1mo">&lt; 1 month</option>
+                                    <option value="1-3mo">1 - 3 months</option>
+                                    <option value="3-6mo" selected>3 - 6 months</option>
+                                    <option value="6mo+">6+ months</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Do you have support (friends, mentor, family)?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5_support" value="Yes" checked> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t5_support" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t5_support" value="Not willing to talk about it"> Prefer not to discuss</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Are you actively job searching?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5_search" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t5_search" value="Considering" checked> Considering</label>
+                                    <label class="radio-label"><input type="radio" name="t5_search" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t5_search" value="Not yet"> Not yet</label>
+                                </div>
+                            </div>
+
+                            <div class="button-bar">
+                                <button type="button" class="btn btn-primary" onclick="runTool5()">
+                                    <i class="fa-solid fa-heart-pulse"></i> Generate Resilience Plan
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSample5()">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output5" class="output-container">
+                        <!-- Rendered Output -->
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> History Log</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool5')">Clear History</button>
+                        </div>
+                        <div id="history5"></div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Footer Required on Every View -->
+            <footer class="app-footer">
+                For workplace fairness assessment and documentation only. Not legal or HR advice. For discrimination, harassment, or legal violations, consult an employment attorney or appropriate authorities.
+            </footer>
+        </main>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check" style="color: #4ADE80;"></i>
+        <span id="toastMsg">Copied!</span>
+    </div>
+
+    <script>
+        // NAVIGATION & MOBILE INTERACTION
+        const sidebar = id('sidebar');
+        const overlay = id('sidebarOverlay');
+        const hamburgerBtn = id('hamburgerBtn');
+
+        function id(name) { return document.getElementById(name); }
+
+        function toggleMobileSidebar() {
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('mobile-open');
+        }
+
+        hamburgerBtn.addEventListener('click', toggleMobileSidebar);
+        overlay.addEventListener('click', toggleMobileSidebar);
+
+        function switchView(targetId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item button').forEach(b => b.classList.remove('active'));
+
+            const targetView = id(targetId);
+            if (targetView) targetView.classList.add('active');
+
+            const activeBtn = document.querySelector(`.nav-item button[data-target="${targetId}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // Close mobile menu if open
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('mobile-open');
+
+            // Scroll top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Refresh history for view
+            if (targetId.startsWith('tool')) {
+                renderHistory(targetId);
+            }
+        }
+
+        document.querySelectorAll('.nav-item button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-target');
+                switchView(target);
+            });
+        });
+
+        // TOAST NOTIFICATION
+        function showToast(msg = "Copied!") {
+            const toast = id('toast');
+            id('toastMsg').innerText = msg;
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2000);
+        }
+
+        function copyToClipboard(elementId) {
+            const text = id(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        // HISTORY MANAGEMENT
+        function saveToHistory(toolId, data) {
+            const key = `fairness_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            const entry = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString(),
+                data: data
+            };
+            history.unshift(entry);
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function clearHistory(toolId) {
+            const key = `fairness_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function renderHistory(toolId) {
+            const key = `fairness_history_${toolId}`;
+            const container = id(`history${toolId.replace('tool', '')}`);
+            if (!container) return;
+
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            if (history.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">No previous records saved.</p>';
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="history-item" id="h_${item.id}">
+                    <div class="history-item-header" onclick="toggleHistoryItem(${item.id})">
+                        <span><i class="fa-regular fa-clock"></i> ${item.timestamp}</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="history-item-body">
+                        ${item.data.summaryHtml}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistoryItem(id) {
+            const el = document.getElementById(`h_${id}`);
+            if (el) el.classList.toggle('open');
+        }
+
+        // SAMPLE SCENARIOS & TOOL LOGIC
+
+        // TOOL 1 LOGIC
+        function loadSample1() {
+            id('t1_treatment').value = "Boss consistently gives plum assignments and major client visibility to one peer, while assigning me background routine maintenance.";
+            id('t1_who').value = "Peer (Alex) with same title and tenure";
+            id('t1_they_get').value = "Flexibility on deadlines, public praise at team meetings, lead on new initiatives";
+            id('t1_you_get').value = "Strict deadline enforcement, heavy operational workload, work ignored during group announcements";
+            id('t1_duration').value = "6mo+";
+            showToast("Sample Scenario Loaded");
+        }
+
+        function runTool1() {
+            const tr = id('t1_treatment').value.trim();
+            const who = id('t1_who').value.trim();
+            const theyGet = id('t1_they_get').value.trim();
+            const youGet = id('t1_you_get').value.trim();
+            const duration = id('t1_duration').value;
+
+            if (!tr) { alert("Please describe the treatment first."); return; }
+
+            // Determine Severity
+            let severity = "Problematic";
+            let badgeClass = "badge-problematic";
+            if (duration === "6mo+" || tr.toLowerCase().includes("gender") || tr.toLowerCase().includes("race")) {
+                severity = "Actionable";
+                badgeClass = "badge-actionable";
+            }
+            if (tr.toLowerCase().includes("harass") || tr.toLowerCase().includes("illegal") || tr.toLowerCase().includes("retaliat")) {
+                severity = "Legal issue";
+                badgeClass = "badge-legal";
+            }
+
+            const outputHtml = `
+                <div class="card">
+                    <h3 style="color:var(--burgundy); margin-bottom: 16px;">Fairness Audit Assessment</h3>
+
+                    <div class="section-box">
+                        <div class="section-title">
+                            <span class="section-title-left"><i class="fa-solid fa-table-list"></i> THE COMPARISON TABLE</span>
+                        </div>
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Favored Group / Person (${who || 'Peer'})</th>
+                                    <th>Your Experience</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Treatments & Opportunities</strong></td>
+                                    <td>${theyGet || 'N/A'}</td>
+                                    <td>${youGet || 'N/A'}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Pattern Duration</strong></td>
+                                    <td colspan="2">${duration}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-diagram-project"></i> THE PATTERN</span></div>
+                        <p style="font-size: 0.9rem;">Analysis indicates this disparity primary stems from <strong>Favoritism & Informal Alignment</strong>. The persistent contrast between public praise for peer work and silence/strictness toward your output over ${duration} reflects subjective management criteria rather than documented objective skill gaps.</p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-gauge-high"></i> THE EVIDENCE STRENGTH</span></div>
+                        <p style="font-size: 0.9rem;"><strong>Moderate to High:</strong> Written task assignments, deadline change requests, and project credits serve as tangible artifacts. The fact that the pattern spans <em>${duration}</em> significantly strengthens the provability beyond an isolated oversight.</p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-scale-unbalanced"></i> THE SELF-CHECK</span></div>
+                        <p style="font-size: 0.9rem;"><em>Legitimate alternative explanations to consider:</em> Does the peer possess niche technical experience, client preferences, or historical context for these specific tasks? Have you explicitly communicated interest in client-facing roles in writing?</p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title">
+                            <span class="section-title-left"><i class="fa-solid fa-triangle-exclamation"></i> THE SEVERITY</span>
+                            <span class="badge ${badgeClass}">${severity}</span>
+                        </div>
+                        <p style="font-size: 0.9rem;">This situation is categorized as <strong>${severity}</strong>. Continued unaddressed disparity risks impacting your career progression, performance reviews, and compensation trajectory.</p>
+                    </div>
+                </div>
+            `;
+
+            const outDiv = id('output1');
+            outDiv.innerHTML = outputHtml;
+            outDiv.classList.add('active');
+
+            saveToHistory('tool1', { summaryHtml: `<strong>Duration:</strong> ${duration} | <strong>Severity:</strong> ${severity}<br><small>${tr.substring(0, 80)}...</small>` });
+        }
+
+        // TOOL 2 LOGIC
+        function loadSample2() {
+            id('t2_incidents').value = "- Oct 12: Requested assignment on Project Alpha; boss gave it to peer without clear explanation despite my prior experience.
+- Nov 03: Peer granted 3-day deadline extension via chat; my request for same project extension was denied citing 'strict policy'.
+- Dec 15: Delivered Q4 strategy deck; boss presented it to leadership without acknowledging my lead role.
+- Jan 10: Received vague feedback during 1-on-1 that I 'need to be more visible' while denying high-visibility project leads.";
+            document.querySelectorAll('input[name="t2_witnesses"]')[2].checked = true; // Sometimes
+            document.querySelectorAll('input[name="t2_evidence"]').forEach(cb => {
+                cb.checked = (cb.value === "Email" || cb.value === "Chat");
+            });
+            document.querySelectorAll('input[name="t2_feedback"]')[1].checked = true; // No
+            showToast("Sample Scenario Loaded");
+        }
+
+        function runTool2() {
+            const incidents = id('t2_incidents').value.trim();
+            const witnesses = document.querySelector('input[name="t2_witnesses"]:checked')?.value || "Unspecified";
+            const evidenceChecked = Array.from(document.querySelectorAll('input[name="t2_evidence"]:checked')).map(c => c.value);
+            const feedback = document.querySelector('input[name="t2_feedback"]:checked')?.value || "Unspecified";
+
+            if (!incidents) { alert("Please enter specific incidents."); return; }
+
+            const evList = evidenceChecked.length > 0 ? evidenceChecked.join(", ") : "None specified";
+
+            const formattedLogText = `FACTUAL INCIDENT LOG
+Date Generated: ${new Date().toLocaleDateString()}
+Witnesses Present: ${witnesses}
+Written Evidence Available: ${evList}
+Explanatory Feedback Received: ${feedback}
+
+INCIDENT SUMMARY:
+${incidents}
+
+EXPLANATORY CONTEXT NOTES:
+- Records maintained neutrally without emotional language.
+- Written artifacts preserved in personal archive.`;
+
+            const outputHtml = `
+                <div class="card">
+                    <h3 style="color:var(--burgundy); margin-bottom: 16px;">Structured Documentation Record</h3>
+
+                    <div class="section-box">
+                        <div class="section-title">
+                            <span class="section-title-left"><i class="fa-solid fa-file-lines"></i> THE INCIDENT LOG</span>
+                            <button class="btn btn-outline btn-sm" onclick="copyToClipboard('codeLog')"><i class="fa-regular fa-copy"></i> Copy Log</button>
+                        </div>
+                        <div class="code-box" id="codeLog">${formattedLogText}</div>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-list-check"></i> THE EVIDENCE CHECKLIST</span></div>
+                        <ul style="font-size: 0.875rem; padding-left: 20px; line-height: 1.6;">
+                            <li><strong>Emails & Chats:</strong> Save copies of task requests, approvals, and denials.</li>
+                            <li><strong>Metadata:</strong> Keep original timestamps, calendar invites, and version histories.</li>
+                            <li><strong>Work Products:</strong> Retain copies of completed deliverables showing authorship.</li>
+                        </ul>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-timeline"></i> THE TIMELINE</span></div>
+                        <p style="font-size: 0.9rem;">Your log demonstrates an ongoing chronological sequence. Maintaining exact timestamps establishes pattern continuity rather than isolated incidents.</p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-pen-to-square"></i> THE CONTEXT NOTES</span></div>
+                        <p style="font-size: 0.9rem;"><em>Rule of thumb:</em> State observable actions only (e.g., "Requested X on [Date], received denial on [Date]"). Avoid adjectives describing motives (e.g., replace "He maliciously denied me" with "Request was denied without rationale").</p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-box-archive"></i> THE BACKUP STRATEGY</span></div>
+                        <p style="font-size: 0.9rem;">Forward unclassified work logs and email headers to your personal records or maintain physical printed copies. Do not store confidential company trade secrets on personal devices.</p>
+                    </div>
+                </div>
+            `;
+
+            const outDiv = id('output2');
+            outDiv.innerHTML = outputHtml;
+            outDiv.classList.add('active');
+
+            saveToHistory('tool2', { summaryHtml: `<strong>Evidence:</strong> ${evList} | <strong>Witnesses:</strong> ${witnesses}<br><small>${incidents.substring(0, 80)}...</small>` });
+        }
+
+        // TOOL 3 LOGIC
+        function loadSample3() {
+            id('t3_outcome').value = "Equal treatment";
+            document.querySelectorAll('input[name="t3_reaction"]')[0].checked = true; // Defensive
+            document.querySelectorAll('input[name="t3_relationship"]')[1].checked = true; // Neutral
+            id('t3_example').value = "Peer was assigned as project lead on the high-visibility client account last week, while I was assigned background technical maintenance despite express interest and past success in client leads.";
+            showToast("Sample Scenario Loaded");
+        }
+
+        function runTool3() {
+            const outcome = id('t3_outcome').value;
+            const reaction = document.querySelector('input[name="t3_reaction"]:checked')?.value || "Defensive";
+            const relationship = document.querySelector('input[name="t3_relationship"]:checked')?.value || "Neutral";
+            const example = id('t3_example').value.trim();
+
+            if (!example) { alert("Please provide a specific example."); return; }
+
+            const scriptText = `"Hi [Manager Name], thanks for meeting with me. I wanted to touch base on project assignments and my growth path on the team.
+
+I noticed that recently regarding assignments like: '${example}', I was passed over for the lead role.
+
+My goal is ${outcome.toLowerCase()}. I want to make sure I understand the criteria being used so I can align my focus and ensure equal opportunities for high-impact work moving forward."`;
+
+            const followUpText = `Subject: Summary of our discussion - Project Assignments & Growth
+
+Hi [Manager Name],
+
+Thank you for taking the time to speak with me today. I appreciated discussing how project assignments are allocated, specifically regarding ${example.substring(0, 50)}...
+
+As discussed, my goal remains ${outcome.toLowerCase()}. Please let me know if there are additional steps or metrics I should focus on.
+
+Best regards,
+[Your Name]`;
+
+            const outputHtml = `
+                <div class="card">
+                    <h3 style="color:var(--burgundy); margin-bottom: 16px;">Conversation Strategy & Script</h3>
+
+                    <div class="section-box">
+                        <div class="section-title">
+                            <span class="section-title-left"><i class="fa-solid fa-comment-dots"></i> THE SCRIPT</span>
+                            <button class="btn btn-outline btn-sm" onclick="copyToClipboard('codeScript')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                        </div>
+                        <div class="code-box" id="codeScript">${scriptText}</div>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-crop-simple"></i> THE FRAME</span></div>
+                        <p style="font-size: 0.9rem;">Frame the conversation around <strong>curiosity and clarity</strong> rather than accusation. Use <em>"I noticed a pattern and I want to align"</em> instead of <em>"You are treating me unfairly."</em></p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-hand-holding-hand"></i> EVIDENCE PRESENTATION</span></div>
+                        <p style="font-size: 0.9rem;">Bring exact project titles and dates. Keep tone neutral and calm. If manager reacts in a <strong>${reaction}</strong> manner, remain grounded in facts without mirroring their emotion.</p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-shield-cat"></i> IF THEY DEFLECT OR EXPLAIN</span></div>
+                        <p style="font-size: 0.9rem;"><strong>If they explain:</strong> Ask for clear performance benchmarks. <strong>If they deflect:</strong> Hold the line gently by saying, <em>"I appreciate that perspective, but I want to ensure we have a clear, repeatable process for future assignments."</em></p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title">
+                            <span class="section-title-left"><i class="fa-solid fa-envelope-open-text"></i> THE FOLLOW-UP EMAIL</span>
+                            <button class="btn btn-outline btn-sm" onclick="copyToClipboard('codeFollowup')"><i class="fa-regular fa-copy"></i> Copy Email</button>
+                        </div>
+                        <div class="code-box" id="codeFollowup">${followUpText}</div>
+                    </div>
+                </div>
+            `;
+
+            const outDiv = id('output3');
+            outDiv.innerHTML = outputHtml;
+            outDiv.classList.add('active');
+
+            saveToHistory('tool3', { summaryHtml: `<strong>Goal:</strong> ${outcome} | <strong>Reaction:</strong> ${reaction}<br><small>${example.substring(0, 80)}...</small>` });
+        }
+
+        // TOOL 4 LOGIC
+        function loadSample4() {
+            id('t4_source').value = "My boss";
+            document.querySelectorAll('input[name="t4_addressed"]')[0].checked = true; // Yes and failed
+            document.querySelectorAll('input[name="t4_illegal"]')[1].checked = true; // Maybe
+            id('t4_goal').value = "Transfer";
+            showToast("Sample Scenario Loaded");
+        }
+
+        function runTool4() {
+            const source = id('t4_source').value;
+            const addressed = document.querySelector('input[name="t4_addressed"]:checked')?.value || "Unspecified";
+            const illegal = document.querySelector('input[name="t4_illegal"]:checked')?.value || "Maybe";
+            const goal = id('t4_goal').value;
+
+            const outputHtml = `
+                <div class="card">
+                    <h3 style="color:var(--burgundy); margin-bottom: 16px;">Escalation Roadmap</h3>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-layer-group"></i> THE ESCALATION LADDER</span></div>
+                        <ol style="font-size: 0.875rem; padding-left: 20px; line-height: 1.7;">
+                            <li><strong>Step 1: Direct Manager:</strong> ${addressed.includes('failed') ? '<span style="color:#C2410C;">Attempted & Unresolved</span>' : 'Pending or Initial phase'}</li>
+                            <li><strong>Step 2: Skip-Level Manager:</strong> Approach manager’s boss with objective evidence focused on team productivity and fair resource allocation.</li>
+                            <li><strong>Step 3: HR / Employee Relations:</strong> Present documented patterns, asking for policy clarification or mediation.</li>
+                            <li><strong>Step 4: External Legal / Legal Representation:</strong> Consult legal counsel if statutory protected class discrimination or illegal retaliation occurs.</li>
+                        </ol>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-user-group"></i> THE HR CONVERSATION</span></div>
+                        <p style="font-size: 0.9rem;">Present the issue as a <strong>systemic pattern impacting performance and team retention</strong>, not a personal grievance. Frame it around policy adherence and business operational risks.</p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-arrow-up-right-dots"></i> THE SKIP-LEVEL APPROACH</span></div>
+                        <p style="font-size: 0.9rem;">Request a 1-on-1 with your manager's supervisor. Focus on career development and project distribution across the broader team without attacking your manager personally.</p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-gavel"></i> THE LEGAL LINE</span></div>
+                        <p style="font-size: 0.9rem;"><em>General Guidance:</em> If treatment is linked to protected characteristics (race, gender, age, disability, religion, origin) or illegal retaliation, document external counsel consultations privately on personal time.</p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-repeat"></i> INTERNAL TRANSFER STRATEGY</span></div>
+                        <p style="font-size: 0.9rem;">Primary goal selected: <strong>${goal}</strong>. Network quietly with other departmental leads. Focus on expanding internal visibility and securing a transfer before bridges are burned.</p>
+                    </div>
+                </div>
+            `;
+
+            const outDiv = id('output4');
+            outDiv.innerHTML = outputHtml;
+            outDiv.classList.add('active');
+
+            saveToHistory('tool4', { summaryHtml: `<strong>Source:</strong> ${source} | <strong>Goal:</strong> ${goal} | <strong>Illegal?:</strong> ${illegal}` });
+        }
+
+        // TOOL 5 LOGIC
+        function loadSample5() {
+            document.querySelectorAll('input[name="t5_impact"]').forEach(cb => {
+                cb.checked = (cb.value === "Anger" || cb.value === "Cynicism" || cb.value === "Performance");
+            });
+            id('t5_duration').value = "3-6mo";
+            document.querySelectorAll('input[name="t5_support"]')[0].checked = true; // Yes
+            document.querySelectorAll('input[name="t5_search"]')[1].checked = true; // Considering
+            showToast("Sample Scenario Loaded");
+        }
+
+        function runTool5() {
+            const impacts = Array.from(document.querySelectorAll('input[name="t5_impact"]:checked')).map(c => c.value);
+            const duration = id('t5_duration').value;
+            const support = document.querySelector('input[name="t5_support"]:checked')?.value || "Yes";
+            const search = document.querySelector('input[name="t5_search"]:checked')?.value || "Considering";
+
+            const impactList = impacts.length > 0 ? impacts.join(", ") : "General stress";
+
+            const outputHtml = `
+                <div class="card">
+                    <h3 style="color:var(--burgundy); margin-bottom: 16px;">Emotional Resilience & Protection Plan</h3>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-brain"></i> THE DETACHMENT FRAME</span></div>
+                        <p style="font-size: 0.9rem;">Practice <strong>Psychological Detachment</strong>. Treat your workplace like an external lab experiment. Document facts objectively, but disconnect your personal self-worth from your manager's biases.</p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-user-shield"></i> IDENTITY PROTECTION</span></div>
+                        <p style="font-size: 0.9rem;">You are not your boss's opinion of you. Your professional capabilities exist independently of a flawed local evaluation metric.</p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-battery-half"></i> ENERGY CONSERVATION</span></div>
+                        <p style="font-size: 0.9rem;">Impacts noted: <strong>${impactList}</strong> over <em>${duration}</em>. Cease over-performing in unrewarded extra roles ("quiet quitting" non-essential favors) and channel that conserved energy into career growth or job search activities.</p>
+                    </div>
+
+                    <div class="section-box">
+                        <div class="section-title"><span class="section-title-left"><i class="fa-solid fa-door-open"></i> EXIT STRATEGY & NEXT CHAPTER</span></div>
+                        <p style="font-size: 0.9rem;">Job Search Status: <strong>${search}</strong>. When interviewing for new roles, evaluate fairness during interviews by asking: <em>"How are project assignments distributed?"</em> and <em>"How is performance evaluated across team members?"</em></p>
+                    </div>
+                </div>
+            `;
+
+            const outDiv = id('output5');
+            outDiv.innerHTML = outputHtml;
+            outDiv.classList.add('active');
+
+            saveToHistory('tool5', { summaryHtml: `<strong>Duration:</strong> ${duration} | <strong>Impacts:</strong> ${impactList}<br><strong>Job Search:</strong> ${search}` });
+        }
+
+        // Initialize default view
+        document.addEventListener('DOMContentLoaded', () => {
+            switchView('dashboard');
+        });
+    </script>
+</body>
+</html>

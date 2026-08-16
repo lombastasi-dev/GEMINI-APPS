@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raise Negotiator — The Conversation Toolkit</title>
+    <!-- Google Fonts & Font Awesome CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --emerald: #2D6A4F;
+            --emerald-hover: #1B4332;
+            --emerald-light: #D8F3DC;
+            --amber: #F4A261;
+            --amber-hover: #E76F51;
+            --amber-light: #FFE8D6;
+            --bg-gradient: linear-gradient(135deg, #F1F8F5 0%, #FFF5E6 100%);
+            --text-dark: #1E293B;
+            --text-muted: #64748B;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #FFFFFF;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 40;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 24px;
+            color: var(--emerald);
+        }
+
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--emerald);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item button:hover {
+            background-color: var(--emerald-light);
+            color: var(--emerald);
+        }
+
+        .nav-item.active button {
+            background-color: var(--emerald);
+            color: #FFFFFF;
+        }
+
+        .nav-item button i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 30;
+        }
+
+        .mobile-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            color: var(--emerald);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-dark);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 35;
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Card System */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        /* Typography & Headings */
+        .hero {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--emerald);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            font-size: 16px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--emerald);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        /* Grid Layouts */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+            border-color: var(--emerald);
+        }
+
+        .dash-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--emerald-light);
+            color: var(--emerald);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .dash-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .dash-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control, select.form-control, textarea.form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-dark);
+            background: #FAFAFA;
+            outline: none;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--emerald);
+            background: #FFFFFF;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group, .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .custom-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #FAFAFA;
+            cursor: pointer;
+            font-size: 13.5px;
+            font-weight: 500;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .custom-option:hover {
+            border-color: var(--emerald);
+            background: #FFFFFF;
+        }
+
+        .custom-option input {
+            accent-color: var(--emerald);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--emerald);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--emerald-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #F1F5F9;
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #E2E8F0;
+        }
+
+        .btn-amber {
+            background-color: var(--amber);
+            color: #FFFFFF;
+        }
+
+        .btn-amber:hover {
+            background-color: var(--amber-hover);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Outputs Section */
+        .output-container {
+            margin-top: 32px;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .output-block {
+            background: #FFFFFF;
+            border-left: 4px solid var(--emerald);
+            border-radius: 8px;
+            padding: 18px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .output-block.amber {
+            border-left-color: var(--amber);
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .output-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .script-box {
+            background: #F8FAFC;
+            border: 1px dashed #CBD5E1;
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 13.5px;
+            color: #334155;
+            font-style: italic;
+            margin-top: 8px;
+            white-space: pre-wrap;
+            position: relative;
+        }
+
+        /* Badge / Indicators */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-green { background: #D1FAE5; color: #065F46; }
+        .badge-yellow { background: #FEF3C7; color: #92400E; }
+        .badge-red { background: #FEE2E2; color: #991B1B; }
+
+        /* Accordion / History */
+        .accordion {
+            margin-top: 32px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #FFFFFF;
+        }
+
+        .accordion-header {
+            padding: 14px 18px;
+            background: #F8FAFC;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-dark);
+            user-select: none;
+        }
+
+        .accordion-content {
+            padding: 16px 18px;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .accordion.open .accordion-content {
+            display: block;
+        }
+
+        .history-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: #FAFAFA;
+            border-radius: 6px;
+            font-size: 13px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--text-dark);
+            color: #FFFFFF;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 60px;
+            }
+
+            .main-content {
+                padding: 20px 16px;
+            }
+
+            .hero h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle" style="color: #4ADE80;"></i>
+        <span id="toast-msg">Copied to clipboard!</span>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="brand">
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+            <span>Raise Negotiator</span>
+        </div>
+        <button class="hamburger" id="hamburger-btn">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+                <h1>Raise Negotiator</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item active" data-tool="dashboard">
+                    <button><i class="fa-solid fa-chart-pie"></i> Dashboard</button>
+                </li>
+                <li class="nav-item" data-tool="tool1">
+                    <button><i class="fa-solid fa-comments"></i> Ask Architect</button>
+                </li>
+                <li class="nav-item" data-tool="tool2">
+                    <button><i class="fa-solid fa-shield-halved"></i> Objection Handler</button>
+                </li>
+                <li class="nav-item" data-tool="tool3">
+                    <button><i class="fa-solid fa-clock"></i> Timing Optimizer</button>
+                </li>
+                <li class="nav-item" data-tool="tool4">
+                    <button><i class="fa-solid fa-bolt"></i> Confidence Builder</button>
+                </li>
+                <li class="nav-item" data-tool="tool5">
+                    <button><i class="fa-solid fa-clipboard-check"></i> Post-Plan</button>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <main class="main-content">
+
+                <!-- DASHBOARD VIEW -->
+                <div id="view-dashboard" class="view-panel">
+                    <div class="hero">
+                        <h1>Raise Negotiator</h1>
+                        <p>The right number means nothing without the right conversation.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dash-card" onclick="switchView('tool1')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-comments"></i></div>
+                            <h3>The Ask Architect</h3>
+                            <p>Structure your opening, frame your proof, deliver your request with precision.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool2')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h3>The Objection Handler</h3>
+                            <p>Master exact scripts for budget freezes, timing issues, and pushback.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool3')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-clock"></i></div>
+                            <h3>The Timing Optimizer</h3>
+                            <p>Determine the precise optimal window for maximum success leverage.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool4')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-bolt"></i></div>
+                            <h3>The Confidence Builder</h3>
+                            <p>Audit your value, eliminate fear, and practice solid mental reframes.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool5')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+                            <h3>The Post-Negotiation Plan</h3>
+                            <p>Lock in commitments in writing and plan smart, strategic next steps.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 1: THE ASK ARCHITECT -->
+                <div id="view-tool1" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="section-title"><i class="fa-solid fa-comments"></i> The Ask Architect</div>
+                        <div class="section-desc">Solve: "I don't know how to open the conversation or what order to say things in."</div>
+
+                        <form id="form-tool1">
+                            <div class="form-group">
+                                <label class="form-label">Your target raise:</label>
+                                <input type="text" id="t1-target" class="form-control" placeholder="e.g., $10k or 15%">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your evidence / achievements:</label>
+                                <textarea id="t1-evidence" class="form-control" placeholder="List key contributions, revenue earned, projects led..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your boss's decision style:</label>
+                                <div class="radio-group">
+                                    <label class="custom-option"><input type="radio" name="t1-style" value="data" checked> Needs data</label>
+                                    <label class="custom-option"><input type="radio" name="t1-style" value="relational"> Needs to like you</label>
+                                    <label class="custom-option"><input type="radio" name="t1-style" value="gut"> Gut feel</label>
+                                    <label class="custom-option"><input type="radio" name="t1-style" value="avoids"> Avoids conflict</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Company financial health:</label>
+                                <select id="t1-health" class="form-control">
+                                    <option value="Growing">Growing</option>
+                                    <option value="Stable">Stable</option>
+                                    <option value="Tight">Tight</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your leverage:</label>
+                                <select id="t1-leverage" class="form-control">
+                                    <option value="Market data">Market data</option>
+                                    <option value="Strong offer elsewhere">Strong offer elsewhere</option>
+                                    <option value="Irreplaceable">Irreplaceable / Critical role</option>
+                                    <option value="Willing to walk">Willing to walk</option>
+                                    <option value="Limited">Limited</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="generateTool1()"><i class="fa-solid fa-wand-magic-sparkles"></i> Build My Script</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool1" class="output-container">
+                        <!-- Content generated dynamically -->
+                    </div>
+
+                    <!-- History -->
+                    <div class="accordion" id="acc-tool1">
+                        <div class="accordion-header" onclick="toggleAccordion('acc-tool1')">
+                            <span><i class="fa-solid fa-history"></i> Saved Scenarios (History)</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <ul class="history-list" id="hist-tool1"></ul>
+                            <button class="btn btn-secondary btn-sm" style="margin-top: 10px;" onclick="clearHistory('tool1')">Clear History</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 2: THE OBJECTION HANDLER -->
+                <div id="view-tool2" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="section-title"><i class="fa-solid fa-shield-halved"></i> The Objection Handler</div>
+                        <div class="section-desc">Solve: "I'm afraid they'll say no and I won't know how to respond."</div>
+
+                        <form id="form-tool2">
+                            <div class="form-group">
+                                <label class="form-label">Expected objections (check all that apply):</label>
+                                <div class="checkbox-group">
+                                    <label class="custom-option"><input type="checkbox" name="t2-obj" value="budget"> Budget freeze</label>
+                                    <label class="custom-option"><input type="checkbox" name="t2-obj" value="cycle"> Not in cycle</label>
+                                    <label class="custom-option"><input type="checkbox" name="t2-obj" value="others"> Others aren't getting raises</label>
+                                    <label class="custom-option"><input type="checkbox" name="t2-obj" value="tenure"> Haven't been here long enough</label>
+                                    <label class="custom-option"><input type="checkbox" name="t2-obj" value="proof"> Need to see more proof</label>
+                                    <label class="custom-option"><input type="checkbox" name="t2-obj" value="band"> Already at top of band</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your emotional reaction to 'no':</label>
+                                <select id="t2-reaction" class="form-control">
+                                    <option value="Curious">Prepared to stay Curious</option>
+                                    <option value="Defeated">Defeated</option>
+                                    <option value="Argumentative">Argumentative</option>
+                                    <option value="Prepared to walk">Prepared to walk</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your preparation level:</label>
+                                <select id="t2-prep" class="form-control">
+                                    <option value="Moderate">Moderate</option>
+                                    <option value="Extensive">Extensive</option>
+                                    <option value="Minimal">Minimal</option>
+                                    <option value="Wing it">Wing it</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="generateTool2()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Response Bank</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool2" class="output-container"></div>
+
+                    <div class="accordion" id="acc-tool2">
+                        <div class="accordion-header" onclick="toggleAccordion('acc-tool2')">
+                            <span><i class="fa-solid fa-history"></i> Saved Scenarios (History)</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <ul class="history-list" id="hist-tool2"></ul>
+                            <button class="btn btn-secondary btn-sm" style="margin-top: 10px;" onclick="clearHistory('tool2')">Clear History</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 3: THE TIMING OPTIMIZER -->
+                <div id="view-tool3" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="section-title"><i class="fa-solid fa-clock"></i> The Timing Optimizer</div>
+                        <div class="section-desc">Solve: "I don't know when to have this conversation for maximum success."</div>
+
+                        <form id="form-tool3">
+                            <div class="form-group">
+                                <label class="form-label">Last raise:</label>
+                                <select id="t3-lastraise" class="form-control">
+                                    <option value="1-2yr">1-2 years ago</option>
+                                    <option value="<6mo">&lt; 6 months ago</option>
+                                    <option value="6-12mo">6-12 months ago</option>
+                                    <option value="2yr+">2+ years ago</option>
+                                    <option value="Never">Never</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Recent performance:</label>
+                                <select id="t3-perf" class="form-control">
+                                    <option value="Exceeded">Exceeded expectations</option>
+                                    <option value="Met">Met expectations</option>
+                                    <option value="Mixed">Mixed performance</option>
+                                    <option value="Just recovered">Just recovered from an issue</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Upcoming events (check all that apply):</label>
+                                <div class="checkbox-group">
+                                    <label class="custom-option"><input type="checkbox" name="t3-events" value="cycle"> Review cycle coming up</label>
+                                    <label class="custom-option"><input type="checkbox" name="t3-events" value="budget"> Budget planning window</label>
+                                    <label class="custom-option"><input type="checkbox" name="t3-events" value="announcement"> Company major announcement</label>
+                                    <label class="custom-option"><input type="checkbox" name="t3-events" value="vacation"> Boss vacation soon</label>
+                                    <label class="custom-option"><input type="checkbox" name="t3-events" value="none"> Nothing known</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Boss's current stress level:</label>
+                                <select id="t3-stress" class="form-control">
+                                    <option value="Normal">Normal</option>
+                                    <option value="Low">Low</option>
+                                    <option value="High">High</option>
+                                    <option value="Crisis">Crisis mode</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="generateTool3()"><i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Timing</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool3" class="output-container"></div>
+
+                    <div class="accordion" id="acc-tool3">
+                        <div class="accordion-header" onclick="toggleAccordion('acc-tool3')">
+                            <span><i class="fa-solid fa-history"></i> Saved Scenarios (History)</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <ul class="history-list" id="hist-tool3"></ul>
+                            <button class="btn btn-secondary btn-sm" style="margin-top: 10px;" onclick="clearHistory('tool3')">Clear History</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 4: THE CONFIDENCE BUILDER -->
+                <div id="view-tool4" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="section-title"><i class="fa-solid fa-bolt"></i> The Confidence Builder</div>
+                        <div class="section-desc">Solve: "I'm terrified of the conversation and need to walk in feeling certain."</div>
+
+                        <form id="form-tool4">
+                            <div class="form-group">
+                                <label class="form-label">Your biggest fear:</label>
+                                <select id="t4-fear" class="form-control">
+                                    <option value="I'll seem greedy">I'll seem greedy</option>
+                                    <option value="They'll say no">They'll say no</option>
+                                    <option value="It will damage relationship">It will damage the relationship</option>
+                                    <option value="I don't deserve it">I don't deserve it</option>
+                                    <option value="They'll fire me">They'll fire me</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Evidence of your value:</label>
+                                <textarea id="t4-evidence" class="form-control" placeholder="What impact have you made recently?"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">How many times have you asked for a raise before?</label>
+                                <select id="t4-times" class="form-control">
+                                    <option value="Never">Never</option>
+                                    <option value="Once">Once</option>
+                                    <option value="2-3 times">2-3 times</option>
+                                    <option value="Many times">Many times</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your self-assessment:</label>
+                                <select id="t4-self" class="form-control">
+                                    <option value="Underpaid and underrecognized">Underpaid and underrecognized</option>
+                                    <option value="Fairly paid">Fairly paid</option>
+                                    <option value="Overpaid">Overpaid</option>
+                                    <option value="Not sure">Not sure</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="generateTool4()"><i class="fa-solid fa-wand-magic-sparkles"></i> Build Confidence Framework</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool4" class="output-container"></div>
+
+                    <div class="accordion" id="acc-tool4">
+                        <div class="accordion-header" onclick="toggleAccordion('acc-tool4')">
+                            <span><i class="fa-solid fa-history"></i> Saved Scenarios (History)</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <ul class="history-list" id="hist-tool4"></ul>
+                            <button class="btn btn-secondary btn-sm" style="margin-top: 10px;" onclick="clearHistory('tool4')">Clear History</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 5: THE POST-NEGOTIATION PLAN -->
+                <div id="view-tool5" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="section-title"><i class="fa-solid fa-clipboard-check"></i> The Post-Negotiation Plan</div>
+                        <div class="section-desc">Solve: "After the conversation, I need to know what to do regardless of the outcome."</div>
+
+                        <form id="form-tool5">
+                            <div class="form-group">
+                                <label class="form-label">Their response:</label>
+                                <select id="t5-response" class="form-control">
+                                    <option value="Partial">Partial raise</option>
+                                    <option value="Yes">Yes (Full approval)</option>
+                                    <option value="No">No (Flat denial)</option>
+                                    <option value="Deferred">Deferred / Later date</option>
+                                    <option value="Counter-offered">Counter-offered non-monetary</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What they promised / said:</label>
+                                <textarea id="t5-promised" class="form-control" placeholder="Detail promises, timelines, or rationale given..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your emotional state:</label>
+                                <select id="t5-emotion" class="form-control">
+                                    <option value="Disappointed">Disappointed</option>
+                                    <option value="Elated">Elated</option>
+                                    <option value="Okay">Okay</option>
+                                    <option value="Angry">Angry</option>
+                                    <option value="Confused">Confused</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your intended next move:</label>
+                                <div class="radio-group">
+                                    <label class="custom-option"><input type="radio" name="t5-move" value="followup" checked> Follow up in writing</label>
+                                    <label class="custom-option"><input type="radio" name="t5-move" value="look"> Start looking elsewhere</label>
+                                    <label class="custom-option"><input type="radio" name="t5-move" value="celebrate"> Celebrate</label>
+                                    <label class="custom-option"><input type="radio" name="t5-move" value="more"> Negotiate more</label>
+                                    <label class="custom-option"><input type="radio" name="t5-move" value="accept"> Accept and move on</label>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="generateTool5()"><i class="fa-solid fa-wand-magic-sparkles"></i> Build Post-Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool5" class="output-container"></div>
+
+                    <div class="accordion" id="acc-tool5">
+                        <div class="accordion-header" onclick="toggleAccordion('acc-tool5')">
+                            <span><i class="fa-solid fa-history"></i> Saved Scenarios (History)</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <ul class="history-list" id="hist-tool5"></ul>
+                            <button class="btn btn-secondary btn-sm" style="margin-top: 10px;" onclick="clearHistory('tool5')">Clear History</button>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+
+            <!-- Mandatory Footer -->
+            <footer class="footer">
+                For salary negotiation preparation only. Not financial, legal, or HR advice. For contractual compensation questions, consult your HR department or an employment attorney.
+            </footer>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- Navigation Logic ---
+        function switchView(toolId) {
+            document.querySelectorAll('.view-panel').forEach(panel => panel.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
+            const activePanel = document.getElementById(`view-${toolId}`);
+            if (activePanel) {
+                activePanel.style.display = 'block';
+            }
+
+            const activeNav = document.querySelector(`.nav-item[data-tool="${toolId}"]`);
+            if (activeNav) {
+                activeNav.classList.add('active');
+            }
+
+            // Close mobile menu
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebar-overlay').classList.remove('active');
+
+            // Scroll top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Load tool history
+            if (toolId !== 'dashboard') {
+                renderHistory(toolId);
+            }
+        }
+
+        // Event Listeners for Nav
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const toolId = this.getAttribute('data-tool');
+                switchView(toolId);
+            });
+        });
+
+        // Mobile Sidebar Controls
+        document.getElementById('hamburger-btn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebar-overlay').classList.toggle('active');
+        });
+
+        document.getElementById('sidebar-overlay').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebar-overlay').classList.remove('active');
+        });
+
+        // Copy Clipboard Helper
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // Accordion Toggle
+        function toggleAccordion(id) {
+            const acc = document.getElementById(id);
+            acc.classList.toggle('open');
+        }
+
+        // --- LocalStorage History Management ---
+        function saveHistory(toolId, summary) {
+            const key = `raise_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            const timestamp = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            history.unshift({ timestamp, summary });
+            if (history.length > 30) history = history.slice(0, 30);
+            
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = `raise_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const listEl = document.getElementById(`hist-${toolId}`);
+            if (!listEl) return;
+
+            if (history.length === 0) {
+                listEl.innerHTML = '<li style="font-size:12px; color:var(--text-muted);">No history saved yet.</li>';
+                return;
+            }
+
+            listEl.innerHTML = history.map(item => `
+                <li class="history-item">
+                    <span>${item.summary}</span>
+                    <span style="font-size:11px; color:var(--text-muted);">${item.timestamp}</span>
+                </li>
+            `).join('');
+        }
+
+        function clearHistory(toolId) {
+            localStorage.removeItem(`raise_history_${toolId}`);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+
+        // ==========================================
+        // TOOL 1: ASK ARCHITECT LOGIC
+        // ==========================================
+        function loadSampleTool1() {
+            document.getElementById('t1-target').value = "15%";
+            document.getElementById('t1-evidence').value = "Led 3 major client projects that exceeded targets by 20% and took on full team onboarding/training.";
+            document.querySelector('input[name="t1-style"][value="data"]').checked = true;
+            document.getElementById('t1-health').value = "Stable";
+            document.getElementById('t1-leverage').value = "Market data";
+        }
+
+        function generateTool1() {
+            const target = document.getElementById('t1-target').value.trim() || "$10,000";
+            const evidence = document.getElementById('t1-evidence').value.trim() || "Consistently high output and expanded duties.";
+            const style = document.querySelector('input[name="t1-style"]:checked').value;
+            const health = document.getElementById('t1-health').value;
+            const leverage = document.getElementById('t1-leverage').value;
+
+            // Decision style adaptation
+            let styleAdvice = "";
+            let openingLead = "";
+            if (style === 'data') {
+                styleAdvice = "Lead with exact metrics, ROI, and percentage growth. Keep emotions completely out.";
+                openingLead = "I've pulled together performance metrics over the last year regarding my impact on team output...";
+            } else if (style === 'relational') {
+                styleAdvice = "Frame the ask as a shared win and express genuine passion for the team's long-term future.";
+                openingLead = "I really love working with this team and I'm proud of what we've built together recently...";
+            } else if (style === 'gut') {
+                styleAdvice = "Focus on big-picture impact, overall trust, and elevated responsibility.";
+                openingLead = "I wanted to take a step back and look at how my role has evolved and where we are heading...";
+            } else { // avoids conflict
+                styleAdvice = "Keep tone incredibly warm, collaborative, and stress-free. Reassure them you are solving problems, not creating one.";
+                openingLead = "I wanted to schedule a relaxed catch-up to review my role alignment and market benchmarks...";
+            }
+
+            const openingScript = `Thanks for making time today. I’m really proud of what we’ve accomplished recently. ${openingLead} Based on my expanded scope and recent output, I’d like to discuss aligning my baseline compensation to reflect this elevated impact.`;
+            const askScript = `Based on current market benchmarks and my contributions—specifically ${evidence}—I am requesting an adjustment of my target compensation to ${target}.`;
+
+            const html = `
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-play" style="color:var(--emerald);"></i> THE OPENING (First 90 Seconds)</div>
+                        <button class="btn btn-secondary btn-sm" onclick="copyText(\`${openingScript.replace(/'/g, "\\'")}\`)"><i class="fa-solid fa-copy"></i> Copy</button>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-muted); margin-bottom:6px;"><strong>Boss Alignment Strategy:</strong> ${styleAdvice}</p>
+                    <div class="script-box">"${openingScript}"</div>
+                </div>
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-layer-group" style="color:var(--emerald);"></i> THE EVIDENCE STACK</div>
+                    </div>
+                    <p style="font-size:13.5px; margin-bottom:8px;">Present proof in strict hierarchy order:</p>
+                    <ol style="margin-left:20px; font-size:13.5px; color:var(--text-dark);">
+                        <li><strong>Direct Impact:</strong> ${evidence}</li>
+                        <li><strong>Market Position:</strong> Leveraging <em>${leverage}</em> given company's <em>${health}</em> position.</li>
+                        <li><strong>Future Contribution:</strong> Outline the next 6-12 months of value you will unlock.</li>
+                    </ol>
+                </div>
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-bullseye" style="color:var(--emerald);"></i> THE NUMBER DELIVERY</div>
+                        <button class="btn btn-secondary btn-sm" onclick="copyText(\`${askScript.replace(/'/g, "\\'")}\`)"><i class="fa-solid fa-copy"></i> Copy</button>
+                    </div>
+                    <div class="script-box">"${askScript}"</div>
+                </div>
+
+                <div class="output-block amber">
+                    <div class="output-header">
+                        <div class="output-title" style="color:#B45309;"><i class="fa-solid fa-volume-xmark"></i> THE SILENCE</div>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-dark);">
+                        <strong>Crucial Rule:</strong> Immediately stop talking after stating the number (${target}). Do NOT talk to fill uncomfortable silence. Do NOT justify further or hedge ("...or whatever you think is fair"). Let them process and speak next.
+                    </p>
+                </div>
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-life-ring" style="color:var(--emerald);"></i> THE BACKUP ASK</div>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-dark);">
+                        If base salary increase meets friction, immediately pivot to alternative value:
+                        <br><em>"If base salary is constrained today, can we agree on an immediate title change, an accelerated 6-month review clause, or professional development funding?"</em>
+                    </p>
+                </div>
+            `;
+
+            const container = document.getElementById('output-tool1');
+            container.innerHTML = html;
+            container.classList.add('active');
+
+            saveHistory('tool1', `Target: ${target} | Leverage: ${leverage}`);
+        }
+
+
+        // ==========================================
+        // TOOL 2: OBJECTION HANDLER LOGIC
+        // ==========================================
+        function loadSampleTool2() {
+            const boxes = document.querySelectorAll('input[name="t2-obj"]');
+            boxes.forEach(b => b.checked = (b.value === 'budget' || b.value === 'cycle' || b.value === 'proof'));
+            document.getElementById('t2-reaction').value = "Curious";
+            document.getElementById('t2-prep').value = "Moderate";
+        }
+
+        function generateTool2() {
+            const checkedObjs = Array.from(document.querySelectorAll('input[name="t2-obj"]:checked')).map(c => c.value);
+            const reaction = document.getElementById('t2-reaction').value;
+            const prep = document.getElementById('t2-prep').value;
+
+            if (checkedObjs.length === 0) {
+                alert("Please select at least one expected objection.");
+                return;
+            }
+
+            const objectionScripts = {
+                budget: {
+                    title: "Budget Freeze / Financial Hardship",
+                    script: "I completely respect budget realities. If base salary adjustments are frozen across the board right now, can we commit in writing to a mid-cycle review on [Specific Date] once budgets unfreeze?"
+                },
+                cycle: {
+                    title: "Not in Standard Review Cycle",
+                    script: "I understand timing matters. My goal isn't to bypass standard policy, but given that my duties have permanently shifted since [Month], I wanted to establish the benchmark now so I am prioritized when cycle opens."
+                },
+                others: {
+                    title: "Others Aren't Getting Raises",
+                    script: "I appreciate the context. My request is based specifically on the measurable output and expanded scope of my role, rather than peer comparisons. I'd love to stay focused on my specific value contribution."
+                },
+                tenure: {
+                    title: "Haven't Been Here Long Enough",
+                    script: "I agree tenure is important, but my pace of impact has scaled faster than standard timelines. In my short tenure, I’ve delivered [Key Milestone]. I’d love for compensation to track contribution over calendar days."
+                },
+                proof: {
+                    title: "Need to See More Performance First",
+                    script: "That’s completely fair. Let’s define exact, measurable milestones today that—once achieved over the next 90 days—will unlock this specific compensation target."
+                },
+                band: {
+                    title: "Already at Top of Salary Band",
+                    script: "That suggests my current level no longer reflects my actual work. Should we be having a conversation about updating my title and formal grade band to match my actual responsibilities?"
+                }
+            };
+
+            let responseBankHTML = checkedObjs.map(key => {
+                const item = objectionScripts[key];
+                return `
+                    <div class="output-block">
+                        <div class="output-header">
+                            <div class="output-title"><i class="fa-solid fa-comment-slash" style="color:var(--emerald);"></i> ${item.title}</div>
+                            <button class="btn btn-secondary btn-sm" onclick="copyText(\`${item.script.replace(/'/g, "\\'")}\`)"><i class="fa-solid fa-copy"></i> Copy Response</button>
+                        </div>
+                        <div class="script-box">"${item.script}"</div>
+                    </div>
+                `;
+            }).join('');
+
+            const html = `
+                ${responseBankHTML}
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-magnifying-glass" style="color:var(--emerald);"></i> THE CURIOSITY FRAME</div>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-dark);">
+                        Your emotional stance is set to <strong>${reaction}</strong>. Remember: A "no" is often just a "not yet" or "I need more information."
+                        <br><br>
+                        <em>Use this universal inquiry:</em> "What specific metrics or business conditions would need to be true for this raise to be a simple 'yes'?"
+                    </p>
+                </div>
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-calendar-check" style="color:var(--emerald);"></i> THE TIMELINE LOCK</div>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-dark);">
+                        Never leave a rejection floating. Lock in a calendar date:
+                        <br><em>"Can we put 15 minutes on the calendar for [Date 3 months away] specifically to review this progress?"</em>
+                    </p>
+                </div>
+
+                <div class="output-block amber">
+                    <div class="output-header">
+                        <div class="output-title" style="color:#B45309;"><i class="fa-solid fa-door-open"></i> THE GRACEFUL EXIT</div>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-dark);">
+                        Maintain zero resentment. End with: <em>"Thank you for being open with me. I appreciate your guidance and look forward to hitting these milestones together."</em>
+                    </p>
+                </div>
+            `;
+
+            const container = document.getElementById('output-tool2');
+            container.innerHTML = html;
+            container.classList.add('active');
+
+            saveHistory('tool2', `Objections: ${checkedObjs.join(', ')} | Prep: ${prep}`);
+        }
+
+
+        // ==========================================
+        // TOOL 3: TIMING OPTIMIZER LOGIC
+        // ==========================================
+        function loadSampleTool3() {
+            document.getElementById('t3-lastraise').value = "1-2yr";
+            document.getElementById('t3-perf').value = "Exceeded";
+            const boxes = document.querySelectorAll('input[name="t3-events"]');
+            boxes.forEach(b => b.checked = (b.value === 'budget'));
+            document.getElementById('t3-stress').value = "Normal";
+        }
+
+        function generateTool3() {
+            const lastRaise = document.getElementById('t3-lastraise').value;
+            const perf = document.getElementById('t3-perf').value;
+            const events = Array.from(document.querySelectorAll('input[name="t3-events"]:checked')).map(c => c.value);
+            const stress = document.getElementById('t3-stress').value;
+
+            // Score Calculation
+            let score = 0; // -10 to +10
+
+            if (lastRaise === '1-2yr' || lastRaise === '2yr+') score += 3;
+            if (lastRaise === '<6mo') score -= 4;
+
+            if (perf === 'Exceeded') score += 4;
+            if (perf === 'Met') score += 1;
+            if (perf === 'Mixed' || perf === 'Just recovered') score -= 3;
+
+            if (events.includes('budget') || events.includes('cycle')) score += 3;
+            if (events.includes('vacation')) score -= 2;
+
+            if (stress === 'Low' || stress === 'Normal') score += 2;
+            if (stress === 'High') score -= 3;
+            if (stress === 'Crisis') score -= 6;
+
+            let badgeHTML = '';
+            let windowDesc = '';
+
+            if (score >= 4) {
+                badgeHTML = `<span class="badge badge-green"><i class="fa-solid fa-circle-check"></i> GREEN LIGHT (High Probability)</span>`;
+                windowDesc = "Initiate within the next 1 to 2 weeks. Your performance and timing alignment are at peak leverage.";
+            } else if (score >= 0) {
+                badgeHTML = `<span class="badge badge-yellow"><i class="fa-solid fa-triangle-exclamation"></i> YELLOW LIGHT (Proceed with Caution)</span>`;
+                windowDesc = "Wait 3 to 4 weeks while planting seeds and easing current manager stress levels.";
+            } else {
+                badgeHTML = `<span class="badge badge-red"><i class="fa-solid fa-hand"></i> RED LIGHT (High Risk)</span>`;
+                windowDesc = "Hold off for 6 to 8 weeks. Focus purely on performance stabilization and wait for crisis state to pass.";
+            }
+
+            const html = `
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-gauge-high" style="color:var(--emerald);"></i> THE TIMING SCORE</div>
+                    </div>
+                    <div style="margin: 10px 0;">${badgeHTML}</div>
+                    <p style="font-size:13.5px; color:var(--text-dark); margin-top:8px;">
+                        <strong>Optimal Window:</strong> ${windowDesc}
+                    </p>
+                </div>
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-list-check" style="color:var(--emerald);"></i> THE PRE-WORK (2 Weeks Prior)</div>
+                    </div>
+                    <ul style="margin-left:20px; font-size:13.5px; color:var(--text-dark);">
+                        <li>Send a weekly update email highlighting major project wins.</li>
+                        <li>Ensure all pending administrative tasks or deliverables are 100% up to date.</li>
+                        <li>Ask your boss casually in a 1-on-1: <em>"What is your biggest priority right now, and how can I help take weight off your plate?"</em></li>
+                    </ul>
+                </div>
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-seedling" style="color:var(--emerald);"></i> THE PREVIEW (Planting the Seed)</div>
+                        <button class="btn btn-secondary btn-sm" onclick="copyText('Hi [Manager], I’d love to put 20 minutes on our calendars next week to discuss my role, recent performance, and future growth. No immediate action needed today, just want to ensure we align!')"><i class="fa-solid fa-copy"></i> Copy Teaser</button>
+                    </div>
+                    <div class="script-box">"Hi [Manager], I’d love to put 20 minutes on our calendars next week to discuss my role, recent performance, and future growth. No immediate action needed today, just want to ensure we align!"</div>
+                </div>
+
+                <div class="output-block amber">
+                    <div class="output-header">
+                        <div class="output-title" style="color:#B45309;"><i class="fa-solid fa-clock-rotate-left"></i> IF TIMING IS BAD</div>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-dark);">
+                        If current conditions are hostile (e.g. crisis or layoffs), do not ask now. Instead, document every single win in a "Brag Sheet" document weekly so you are armed when conditions improve.
+                    </p>
+                </div>
+            `;
+
+            const container = document.getElementById('output-tool3');
+            container.innerHTML = html;
+            container.classList.add('active');
+
+            saveHistory('tool3', `Status: ${score >= 4 ? 'Green' : score >= 0 ? 'Yellow' : 'Red'} | Stress: ${stress}`);
+        }
+
+
+        // ==========================================
+        // TOOL 4: CONFIDENCE BUILDER LOGIC
+        // ==========================================
+        function loadSampleTool4() {
+            document.getElementById('t4-fear').value = "I'll seem greedy";
+            document.getElementById('t4-evidence').value = "Generated 20% revenue increase from my initiative and streamlined operational workflow.";
+            document.getElementById('t4-times').value = "Never";
+            document.getElementById('t4-self').value = "Underpaid and underrecognized";
+        }
+
+        function generateTool4() {
+            const fear = document.getElementById('t4-fear').value;
+            const evidence = document.getElementById('t4-evidence').value.trim() || "Consistently solid contribution.";
+            const times = document.getElementById('t4-times').value;
+            const self = document.getElementById('t4-self').value;
+
+            const fearReframes = {
+                "I'll seem greedy": "Seeking market rate is not greed; it is professional business alignment. Companies adjust contract rates with vendors constantly without emotion.",
+                "They'll say no": "A 'no' is not a failure—it is simply data. It reveals whether the company values retainment or if you need to plan your next strategic move.",
+                "It will damage relationship": "Managers respect employees who advocate for themselves professionally. It signals maturity, self-worth, and leadership.",
+                "I don't deserve it": "Your evidence speaks louder than impostor syndrome. Focus strictly on objective outputs, not internal feelings.",
+                "They'll fire me": "Good employees are never fired simply for asking for a raise in a respectful, professional manner."
+            };
+
+            const html = `
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-scale-balanced" style="color:var(--emerald);"></i> THE DESERVINGNESS AUDIT</div>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-dark);">
+                        <strong>Your Objective Proof:</strong> "${evidence}"
+                        <br><br>
+                        You evaluated your state as <em>${self}</em>. Asking for fair value is a standard professional exchange, not a personal favor request.
+                    </p>
+                </div>
+
+                <div class="output-block amber">
+                    <div class="output-header">
+                        <div class="output-title" style="color:#B45309;"><i class="fa-solid fa-brain"></i> THE MENTAL REFRAME</div>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-dark);">
+                        <strong>Addressing Fear ("${fear}"):</strong>
+                        <br>
+                        <em>${fearReframes[fear]}</em>
+                    </p>
+                </div>
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-lung" style="color:var(--emerald);"></i> REHEARSAL & BREATHING</div>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-dark);">
+                        <strong>Box Breathing Technique (Before entering):</strong>
+                        <br>Inhale deeply for 4 seconds → Hold for 4 seconds → Exhale for 4 seconds → Hold for 4 seconds. Repeat 3 times to lower heart rate.
+                    </p>
+                </div>
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-shield-cat" style="color:var(--emerald);"></i> THE WORST CASE REALITY</div>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-dark);">
+                        <strong>What actually happens if they say no?</strong>
+                        <br>You continue earning your current paycheck tomorrow, but you now possess vital clarity on the company's constraints or valuation of your role. You lose nothing by asking professionally.
+                    </p>
+                </div>
+            `;
+
+            const container = document.getElementById('output-tool4');
+            container.innerHTML = html;
+            container.classList.add('active');
+
+            saveHistory('tool4', `Fear: ${fear} | Self-Eval: ${self}`);
+        }
+
+
+        // ==========================================
+        // TOOL 5: POST-NEGOTIATION PLAN LOGIC
+        // ==========================================
+        function loadSampleTool5() {
+            document.getElementById('t5-response').value = "Partial";
+            document.getElementById('t5-promised').value = "Approved 5% increase now, promised to revisit remaining 10% in 6 months during budget reviews.";
+            document.getElementById('t5-emotion').value = "Disappointed";
+            document.querySelector('input[name="t5-move"][value="followup"]').checked = true;
+        }
+
+        function generateTool5() {
+            const resp = document.getElementById('t5-response').value;
+            const promised = document.getElementById('t5-promised').value.trim() || "No specific verbal commitments noted.";
+            const emotion = document.getElementById('t5-emotion').value;
+            const move = document.querySelector('input[name="t5-move"]:checked').value;
+
+            const emailTemplate = `Subject: Summary of Compensation Discussion - [Your Name]\n\nHi [Manager Name],\n\nThank you for taking the time to discuss my role and compensation today. I appreciate your support and open communication.\n\nTo confirm my understanding from our conversation:\n- ${promised}\n\nI look forward to continuing to deliver great results for the team. Please let me know if I missed any details!\n\nBest regards,\n[Your Name]`;
+
+            const html = `
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-envelope" style="color:var(--emerald);"></i> THE CONFIRMATION EMAIL</div>
+                        <button class="btn btn-secondary btn-sm" onclick="copyText(\`${emailTemplate.replace(/'/g, "\\'").replace(/\n/g, "\\n")}\`)"><i class="fa-solid fa-copy"></i> Copy Email Template</button>
+                    </div>
+                    <div class="script-box">${emailTemplate.replace(/\n/g, '<br>')}</div>
+                </div>
+
+                <div class="output-block">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-calendar-days" style="color:var(--emerald);"></i> THE CHECKPOINT SCHEDULE</div>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-dark);">
+                        Set a calendar reminder for <strong>${resp === 'Deferred' || resp === 'Partial' ? '60 days from now' : '90 days from now'}</strong> to evaluate if commitments are being honored and to re-engage management.
+                    </p>
+                </div>
+
+                <div class="output-block amber">
+                    <div class="output-header">
+                        <div class="output-title" style="color:#B45309;"><i class="fa-solid fa-user-ninja"></i> STRATEGIC NEXT MOVE</div>
+                    </div>
+                    <p style="font-size:13.5px; color:var(--text-dark);">
+                        ${resp === 'No' || move === 'look' ? 
+                          '<strong>The Quiet Search:</strong> Update LinkedIn discretely, refresh your resume with recent metrics, and begin reaching out to network contacts without broadcasting intent.' : 
+                          '<strong>Maintain Excellence:</strong> Lock in high output so there is zero room for management to pull back on promises made.'}
+                    </p>
+                </div>
+            `;
+
+            const container = document.getElementById('output-tool5');
+            container.innerHTML = html;
+            container.classList.add('active');
+
+            saveHistory('tool5', `Outcome: ${resp} | Move: ${move}`);
+        }
+    </script>
+</body>
+</html>

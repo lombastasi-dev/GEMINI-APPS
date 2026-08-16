@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Trade-Off Planner</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --deep-navy: #1D3557;
+            --warm-copper: #E76F51;
+            --soft-teal: #457B9D;
+            --light-blue: #A8DADC;
+            --bg-gradient-start: #F1FAEE;
+            --bg-gradient-end: #FFF5F2;
+            --card-bg: #FFFFFF;
+            --text-main: #2B2D42;
+            --text-muted: #6C757D;
+            --border-color: #E9ECEF;
+            --sidebar-width: 250px;
+            --success-color: #2A9D8F;
+            --danger-color: #E63946;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* App Container & Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--warm-copper);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--deep-navy);
+            line-height: 1.2;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nav-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item button:hover {
+            background: rgba(69, 123, 157, 0.08);
+            color: var(--deep-navy);
+        }
+
+        .nav-item button.active {
+            background: var(--deep-navy);
+            color: #FFFFFF;
+        }
+
+        .nav-item button i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item button.active i {
+            color: var(--warm-copper);
+        }
+
+        /* Mobile Header & Hamburger */
+        .mobile-header {
+            display: none;
+            background: var(--card-bg);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .mobile-title {
+            font-weight: 700;
+            color: var(--deep-navy);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: var(--deep-navy);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 95;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards & Common UI */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, var(--deep-navy) 0%, #2A4365 100%);
+            color: white;
+            border: none;
+            margin-bottom: 32px;
+        }
+
+        .hero-card h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #FFFFFF;
+        }
+
+        .hero-card p {
+            color: var(--light-blue);
+            font-size: 1.05rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+            border-color: var(--soft-teal);
+        }
+
+        .dash-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: rgba(231, 111, 81, 0.1);
+            color: var(--warm-copper);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            color: var(--deep-navy);
+        }
+
+        .dash-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            flex: 1;
+        }
+
+        .tool-header {
+            margin-bottom: 24px;
+        }
+
+        .tool-header h2 {
+            font-size: 1.5rem;
+            color: var(--deep-navy);
+            margin-bottom: 6px;
+        }
+
+        .tool-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: var(--deep-navy);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background: #FAFAFA;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--soft-teal);
+            background: #FFFFFF;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group, .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: normal;
+            cursor: pointer;
+            background: #F8F9FA;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .auto-calc-box {
+            background: #EBF8FF;
+            border: 1px solid var(--light-blue);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .auto-calc-box span {
+            font-size: 0.9rem;
+            color: var(--deep-navy);
+            font-weight: 600;
+        }
+
+        .auto-calc-val {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--warm-copper);
+        }
+
+        /* Buttons & Actions */
+        .btn-toolbar {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--warm-copper);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #D95D39;
+        }
+
+        .btn-secondary {
+            background: #E9ECEF;
+            color: var(--deep-navy);
+        }
+
+        .btn-secondary:hover {
+            background: #DEE2E6;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-muted);
+            color: var(--deep-navy);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Output Card & Analysis UI */
+        .output-card {
+            background: #FFFFFF;
+            border-left: 4px solid var(--warm-copper);
+        }
+
+        .output-section {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .output-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .output-title {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            color: var(--warm-copper);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .output-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--deep-navy);
+            margin-bottom: 4px;
+        }
+
+        .output-desc {
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .script-box {
+            background: #F8F9FA;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            font-family: monospace;
+            font-size: 0.88rem;
+            color: #2D3748;
+            white-space: pre-wrap;
+            position: relative;
+            margin-top: 8px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .copy-btn:hover {
+            color: var(--deep-navy);
+            background: #F1F3F5;
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 32px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .history-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--deep-navy);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .history-summary {
+            padding: 12px 16px;
+            background: #F8F9FA;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+
+        .history-details {
+            padding: 16px;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.88rem;
+            background: #FFFFFF;
+        }
+
+        .history-item.open .history-details {
+            display: block;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--deep-navy);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Global Footer */
+        .app-footer {
+            margin-top: auto;
+            padding: 24px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            background: transparent;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 16px 12px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="mobile-title">
+            <i class="fa-solid fa-scale-balanced" style="color: var(--warm-copper);"></i>
+            <span>Trade-Off Planner</span>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <h1>Career Trade-Off<br>Planner</h1>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <button class="active" data-view="dashboard">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-view="tool1">
+                        <i class="fa-solid fa-calculator"></i>
+                        <span>True Cost</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-view="tool2">
+                        <i class="fa-solid fa-piggy-bank"></i>
+                        <span>Financial Runway</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-view="tool3">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <span>Alternative Mapper</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-view="tool4">
+                        <i class="fa-solid fa-wrench"></i>
+                        <span>Stay-and-Fix Plan</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-view="tool5">
+                        <i class="fa-solid fa-compass"></i>
+                        <span>The Decision</span>
+                    </button>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-wrapper">
+
+                <!-- DASHBOARD VIEW -->
+                <section id="dashboard" class="view-section active">
+                    <div class="card hero-card">
+                        <h2>Career Trade-Off Planner</h2>
+                        <p>Good money. Bad life. Let's do the math on both.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dash-card" data-target="tool1">
+                            <div class="dash-icon"><i class="fa-solid fa-calculator"></i></div>
+                            <h3>The True Cost Calculator</h3>
+                            <p>Calculate your real hourly rate after factoring in commute, recovery, and lifestyle taxes.</p>
+                        </div>
+                        <div class="dash-card" data-target="tool2">
+                            <div class="dash-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+                            <h3>The Financial Runway</h3>
+                            <p>Determine exact survival months, safety numbers, and negotiation leverage.</p>
+                        </div>
+                        <div class="dash-card" data-target="tool3">
+                            <div class="dash-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                            <h3>The Alternative Mapper</h3>
+                            <p>Map transferable skills and prototype realistic, lower-stress career pivots.</p>
+                        </div>
+                        <div class="dash-card" data-target="tool4">
+                            <div class="dash-icon"><i class="fa-solid fa-wrench"></i></div>
+                            <h3>The Stay-and-Fix Plan</h3>
+                            <p>Explore internal transfers, scope reduction, and negotiate your current job.</p>
+                        </div>
+                        <div class="dash-card" data-target="tool5">
+                            <div class="dash-icon"><i class="fa-solid fa-compass"></i></div>
+                            <h3>The Decision</h3>
+                            <p>Synthesize financial, health, and career data into a clear, regret-free action plan.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: TRUE COST CALCULATOR -->
+                <section id="tool1" class="view-section">
+                    <div class="tool-header">
+                        <h2>Tool 1 — The True Cost Calculator</h2>
+                        <p>"I make great money but I need to know what it's actually costing me."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool1">
+                            <div class="form-group">
+                                <label for="t1-salary">Your current annual base salary ($):</label>
+                                <input type="number" id="t1-salary" class="form-control" placeholder="120000">
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-bonus">Your annual bonuses/benefits value ($):</label>
+                                <input type="number" id="t1-bonus" class="form-control" placeholder="30000">
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-work-hours">Hours worked per week:</label>
+                                <input type="number" id="t1-work-hours" class="form-control" placeholder="55">
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-commute-hours">Hours commuting per week:</label>
+                                <input type="number" id="t1-commute-hours" class="form-control" placeholder="8">
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-recovery-hours">Hours spent recovering from work per week:</label>
+                                <input type="number" id="t1-recovery-hours" class="form-control" placeholder="10">
+                            </div>
+
+                            <div class="auto-calc-box">
+                                <span>Your Effective Hourly Rate:</span>
+                                <span class="auto-calc-val" id="t1-auto-rate">$0.00 / hr</span>
+                            </div>
+
+                            <div class="btn-toolbar">
+                                <button type="button" class="btn btn-primary" id="t1-analyze">Analyze True Cost</button>
+                                <button type="button" class="btn btn-secondary" id="t1-sample">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="t1-output" class="card output-card" style="display: none;">
+                        <!-- Results injected via JS -->
+                    </div>
+
+                    <div class="history-section" id="t1-history-wrapper">
+                        <div class="history-header">
+                            <span class="history-title">Saved Analyses</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool1')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="t1-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: FINANCIAL RUNWAY -->
+                <section id="tool2" class="view-section">
+                    <div class="tool-header">
+                        <h2>Tool 2 — The Financial Runway</h2>
+                        <p>"I can't leave until I know I won't end up broke."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool2">
+                            <div class="form-group">
+                                <label for="t2-essential">Monthly essential expenses ($):</label>
+                                <input type="number" id="t2-essential" class="form-control" placeholder="6000">
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-discretionary">Monthly discretionary expenses ($):</label>
+                                <input type="number" id="t2-discretionary" class="form-control" placeholder="3000">
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-savings">Current liquid savings ($):</label>
+                                <input type="number" id="t2-savings" class="form-control" placeholder="45000">
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-severance">Expected severance / liquid payouts if leaving ($):</label>
+                                <input type="number" id="t2-severance" class="form-control" placeholder="20000">
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-other-income">Other side / passive monthly income ($):</label>
+                                <input type="number" id="t2-other-income" class="form-control" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-min-salary">Minimum annual salary you'd accept elsewhere ($):</label>
+                                <input type="number" id="t2-min-salary" class="form-control" placeholder="75000">
+                            </div>
+
+                            <div class="btn-toolbar">
+                                <button type="button" class="btn btn-primary" id="t2-analyze">Calculate Runway</button>
+                                <button type="button" class="btn btn-secondary" id="t2-sample">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="t2-output" class="card output-card" style="display: none;"></div>
+
+                    <div class="history-section" id="t2-history-wrapper">
+                        <div class="history-header">
+                            <span class="history-title">Saved Analyses</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool2')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="t2-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: ALTERNATIVE MAPPER -->
+                <section id="tool3" class="view-section">
+                    <div class="tool-header">
+                        <h2>Tool 3 — The Alternative Mapper</h2>
+                        <p>"What would I actually do if I left? Is there anything that pays enough?"</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool3">
+                            <div class="form-group">
+                                <label for="t3-skills">Skills that transfer:</label>
+                                <textarea id="t3-skills" class="form-control" placeholder="e.g., Project management, data analysis, stakeholder negotiation"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-industries">Industries you're curious about:</label>
+                                <textarea id="t3-industries" class="form-control" placeholder="e.g., Nonprofits, Climate Tech, Higher Education"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-roles">Roles you'd consider:</label>
+                                <textarea id="t3-roles" class="form-control" placeholder="e.g., Operations Manager, Program Lead, Consultant"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-salary-research">Salary research you've done:</label>
+                                <textarea id="t3-salary-research" class="form-control" placeholder="e.g., Researched $80k-$95k range for Operations Manager"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-fears">Biggest fear about switching:</label>
+                                <textarea id="t3-fears" class="form-control" placeholder="e.g., Fear of starting over at 42, losing prestige"></textarea>
+                            </div>
+
+                            <div class="btn-toolbar">
+                                <button type="button" class="btn btn-primary" id="t3-analyze">Map Alternatives</button>
+                                <button type="button" class="btn btn-secondary" id="t3-sample">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="t3-output" class="card output-card" style="display: none;"></div>
+
+                    <div class="history-section" id="t3-history-wrapper">
+                        <div class="history-header">
+                            <span class="history-title">Saved Analyses</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool3')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="t3-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: STAY-AND-FIX PLAN -->
+                <section id="tool4" class="view-section">
+                    <div class="tool-header">
+                        <h2>Tool 4 — The Stay-and-Fix Plan</h2>
+                        <p>"Maybe I can make this job bearable without leaving the money."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool4">
+                            <div class="form-group">
+                                <label>What specifically makes it bad? (Check all that apply)</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="t4-issues" value="Hours"> Hours</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t4-issues" value="Boss"> Boss</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t4-issues" value="Culture"> Culture</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t4-issues" value="Commute"> Commute</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t4-issues" value="Work itself"> Work itself</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t4-issues" value="Travel"> Travel</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t4-issues" value="Ethics"> Ethics</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t4-issues" value="Burnout"> Burnout</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-tried">What have you tried so far?</label>
+                                <textarea id="t4-tried" class="form-control" placeholder="e.g., Pushed back informally on weekend emails, taken sick days"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-employer-change">What could your employer change to make it tolerable?</label>
+                                <textarea id="t4-employer-change" class="form-control" placeholder="e.g., Reassign project X, move to remote 3 days/week, change manager"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Do you have leverage? (e.g., critical skills, hard to replace, key client trust)</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t4-leverage" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t4-leverage" value="Maybe"> Maybe</label>
+                                    <label class="radio-label"><input type="radio" name="t4-leverage" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t4-leverage" value="Not sure"> Not sure</label>
+                                </div>
+                            </div>
+
+                            <div class="btn-toolbar">
+                                <button type="button" class="btn btn-primary" id="t4-analyze">Generate Stay-and-Fix Plan</button>
+                                <button type="button" class="btn btn-secondary" id="t4-sample">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="t4-output" class="card output-card" style="display: none;"></div>
+
+                    <div class="history-section" id="t4-history-wrapper">
+                        <div class="history-header">
+                            <span class="history-title">Saved Analyses</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool4')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="t4-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: THE DECISION -->
+                <section id="tool5" class="view-section">
+                    <div class="tool-header">
+                        <h2>Tool 5 — The Decision</h2>
+                        <p>"I've done the analysis and I still can't decide."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool5">
+                            <div class="form-group">
+                                <label for="t5-gut">Your gut says:</label>
+                                <select id="t5-gut" class="form-control">
+                                    <option value="Stay">Stay for now and collect the paycheck</option>
+                                    <option value="Go">Go - I need an exit plan</option>
+                                    <option value="Terrified either way">Terrified either way</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-friend">What would you tell your best friend if they were in your exact situation?</label>
+                                <textarea id="t5-friend" class="form-control" placeholder="e.g., I'd tell them no salary is worth their health collapsing, but plan it safely."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-small-step">What's the smallest step you could take this week?</label>
+                                <textarea id="t5-small-step" class="form-control" placeholder="e.g., Update my resume, schedule a doctor appointment, talk to a recruiter."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-condition">What would need to be true to make the decision easy?</label>
+                                <textarea id="t5-condition" class="form-control" placeholder="e.g., Having $20k more in savings or receiving a firm job offer at $85k."></textarea>
+                            </div>
+
+                            <div class="btn-toolbar">
+                                <button type="button" class="btn btn-primary" id="t5-analyze">Synthesize Decision</button>
+                                <button type="button" class="btn btn-secondary" id="t5-sample">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="t5-output" class="card output-card" style="display: none;"></div>
+
+                    <div class="history-section" id="t5-history-wrapper">
+                        <div class="history-header">
+                            <span class="history-title">Saved Analyses</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool5')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="t5-history-list"></div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Footer on every screen -->
+            <footer class="app-footer">
+                For career and financial reflection only. Not financial, legal, or therapeutic advice. For major financial decisions, consult a financial advisor.
+            </footer>
+        </main>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast" class="toast">Copied to clipboard!</div>
+
+    <script>
+        /* ------------------------------------------------------------------
+           APP NAVIGATION & CORE ENGINE
+        ------------------------------------------------------------------ */
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            initAutoCalculations();
+            initToolEventHandlers();
+            loadAllHistories();
+        });
+
+        // Navigation logic
+        function initNavigation() {
+            const navButtons = document.querySelectorAll('.nav-item button');
+            const dashCards = document.querySelectorAll('.dash-card');
+            const views = document.querySelectorAll('.view-section');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+
+            function switchView(targetViewId) {
+                views.forEach(v => v.classList.remove('active'));
+                navButtons.forEach(btn => {
+                    if (btn.dataset.view === targetViewId) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+
+                const targetEl = document.getElementById(targetViewId);
+                if (targetEl) {
+                    targetEl.classList.add('active');
+                }
+
+                // Close mobile sidebar if open
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('mobile-open');
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            navButtons.forEach(btn => {
+                btn.addEventListener('click', () => switchView(btn.dataset.view));
+            });
+
+            dashCards.forEach(card => {
+                card.addEventListener('click', () => switchView(card.dataset.target));
+            });
+
+            hamburgerBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('mobile-open');
+            });
+
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('mobile-open');
+            });
+        }
+
+        /* ------------------------------------------------------------------
+           TOAST & UTILS
+        ------------------------------------------------------------------ */
+        function showToast(message = "Copied!") {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(() => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        function formatCurrency(num) {
+            const val = parseFloat(num) || 0;
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+        }
+
+        /* ------------------------------------------------------------------
+           LOCAL STORAGE HISTORY SYSTEM
+        ------------------------------------------------------------------ */
+        const MAX_HISTORY = 30;
+
+        function saveHistory(toolId, data) {
+            const key = `tradeoff_history_${toolId}`;
+            let history = getHistory(toolId);
+            const entry = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }),
+                data: data
+            };
+            history.unshift(entry);
+            if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistoryUI(toolId);
+        }
+
+        function getHistory(toolId) {
+            const key = `tradeoff_history_${toolId}`;
+            try {
+                return JSON.parse(localStorage.getItem(key)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function clearToolHistory(toolId) {
+            const key = `tradeoff_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistoryUI(toolId);
+            showToast("History cleared");
+        }
+
+        function loadAllHistories() {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistoryUI);
+        }
+
+        function renderHistoryUI(toolId) {
+            const wrapper = document.getElementById(`${toolId}-history-list`);
+            if (!wrapper) return;
+            const history = getHistory(toolId);
+
+            if (history.length === 0) {
+                wrapper.innerHTML = '<p style="font-size:0.85rem; color: var(--text-muted); font-style: italic;">No saved analyses yet.</p>';
+                return;
+            }
+
+            wrapper.innerHTML = history.map(item => `
+                <div class="history-item" id="hist-${item.id}">
+                    <div class="history-summary" onclick="toggleHistoryItem('${item.id}')">
+                        <span><i class="fa-regular fa-clock" style="margin-right:6px;"></i> ${item.timestamp}</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="history-details">
+                        ${item.data.htmlOutput}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistoryItem(id) {
+            const el = document.getElementById(`hist-${id}`);
+            if (el) el.classList.toggle('open');
+        }
+
+        /* ------------------------------------------------------------------
+           TOOL 1 ENGINE: TRUE COST CALCULATOR
+        ------------------------------------------------------------------ */
+        function initAutoCalculations() {
+            const inputs = ['t1-salary', 't1-bonus', 't1-work-hours', 't1-commute-hours', 't1-recovery-hours'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', updateT1AutoCalc);
+            });
+        }
+
+        function updateT1AutoCalc() {
+            const salary = parseFloat(document.getElementById('t1-salary').value) || 0;
+            const bonus = parseFloat(document.getElementById('t1-bonus').value) || 0;
+            const workH = parseFloat(document.getElementById('t1-work-hours').value) || 0;
+            const commuteH = parseFloat(document.getElementById('t1-commute-hours').value) || 0;
+            const recoveryH = parseFloat(document.getElementById('t1-recovery-hours').value) || 0;
+
+            const totalComp = salary + bonus;
+            const totalHoursPerWeek = workH + commuteH + recoveryH;
+            const totalHoursPerYear = totalHoursPerWeek * 50; // Assume 50 working weeks
+
+            const hourly = totalHoursPerYear > 0 ? (totalComp / totalHoursPerYear) : 0;
+            document.getElementById('t1-auto-rate').textContent = `${formatCurrency(hourly)} / hr`;
+            return { totalComp, totalHoursPerWeek, hourly };
+        }
+
+        function runTool1() {
+            const salary = parseFloat(document.getElementById('t1-salary').value) || 0;
+            const bonus = parseFloat(document.getElementById('t1-bonus').value) || 0;
+            const workH = parseFloat(document.getElementById('t1-work-hours').value) || 0;
+            const commuteH = parseFloat(document.getElementById('t1-commute-hours').value) || 0;
+            const recoveryH = parseFloat(document.getElementById('t1-recovery-hours').value) || 0;
+
+            if (salary <= 0) {
+                alert("Please enter a valid salary amount.");
+                return;
+            }
+
+            const { totalComp, totalHoursPerWeek, hourly } = updateT1AutoCalc();
+            const nominalHourly = (totalComp / (40 * 50)); // standard 40h work week
+
+            const htmlOutput = `
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-calculator"></i> The Real Hourly Rate</div>
+                    <div class="output-value">${formatCurrency(hourly)} / hour</div>
+                    <div class="output-desc">
+                        Nominally, your salary suggests you make <strong>${formatCurrency(nominalHourly)}/hr</strong> (based on 40h/wk). 
+                        However, when factoring in <strong>${workH}h work</strong>, <strong>${commuteH}h commute</strong>, and <strong>${recoveryH}h decompressing/recovering</strong> (${totalHoursPerWeek} total hours/wk consumed), your true rate drops by <strong>${Math.round((1 - hourly/nominalHourly)*100)}%</strong>.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-heart-pulse"></i> The Health Tax</div>
+                    <div class="output-desc">
+                        Allocating ${recoveryH} hours every week solely to recover from stress indicates chronic system overload. 
+                        This time tax is physically equivalent to working an extra ${Math.round((recoveryH/workH)*100)}% shift each week unpaid.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-people-roof"></i> The Relationship Tax</div>
+                    <div class="output-desc">
+                        You spend roughly <strong>${(commuteH + recoveryH) * 50} hours per year</strong> in transitional stress or recovery. 
+                        That is time subtracted directly from presence with family, partners, friends, and personal health.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-seedling"></i> The Opportunity Cost</div>
+                    <div class="output-desc">
+                        Beyond money, staying costs you the capacity to build alternative skills, network in healthier industries, or explore personal enterprise during peak energetic years.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-lock"></i> The Lifestyle Lock</div>
+                    <div class="output-desc">
+                        High stress frequently triggers compensating expenses: convenience meals, expensive decompression travel, and retail therapy. Track how much of your total ${formatCurrency(totalComp)} pays for coping mechanisms.
+                    </div>
+                </div>
+            `;
+
+            const outCard = document.getElementById('t1-output');
+            outCard.innerHTML = htmlOutput;
+            outCard.style.display = 'block';
+
+            saveHistory('tool1', { htmlOutput });
+        }
+
+        /* ------------------------------------------------------------------
+           TOOL 2 ENGINE: FINANCIAL RUNWAY
+        ------------------------------------------------------------------ */
+        function runTool2() {
+            const essential = parseFloat(document.getElementById('t2-essential').value) || 0;
+            const discretionary = parseFloat(document.getElementById('t2-discretionary').value) || 0;
+            const savings = parseFloat(document.getElementById('t2-savings').value) || 0;
+            const severance = parseFloat(document.getElementById('t2-severance').value) || 0;
+            const otherIncome = parseFloat(document.getElementById('t2-other-income').value) || 0;
+            const minSalary = parseFloat(document.getElementById('t2-min-salary').value) || 0;
+
+            if (essential <= 0) {
+                alert("Please enter monthly essential expenses.");
+                return;
+            }
+
+            const totalSavings = savings + severance;
+            const netBurnStandard = (essential + discretionary) - otherIncome;
+            const netBurnLean = essential - otherIncome;
+
+            const standardRunwayMonths = netBurnStandard > 0 ? (totalSavings / netBurnStandard).toFixed(1) : "Infinite";
+            const leanRunwayMonths = netBurnLean > 0 ? (totalSavings / netBurnLean).toFixed(1) : "Infinite";
+
+            const safetyTarget6Mo = (essential * 6) + (discretionary * 3);
+
+            const htmlOutput = `
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-hourglass-half"></i> The Runway</div>
+                    <div class="output-value">${standardRunwayMonths} Months (Current Lifestyle)</div>
+                    <div class="output-desc">
+                        With total available liquid funds of <strong>${formatCurrency(totalSavings)}</strong> and a monthly net burn of <strong>${formatCurrency(netBurnStandard)}</strong>, you can walk away today and maintain standard spending for over ${Math.floor(standardRunwayMonths)} months.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-scissors"></i> The Reduced Lifestyle</div>
+                    <div class="output-value">${leanRunwayMonths} Months (Lean Essential Mode)</div>
+                    <div class="output-desc">
+                        By temporarily pausing discretionary spending (saving ${formatCurrency(discretionary)}/mo), your monthly burn drops to <strong>${formatCurrency(netBurnLean)}</strong>, extending your financial freedom cushion significantly.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-bridge"></i> The Bridge Plan</div>
+                    <div class="output-desc">
+                        Accepting a floor salary of <strong>${formatCurrency(minSalary)}</strong> (~${formatCurrency(minSalary / 12)}/mo net) covers <strong>${Math.round(((minSalary/12) / essential) * 100)}%</strong> of your core baseline survival costs without burning capital.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-shield-halved"></i> The Safety Number</div>
+                    <div class="output-value">${formatCurrency(safetyTarget6Mo)}</div>
+                    <div class="output-desc">
+                        This reflects 6 months of essential living plus 3 months of buffer. You currently have <strong>${Math.round((totalSavings / safetyTarget6Mo) * 100)}%</strong> of this target saved.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-hand-fist"></i> The Negotiation Leverage</div>
+                    <div class="output-desc">
+                        Knowing you have ${leanRunwayMonths} months of safety gives you absolute psychological freedom. You do not need to speak from desperation at your current job or in interviews.
+                    </div>
+                </div>
+            `;
+
+            const outCard = document.getElementById('t2-output');
+            outCard.innerHTML = htmlOutput;
+            outCard.style.display = 'block';
+
+            saveHistory('tool2', { htmlOutput });
+        }
+
+        /* ------------------------------------------------------------------
+           TOOL 3 ENGINE: ALTERNATIVE MAPPER
+        ------------------------------------------------------------------ */
+        function runTool3() {
+            const skills = document.getElementById('t3-skills').value || 'Core professional skills';
+            const industries = document.getElementById('t3-industries').value || 'Target industries';
+            const roles = document.getElementById('t3-roles').value || 'Potential roles';
+            const salaryRes = document.getElementById('t3-salary-research').value || 'Researched ranges';
+            const fears = document.getElementById('t3-fears').value || 'Loss of income or standing';
+
+            const htmlOutput = `
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-arrows-spin"></i> The Transfer Map</div>
+                    <div class="output-desc">
+                        Your skills (<em>"${skills.substring(0, 80)}..."</em>) are functional assets, not tied to your current company badge. High-level problem solving, communication, and execution are fully portable into <strong>${industries}</strong>.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-magnifying-glass"></i> The Gap Analysis</div>
+                    <div class="output-desc">
+                        Transitioning into <strong>${roles}</strong> rarely requires re-schooling. The main gap is domain jargon and network positioning. Repackaging existing wins into target industry terminology bridges 80% of the perceived gap.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-chart-line"></i> The Realistic Range</div>
+                    <div class="output-desc">
+                        Based on target research (<em>${salaryRes}</em>), taking a controlled step down in pay trades top-tier salary for immense life quality gains.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-scale-balanced"></i> The Lifestyle Comparison</div>
+                    <div class="output-desc">
+                        Trading high-burn stress for manageable workloads in <strong>${industries}</strong> often returns 10-15 hours per week of personal energy, eliminating the hidden health tax.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-flask"></i> The Low-Risk Experiment</div>
+                    <div class="output-desc">
+                        <strong>Test before quitting:</strong> Conduct 3 informational interviews with people in <em>${roles}</em> over the next 14 days. Address your fear (<em>"${fears}"</em>) directly by asking them how they handled early transitions.
+                    </div>
+                </div>
+            `;
+
+            const outCard = document.getElementById('t3-output');
+            outCard.innerHTML = htmlOutput;
+            outCard.style.display = 'block';
+
+            saveHistory('tool3', { htmlOutput });
+        }
+
+        /* ------------------------------------------------------------------
+           TOOL 4 ENGINE: STAY-AND-FIX PLAN
+        ------------------------------------------------------------------ */
+        function runTool4() {
+            const checkedIssues = Array.from(document.querySelectorAll('input[name="t4-issues"]:checked')).map(c => c.value);
+            const tried = document.getElementById('t4-tried').value || 'Informal adjustments';
+            const changes = document.getElementById('t4-employer-change').value || 'Workload or structural shifts';
+            const leverage = document.querySelector('input[name="t4-leverage"]:checked')?.value || 'Not sure';
+
+            const issuesList = checkedIssues.length > 0 ? checkedIssues.join(', ') : 'General burnout';
+
+            const scriptText = `Hi [Manager Name],
+
+I want to initiate a proactive discussion about optimizing my long-term sustainability and output in this role.
+
+Currently, key friction points around ${issuesList} are impacting my capacity to deliver at peak level. To align my focus with high-impact goals, I propose the following adjustments:
+
+- Focus areas: ${changes}
+- Proposed shift: Reallocating low-priority task coverage or adjusting core working windows.
+
+I remain committed to delivering quality work for the team, and making these calibration changes will allow me to sustain that performance. Let's discuss this during our next 1-on-1.`;
+
+            const htmlOutput = `
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-sliders"></i> The Negotiables</div>
+                    <div class="output-desc">
+                        Identified Friction Points: <strong>${issuesList}</strong>.<br>
+                        With <strong>${leverage}</strong> leverage, framing these demands as performance-enabling (rather than personal complaint) yields the highest success rate.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-comment-dots"></i> The Ask Script</div>
+                    <div class="output-desc">Copy and adapt this script for a structured negotiation:</div>
+                    <div class="script-box">
+                        <button class="copy-btn" onclick="copyToClipboard(\`${scriptText.replace(/`/g, '\\`')}\`)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                        ${scriptText}
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-arrows-turn-to-dots"></i> The Internal Transfer</div>
+                    <div class="output-desc">
+                        Moving to a different department or manager preserves your vesting schedules, tenure, and benefits while removing toxic immediate team dynamics.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-gauge-low"></i> The Scope Reduction</div>
+                    <div class="output-desc">
+                        Practice "Quiet Calibration": Stop performing unrewarded over-time tasks. Meet all stated job description expectations accurately, but cease volunteering for discretionary crisis management.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-bullseye"></i> The Reality Check</div>
+                    <div class="output-desc">
+                        ${checkedIssues.includes('Culture') || checkedIssues.includes('Ethics') ? 
+                          '<strong>Warning:</strong> Cultural and ethical toxicity rarely fix via negotiation. Focus your energy on an exit strategy rather than fixing deep organization traits.' : 
+                          'Structural issues like hours and projects can often be renegotiated if leadership values your retention.'}
+                    </div>
+                </div>
+            `;
+
+            const outCard = document.getElementById('t4-output');
+            outCard.innerHTML = htmlOutput;
+            outCard.style.display = 'block';
+
+            saveHistory('tool4', { htmlOutput });
+        }
+
+        /* ------------------------------------------------------------------
+           TOOL 5 ENGINE: THE DECISION
+        ------------------------------------------------------------------ */
+        function runTool5() {
+            const gut = document.getElementById('t5-gut').value;
+            const friend = document.getElementById('t5-friend').value || 'Take care of health first.';
+            const step = document.getElementById('t5-small-step').value || 'Update resume.';
+            const condition = document.getElementById('t5-condition').value || 'Financial safety buffer.';
+
+            const htmlOutput = `
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-table-cells"></i> The Decision Matrix</div>
+                    <div class="output-desc">
+                        <strong>Gut Reading:</strong> ${gut}.<br>
+                        <strong>Perspective Alignment:</strong> You advised your best friend: <em>"${friend}"</em>. Notice if you are holding yourself to a harsher, more punitive standard than someone you care about.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-calendar-check"></i> The Commitment Test</div>
+                    <div class="output-desc">
+                        Imagine standing here 365 days from today:
+                        <ul style="margin-left: 20px; margin-top: 6px;">
+                            <li><strong>Scenario A (Stay & Unchanged):</strong> High income maintained, but health and relationships further eroded.</li>
+                            <li><strong>Scenario B (Calculated Exit):</strong> Lower pay or temporary transition, but regained agency, health, and career trajectory.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-diagram-project"></i> The Hybrid Path</div>
+                    <div class="output-desc">
+                        You do not need to make a binary "Quit Tomorrow vs. Stay Forever" choice. Treat your job as an objective financial sponsor while building your exit ramp during non-work hours.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-timeline"></i> The Timeline</div>
+                    <div class="output-desc">
+                        <strong>Immediate Action Step:</strong> ${step}<br>
+                        <strong>Pre-Condition Target:</strong> ${condition}
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-handshake-simple"></i> The No-Regret Pledge</div>
+                    <div class="output-desc">
+                        Commit to honoring your decision once made. Money spent purchasing your sanity and long-term health is never "lost" capital—it is an investment in longevity.
+                    </div>
+                </div>
+            `;
+
+            const outCard = document.getElementById('t5-output');
+            outCard.innerHTML = htmlOutput;
+            outCard.style.display = 'block';
+
+            saveHistory('tool5', { htmlOutput });
+        }
+
+        /* ------------------------------------------------------------------
+           SAMPLE SCENARIO LOADERS & EVENT BINDINGS
+        ------------------------------------------------------------------ */
+        function initToolEventHandlers() {
+            // Tool 1
+            document.getElementById('t1-analyze').addEventListener('click', runTool1);
+            document.getElementById('t1-sample').addEventListener('click', () => {
+                document.getElementById('t1-salary').value = 120000;
+                document.getElementById('t1-bonus').value = 30000;
+                document.getElementById('t1-work-hours').value = 55;
+                document.getElementById('t1-commute-hours').value = 8;
+                document.getElementById('t1-recovery-hours').value = 10;
+                updateT1AutoCalc();
+                runTool1();
+            });
+
+            // Tool 2
+            document.getElementById('t2-analyze').addEventListener('click', runTool2);
+            document.getElementById('t2-sample').addEventListener('click', () => {
+                document.getElementById('t2-essential').value = 6000;
+                document.getElementById('t2-discretionary').value = 3000;
+                document.getElementById('t2-savings').value = 45000;
+                document.getElementById('t2-severance').value = 20000;
+                document.getElementById('t2-other-income').value = 0;
+                document.getElementById('t2-min-salary').value = 75000;
+                runTool2();
+            });
+
+            // Tool 3
+            document.getElementById('t3-analyze').addEventListener('click', runTool3);
+            document.getElementById('t3-sample').addEventListener('click', () => {
+                document.getElementById('t3-skills').value = "Project management, data analysis, team leadership, cross-functional strategy";
+                document.getElementById('t3-industries').value = "Nonprofit management, Higher Education, Climate Tech";
+                document.getElementById('t3-roles').value = "Operations Manager, Senior Program Lead";
+                document.getElementById('t3-salary-research').value = "Researched $80,000 - $95,000 range for mid-level operations";
+                document.getElementById('t3-fears').value = "Fear of starting over at 42, giving up senior title prestige";
+                runTool3();
+            });
+
+            // Tool 4
+            document.getElementById('t4-analyze').addEventListener('click', runTool4);
+            document.getElementById('t4-sample').addEventListener('click', () => {
+                document.querySelectorAll('input[name="t4-issues"]').forEach(cb => {
+                    cb.checked = ['Hours', 'Boss', 'Burnout'].includes(cb.value);
+                });
+                document.getElementById('t4-tried').value = "Tried informal boundary setting and taking occasional sick days";
+                document.getElementById('t4-employer-change').value = "Reduce weekly hours, change direct reporting line, assign dedicated coordinator";
+                
+                const rad = document.querySelector('input[name="t4-leverage"][value="Maybe"]');
+                if (rad) rad.checked = true;
+
+                runTool4();
+            });
+
+            // Tool 5
+            document.getElementById('t5-analyze').addEventListener('click', runTool5);
+            document.getElementById('t5-sample').addEventListener('click', () => {
+                document.getElementById('t5-gut').value = "Terrified either way";
+                document.getElementById('t5-friend').value = "I would tell them to prioritize their physical health before burnout becomes irreversible, but set up a clear 6-month financial runway first.";
+                document.getElementById('t5-small-step').value = "Update resume and LinkedIn profile, schedule an informational interview with an alumni connection.";
+                document.getElementById('t5-condition').value = "Reaching $20k in additional liquid savings to feel completely safe making the pivot.";
+                runTool5();
+            });
+        }
+    </script>
+</body>
+</html>

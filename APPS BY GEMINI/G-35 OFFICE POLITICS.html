@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Politics Navigator</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --burgundy: #6D2E46;
+            --burgundy-light: #8D3E5B;
+            --burgundy-dark: #4D2031;
+            --sage: #A3B18A;
+            --sage-dark: #588157;
+            --sage-light: #DAD7CD;
+            --bg-gradient: linear-gradient(135deg, #FAF3F5 0%, #F1F8E8 100%);
+            --card-bg: #FFFFFF;
+            --text-main: #2B2D42;
+            --text-muted: #6C757D;
+            --border-color: #E9ECEF;
+            --sidebar-width: 250px;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+            --radius-xl: 1rem;
+            --radius-lg: 0.75rem;
+            --radius-md: 0.5rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #FFFFFF;
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--burgundy);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--burgundy);
+            line-height: 1.2;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: #FAF3F5;
+            color: var(--burgundy);
+        }
+
+        .nav-item.active {
+            background: #FAF3F5;
+            color: var(--burgundy);
+            border-left-color: var(--burgundy);
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            flex: 1;
+        }
+
+        /* Mobile Header & Overlay */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 90;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--burgundy);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 95;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Cards & Elements */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, var(--burgundy) 0%, var(--burgundy-dark) 100%);
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .hero-card h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-card p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .problem-statement {
+            background: #FAF3F5;
+            border-left: 4px solid var(--burgundy);
+            padding: 1rem 1.25rem;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            color: var(--burgundy-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        textarea, select, input[type="text"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #FAFAFA;
+            transition: all 0.2s;
+        }
+
+        textarea:focus, select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--burgundy);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(109, 46, 70, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .radio-label input {
+            accent-color: var(--burgundy);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--burgundy);
+            color: white;
+            flex: 2;
+        }
+
+        .btn-primary:hover {
+            background: var(--burgundy-light);
+            box-shadow: 0 4px 12px rgba(109, 46, 70, 0.2);
+        }
+
+        .btn-secondary {
+            background: #EAEAEA;
+            color: var(--text-main);
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: #E0E0E0;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-copy {
+            background: var(--sage);
+            color: white;
+        }
+
+        .btn-copy:hover {
+            background: var(--sage-dark);
+        }
+
+        /* Dashboard Grid */
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--burgundy);
+        }
+
+        .dashboard-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .dashboard-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            background: #FAF3F5;
+            color: var(--burgundy);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .dashboard-card h3 {
+            font-size: 1.1rem;
+            color: var(--burgundy);
+        }
+
+        .dashboard-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Analysis Output Styling */
+        .output-section {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .output-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .output-card {
+            border-top: 4px solid var(--burgundy);
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .output-card.sage-accent {
+            border-top-color: var(--sage-dark);
+        }
+
+        .output-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .output-header h4 {
+            color: var(--burgundy);
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .output-card.sage-accent .output-header h4 {
+            color: var(--sage-dark);
+        }
+
+        .output-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        .script-box {
+            background: #F8F9FA;
+            border: 1px dashed #CED4DA;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            font-family: 'Inter', sans-serif;
+            font-style: italic;
+            position: relative;
+            margin: 0.75rem 0;
+            white-space: pre-line;
+        }
+
+        .diagram-box {
+            background: #FAF3F5;
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .diagram-node {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 2px solid var(--burgundy);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            color: var(--burgundy);
+            margin: 0.25rem;
+        }
+
+        .diagram-node.informal {
+            border-style: dashed;
+            border-color: var(--sage-dark);
+            color: var(--sage-dark);
+        }
+
+        .diagram-arrow {
+            display: inline-block;
+            margin: 0 0.5rem;
+            color: var(--text-muted);
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-header h3 {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+
+        .history-summary {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #FAFAFA;
+        }
+
+        .history-summary:hover {
+            background: #F0F0F0;
+        }
+
+        .history-details {
+            padding: 1rem;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            background: #FFFFFF;
+        }
+
+        .history-item.open .history-details {
+            display: block;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--burgundy);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            font-weight: 500;
+            font-size: 0.9rem;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            width: 100%;
+            padding: 1.5rem 0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            line-height: 1.5;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding-top: 80px;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .hero-card h2 {
+                font-size: 1.75rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: var(--burgundy);">
+            <i class="fa-solid fa-compass"></i>
+            <span>Politics Navigator</span>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-compass"></i>
+                <h1>Office Politics<br><span style="font-size:0.8rem; font-weight:400; color:var(--text-muted);">Navigator</span></h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-item active" data-tool="dashboard">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </a>
+                <a class="nav-item" data-tool="politics-map">
+                    <i class="fa-solid fa-sitemap"></i> Politics Map
+                </a>
+                <a class="nav-item" data-tool="alliance-builder">
+                    <i class="fa-solid fa-handshake"></i> Alliance Builder
+                </a>
+                <a class="nav-item" data-tool="neutral-position">
+                    <i class="fa-solid fa-scale-balanced"></i> Neutral Position
+                </a>
+                <a class="nav-item" data-tool="visibility-strategy">
+                    <i class="fa-solid fa-eye"></i> Visibility Strategy
+                </a>
+                <a class="nav-item" data-tool="values-guard">
+                    <i class="fa-solid fa-shield-halved"></i> Values Guard
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-container">
+
+                <!-- DASHBOARD VIEW -->
+                <section id="view-dashboard" class="tool-view">
+                    <div class="card hero-card">
+                        <h2>Office Politics Navigator</h2>
+                        <p>Understand the game without selling your soul.</p>
+                    </div>
+
+                    <div class="grid-dashboard">
+                        <div class="dashboard-card" onclick="switchTool('politics-map')">
+                            <div>
+                                <div class="dashboard-card-header">
+                                    <div class="dashboard-card-icon"><i class="fa-solid fa-sitemap"></i></div>
+                                    <h3>Politics Map</h3>
+                                </div>
+                                <p>Decode how decisions actually get made, formal authority vs informal influence.</p>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card" onclick="switchTool('alliance-builder')">
+                            <div>
+                                <div class="dashboard-card-header">
+                                    <div class="dashboard-card-icon"><i class="fa-solid fa-handshake"></i></div>
+                                    <h3>Alliance Builder</h3>
+                                </div>
+                                <p>Form mutually beneficial, protective workplace relationships without feeling transactional.</p>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card" onclick="switchTool('neutral-position')">
+                            <div>
+                                <div class="dashboard-card-header">
+                                    <div class="dashboard-card-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+                                    <h3>Neutral Position</h3>
+                                </div>
+                                <p>Navigate crossfire between factions without getting dragged down or taking sides.</p>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card" onclick="switchTool('visibility-strategy')">
+                            <div>
+                                <div class="dashboard-card-header">
+                                    <div class="dashboard-card-icon"><i class="fa-solid fa-eye"></i></div>
+                                    <h3>Visibility Strategy</h3>
+                                </div>
+                                <p>Ensure key stakeholders recognize your value authentically without self-aggrandizement.</p>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card" onclick="switchTool('values-guard')">
+                            <div>
+                                <div class="dashboard-card-header">
+                                    <div class="dashboard-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                                    <h3>Values Guard</h3>
+                                </div>
+                                <p>Protect your moral code and career standing under toxic or dubious pressure.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: POLITICS MAP -->
+                <section id="view-politics-map" class="tool-view" style="display:none;">
+                    <div class="card">
+                        <h2>Politics Map</h2>
+                        <div class="problem-statement">
+                            <i class="fa-solid fa-circle-question"></i>
+                            <span>"I don't understand how decisions actually get made here."</span>
+                        </div>
+
+                        <form id="form-politics-map">
+                            <div class="form-group">
+                                <label for="pm-formal">Who has formal authority?</label>
+                                <textarea id="pm-formal" placeholder="e.g., Director Sarah, VP of Engineering"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pm-informal">Who has informal influence?</label>
+                                <textarea id="pm-informal" placeholder="e.g., Senior Lead Tech Mark, Admin Assistant Julie"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pm-allies">Who is allied with whom?</label>
+                                <textarea id="pm-allies" placeholder="e.g., Mark has VP's ear; Product Manager aligned with Marketing"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pm-decisions">Where do decisions really happen?</label>
+                                <select id="pm-decisions">
+                                    <option value="In meetings">In official meetings</option>
+                                    <option value="In side conversations">In side conversations / pre-meetings</option>
+                                    <option value="In leadership offsites">In leadership offsites</option>
+                                    <option value="I don't know">I don't know</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Is there a rival faction?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="pm-rival" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="pm-rival" value="Maybe"> Maybe</label>
+                                    <label class="radio-label"><input type="radio" name="pm-rival" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="pm-rival" value="Not sure"> Not sure</label>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="loadSample('politics-map')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Analyze Landscape</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-politics-map" class="output-section">
+                        <!-- Dynamic Analysis Sections -->
+                    </div>
+
+                    <div class="history-section" id="history-politics-map"></div>
+                </section>
+
+                <!-- TOOL 2: ALLIANCE BUILDER -->
+                <section id="view-alliance-builder" class="tool-view" style="display:none;">
+                    <div class="card">
+                        <h2>Alliance Builder</h2>
+                        <div class="problem-statement">
+                            <i class="fa-solid fa-circle-question"></i>
+                            <span>"I need relationships that protect me without feeling like I'm using people."</span>
+                        </div>
+
+                        <form id="form-alliance-builder">
+                            <div class="form-group">
+                                <label for="ab-trust">Who do you trust?</label>
+                                <textarea id="ab-trust" placeholder="e.g., Peers Jane and Dave from Operations"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ab-trusts-you">Who trusts you?</label>
+                                <textarea id="ab-trusts-you" placeholder="e.g., Direct manager, Junior analysts"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ab-need-know">Who do you need to know better?</label>
+                                <textarea id="ab-need-know" placeholder="e.g., Head of Finance, Lead Product Designer"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ab-offer">What do you offer others?</label>
+                                <select id="ab-offer">
+                                    <option value="Expertise">Technical / Domain Expertise</option>
+                                    <option value="Resources">Access to Resources / Budget</option>
+                                    <option value="Support">Emotional & Operational Support</option>
+                                    <option value="Information">Early Intel & Cross-functional Information</option>
+                                    <option value="Connections">Network Connections</option>
+                                    <option value="Hard work">Execution Capacity & Hard Work</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ab-need">What do you need from others?</label>
+                                <select id="ab-need">
+                                    <option value="Protection">Political Protection / Cover</option>
+                                    <option value="Information">Early Information & Context</option>
+                                    <option value="Advocacy">Public Advocacy / Sponsorship</option>
+                                    <option value="Opportunities">Stretch Opportunities & Projects</option>
+                                    <option value="Validation">Validation & Peer Feedback</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="loadSample('alliance-builder')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-diagram-project"></i> Generate Strategy</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-alliance-builder" class="output-section"></div>
+                    <div class="history-section" id="history-alliance-builder"></div>
+                </section>
+
+                <!-- TOOL 3: THE NEUTRAL POSITION -->
+                <section id="view-neutral-position" class="tool-view" style="display:none;">
+                    <div class="card">
+                        <h2>The Neutral Position</h2>
+                        <div class="problem-statement">
+                            <i class="fa-solid fa-circle-question"></i>
+                            <span>"I'm caught between two powerful people/groups and I don't want to pick sides."</span>
+                        </div>
+
+                        <form id="form-neutral-position">
+                            <div class="form-group">
+                                <label for="np-sides">Who are the two sides?</label>
+                                <textarea id="np-sides" placeholder="e.g., VP of Sales vs VP of Product"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="np-want">What do they want from you?</label>
+                                <textarea id="np-want" placeholder="e.g., Public endorsement of their project timeline"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="np-consequence">What happens if you choose a side?</label>
+                                <textarea id="np-consequence" placeholder="e.g., Lose budget access from losing party; alienate core team"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Can you avoid choosing?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="np-avoid" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="np-avoid" value="Temporarily"> Temporarily</label>
+                                    <label class="radio-label"><input type="radio" name="np-avoid" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="np-avoid" value="Not sure"> Not sure</label>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="loadSample('neutral-position')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-shield"></i> Develop Neutral Playbook</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-neutral-position" class="output-section"></div>
+                    <div class="history-section" id="history-neutral-position"></div>
+                </section>
+
+                <!-- TOOL 4: VISIBILITY STRATEGY -->
+                <section id="view-visibility-strategy" class="tool-view" style="display:none;">
+                    <div class="card">
+                        <h2>Visibility Strategy</h2>
+                        <div class="problem-statement">
+                            <i class="fa-solid fa-circle-question"></i>
+                            <span>"Good work isn't enough. I need the right people to know I exist."</span>
+                        </div>
+
+                        <form id="form-visibility-strategy">
+                            <div class="form-group">
+                                <label for="vs-known-for">What do you want to be known for?</label>
+                                <textarea id="vs-known-for" placeholder="e.g., Data-driven optimization, reliable crisis execution"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="vs-target-audience">Who needs to know about your work?</label>
+                                <textarea id="vs-target-audience" placeholder="e.g., Skip-level Director, Cross-functional Engineering Leads"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="vs-current-share">How do you currently share wins?</label>
+                                <select id="vs-current-share">
+                                    <option value="I don't">I don't share wins / Keep head down</option>
+                                    <option value="Team meetings">Team meetings only</option>
+                                    <option value="One-on-ones">1-on-1s with direct manager</option>
+                                    <option value="Email updates">Status email updates</option>
+                                    <option value="Social/Slack">Public Slack/Teams channels</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="vs-discomfort">What feels uncomfortable about self-promotion?</label>
+                                <textarea id="vs-discomfort" placeholder="e.g., Feels like bragging, fear of looking arrogant or needy"></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="loadSample('visibility-strategy')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-bullhorn"></i> Build Visibility Plan</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-visibility-strategy" class="output-section"></div>
+                    <div class="history-section" id="history-visibility-strategy"></div>
+                </section>
+
+                <!-- TOOL 5: VALUES GUARD -->
+                <section id="view-values-guard" class="tool-view" style="display:none;">
+                    <div class="card">
+                        <h2>Values Guard</h2>
+                        <div class="problem-statement">
+                            <i class="fa-solid fa-circle-question"></i>
+                            <span>"The political pressure is asking me to compromise who I am."</span>
+                        </div>
+
+                        <form id="form-values-guard">
+                            <div class="form-group">
+                                <label for="vg-pressure-type">What pressure are you facing?</label>
+                                <select id="vg-pressure-type">
+                                    <option value="Gossip">Participating in toxic gossip</option>
+                                    <option value="Backstabbing">Backstabbing / Scapegoating someone</option>
+                                    <option value="Exclusion">Systematically excluding a colleague</option>
+                                    <option value="Falsifying results">Falsifying or massaging metrics/data</option>
+                                    <option value="Undermining a colleague">Undermining another lead's authority</option>
+                                    <option value="Hiding information">Withholding critical information</option>
+                                    <option value="Other">Other ethical dilemma</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="vg-source">Who is applying the pressure?</label>
+                                <select id="vg-source">
+                                    <option value="Boss">Direct Boss / Supervisor</option>
+                                    <option value="Peer">Peer / Teammate</option>
+                                    <option value="Team culture">Prevailing Team Culture</option>
+                                    <option value="Senior leader">Senior Executive</option>
+                                    <option value="Myself">Internal Anxiety / Myself</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="vg-value-risk">What value is at risk?</label>
+                                <textarea id="vg-value-risk" placeholder="e.g., Personal integrity, fairness, psychological safety"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="vg-fear">What are you afraid will happen if you refuse?</label>
+                                <textarea id="vg-fear" placeholder="e.g., Getting passed over for promotion, social isolation"></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="loadSample('values-guard')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-shield-cat"></i> Formulate Defense</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-values-guard" class="output-section"></div>
+                    <div class="history-section" id="history-values-guard"></div>
+                </section>
+
+            </div>
+
+            <!-- Global Footer -->
+            <footer>
+                <div class="footer-content">
+                    For professional relationship strategy only. Not psychological, legal, or HR advice. For harassment or discrimination, contact appropriate authorities.
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">Copied to clipboard!</div>
+
+    <script>
+        /* Global Navigation Logic */
+        document.addEventListener('DOMContentLoaded', () => {
+            setupNavigation();
+            setupFormListeners();
+            loadAllHistories();
+        });
+
+        function setupNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const toolId = item.getAttribute('data-tool');
+                    switchTool(toolId);
+                    closeMobileSidebar();
+                });
+            });
+
+            hamburgerBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('mobile-open');
+            });
+
+            overlay.addEventListener('click', closeMobileSidebar);
+        }
+
+        function closeMobileSidebar() {
+            document.getElementById('sidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('mobile-open');
+        }
+
+        function switchTool(toolId) {
+            // Update Nav Active Class
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.toggle('active', nav.getAttribute('data-tool') === toolId);
+            });
+
+            // Show Target View, Hide Others
+            document.querySelectorAll('.tool-view').forEach(view => {
+                view.style.display = view.id === `view-${toolId}` ? 'block' : 'none';
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* Toast Logic */
+        function showToast(message = "Copied to clipboard!") {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied script to clipboard!");
+            }).catch(err => {
+                console.error("Copy failed", err);
+            });
+        }
+
+        /* Sample Data Handlers */
+        const SAMPLE_DATA = {
+            'politics-map': {
+                'pm-formal': 'Director Sarah (Engineering) & VP James',
+                'pm-informal': 'Senior PM Mark (has VP ear, informal gatekeeper) & Executive Assistant Julie',
+                'pm-allies': 'Mark is closely allied with VP James; Product team aligns with Marketing against Ops',
+                'pm-decisions': 'In side conversations',
+                'pm-rival': 'Yes'
+            },
+            'alliance-builder': {
+                'ab-trust': 'Jane (Tech Lead) and Dave (Operations Lead)',
+                'ab-trusts-you': 'Direct Manager (VP Alex) and Junior Analysts',
+                'ab-need-know': 'Operations Manager Karen (controls execution bandwidth)',
+                'ab-offer': 'Expertise',
+                'ab-need': 'Advocacy'
+            },
+            'neutral-position': {
+                'np-sides': 'VP Alex (wants faster feature shipping) vs Director Karen (wants stability & high quality)',
+                'np-want': 'Public support for their preferred product roadmap at Friday review',
+                'np-consequence': 'Alienates either VP Alex (career blocker) or Director Karen (operational blocker)',
+                'np-avoid': 'Temporarily'
+            },
+            'visibility-strategy': {
+                'vs-known-for': 'Data visualization & translating complex technical metrics into executive stories',
+                'vs-target-audience': 'Skip-level Director & Cross-functional Business Development Leads',
+                'vs-current-share': 'One-on-ones',
+                'vs-discomfort': 'Feels like self-aggrandizing bragging; uncomfortable putting myself in spotlight'
+            },
+            'values-guard': {
+                'vg-pressure-type': 'Gossip',
+                'vg-source': 'Team culture',
+                'vg-value-risk': 'Kindness, psychological safety, and personal integrity',
+                'vg-fear': 'Being socially excluded or branded as "not a team player"'
+            }
+        };
+
+        function loadSample(toolId) {
+            const data = SAMPLE_DATA[toolId];
+            if (!data) return;
+
+            Object.keys(data).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = data[key];
+                } else {
+                    // Check for radio buttons
+                    const radios = document.getElementsByName(key);
+                    radios.forEach(radio => {
+                        if (radio.value === data[key]) radio.checked = true;
+                    });
+                }
+            });
+            showToast("Sample scenario loaded.");
+        }
+
+        /* Event Listeners setup for Form Submissions */
+        function setupFormListeners() {
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const toolId = this.id.replace('form-', '');
+                    processAnalysis(toolId);
+                });
+            });
+        }
+
+        /* Business Logic & Pre-written Analysis Engines */
+        function processAnalysis(toolId) {
+            let outputContainer = document.getElementById(`output-${toolId}`);
+            let htmlContent = '';
+            let historyEntry = {};
+
+            if (toolId === 'politics-map') {
+                const formal = document.getElementById('pm-formal').value || 'Not specified';
+                const informal = document.getElementById('pm-informal').value || 'Not specified';
+                const allies = document.getElementById('pm-allies').value || 'Not specified';
+                const decisions = document.getElementById('pm-decisions').value;
+                const rival = document.querySelector('input[name="pm-rival"]:checked')?.value || 'Not sure';
+
+                historyEntry = { summary: `Map: ${formal.substring(0, 30)}...`, date: new Date().toLocaleDateString() };
+
+                htmlContent = `
+                    <div class="output-card">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-sitemap"></i> Power Map Diagram</h4>
+                        </div>
+                        <div class="output-content">
+                            <p><strong>Formal Power Hierarchy:</strong> ${formal}</p>
+                            <p><strong>Informal Influence Hubs:</strong> ${informal}</p>
+                            <div class="diagram-box">
+                                <span class="diagram-node">${formal.split(',')[0] || 'Formal Lead'}</span>
+                                <span class="diagram-arrow"><i class="fa-solid fa-arrows-left-right"></i></span>
+                                <span class="diagram-node informal">${informal.split(',')[0] || 'Shadow Influencer'}</span>
+                                <div style="margin-top:0.5rem; font-size:0.8rem; color:var(--text-muted);">Solid line = Title power | Dashed line = Real ear/influence</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="output-card sage-accent">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-filter"></i> The Decision Pipeline</h4>
+                        </div>
+                        <div class="output-content">
+                            <p>Because decisions happen <strong>${decisions.toLowerCase()}</strong>, official forums are mostly ceremonial confirmation settings.</p>
+                            <p style="margin-top:0.5rem;"><strong>Actionable Rule:</strong> Never pitch an idea cold in a general meeting. Pitch in pre-meetings with ${informal.split(',')[0] || 'informal influencers'} to secure buy-in before the formal calendar event.</p>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-eye-slash"></i> Blind Spots & Faction Analysis</h4>
+                        </div>
+                        <div class="output-content">
+                            <p><strong>Rival Faction Threat:</strong> ${rival}</p>
+                            <p>${rival === 'Yes' ? 'Active rival factions present high risk of crossfire. Ensure your work remains neutral, highly documented, and aligned directly with organizational KPIs rather than personal loyalties.' : 'Low visible rival faction activity. Main risk is hidden personal agendas.'}</p>
+                            <p style="margin-top:0.5rem;"><strong>Allies Structure:</strong> ${allies}</p>
+                        </div>
+                    </div>
+
+                    <div class="output-card sage-accent">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-compass"></i> Your Position & Priority Insight</h4>
+                        </div>
+                        <div class="output-content">
+                            <div class="problem-statement" style="background:#EBF3E8; border-color:var(--sage-dark); color:#2E4028;">
+                                <i class="fa-solid fa-lightbulb"></i>
+                                <span><strong>Weekly Insight:</strong> Map your projects directly to ${informal.split(',')[0] || 'influencers'}'s stated priorities this week. Formal authority grants sign-off, but informal power grants momentum.</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (toolId === 'alliance-builder') {
+                const trust = document.getElementById('ab-trust').value || 'Peers';
+                const trustsYou = document.getElementById('ab-trusts-you').value || 'Team';
+                const needKnow = document.getElementById('ab-need-know').value || 'Stakeholders';
+                const offer = document.getElementById('ab-offer').value;
+                const need = document.getElementById('ab-need').value;
+
+                historyEntry = { summary: `Alliance: Target ${needKnow.substring(0, 30)}...`, date: new Date().toLocaleDateString() };
+
+                htmlContent = `
+                    <div class="output-card">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-handshake"></i> Relationship Strategy</h4>
+                        </div>
+                        <div class="output-content">
+                            <p>You offer <strong>${offer}</strong> and require <strong>${need}</strong>. Your strategic priority is bridging connection with <strong>${needKnow}</strong>.</p>
+                        </div>
+                    </div>
+
+                    <div class="output-card sage-accent">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-seedling"></i> The Give-First Approach</h4>
+                        </div>
+                        <div class="output-content">
+                            <ol style="padding-left:1.2rem; line-height:1.8;">
+                                <li><strong>Low-cost intelligence sharing:</strong> Send a quick article or industry update relevant to ${needKnow}'s team with no request attached.</li>
+                                <li><strong>Pre-emptive support:</strong> Offer early operational bandwidth or data review for their upcoming milestone using your ${offer}.</li>
+                                <li><strong>Public credit amplification:</strong> Explicitly mention ${trustsYou}'s contributions in broader forums.</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-mug-hot"></i> The Coffee Map (15-Min Connection Plan)</h4>
+                        </div>
+                        <div class="output-content">
+                            <ul style="list-style:none; line-height:1.8;">
+                                <li><i class="fa-solid fa-check-circle" style="color:var(--sage-dark);"></i> <strong>${needKnow}:</strong> Focus on understanding their quarterly blockers.</li>
+                                <li><i class="fa-solid fa-check-circle" style="color:var(--sage-dark);"></i> <strong>${trust.split(',')[0] || 'Key Peer'}:</strong> Maintenance check-in to exchange informal intelligence.</li>
+                                <li><i class="fa-solid fa-check-circle" style="color:var(--sage-dark);"></i> <strong>Cross-functional Ally:</strong> Test ideas outside your hierarchy.</li>
+                                <li><i class="fa-solid fa-check-circle" style="color:var(--sage-dark);"></i> <strong>Direct Network:</strong> Re-anchor trust with existing allies.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="output-card sage-accent">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-triangle-exclamation"></i> Red Flags: Trap Identification</h4>
+                        </div>
+                        <div class="output-content">
+                            <p>Beware of prospective allies who seek asymmetrical information sharing (take without give) or who request off-the-record criticism of ${trustsYou}. Keep initial interactions tightly anchored to professional execution.</p>
+                        </div>
+                    </div>
+                `;
+            } else if (toolId === 'neutral-position') {
+                const sides = document.getElementById('np-sides').value || 'Faction A vs Faction B';
+                const want = document.getElementById('np-want').value || 'Commitment';
+                const consequence = document.getElementById('np-consequence').value || 'Loss of standing';
+                const avoid = document.querySelector('input[name="np-avoid"]:checked')?.value || 'Temporarily';
+
+                const neutralScriptText = `"I completely understand why ${sides.split('vs')[0] || 'Side A'} is prioritizing this timeline, and I also recognize ${sides.split('vs')[1] || 'Side B'}'s concerns regarding execution risk. My primary focus is ensuring the core objective succeeds without creating technical debt for either team. Let's look at the objective data before locking in."`;
+
+                historyEntry = { summary: `Neutrality: ${sides.substring(0, 30)}...`, date: new Date().toLocaleDateString() };
+
+                htmlContent = `
+                    <div class="output-card">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-comment-dots"></i> The Neutral Script</h4>
+                            <button class="btn btn-sm btn-copy" onclick="copyToClipboard(\`${neutralScriptText.replace(/"/g, '&quot;')}\`)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                        </div>
+                        <div class="output-content">
+                            <div class="script-box">${neutralScriptText}</div>
+                            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.5rem;">Validates both perspectives without offering tactical endorsement to either.</p>
+                        </div>
+                    </div>
+
+                    <div class="output-card sage-accent">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-language"></i> The Translator Role</h4>
+                        </div>
+                        <div class="output-content">
+                            <p>Refrain from passing judgment on motive. Reframe political demands into operational language:</p>
+                            <p style="margin-top:0.5rem;"><strong>Instead of:</strong> "They are trying to control the narrative."<br>
+                            <strong>Say:</strong> "Their primary constraint appears to be timeline risk, while our constraint is operational accuracy."</p>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-hourglass-half"></i> The Delay & Decision Framework</h4>
+                        </div>
+                        <div class="output-content">
+                            <p><strong>Ability to Avoid:</strong> ${avoid}</p>
+                            <p><strong>Delay Tactic:</strong> "I need to run the technical variance numbers before taking a formal stance on this." (Buys 48 hours for political temperature to drop).</p>
+                            <p style="margin-top:0.75rem;"><strong>If Forced:</strong> Choose the option that preserves long-term systemic integrity over short-term political favor, and privately pre-brief the non-chosen party to explain the objective operational constraints forced upon you.</p>
+                        </div>
+                    </div>
+                `;
+            } else if (toolId === 'visibility-strategy') {
+                const knownFor = document.getElementById('vs-known-for').value || 'Execution excellence';
+                const audience = document.getElementById('vs-target-audience').value || 'Leadership';
+                const shareMethod = document.getElementById('vs-current-share').value;
+                const discomfort = document.getElementById('vs-discomfort').value || 'Fear of bragging';
+
+                const narrativeText = `I specialize in bridge-building between complex requirements and clear execution, ensuring ${knownFor} delivers measurable outcome quality.`;
+
+                historyEntry = { summary: `Visibility: ${knownFor.substring(0, 30)}...`, date: new Date().toLocaleDateString() };
+
+                htmlContent = `
+                    <div class="output-card">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-quote-left"></i> The 2-Sentence Professional Narrative</h4>
+                            <button class="btn btn-sm btn-copy" onclick="copyToClipboard(\`${narrativeText.replace(/"/g, '&quot;')}\`)"><i class="fa-regular fa-copy"></i> Copy Narrative</button>
+                        </div>
+                        <div class="output-content">
+                            <div class="script-box">${narrativeText}</div>
+                        </div>
+                    </div>
+
+                    <div class="output-card sage-accent">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-feather-pointed"></i> Ethical Visibility Techniques</h4>
+                        </div>
+                        <div class="output-content">
+                            <p>To overcome discomfort (<em>"${discomfort}"</em>):</p>
+                            <ul style="padding-left:1.2rem; margin-top:0.5rem; line-height:1.7;">
+                                <li><strong>The Shared Win:</strong> Frame achievements around team execution ("The engineering group pulled off X; I was glad to lead the data piece").</li>
+                                <li><strong>The Insight Share:</strong> Share a lesson or mistake avoided rather than praising yourself ("What we learned from this week's deployment failure").</li>
+                                <li><strong>The Progress Report:</strong> Shift from bragging to structured metrics updates for ${audience}.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-bullhorn"></i> The Witness Strategy & Ritual</h4>
+                        </div>
+                        <div class="output-content">
+                            <p><strong>The Witness Strategy:</strong> Praise peers publicly to ${audience}. High-integrity leaders naturally reflect credit back to those who compliment others.</p>
+                            <p style="margin-top:0.5rem;"><strong>Monthly Visibility Ritual:</strong> Transition from <em>"${shareMethod}"</em> to a brief end-of-month 3-bullet email highlighting team wins, key operational metrics, and upcoming milestones.</p>
+                        </div>
+                    </div>
+                `;
+            } else if (toolId === 'values-guard') {
+                const pressure = document.getElementById('vg-pressure-type').value;
+                const source = document.getElementById('vg-source').value;
+                const valueAtRisk = document.getElementById('vg-value-risk').value || 'Integrity';
+                const fear = document.getElementById('vg-fear').value || 'Isolation';
+
+                const boundaryLineText = `"I understand the group feels strongly about this, but I have a personal rule against ${pressure.toLowerCase()}. I'm focused strictly on project deliverables."`;
+
+                historyEntry = { summary: `Guard: ${pressure} from ${source}`, date: new Date().toLocaleDateString() };
+
+                htmlContent = `
+                    <div class="output-card">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-shield-halved"></i> The Boundary Line</h4>
+                            <button class="btn btn-sm btn-copy" onclick="copyToClipboard(\`${boundaryLineText.replace(/"/g, '&quot;')}\`)"><i class="fa-regular fa-copy"></i> Copy Boundary Script</button>
+                        </div>
+                        <div class="output-content">
+                            <div class="script-box">${boundaryLineText}</div>
+                            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.5rem;">Protects your core value (<strong>${valueAtRisk}</strong>) without launching an aggressive moral counter-attack.</p>
+                        </div>
+                    </div>
+
+                    <div class="output-card sage-accent">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-door-open"></i> The Exit Hatch & Alternative</h4>
+                        </div>
+                        <div class="output-content">
+                            <p><strong>Tactical Exit Hatch:</strong> Use objective physical/operational disconnects when ${pressure.toLowerCase()} arises ("I need to catch this call," "I have a hard deadline in 5 minutes").</p>
+                            <p style="margin-top:0.5rem;"><strong>Social Alternative:</strong> Fulfill social bonding needs by organizing explicit task-focused coffee chats or problem-solving sessions, replacing toxic group venting with structured collaboration.</p>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-header">
+                            <h4><i class="fa-solid fa-heart-pulse"></i> Long-Term Compatibility Check</h4>
+                        </div>
+                        <div class="output-content">
+                            <p><strong>Fear Analysis:</strong> You indicated fear of <em>"${fear}"</em>.</p>
+                            <p style="margin-top:0.5rem;">Remember: Compromising your principles to stay inside a toxic circle costs far more in mental wear and professional reputation over time than being an respected, independent outsider.</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            outputContainer.innerHTML = htmlContent;
+            outputContainer.classList.add('active');
+
+            saveHistory(toolId, historyEntry);
+            loadHistory(toolId);
+        }
+
+        /* LocalStorage History Handlers */
+        function saveHistory(toolId, entry) {
+            const key = `politics_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            history.unshift(entry);
+            if (history.length > 30) history = history.slice(0, 30); // Max 30 items
+            localStorage.setItem(key, JSON.stringify(history));
+        }
+
+        function loadHistory(toolId) {
+            const historyContainer = document.getElementById(`history-${toolId}`);
+            if (!historyContainer) return;
+
+            const key = `politics_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+            if (history.length === 0) {
+                historyContainer.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <div class="history-header">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Analysis History (${history.length})</h3>
+                    <button class="btn btn-sm btn-secondary" onclick="clearHistory('${toolId}')">Clear History</button>
+                </div>
+            `;
+
+            history.forEach((item, idx) => {
+                html += `
+                    <div class="history-item" id="hist-${toolId}-${idx}">
+                        <div class="history-summary" onclick="toggleHistoryItem('${toolId}', ${idx})">
+                            <span>${item.summary}</span>
+                            <span style="color:var(--text-muted); font-size:0.8rem;">${item.date}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            historyContainer.innerHTML = html;
+        }
+
+        function toggleHistoryItem(toolId, idx) {
+            const item = document.getElementById(`hist-${toolId}-${idx}`);
+            if (item) item.classList.toggle('open');
+        }
+
+        function clearHistory(toolId) {
+            const key = `politics_history_${toolId}`;
+            localStorage.removeItem(key);
+            loadHistory(toolId);
+            showToast("History cleared.");
+        }
+
+        function loadAllHistories() {
+            ['politics-map', 'alliance-builder', 'neutral-position', 'visibility-strategy', 'values-guard'].forEach(toolId => {
+                loadHistory(toolId);
+            });
+        }
+    </script>
+</body>
+</html>

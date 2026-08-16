@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LongDistanceOS — Close the gap without growing apart</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        midnight: '#1B263B',
+                        gold: '#E0A458',
+                        'gold-hover': '#C88E45',
+                        bgStart: '#E0E1DD',
+                        bgEnd: '#FFF8E7',
+                        cardBg: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #E0E1DD 0%, #FFF8E7 100%);
+            min-height: 100vh;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E0A458;
+            border-radius: 3px;
+        }
+
+        /* Accordion transition styling */
+        .accordion-content {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 2000px;
+            opacity: 1;
+        }
+
+        /* Toast animation */
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(10px); }
+            15% { opacity: 1; transform: translateY(0); }
+            85% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+        .toast-animate {
+            animation: fadeInOut 2s ease-in-out forwards;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased flex flex-col min-h-screen">
+
+    <!-- Toast Container -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-midnight text-white px-5 py-3 rounded-xl shadow-xl z-50 hidden flex items-center space-x-3 border border-gold/30">
+        <i class="fa-solid fa-check-circle text-gold"></i>
+        <span id="toast-message" class="font-medium text-sm">Copied!</span>
+    </div>
+
+    <div class="flex flex-1 relative">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between">
+            <div>
+                <!-- Brand Header -->
+                <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
+                        <div class="w-10 h-10 rounded-xl bg-midnight flex items-center justify-center text-gold shadow-sm">
+                            <i class="fa-solid fa-compass text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-midnight text-lg tracking-tight leading-none">LongDistance<span class="text-gold">OS</span></h1>
+                            <p class="text-[11px] text-slate-400 font-medium mt-0.5">Practical Relationship Kit</p>
+                        </div>
+                    </div>
+                    <button class="md:hidden text-slate-400 hover:text-slate-600 focus:outline-none" onclick="toggleSidebar()">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="p-4 space-y-1.5">
+                    <button onclick="switchTab('dashboard')" data-nav="dashboard" class="nav-item w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-colors text-white bg-midnight shadow-sm">
+                        <i class="fa-solid fa-chart-pie w-5 text-center text-gold"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button onclick="switchTab('timezone')" data-nav="timezone" class="nav-item w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                        <i class="fa-solid fa-clock w-5 text-center text-slate-400"></i>
+                        <span>Time Zone Sync</span>
+                    </button>
+                    <button onclick="switchTab('jealousy')" data-nav="jealousy" class="nav-item w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                        <i class="fa-solid fa-shield-heart w-5 text-center text-slate-400"></i>
+                        <span>Jealousy Reset</span>
+                    </button>
+                    <button onclick="switchTab('visit')" data-nav="visit" class="nav-item w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                        <i class="fa-solid fa-plane-departure w-5 text-center text-slate-400"></i>
+                        <span>Visit Planner</span>
+                    </button>
+                    <button onclick="switchTab('future')" data-nav="future" class="nav-item w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                        <i class="fa-solid fa-map-location-dot w-5 text-center text-slate-400"></i>
+                        <span>Future Talk</span>
+                    </button>
+                    <button onclick="switchTab('communication')" data-nav="communication" class="nav-item w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                        <i class="fa-solid fa-comments w-5 text-center text-slate-400"></i>
+                        <span>Comm Repair</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Sidebar Footer Info -->
+            <div class="p-4 border-t border-slate-100 text-xs text-slate-400 text-center">
+                <p>LongDistanceOS &copy; <span id="year"></span></p>
+                <p class="mt-1 font-medium text-midnight">Built for connection.</p>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile sidebar -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 z-30 hidden md:hidden" onclick="toggleSidebar()"></div>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 md:ml-64 p-4 sm:p-6 md:p-8 max-w-4xl mx-auto w-full transition-all duration-300">
+            
+            <!-- Top Mobile Bar -->
+            <div class="md:hidden flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                <div class="flex items-center space-x-3" onclick="switchTab('dashboard')">
+                    <div class="w-8 h-8 rounded-lg bg-midnight flex items-center justify-center text-gold">
+                        <i class="fa-solid fa-compass text-sm"></i>
+                    </div>
+                    <span class="font-bold text-midnight text-base">LongDistance<span class="text-gold">OS</span></span>
+                </div>
+                <button onclick="toggleSidebar()" class="p-2 text-slate-600 hover:bg-slate-50 rounded-lg">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+
+            <!-- TAB 0: DASHBOARD -->
+            <section id="tab-dashboard" class="tab-content space-y-6">
+                <!-- Hero Header -->
+                <div class="bg-midnight text-white p-8 rounded-xl shadow-sm relative overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 opacity-10 text-gold text-9xl">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <span class="inline-block px-3 py-1 bg-gold/20 text-gold text-xs font-semibold rounded-full mb-3 uppercase tracking-wider">Practical Relationship Toolkit</span>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">Long-Distance OS</h2>
+                        <p class="text-slate-300 text-lg max-w-xl">Close the gap without growing apart. Practical frameworks, scripts, and planners designed to reduce distance friction.</p>
+                    </div>
+                </div>
+
+                <!-- Days Until Visit Widget -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center space-x-4 w-full md:w-auto">
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-gold flex items-center justify-center flex-shrink-0 text-xl font-bold">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">Next Reunion Countdown</h3>
+                            <p class="text-slate-500 text-xs">Set your planned visit date to keep the momentum going.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+                        <input type="date" id="visit-date-picker" onchange="updateCountdown()" class="px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-gold/50">
+                        <div id="countdown-display" class="px-4 py-2 bg-midnight text-gold rounded-lg font-bold text-center text-sm min-w-[100px]">
+                            Set Date
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5 Tool Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Tool 1 Card -->
+                    <div onclick="switchTab('timezone')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-gold/30 transition-all cursor-pointer group flex flex-col justify-between">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 group-hover:bg-midnight group-hover:text-gold text-slate-700 flex items-center justify-center mb-4 transition-colors">
+                                <i class="fa-solid fa-clock text-lg"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-lg group-hover:text-midnight transition-colors">Time Zone Sync</h3>
+                            <p class="text-slate-500 text-sm mt-1">Map schedules across time zones to find reliable, high-energy overlap windows.</p>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs font-semibold text-gold group-hover:translate-x-1 transition-transform">
+                            <span>Open Tool</span>
+                            <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tool 2 Card -->
+                    <div onclick="switchTab('jealousy')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-gold/30 transition-all cursor-pointer group flex flex-col justify-between">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 group-hover:bg-midnight group-hover:text-gold text-slate-700 flex items-center justify-center mb-4 transition-colors">
+                                <i class="fa-solid fa-shield-heart text-lg"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-lg group-hover:text-midnight transition-colors">Jealousy Reset</h3>
+                            <p class="text-slate-500 text-sm mt-1">De-escalate spirals, separate facts from story, and draft constructive boundaries.</p>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs font-semibold text-gold group-hover:translate-x-1 transition-transform">
+                            <span>Open Tool</span>
+                            <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tool 3 Card -->
+                    <div onclick="switchTab('visit')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-gold/30 transition-all cursor-pointer group flex flex-col justify-between">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 group-hover:bg-midnight group-hover:text-gold text-slate-700 flex items-center justify-center mb-4 transition-colors">
+                                <i class="fa-solid fa-plane-departure text-lg"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-lg group-hover:text-midnight transition-colors">Visit Planner</h3>
+                            <p class="text-slate-500 text-sm mt-1">Turn vague reunion promises into clear budgets, logistics, and intentional itineraries.</p>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs font-semibold text-gold group-hover:translate-x-1 transition-transform">
+                            <span>Open Tool</span>
+                            <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tool 4 Card -->
+                    <div onclick="switchTab('future')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-gold/30 transition-all cursor-pointer group flex flex-col justify-between">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 group-hover:bg-midnight group-hover:text-gold text-slate-700 flex items-center justify-center mb-4 transition-colors">
+                                <i class="fa-solid fa-map-location-dot text-lg"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-lg group-hover:text-midnight transition-colors">Future Talk</h3>
+                            <p class="text-slate-500 text-sm mt-1">Navigate distance-closing conversations with realistic timelines and non-pressuring scripts.</p>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs font-semibold text-gold group-hover:translate-x-1 transition-transform">
+                            <span>Open Tool</span>
+                            <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tool 5 Card -->
+                    <div onclick="switchTab('communication')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-gold/30 transition-all cursor-pointer group flex flex-col justify-between md:col-span-2">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 group-hover:bg-midnight group-hover:text-gold text-slate-700 flex items-center justify-center mb-4 transition-colors">
+                                <i class="fa-solid fa-comments text-lg"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-lg group-hover:text-midnight transition-colors">Communication Repair</h3>
+                            <p class="text-slate-500 text-sm mt-1">Diagnose conversation drift, evaluate relationship friction risk, and restore deep connection.</p>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs font-semibold text-gold group-hover:translate-x-1 transition-transform">
+                            <span>Open Tool</span>
+                            <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 1: TIME ZONE SYNC -->
+            <section id="tab-timezone" class="tab-content hidden space-y-6">
+                <!-- Header -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-gold uppercase tracking-wider">Tool 1</span>
+                        <h2 class="text-2xl font-bold text-midnight">Time Zone Sync</h2>
+                        <p class="text-slate-500 text-sm mt-1">Solve: "We never talk because our schedules don't overlap."</p>
+                    </div>
+                    <button onclick="loadSampleTimezone()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-gold"></i>
+                        <span>Load Sample Scenario</span>
+                    </button>
+                </div>
+
+                <!-- Input Form -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <form id="form-timezone" onsubmit="handleTimezoneSubmit(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Your Time Zone</label>
+                                <select id="tz-your-zone" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                                    <option value="EST">EST (UTC-5)</option>
+                                    <option value="CST">CST (UTC-6)</option>
+                                    <option value="MST">MST (UTC-7)</option>
+                                    <option value="PST">PST (UTC-8)</option>
+                                    <option value="GMT">GMT / UTC (UTC+0)</option>
+                                    <option value="CET">CET (UTC+1)</option>
+                                    <option value="IST">IST (UTC+5:30)</option>
+                                    <option value="JST">JST (UTC+9)</option>
+                                    <option value="AEST">AEST (UTC+10)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Their Time Zone</label>
+                                <select id="tz-their-zone" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                                    <option value="EST">EST (UTC-5)</option>
+                                    <option value="CST">CST (UTC-6)</option>
+                                    <option value="MST">MST (UTC-7)</option>
+                                    <option value="PST">PST (UTC-8)</option>
+                                    <option value="GMT">GMT / UTC (UTC+0)</option>
+                                    <option value="CET">CET (UTC+1)</option>
+                                    <option value="IST">IST (UTC+5:30)</option>
+                                    <option value="JST" selected>JST (UTC+9)</option>
+                                    <option value="AEST">AEST (UTC+10)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Your Work/School Hours</label>
+                                <input type="text" id="tz-your-hours" placeholder="e.g. 9am-6pm" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Their Work/School Hours</label>
+                                <input type="text" id="tz-their-hours" placeholder="e.g. 9am-6pm" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Your Energy Peak</label>
+                                <select id="tz-your-peak" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                                    <option value="Morning">Morning</option>
+                                    <option value="Midday">Midday</option>
+                                    <option value="Evening">Evening</option>
+                                    <option value="Night owl">Night owl</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Their Energy Peak</label>
+                                <select id="tz-their-peak" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                                    <option value="Morning">Morning</option>
+                                    <option value="Midday">Midday</option>
+                                    <option value="Evening">Evening</option>
+                                    <option value="Night owl">Night owl</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-midnight text-white font-bold rounded-xl hover:bg-slate-800 transition-colors shadow-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span>Sync Schedules</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Output Area -->
+                <div id="output-timezone" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-6">
+                        <div class="border-b border-slate-100 pb-4">
+                            <h3 class="text-xl font-bold text-midnight flex items-center">
+                                <i class="fa-solid fa-calendar-days text-gold mr-3"></i> Sync Analysis
+                            </h3>
+                        </div>
+
+                        <!-- Time Map -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Your Time Map</h4>
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-sm leading-relaxed" id="res-tz-map"></div>
+                        </div>
+
+                        <!-- Overlap Windows -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="p-4 bg-amber-50/60 border border-amber-200 rounded-xl">
+                                <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wider mb-2 flex items-center">
+                                    <i class="fa-solid fa-circle-check text-gold mr-2"></i> Overlap Windows
+                                </h4>
+                                <div class="text-sm text-slate-700" id="res-tz-overlap"></div>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 flex items-center">
+                                    <i class="fa-solid fa-star text-gold mr-2"></i> Best Call Times
+                                </h4>
+                                <div class="text-sm text-slate-700" id="res-tz-best"></div>
+                            </div>
+                        </div>
+
+                        <!-- Worst Call Times -->
+                        <div class="p-4 bg-rose-50/50 border border-rose-100 rounded-xl">
+                            <h4 class="text-xs font-bold text-rose-800 uppercase tracking-wider mb-2 flex items-center">
+                                <i class="fa-solid fa-circle-xmark text-rose-500 mr-2"></i> Times to Avoid
+                            </h4>
+                            <div class="text-sm text-slate-700" id="res-tz-worst"></div>
+                        </div>
+
+                        <!-- Concrete Agreement Rule -->
+                        <div class="p-5 bg-midnight text-white rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div>
+                                <span class="text-xs font-semibold text-gold uppercase tracking-wider">Recommended Schedule Rule</span>
+                                <p class="font-medium text-base mt-1" id="res-tz-rule"></p>
+                            </div>
+                            <button onclick="copyToClipboard(document.getElementById('res-tz-rule').innerText)" class="px-4 py-2 bg-gold text-midnight font-bold rounded-lg text-xs hover:bg-gold-hover transition-colors whitespace-nowrap flex items-center">
+                                <i class="fa-solid fa-copy mr-1.5"></i> Copy Rule
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Accordion -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                    <button onclick="toggleAccordion('hist-timezone')" class="w-full px-6 py-4 text-left font-bold text-slate-700 flex items-center justify-between hover:bg-slate-50">
+                        <span class="flex items-center text-sm">
+                            <i class="fa-solid fa-clock-rotate-left text-slate-400 mr-2.5"></i> Time Zone Sync History
+                        </span>
+                        <i id="hist-timezone-icon" class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform"></i>
+                    </button>
+                    <div id="hist-timezone" class="accordion-content px-6 pb-6">
+                        <div id="hist-timezone-list" class="space-y-3 pt-2 text-sm text-slate-600"></div>
+                        <button onclick="clearHistory('timezone')" class="mt-4 px-3 py-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 text-xs font-semibold rounded-lg transition-colors">Clear History</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 2: JEALOUSY RESET -->
+            <section id="tab-jealousy" class="tab-content hidden space-y-6">
+                <!-- Header -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-gold uppercase tracking-wider">Tool 2</span>
+                        <h2 class="text-2xl font-bold text-midnight">Jealousy Reset</h2>
+                        <p class="text-slate-500 text-sm mt-1">Solve: "They went out and I spiraled. I don't want to be controlling."</p>
+                    </div>
+                    <button onclick="loadSampleJealousy()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-gold"></i>
+                        <span>Load Sample Scenario</span>
+                    </button>
+                </div>
+
+                <!-- Input Form -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <form id="form-jealousy" onsubmit="handleJealousySubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">What triggered the jealousy?</label>
+                            <textarea id="j-trigger" rows="2" placeholder="e.g. They went to a party and posted a group photo with strangers." required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">What concrete evidence do you actually have?</label>
+                            <textarea id="j-evidence" rows="2" placeholder="e.g. Just the social media picture, they haven't texted back in 3 hours." required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">What are you afraid of?</label>
+                            <select id="j-fear" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                                <option value="They're losing interest">They're losing interest</option>
+                                <option value="They'll meet someone">They'll meet someone else</option>
+                                <option value="I'm forgettable">I'm forgettable / out of sight, out of mind</option>
+                                <option value="They're hiding something">They're hiding something from me</option>
+                                <option value="I don't know">I don't know, just a general spiral</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-2">Have you talked about clear boundaries for this?</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-slate-50 text-xs">
+                                    <input type="radio" name="j-boundaries" value="Yes, clear" checked class="text-gold focus:ring-gold">
+                                    <span>Yes, clear</span>
+                                </label>
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-slate-50 text-xs">
+                                    <input type="radio" name="j-boundaries" value="Yes, vague" class="text-gold focus:ring-gold">
+                                    <span>Yes, vague</span>
+                                </label>
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-slate-50 text-xs">
+                                    <input type="radio" name="j-boundaries" value="No" class="text-gold focus:ring-gold">
+                                    <span>No</span>
+                                </label>
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-slate-50 text-xs">
+                                    <input type="radio" name="j-boundaries" value="Tried, failed" class="text-gold focus:ring-gold">
+                                    <span>Tried, failed</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-midnight text-white font-bold rounded-xl hover:bg-slate-800 transition-colors shadow-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-heart-crack"></i>
+                            <span>Reset Spiral</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Output Area -->
+                <div id="output-jealousy" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-6">
+                        <div class="border-b border-slate-100 pb-4">
+                            <h3 class="text-xl font-bold text-midnight flex items-center">
+                                <i class="fa-solid fa-scale-balanced text-gold mr-3"></i> Perspective De-escalation
+                            </h3>
+                        </div>
+
+                        <!-- Facts vs Story -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Facts vs. Story Analysis</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="p-4 bg-emerald-50/60 border border-emerald-200 rounded-xl">
+                                    <h5 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2 flex items-center">
+                                        <i class="fa-solid fa-check text-emerald-600 mr-2"></i> What We Know (Facts)
+                                    </h5>
+                                    <p class="text-sm text-slate-700 leading-relaxed" id="res-j-facts"></p>
+                                </div>
+                                <div class="p-4 bg-rose-50/60 border border-rose-200 rounded-xl">
+                                    <h5 class="text-xs font-bold text-rose-800 uppercase tracking-wider mb-2 flex items-center">
+                                        <i class="fa-solid fa-circle-question text-rose-500 mr-2"></i> What We Cannot Know (Story)
+                                    </h5>
+                                    <p class="text-sm text-slate-700 leading-relaxed" id="res-j-story"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3 Likely Explanations -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">3 Non-Catastrophic Explanations</h4>
+                            <ul class="space-y-2 text-sm text-slate-700" id="res-j-explanations"></ul>
+                        </div>
+
+                        <!-- One Boundary To Propose (Script) -->
+                        <div class="p-5 bg-slate-900 text-white rounded-xl space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gold uppercase tracking-wider">Constructive Boundary Script</span>
+                                <button onclick="copyToClipboard(document.getElementById('res-j-script').innerText)" class="px-3 py-1 bg-gold text-midnight font-bold rounded text-xs hover:bg-gold-hover transition-colors flex items-center">
+                                    <i class="fa-solid fa-copy mr-1"></i> Copy Script
+                                </button>
+                            </div>
+                            <p class="text-sm italic font-serif text-slate-200 bg-slate-800/80 p-4 rounded-lg border border-slate-700" id="res-j-script"></p>
+                        </div>
+
+                        <!-- What NOT to do -->
+                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                            <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wider mb-2 flex items-center">
+                                <i class="fa-solid fa-ban text-amber-600 mr-2"></i> What NOT to do Right Now
+                            </h4>
+                            <ul class="space-y-1.5 text-sm text-slate-700 list-disc list-inside" id="res-j-avoid"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Accordion -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                    <button onclick="toggleAccordion('hist-jealousy')" class="w-full px-6 py-4 text-left font-bold text-slate-700 flex items-center justify-between hover:bg-slate-50">
+                        <span class="flex items-center text-sm">
+                            <i class="fa-solid fa-clock-rotate-left text-slate-400 mr-2.5"></i> Jealousy Reset History
+                        </span>
+                        <i id="hist-jealousy-icon" class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform"></i>
+                    </button>
+                    <div id="hist-jealousy" class="accordion-content px-6 pb-6">
+                        <div id="hist-jealousy-list" class="space-y-3 pt-2 text-sm text-slate-600"></div>
+                        <button onclick="clearHistory('jealousy')" class="mt-4 px-3 py-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 text-xs font-semibold rounded-lg transition-colors">Clear History</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 3: VISIT PLANNER -->
+            <section id="tab-visit" class="tab-content hidden space-y-6">
+                <!-- Header -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-gold uppercase tracking-wider">Tool 3</span>
+                        <h2 class="text-2xl font-bold text-midnight">Visit Planner</h2>
+                        <p class="text-slate-500 text-sm mt-1">Solve: "We keep saying we'll visit but never plan it. It's always 'someday.'"</p>
+                    </div>
+                    <button onclick="loadSampleVisit()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-gold"></i>
+                        <span>Load Sample Scenario</span>
+                    </button>
+                </div>
+
+                <!-- Input Form -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <form id="form-visit" onsubmit="handleVisitSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-2">Who travels this time?</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="flex items-center justify-center space-x-2 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium">
+                                    <input type="radio" name="v-who" value="Me" checked class="text-gold focus:ring-gold">
+                                    <span>Me</span>
+                                </label>
+                                <label class="flex items-center justify-center space-x-2 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium">
+                                    <input type="radio" name="v-who" value="Them" class="text-gold focus:ring-gold">
+                                    <span>Them</span>
+                                </label>
+                                <label class="flex items-center justify-center space-x-2 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium">
+                                    <input type="radio" name="v-who" value="Halfway" class="text-gold focus:ring-gold">
+                                    <span>Meet Halfway</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Total Trip Budget ($ USD)</label>
+                                <input type="number" id="v-budget" placeholder="e.g. 800" min="50" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Time Available</label>
+                                <select id="v-time" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                                    <option value="Weekend">Weekend (2 days)</option>
+                                    <option value="Long weekend">Long Weekend (3-4 days)</option>
+                                    <option value="1 week">1 Week</option>
+                                    <option value="2 weeks">2 Weeks+</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Trip Purpose</label>
+                            <select id="v-purpose" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                                <option value="Just be together">Just be together / Cozy downtime</option>
+                                <option value="Special occasion">Special occasion / Anniversary / Birthday</option>
+                                <option value="Meet family">Meet family or friends</option>
+                                <option value="Explore new place">Explore a new place / Vacation</option>
+                                <option value="Decide on closing distance">Decide on closing distance / Trial living</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-semibold text-slate-600 uppercase">Logistics Stress Level (1-10)</label>
+                                <span id="v-stress-val" class="text-xs font-bold text-midnight bg-amber-100 px-2 py-0.5 rounded">5</span>
+                            </div>
+                            <input type="range" id="v-stress" min="1" max="10" value="5" oninput="document.getElementById('v-stress-val').innerText = this.value" class="w-full accent-gold">
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-midnight text-white font-bold rounded-xl hover:bg-slate-800 transition-colors shadow-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-map"></i>
+                            <span>Generate Visit Blueprint</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Output Area -->
+                <div id="output-visit" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-6">
+                        <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-midnight flex items-center">
+                                <i class="fa-solid fa-passport text-gold mr-3"></i> Visit Blueprint
+                            </h3>
+                            <span id="res-v-type" class="px-3 py-1 bg-midnight text-gold text-xs font-bold rounded-full"></span>
+                        </div>
+
+                        <!-- Budget Breakdown Table -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Estimated Budget Breakdown</h4>
+                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center" id="res-v-budget"></div>
+                        </div>
+
+                        <!-- Stress Reducers -->
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center">
+                                <i class="fa-solid fa-feather text-gold mr-2"></i> Logistics Stress Reducers
+                            </h4>
+                            <ul class="space-y-1.5 text-sm text-slate-700 list-disc list-inside" id="res-v-stress-tips"></ul>
+                        </div>
+
+                        <!-- Conversation To Have Before -->
+                        <div class="p-4 bg-amber-50/60 border border-amber-200 rounded-xl">
+                            <h4 class="text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">Pre-Visit Conversation Topic</h4>
+                            <p class="text-sm text-slate-700" id="res-v-talk"></p>
+                        </div>
+
+                        <!-- Next Step Action -->
+                        <div class="p-5 bg-midnight text-white rounded-xl flex items-center justify-between">
+                            <div>
+                                <span class="text-xs font-semibold text-gold uppercase tracking-wider">Immediate Next Step (This Week)</span>
+                                <p class="font-bold text-base mt-0.5" id="res-v-next"></p>
+                            </div>
+                            <i class="fa-solid fa-circle-arrow-right text-gold text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Accordion -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                    <button onclick="toggleAccordion('hist-visit')" class="w-full px-6 py-4 text-left font-bold text-slate-700 flex items-center justify-between hover:bg-slate-50">
+                        <span class="flex items-center text-sm">
+                            <i class="fa-solid fa-clock-rotate-left text-slate-400 mr-2.5"></i> Visit Planner History
+                        </span>
+                        <i id="hist-visit-icon" class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform"></i>
+                    </button>
+                    <div id="hist-visit" class="accordion-content px-6 pb-6">
+                        <div id="hist-visit-list" class="space-y-3 pt-2 text-sm text-slate-600"></div>
+                        <button onclick="clearHistory('visit')" class="mt-4 px-3 py-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 text-xs font-semibold rounded-lg transition-colors">Clear History</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 4: FUTURE TALK -->
+            <section id="tab-future" class="tab-content hidden space-y-6">
+                <!-- Header -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-gold uppercase tracking-wider">Tool 4</span>
+                        <h2 class="text-2xl font-bold text-midnight">Future Talk</h2>
+                        <p class="text-slate-500 text-sm mt-1">Solve: "We avoid talking about when we'll live in the same place because it's scary."</p>
+                    </div>
+                    <button onclick="loadSampleFuture()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-gold"></i>
+                        <span>Load Sample Scenario</span>
+                    </button>
+                </div>
+
+                <!-- Input Form -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <form id="form-future" onsubmit="handleFutureSubmit(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Time Long-Distance</label>
+                                <select id="f-duration" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                                    <option value="<3mo">< 3 months</option>
+                                    <option value="3-6mo">3-6 months</option>
+                                    <option value="6-12mo">6-12 months</option>
+                                    <option value="1-2yr" selected>1-2 years</option>
+                                    <option value="2yr+">2+ years</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Biggest Obstacle</label>
+                                <select id="f-obstacle" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                                    <option value="Career">Career / Job opportunities</option>
+                                    <option value="School">School / Degree program</option>
+                                    <option value="Family">Family obligations</option>
+                                    <option value="Money">Finances / Moving expenses</option>
+                                    <option value="Visa/immigration">Visa / Immigration process</option>
+                                    <option value="Uncertainty">Uncertainty about relationship</option>
+                                    <option value="Neither wants to move">Neither wants to leave their city</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-2">Have you discussed closing the distance?</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-slate-50">
+                                    <input type="radio" name="f-discussed" value="Yes, timeline" class="text-gold focus:ring-gold">
+                                    <span>Yes, with concrete timeline</span>
+                                </label>
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-slate-50">
+                                    <input type="radio" name="f-discussed" value="Yes, vague" checked class="text-gold focus:ring-gold">
+                                    <span>Yes, but vague ("someday")</span>
+                                </label>
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-slate-50">
+                                    <input type="radio" name="f-discussed" value="No" class="text-gold focus:ring-gold">
+                                    <span>No, haven't brought it up</span>
+                                </label>
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2.5 rounded-lg cursor-pointer hover:bg-slate-50">
+                                    <input type="radio" name="f-discussed" value="One-sided" class="text-gold focus:ring-gold">
+                                    <span>One wants to, other avoids it</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">What would need to be true for YOU to move?</label>
+                            <textarea id="f-your-conditions" rows="2" placeholder="e.g. Remote job offer or 6 months savings guaranteed." required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">What would need to be true for THEM to move?</label>
+                            <textarea id="f-their-conditions" rows="2" placeholder="e.g. Finishing current work contract or visa approval." required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-midnight text-white font-bold rounded-xl hover:bg-slate-800 transition-colors shadow-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-compass-drafting"></i>
+                            <span>Map Out Future Path</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Output Area -->
+                <div id="output-future" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-6">
+                        <div class="border-b border-slate-100 pb-4">
+                            <h3 class="text-xl font-bold text-midnight flex items-center">
+                                <i class="fa-solid fa-road text-gold mr-3"></i> Alignment Strategy
+                            </h3>
+                        </div>
+
+                        <!-- Situation & Reframe -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Situation</h4>
+                                <p class="text-sm text-slate-700" id="res-f-summary"></p>
+                            </div>
+                            <div class="p-4 bg-amber-50/60 border border-amber-200 rounded-xl">
+                                <h4 class="text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">Reframed Logistics Reality</h4>
+                                <p class="text-sm text-slate-700" id="res-f-reframe"></p>
+                            </div>
+                        </div>
+
+                        <!-- 3 Possible Paths -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">3 Concrete Strategic Paths</h4>
+                            <div class="space-y-3" id="res-f-paths"></div>
+                        </div>
+
+                        <!-- Clarity Script -->
+                        <div class="p-5 bg-slate-900 text-white rounded-xl space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gold uppercase tracking-wider">The Clarity Conversation Script</span>
+                                <button onclick="copyToClipboard(document.getElementById('res-f-script').innerText)" class="px-3 py-1 bg-gold text-midnight font-bold rounded text-xs hover:bg-gold-hover transition-colors flex items-center">
+                                    <i class="fa-solid fa-copy mr-1"></i> Copy Script
+                                </button>
+                            </div>
+                            <p class="text-sm italic font-serif text-slate-200 bg-slate-800/80 p-4 rounded-lg border border-slate-700" id="res-f-script"></p>
+                        </div>
+
+                        <!-- If Hesitant & Reality Check -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">If They Are Hesitant</h4>
+                                <p class="text-xs text-slate-600 leading-relaxed" id="res-f-hesitant"></p>
+                            </div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Timeline Reality Check</h4>
+                                <p class="text-xs text-slate-600 leading-relaxed" id="res-f-timeline"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Accordion -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                    <button onclick="toggleAccordion('hist-future')" class="w-full px-6 py-4 text-left font-bold text-slate-700 flex items-center justify-between hover:bg-slate-50">
+                        <span class="flex items-center text-sm">
+                            <i class="fa-solid fa-clock-rotate-left text-slate-400 mr-2.5"></i> Future Talk History
+                        </span>
+                        <i id="hist-future-icon" class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform"></i>
+                    </button>
+                    <div id="hist-future" class="accordion-content px-6 pb-6">
+                        <div id="hist-future-list" class="space-y-3 pt-2 text-sm text-slate-600"></div>
+                        <button onclick="clearHistory('future')" class="mt-4 px-3 py-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 text-xs font-semibold rounded-lg transition-colors">Clear History</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 5: COMMUNICATION REPAIR -->
+            <section id="tab-communication" class="tab-content hidden space-y-6">
+                <!-- Header -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-gold uppercase tracking-wider">Tool 5</span>
+                        <h2 class="text-2xl font-bold text-midnight">Communication Repair</h2>
+                        <p class="text-slate-500 text-sm mt-1">Solve: "We used to talk for hours. Now it's just 'good morning' and 'good night.'"</p>
+                    </div>
+                    <button onclick="loadSampleComm()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-gold"></i>
+                        <span>Load Sample Scenario</span>
+                    </button>
+                </div>
+
+                <!-- Input Form -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <form id="form-comm" onsubmit="handleCommSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-2">How do you usually communicate? (Check all)</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2 rounded-lg cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="c-channels" value="Text" checked class="rounded text-gold focus:ring-gold">
+                                    <span>Texting</span>
+                                </label>
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2 rounded-lg cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="c-channels" value="Voice notes" checked class="rounded text-gold focus:ring-gold">
+                                    <span>Voice notes</span>
+                                </label>
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2 rounded-lg cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="c-channels" value="Video calls" checked class="rounded text-gold focus:ring-gold">
+                                    <span>Video calls</span>
+                                </label>
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2 rounded-lg cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="c-channels" value="Phone calls" class="rounded text-gold focus:ring-gold">
+                                    <span>Phone calls</span>
+                                </label>
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2 rounded-lg cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="c-channels" value="Letters/cards" class="rounded text-gold focus:ring-gold">
+                                    <span>Letters / Cards</span>
+                                </label>
+                                <label class="flex items-center space-x-2 border border-slate-200 p-2 rounded-lg cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="c-channels" value="Social media" class="rounded text-gold focus:ring-gold">
+                                    <span>Social media memes</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Average Daily Contact Time</label>
+                                <select id="c-time" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none">
+                                    <option value="<5 min">< 5 minutes</option>
+                                    <option value="5-15 min">5-15 minutes</option>
+                                    <option value="15-30 min">15-30 minutes</option>
+                                    <option value="30-60 min">30-60 minutes</option>
+                                    <option value="1hr+">1 hour+</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="block text-xs font-semibold text-slate-600 uppercase">Quality Rating (1-10)</label>
+                                    <span id="c-quality-val" class="text-xs font-bold text-midnight bg-amber-100 px-2 py-0.5 rounded">3</span>
+                                </div>
+                                <input type="range" id="c-quality" min="1" max="10" value="3" oninput="document.getElementById('c-quality-val').innerText = this.value" class="w-full accent-gold">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">What has changed recently?</label>
+                            <textarea id="c-changed" rows="2" placeholder="e.g. Work got busy, conversation turned purely transactional." required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">What do you miss most?</label>
+                            <textarea id="c-miss" rows="2" placeholder="e.g. Random silly thoughts, deep late-night chats, feeling close." required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-gold/50 focus:outline-none"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-midnight text-white font-bold rounded-xl hover:bg-slate-800 transition-colors shadow-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-screwdriver-wrench"></i>
+                            <span>Diagnose & Repair</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Output Area -->
+                <div id="output-comm" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-6">
+                        <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-midnight flex items-center">
+                                <i class="fa-solid fa-plug-circle-bolt text-gold mr-3"></i> Repair Diagnostic
+                            </h3>
+                            <div id="res-c-risk" class="px-3 py-1 text-xs font-bold rounded-full flex items-center space-x-1"></div>
+                        </div>
+
+                        <!-- Diagnosis -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Communication Diagnosis</h4>
+                            <p class="text-sm text-slate-700 leading-relaxed" id="res-c-diag"></p>
+                        </div>
+
+                        <!-- 3 Deepening Tactics -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">3 Deepening Tactics</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="res-c-tactics"></div>
+                        </div>
+
+                        <!-- Non-blaming script -->
+                        <div class="p-5 bg-slate-900 text-white rounded-xl space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gold uppercase tracking-wider">Conversation Script (Without Blame)</span>
+                                <button onclick="copyToClipboard(document.getElementById('res-c-script').innerText)" class="px-3 py-1 bg-gold text-midnight font-bold rounded text-xs hover:bg-gold-hover transition-colors flex items-center">
+                                    <i class="fa-solid fa-copy mr-1"></i> Copy Script
+                                </button>
+                            </div>
+                            <p class="text-sm italic font-serif text-slate-200 bg-slate-800/80 p-4 rounded-lg border border-slate-700" id="res-c-script"></p>
+                        </div>
+
+                        <!-- Emergency Reach-out -->
+                        <div class="p-4 bg-amber-50/60 border border-amber-200 rounded-xl space-y-2">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center">
+                                    <i class="fa-solid fa-bolt text-gold mr-2"></i> Bold Emergency Reach-Out Script
+                                </h4>
+                                <button onclick="copyToClipboard(document.getElementById('res-c-emerg').innerText)" class="px-2 py-0.5 bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold rounded text-xs transition-colors">
+                                    Copy
+                                </button>
+                            </div>
+                            <p class="text-xs text-slate-700 font-mono bg-white p-3 rounded border border-amber-200" id="res-c-emerg"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Accordion -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                    <button onclick="toggleAccordion('hist-comm')" class="w-full px-6 py-4 text-left font-bold text-slate-700 flex items-center justify-between hover:bg-slate-50">
+                        <span class="flex items-center text-sm">
+                            <i class="fa-solid fa-clock-rotate-left text-slate-400 mr-2.5"></i> Comm Repair History
+                        </span>
+                        <i id="hist-comm-icon" class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform"></i>
+                    </button>
+                    <div id="hist-comm" class="accordion-content px-6 pb-6">
+                        <div id="hist-comm-list" class="space-y-3 pt-2 text-sm text-slate-600"></div>
+                        <button onclick="clearHistory('comm')" class="mt-4 px-3 py-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 text-xs font-semibold rounded-lg transition-colors">Clear History</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Universal Footer -->
+    <footer class="bg-white border-t border-slate-200/80 py-4 px-6 text-center text-xs text-slate-400 mt-auto z-20">
+        <p>For entertainment and planning purposes only. Not therapy or professional advice.</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Set dynamic current year in sidebar
+        document.getElementById('year').innerText = new Date().getFullYear();
+
+        // Navigation Controller
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            // Show selected tab
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if (activeTab) activeTab.classList.remove('hidden');
+
+            // Update nav item styles
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                const isCurrent = btn.getAttribute('data-nav') === tabId;
+                if (isCurrent) {
+                    btn.className = "nav-item w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-colors text-white bg-midnight shadow-sm";
+                    const icon = btn.querySelector('i');
+                    if(icon) icon.className = icon.className.replace('text-slate-400', 'text-gold');
+                } else {
+                    btn.className = "nav-item w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-50 transition-colors";
+                    const icon = btn.querySelector('i');
+                    if(icon) icon.className = icon.className.replace('text-gold', 'text-slate-400');
+                }
+            });
+
+            // Close sidebar on mobile after selection
+            if (window.innerWidth < 768) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebar-overlay');
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+
+            // Scroll top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(`${id}-icon`);
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                if(icon) icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.classList.add('open');
+                if(icon) icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // Copy Toast Utility
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.classList.remove('hidden');
+                toast.classList.add('toast-animate');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                    toast.classList.remove('toast-animate');
+                }, 2000);
+            });
+        }
+
+        // Countdown Calculator
+        function updateCountdown() {
+            const val = document.getElementById('visit-date-picker').value;
+            const display = document.getElementById('countdown-display');
+            if (!val) {
+                display.innerText = "Set Date";
+                return;
+            }
+            const target = new Date(val);
+            const now = new Date();
+            now.setHours(0,0,0,0);
+            target.setHours(0,0,0,0);
+            const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+            
+            if (diff > 0) {
+                display.innerText = `${diff} Day${diff > 1 ? 's' : ''}!`;
+            } else if (diff === 0) {
+                display.innerText = "Today! 🎉";
+            } else {
+                display.innerText = "Passed";
+            }
+            localStorage.setItem('longdistance_reunion_date', val);
+        }
+
+        // Load stored reunion date on start
+        const savedDate = localStorage.getItem('longdistance_reunion_date');
+        if(savedDate) {
+            document.getElementById('visit-date-picker').value = savedDate;
+            updateCountdown();
+        }
+
+        // LocalStorage History Helpers
+        function saveHistory(toolId, record) {
+            const key = `longdistance_history_${toolId}`;
+            let list = JSON.parse(localStorage.getItem(key) || '[]');
+            list.unshift({ ...record, timestamp: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+            if (list.length > 30) list = list.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(list));
+            renderHistory(toolId);
+        }
+
+        function clearHistory(toolId) {
+            const key = `longdistance_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = `longdistance_history_${toolId}`;
+            const list = JSON.parse(localStorage.getItem(key) || '[]');
+            const container = document.getElementById(`hist-${toolId}-list`);
+            if (!container) return;
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic">No saved analysis history yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => `
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                    <div class="flex justify-between items-center text-[11px] text-slate-400 font-semibold">
+                        <span>${item.title || 'Saved Analysis'}</span>
+                        <span>${item.timestamp}</span>
+                    </div>
+                    <p class="text-xs text-slate-700">${item.detail}</p>
+                </div>
+            `).join('');
+        }
+
+        // TOOL 1: TIME ZONE SYNC LOGIC
+        function loadSampleTimezone() {
+            document.getElementById('tz-your-zone').value = 'EST';
+            document.getElementById('tz-their-zone').value = 'JST';
+            document.getElementById('tz-your-hours').value = '9am-6pm';
+            document.getElementById('tz-their-hours').value = '9am-6pm';
+            document.getElementById('tz-your-peak').value = 'Evening';
+            document.getElementById('tz-their-peak').value = 'Morning';
+        }
+
+        function handleTimezoneSubmit(e) {
+            e.preventDefault();
+            const yZone = document.getElementById('tz-your-zone').value;
+            const tZone = document.getElementById('tz-their-zone').value;
+            const yHours = document.getElementById('tz-your-hours').value;
+            const tHours = document.getElementById('tz-their-hours').value;
+            const yPeak = document.getElementById('tz-your-peak').value;
+            const tPeak = document.getElementById('tz-their-peak').value;
+
+            // Simple map visualization text
+            const mapText = `When you are at work (${yHours} ${yZone}), they are experiencing late hours / early morning in ${tZone}. Your peak energy (${yPeak}) coincides with their ${tPeak === 'Morning' ? 'start of day' : 'downtime'}.`;
+            
+            const overlapText = `<strong>Morning Window:</strong> Your 7:00 AM - 8:00 AM (${yZone}) = Their 8:00 PM - 9:00 PM (${tZone})<br>
+                                 <strong>Evening Window:</strong> Your 8:00 PM - 9:30 PM (${yZone}) = Their 9:00 AM - 10:30 AM (${tZone})`;
+
+            const bestText = `Your ${yPeak} / Their ${tPeak} sync: <strong>8:00 PM ${yZone} / 9:00 AM ${tZone}</strong>. High mental clarity for both, zero work intrusion.`;
+            const worstText = `Avoid 1:00 PM - 4:00 PM (${yZone}). You are in deep work focus and they are asleep or resting in ${tZone}.`;
+            const ruleText = `"Fixed 20-minute catch-up every Tuesday and Thursday at 8:00 PM (${yZone}) / 9:00 AM (${tZone}). No pressure for long calls."`;
+
+            document.getElementById('res-tz-map').innerHTML = mapText;
+            document.getElementById('res-tz-overlap').innerHTML = overlapText;
+            document.getElementById('res-tz-best').innerHTML = bestText;
+            document.getElementById('res-tz-worst').innerHTML = worstText;
+            document.getElementById('res-tz-rule').innerText = ruleText;
+
+            document.getElementById('output-timezone').classList.remove('hidden');
+
+            saveHistory('timezone', {
+                title: `${yZone} ↔ ${tZone}`,
+                detail: `Best Call: 8:00 PM ${yZone} / 9:00 AM ${tZone}`
+            });
+        }
+
+        // TOOL 2: JEALOUSY RESET LOGIC
+        function loadSampleJealousy() {
+            document.getElementById('j-trigger').value = "They went to a late night party with new work colleagues and posted a group photo.";
+            document.getElementById('j-evidence').value = "Just the group picture on Instagram. They haven't texted back for 3 hours.";
+            document.getElementById('j-fear').value = "They'll meet someone";
+            document.querySelector('input[name="j-boundaries"][value="Yes, vague"]').checked = true;
+        }
+
+        function handleJealousySubmit(e) {
+            e.preventDefault();
+            const trigger = document.getElementById('j-trigger').value;
+            const evidence = document.getElementById('j-evidence').value;
+            const fear = document.getElementById('j-fear').value;
+
+            document.getElementById('res-j-facts').innerText = `Fact: "${evidence}". They are in a public setting and focused on their immediate environment.`;
+            document.getElementById('res-j-story').innerText = `Story: "They are pulling away or replacing me." Fear profile: (${fear}). This is your brain filling gaps created by distance.`;
+
+            const explanations = [
+                "1. Their phone battery is low or kept in a pocket/bag in a noisy venue.",
+                "2. They are fully engaged in the room to avoid looking rude on their phone.",
+                "3. They plan to send a detailed recap once they get home or tomorrow morning."
+            ];
+            document.getElementById('res-j-explanations').innerHTML = explanations.map(x => `<li>${x}</li>`).join('');
+
+            const script = `"Hey! Hope you had a great time tonight. I caught myself feeling a bit disconnected earlier when I saw the photo. No stress at all, just wanted to say goodnight and hear all about it tomorrow!"`;
+            document.getElementById('res-j-script').innerText = script;
+
+            const avoid = [
+                "Double texting repeatedly asking 'Who is that in the photo?'",
+                "Posting vague passive-aggressive stories on social media.",
+                "Going cold / silent treatment when they finally do text back."
+            ];
+            document.getElementById('res-j-avoid').innerHTML = avoid.map(a => `<li>${a}</li>`).join('');
+
+            document.getElementById('output-jealousy').classList.remove('hidden');
+
+            saveHistory('jealousy', {
+                title: `Trigger: ${trigger.substring(0, 25)}...`,
+                detail: `Fear: ${fear} | Reset completed.`
+            });
+        }
+
+        // TOOL 3: VISIT PLANNER LOGIC
+        function loadSampleVisit() {
+            document.querySelector('input[name="v-who"][value="Halfway"]').checked = true;
+            document.getElementById('v-budget').value = "850";
+            document.getElementById('v-time').value = "Long weekend";
+            document.getElementById('v-purpose').value = "Just be together";
+            document.getElementById('v-stress').value = "7";
+            document.getElementById('v-stress-val').innerText = "7";
+        }
+
+        function handleVisitSubmit(e) {
+            e.preventDefault();
+            const who = document.querySelector('input[name="v-who"]:checked').value;
+            const budget = parseFloat(document.getElementById('v-budget').value) || 500;
+            const time = document.getElementById('v-time').value;
+            const purpose = document.getElementById('v-purpose').value;
+            const stress = parseInt(document.getElementById('v-stress').value);
+
+            let type = "Balanced Catch-up";
+            if (budget < 400) type = "Low-Key Cozy Visit";
+            else if (purpose === "Special occasion") type = "Special Destination Visit";
+
+            document.getElementById('res-v-type').innerText = type;
+
+            // Budget calculations
+            const travel = Math.round(budget * 0.45);
+            const stay = Math.round(budget * 0.25);
+            const food = Math.round(budget * 0.15);
+            const acts = Math.round(budget * 0.10);
+            const buffer = Math.round(budget * 0.05);
+
+            document.getElementById('res-v-budget').innerHTML = `
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200"><div class="text-xs text-slate-400">Travel</div><div class="font-bold text-midnight">$${travel}</div></div>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200"><div class="text-xs text-slate-400">Stay</div><div class="font-bold text-midnight">$${stay}</div></div>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200"><div class="text-xs text-slate-400">Food</div><div class="font-bold text-midnight">$${food}</div></div>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200"><div class="text-xs text-slate-400">Activities</div><div class="font-bold text-midnight">$${acts}</div></div>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 col-span-2 sm:col-span-1"><div class="text-xs text-slate-400">Buffer</div><div class="font-bold text-gold">$${buffer}</div></div>
+            `;
+
+            const tips = [
+                stress > 6 ? "Leave Day 1 completely unscripted to recover from travel fatigue." : "Schedule 1 main activity per day max.",
+                "Agree in advance on who pays for what or setup a shared travel split ledger.",
+                "Set a clear departure routine so the last morning isn't rushed or panicked."
+            ];
+            document.getElementById('res-v-stress-tips').innerHTML = tips.map(t => `<li>${t}</li>`).join('');
+
+            document.getElementById('res-v-talk').innerText = `Discuss: "What energy level do we want for this visit? (e.g., 80% lounge/relaxing vs 80% sightseeing)."`;
+            document.getElementById('res-v-next').innerText = `Lock in flight/train tickets by Sunday night.`;
+
+            document.getElementById('output-visit').classList.remove('hidden');
+
+            saveHistory('visit', {
+                title: `${time} Trip (${who})`,
+                detail: `Budget: $${budget} | Type: ${type}`
+            });
+        }
+
+        // TOOL 4: FUTURE TALK LOGIC
+        function loadSampleFuture() {
+            document.getElementById('f-duration').value = "1-2yr";
+            document.getElementById('f-obstacle').value = "Career";
+            document.querySelector('input[name="f-discussed"][value="Yes, vague"]').checked = true;
+            document.getElementById('f-your-conditions').value = "Having 6 months of savings and securing a remote job or local interview.";
+            document.getElementById('f-their-conditions').value = "Completing their current 12-month work contract.";
+        }
+
+        function handleFutureSubmit(e) {
+            e.preventDefault();
+            const duration = document.getElementById('f-duration').value;
+            const obstacle = document.getElementById('f-obstacle').value;
+            const discussed = document.querySelector('input[name="f-discussed"]:checked').value;
+            const yourCond = document.getElementById('f-your-conditions').value;
+            const theirCond = document.getElementById('f-their-conditions').value;
+
+            document.getElementById('res-f-summary').innerText = `Long-distance for ${duration}. Main blocker identified: ${obstacle}. Discussion state: ${discussed}.`;
+            document.getElementById('res-f-reframe').innerText = `Reframe ${obstacle} from an emotional barrier into a project milestone with verifiable criteria.`;
+
+            const paths = [
+                { title: "Path A: Relocation Anchor", desc: "One partner commits to moving within 12 months after hitting specific conditions." },
+                { title: "Path B: Third City Bridge", desc: "Both move to a neutral mutually beneficial city when careers align." },
+                { title: "Path C: Extended Trial Stay", desc: "A 1-to-3 month temporary remote stay to test living together before permanent relocation." }
+            ];
+
+            document.getElementById('res-f-paths').innerHTML = paths.map(p => `
+                <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
+                    <h5 class="font-bold text-slate-800 text-sm">${p.title}</h5>
+                    <p class="text-xs text-slate-600 mt-0.5">${p.desc}</p>
+                </div>
+            `).join('');
+
+            const script = `"I love what we're building, and I want to make sure we're driving toward the same vision. Can we sit down this weekend and look at what needs to happen over the next 6-12 months for us to live in the same zip code?"`;
+            document.getElementById('res-f-script').innerText = script;
+
+            document.getElementById('res-f-hesitant').innerText = "If hesitant: Focus on listening rather than convincing. Ask: 'What feels scariest to you about making this move right now?'";
+            document.getElementById('res-f-timeline').innerText = `Given the ${obstacle} constraint, a realistic horizon is 6 to 9 months of active preparation.`;
+
+            document.getElementById('output-future').classList.remove('hidden');
+
+            saveHistory('future', {
+                title: `Future Plan (${obstacle})`,
+                detail: `Duration: ${duration} | Script generated.`
+            });
+        }
+
+        // TOOL 5: COMMUNICATION REPAIR LOGIC
+        function loadSampleComm() {
+            document.querySelectorAll('input[name="c-channels"]').forEach(cb => cb.checked = false);
+            document.querySelector('input[name="c-channels"][value="Text"]').checked = true;
+            document.querySelector('input[name="c-channels"][value="Voice notes"]').checked = true;
+            document.getElementById('c-time').value = "5-15 min";
+            document.getElementById('c-quality').value = "3";
+            document.getElementById('c-quality-val').innerText = "3";
+            document.getElementById('c-changed').value = "Work schedules got intense, calls feel like routine check-ins.";
+            document.getElementById('c-miss').value = "Laughing together and spontaneous deep conversations.";
+        }
+
+        function handleCommSubmit(e) {
+            e.preventDefault();
+            const channels = Array.from(document.querySelectorAll('input[name="c-channels"]:checked')).map(c => c.value);
+            const time = document.getElementById('c-time').value;
+            const quality = parseInt(document.getElementById('c-quality').value);
+            const changed = document.getElementById('c-changed').value;
+            const miss = document.getElementById('c-miss').value;
+
+            // Determine Risk Level
+            let risk = { text: "Low Risk (Green)", class: "bg-emerald-100 text-emerald-800" };
+            if (quality <= 4 || time === "<5 min") {
+                risk = { text: "High Drift (Red)", class: "bg-rose-100 text-rose-800" };
+            } else if (quality <= 6) {
+                risk = { text: "Moderate Drift (Yellow)", class: "bg-amber-100 text-amber-800" };
+            }
+
+            const riskEl = document.getElementById('res-c-risk');
+            riskEl.className = `px-3 py-1 text-xs font-bold rounded-full flex items-center space-x-1 ${risk.class}`;
+            riskEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i><span>${risk.text}</span>`;
+
+            document.getElementById('res-c-diag').innerText = `Your connection has shifted into transactional maintenance mode. Channels used: [${channels.join(', ')}]. Primary loss: "${miss}".`;
+
+            const tactics = [
+                { title: "Voice Note Roulette", desc: "Swap 1-minute audio notes describing 1 vivid sensory detail of your day." },
+                { title: "Question of the Day", desc: "Ask 1 non-logistical question daily (e.g. 'What made you smile today?')." },
+                { title: "Co-Watch / Activity", desc: "Replace passive talk with active shared experiences (watch a movie or play a game)." }
+            ];
+
+            document.getElementById('res-c-tactics').innerHTML = tactics.map(t => `
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                    <h5 class="font-bold text-midnight text-xs">${t.title}</h5>
+                    <p class="text-[11px] text-slate-600 mt-1">${t.desc}</p>
+                </div>
+            `).join('');
+
+            const script = `"Hey, I noticed our calls have felt a bit short and routine lately with everything going on. I really miss our deeper chats and laughing with you. Can we do an uninterrupted video date night this Thursday?"`;
+            document.getElementById('res-c-script').innerText = script;
+
+            const emerg = `"Thinking of you today. No need to text back right away—just wanted to send a quick reminder that I love you and I'm in your corner."`;
+            document.getElementById('res-c-emerg').innerText = emerg;
+
+            document.getElementById('output-comm').classList.remove('hidden');
+
+            saveHistory('comm', {
+                title: `Comm Diagnostic (${risk.text})`,
+                detail: `Quality: ${quality}/10 | Time: ${time}`
+            });
+        }
+
+        // Initialize histories on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderHistory('timezone');
+            renderHistory('jealousy');
+            renderHistory('visit');
+            renderHistory('future');
+            renderHistory('comm');
+        });
+    </script>
+</body>
+</html>

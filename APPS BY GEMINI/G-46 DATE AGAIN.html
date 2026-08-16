@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DateAgain — Dating After Disillusionment</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Modern Reset & Base Variables */
+        :root {
+            --primary: #2A9D8F;
+            --primary-hover: #238378;
+            --primary-light: #E6F4F1;
+            --secondary: #F4A261;
+            --secondary-hover: #E78B43;
+            --bg-gradient: linear-gradient(135deg, #F0FDFA 0%, #FFF5EB 100%);
+            --text-main: #2D3748;
+            --text-muted: #718096;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --danger: #E53E3E;
+            --warning: #DD6B20;
+            --success: #38A169;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* Layout Structure */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Fixed Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            background: var(--primary);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 16px 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            margin-bottom: 4px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Mobile Header & Hamburger */
+        .mobile-header {
+            display: none;
+            background: var(--card-bg);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 95;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Main Content Workspace */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Responsive UI Elements & Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .tool-screen {
+            display: none;
+        }
+
+        .tool-screen.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Headings & Text */
+        .page-title {
+            font-size: 1.85rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .form-control, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #FAFAFA;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #FFF;
+            box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.15);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: #EDF2F7;
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background: #E2E8F0;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background: #F7FAFC;
+            color: var(--text-main);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+        }
+
+        /* Results / Output Panel */
+        .results-panel {
+            margin-top: 32px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 32px;
+        }
+
+        .result-block {
+            background: #F8FAFC;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 16px;
+        }
+
+        .result-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .result-text {
+            font-size: 1rem;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* Dashboard Specific Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .dashboard-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+            border-color: var(--primary);
+        }
+
+        .dash-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .dash-card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .dash-card-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Range Sliders styling for Self-Check */
+        .slider-group {
+            margin-bottom: 24px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .slider-val {
+            font-weight: 700;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--primary);
+        }
+
+        /* Dashboard Bars for Self Check */
+        .progress-bar-container {
+            background: #EDF2F7;
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            transition: width 0.4s ease;
+        }
+
+        .bg-success { background-color: var(--success); }
+        .bg-warning { background-color: var(--warning); }
+        .bg-danger { background-color: var(--danger); }
+
+        /* Copy Button / Micro interactions */
+        .copy-phrase-box {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-top: 8px;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #2D3748;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: opacity;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 32px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-date {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        /* Global Footer */
+        .app-footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 24px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .main-content {
+                padding: 20px 16px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Top Navigation Header -->
+    <div class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="brand-icon"><i class="fa-solid fa-heart-shield"></i></div>
+            <span class="brand-title">DateAgain</span>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open Navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Backdrop Overlay for Mobile Sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon"><i class="fa-solid fa-heart-shield"></i></div>
+                <span class="brand-title">DateAgain</span>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a class="nav-link active" data-screen="dashboard">
+                        <i class="fa-solid fa-compass"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-screen="tool1">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i> Pattern Reveal
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-screen="tool2">
+                        <i class="fa-solid fa-sliders"></i> Trust Calibration
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-screen="tool3">
+                        <i class="fa-solid fa-flag"></i> Red / Green Flag
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-screen="tool4">
+                        <i class="fa-solid fa-key"></i> Vulnerability Plan
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-screen="tool5">
+                        <i class="fa-solid fa-gauge-high"></i> Self-Check
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="main-wrapper">
+            <main class="main-content">
+
+                <!-- DASHBOARD SCREEN -->
+                <section id="dashboard" class="tool-screen active">
+                    <div style="text-align: center; margin-bottom: 36px; padding: 20px 0;">
+                        <h1 class="page-title" style="font-size: 2.2rem; margin-bottom: 12px;">Date Again</h1>
+                        <p class="page-subtitle" style="font-size: 1.15rem; max-width: 600px; margin: 0 auto; color: var(--primary);">
+                            Trust your gut without letting fear drive.
+                        </p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card" onclick="switchScreen('tool1')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                            <div class="dash-card-title">1. Pattern Reveal</div>
+                            <div class="dash-card-desc">Decode previous relationship dynamics to identify specific personal repeat risks and build warning systems.</div>
+                        </div>
+
+                        <div class="dashboard-card" onclick="switchScreen('tool2')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-sliders"></i></div>
+                            <div class="dash-card-title">2. Trust Calibration</div>
+                            <div class="dash-card-desc">Distinguish between protective self-sabotage trauma responses and genuine intuitive gut warnings.</div>
+                        </div>
+
+                        <div class="dashboard-card" onclick="switchScreen('tool3')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-flag"></i></div>
+                            <div class="dash-card-title">3. Red / Green Flag</div>
+                            <div class="dash-card-desc">Objective scoring toolkit to weigh worrisome behavior against safe, consistent green flags.</div>
+                        </div>
+
+                        <div class="dashboard-card" onclick="switchScreen('tool4')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-key"></i></div>
+                            <div class="dash-card-title">4. Vulnerability Plan</div>
+                            <div class="dash-card-desc">Pacing roadmap to share yourself incrementally without oversharing early or walling off.</div>
+                        </div>
+
+                        <div class="dashboard-card" onclick="switchScreen('tool5')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                            <div class="dash-card-title">5. Self-Check</div>
+                            <div class="dash-card-desc">Evaluate your emotional readiness dashboard and ensure you are dating from wholeness, not a wound.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: PATTERN REVEAL -->
+                <section id="tool1" class="tool-screen">
+                    <div class="card">
+                        <h2 class="page-title">Pattern Reveal</h2>
+                        <p class="page-subtitle">"I don't actually know what went wrong last time. I just know it hurt."</p>
+                        
+                        <form id="form-tool1" onsubmit="event.preventDefault(); analyzeTool1();">
+                            <div class="form-group">
+                                <label class="form-label">What was bad about the previous relationship:</label>
+                                <textarea id="t1-bad" placeholder="Describe the atmosphere, treatment, or specific painful dynamics..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your role in the dynamic:</label>
+                                <select id="t1-role">
+                                    <option value="I stayed too long">I stayed too long</option>
+                                    <option value="I ignored red flags">I ignored red flags</option>
+                                    <option value="I tried to fix them">I tried to fix them</option>
+                                    <option value="I lost myself">I lost myself</option>
+                                    <option value="I was controlling">I was controlling out of anxiety</option>
+                                    <option value="I don't know">I don't know</option>
+                                    <option value="I was mistreated">I was mistreated / coerced</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Red flags you saw early:</label>
+                                <textarea id="t1-flags" placeholder="What felt slightly off in the first few weeks or months?"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Why you stayed:</label>
+                                <select id="t1-stay">
+                                    <option value="Hope they'd change">Hope they'd change</option>
+                                    <option value="Fear of being alone">Fear of being alone</option>
+                                    <option value="Financial dependence">Financial dependence / Logistics</option>
+                                    <option value="Love">Strong feelings / Attachment</option>
+                                    <option value="Kids">Family / Children</option>
+                                    <option value="Didn't recognize it as bad">Didn't recognize it as bad at the time</option>
+                                    <option value="They weren't always bad">They weren't always bad (Intermittent validation)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">How it ended:</label>
+                                <select id="t1-ended">
+                                    <option value="I left">I left</option>
+                                    <option value="They left">They left</option>
+                                    <option value="Mutual">Mutual decision</option>
+                                    <option value="Ghosted">Ghosted / Abrupt cutoff</option>
+                                    <option value="Still entangled">Still entangled / On-off</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Time since it ended:</label>
+                                <select id="t1-time">
+                                    <option value="<3mo">&lt; 3 months</option>
+                                    <option value="3-6mo">3 - 6 months</option>
+                                    <option value="6mo-1yr">6 months - 1 year</option>
+                                    <option value="1-2yr">1 - 2 years</option>
+                                    <option value="2+yr">2+ years</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Reveal Pattern</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool1" class="results-panel" style="display: none;">
+                            <!-- Output generated dynamically -->
+                        </div>
+
+                        <!-- History Section -->
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool1')">
+                                <strong><i class="fa-solid fa-clock-rotate-left"></i> Previous Pattern Reveal Analyses</strong>
+                                <i class="fa-solid fa-chevron-down" id="hist-icon-tool1"></i>
+                            </div>
+                            <div id="hist-list-tool1" class="history-list" style="display: none;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: TRUST CALIBRATION -->
+                <section id="tool2" class="tool-screen">
+                    <div class="card">
+                        <h2 class="page-title">Trust Calibration</h2>
+                        <p class="page-subtitle">"I can't tell if I'm being wisely cautious or destructively paranoid."</p>
+
+                        <form id="form-tool2" onsubmit="event.preventDefault(); analyzeTool2();">
+                            <div class="form-group">
+                                <label class="form-label">Current dating behavior:</label>
+                                <select id="t2-behavior">
+                                    <option value="Avoiding entirely">Avoiding entirely</option>
+                                    <option value="Going on dates but keeping walls up">Going on dates but keeping walls up</option>
+                                    <option value="Over-analyzing everything">Over-analyzing every text & movement</option>
+                                    <option value="Testing them constantly">Testing them constantly to see if they fail</option>
+                                    <option value="Open but scared">Open but scared</option>
+                                    <option value="Already attached too fast">Already attached too fast</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Something that made you nervous recently:</label>
+                                <textarea id="t2-nervous" placeholder="Describe the event, message, or silence that triggered worry..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your reaction:</label>
+                                <select id="t2-reaction">
+                                    <option value="Ended it immediately">Ended it immediately / Pulled plug</option>
+                                    <option value="Asked friends">Asked friends for reality check</option>
+                                    <option value="Ignored it">Ignored it & pretended I was fine</option>
+                                    <option value="Confronted them">Confronted them immediately</option>
+                                    <option value="Shut down">Shut down & withdrew emotionally</option>
+                                    <option value="Spiral">Anxious spiral / Overthinking loop</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Past accuracy of your gut:</label>
+                                <select id="t2-gut">
+                                    <option value="Usually right">Usually right</option>
+                                    <option value="Usually wrong">Usually wrong / Misled</option>
+                                    <option value="Mixed">Mixed</option>
+                                    <option value="I don't trust it">I don't trust it at all</option>
+                                    <option value="It was manipulated">It was manipulated / Gaslit in the past</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What you're afraid of missing:</label>
+                                <select id="t2-fear">
+                                    <option value="A good person because I'm scared">A good person because I'm scared</option>
+                                    <option value="Red flags because I'm lonely">Red flags because I'm lonely</option>
+                                    <option value="Both">Both equally</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-compass-drafting"></i> Calibrate Trust</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool2" class="results-panel" style="display: none;"></div>
+
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool2')">
+                                <strong><i class="fa-solid fa-clock-rotate-left"></i> Saved Calibrations</strong>
+                                <i class="fa-solid fa-chevron-down" id="hist-icon-tool2"></i>
+                            </div>
+                            <div id="hist-list-tool2" class="history-list" style="display: none;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: RED FLAG / GREEN FLAG -->
+                <section id="tool3" class="tool-screen">
+                    <div class="card">
+                        <h2 class="page-title">Red Flag / Green Flag Evaluator</h2>
+                        <p class="page-subtitle">"I need a concrete checklist because my feelings are confused."</p>
+
+                        <form id="form-tool3" onsubmit="event.preventDefault(); analyzeTool3();">
+                            <div class="form-group">
+                                <label class="form-label">Their behavior that worries you:</label>
+                                <textarea id="t3-worries" placeholder="Be specific: e.g. late responses, subtle insults, intense declarations..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Their behavior that comforts you:</label>
+                                <textarea id="t3-comforts" placeholder="Be specific: e.g. follows through, validates feelings, respects time..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">How they talk about exes:</label>
+                                <select id="t3-exes">
+                                    <option value="Respectfully">Respectfully / Balanced perspective</option>
+                                    <option value="Vaguely">Vaguely / Neutral</option>
+                                    <option value="Blames all">Blames all exes for everything</option>
+                                    <option value="Trash talk">Trash talks / Harsh name-calling</option>
+                                    <option value="Won't discuss">Won't discuss at all / Suspicious secrecy</option>
+                                    <option value="Still entangled">Still entangled / Unclear boundaries</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">How they handle disagreement:</label>
+                                <select id="t3-conflict">
+                                    <option value="Discuss">Discusses calmly / Open to listening</option>
+                                    <option value="Avoid">Avoids / Changes topic</option>
+                                    <option value="Shut down">Shuts down / Silent treatment</option>
+                                    <option value="Escalate">Escalates / Gets defensive or aggressive</option>
+                                    <option value="Dismiss">Dismisses / Invalidates my perspective</option>
+                                    <option value="Not tested yet">Not tested yet</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">How they respond to your boundaries:</label>
+                                <select id="t3-boundaries">
+                                    <option value="Respects">Respects immediately without fuss</option>
+                                    <option value="Tests">Tests / Tries to push or negotiate</option>
+                                    <option value="Ignores">Ignores completely</option>
+                                    <option value="Praises me for having them">Praises me for having clear limits</option>
+                                    <option value="Seems annoyed">Seems annoyed or pouts</option>
+                                    <option value="Not tested">Not tested yet</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-list-check"></i> Evaluate Flags</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool3" class="results-panel" style="display: none;"></div>
+
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool3')">
+                                <strong><i class="fa-solid fa-clock-rotate-left"></i> Saved Flag Evaluations</strong>
+                                <i class="fa-solid fa-chevron-down" id="hist-icon-tool3"></i>
+                            </div>
+                            <div id="hist-list-tool3" class="history-list" style="display: none;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: VULNERABILITY PLAN -->
+                <section id="tool4" class="tool-screen">
+                    <div class="card">
+                        <h2 class="page-title">Vulnerability Pacing Plan</h2>
+                        <p class="page-subtitle">"I don't know when it's safe to open up or how much to share."</p>
+
+                        <form id="form-tool4" onsubmit="event.preventDefault(); analyzeTool4();">
+                            <div class="form-group">
+                                <label class="form-label">What you tend to overshare:</label>
+                                <textarea id="t4-overshare" placeholder="e.g. Past relationship trauma, deep insecurities, financial struggles early on..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What you tend to hide:</label>
+                                <textarea id="t4-hide" placeholder="e.g. Immediate emotional needs, preferences, daily struggles, true opinions..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your attachment style guess:</label>
+                                <select id="t4-attachment">
+                                    <option value="Anxious">Anxious (Fear of abandonment)</option>
+                                    <option value="Avoidant">Avoidant (Fear of losing independence)</option>
+                                    <option value="Fearful">Fearful-Avoidant / Disorganized (Craves closeness, fears it)</option>
+                                    <option value="Secure">Secure</option>
+                                    <option value="Don't know">Don't know</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What opening up feels like:</label>
+                                <select id="t4-feels">
+                                    <option value="Relief">Relief</option>
+                                    <option value="Terror">Terror / Extreme vulnerability hangover</option>
+                                    <option value="Obligation">Obligation</option>
+                                    <option value="Test">A test to see if they'll run away</option>
+                                    <option value="Connection">Genuine connection building</option>
+                                    <option value="Trap">A trap that gives them ammunition</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Their vulnerability level:</label>
+                                <select id="t4-their-level">
+                                    <option value="Very open">Very open / Emotionally expressive</option>
+                                    <option value="Moderate">Moderate / Reciprocates gradually</option>
+                                    <option value="Guarded">Guarded / Keeps conversation surface level</option>
+                                    <option value="Secretive">Secretive / Deflects personal questions</option>
+                                    <option value="Performative">Performative / Deep stories without real presence</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-shield-halved"></i> Generate Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool4" class="results-panel" style="display: none;"></div>
+
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool4')">
+                                <strong><i class="fa-solid fa-clock-rotate-left"></i> Saved Vulnerability Plans</strong>
+                                <i class="fa-solid fa-chevron-down" id="hist-icon-tool4"></i>
+                            </div>
+                            <div id="hist-list-tool4" class="history-list" style="display: none;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: SELF-CHECK -->
+                <section id="tool5" class="tool-screen">
+                    <div class="card">
+                        <h2 class="page-title">Readiness Self-Check</h2>
+                        <p class="page-subtitle">"I need to make sure I'm dating from wholeness, not from a wound."</p>
+
+                        <form id="form-tool5" onsubmit="event.preventDefault(); analyzeTool5();">
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label class="form-label">I feel whole on my own:</label>
+                                    <span class="slider-val" id="val-t5-s1">5</span>
+                                </div>
+                                <input type="range" id="t5-s1" min="1" max="10" value="5" oninput="updateSliderVal('t5-s1')">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label class="form-label">I trust my ability to spot danger:</label>
+                                    <span class="slider-val" id="val-t5-s2">5</span>
+                                </div>
+                                <input type="range" id="t5-s2" min="1" max="10" value="5" oninput="updateSliderVal('t5-s2')">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label class="form-label">I trust my ability to spot goodness:</label>
+                                    <span class="slider-val" id="val-t5-s3">5</span>
+                                </div>
+                                <input type="range" id="t5-s3" min="1" max="10" value="5" oninput="updateSliderVal('t5-s3')">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label class="form-label">I'm dating to add to my life, not to fix it:</label>
+                                    <span class="slider-val" id="val-t5-s4">5</span>
+                                </div>
+                                <input type="range" id="t5-s4" min="1" max="10" value="5" oninput="updateSliderVal('t5-s4')">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label class="form-label">I can walk away if it's not right:</label>
+                                    <span class="slider-val" id="val-t5-s5">5</span>
+                                </div>
+                                <input type="range" id="t5-s5" min="1" max="10" value="5" oninput="updateSliderVal('t5-s5')">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label class="form-label">I feel hopeful about love:</label>
+                                    <span class="slider-val" id="val-t5-s6">5</span>
+                                </div>
+                                <input type="range" id="t5-s6" min="1" max="10" value="5" oninput="updateSliderVal('t5-s6')">
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-line"></i> Calculate Readiness</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool5" class="results-panel" style="display: none;"></div>
+
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool5')">
+                                <strong><i class="fa-solid fa-clock-rotate-left"></i> Saved Self-Check Reports</strong>
+                                <i class="fa-solid fa-chevron-down" id="hist-icon-tool5"></i>
+                            </div>
+                            <div id="hist-list-tool5" class="history-list" style="display: none;"></div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Global Footer -->
+            <footer class="app-footer">
+                <div class="footer-content">
+                    For entertainment and reflection purposes only. Not therapy or professional advice. If your previous relationship was abusive, consider working with a trauma-informed therapist before dating.
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast" class="toast">Copied to clipboard!</div>
+
+    <!-- JAVASCRIPT LOGIC & TEMPLATE ENGINES -->
+    <script>
+        /* Navigation & Mobile Drawer Setup */
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const screens = document.querySelectorAll('.tool-screen');
+
+        function toggleMobileSidebar() {
+            sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('mobile-open');
+        }
+
+        hamburgerBtn.addEventListener('click', toggleMobileSidebar);
+        sidebarOverlay.addEventListener('click', toggleMobileSidebar);
+
+        function switchScreen(screenId) {
+            screens.forEach(s => s.classList.remove('active'));
+            navLinks.forEach(l => l.classList.remove('active'));
+
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            }
+
+            const activeLink = document.querySelector(`.nav-link[data-screen="${screenId}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+
+            if (sidebar.classList.contains('mobile-open')) {
+                toggleMobileSidebar();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                const target = link.getAttribute('data-screen');
+                switchScreen(target);
+            });
+        });
+
+        /* Toast Helper */
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg || 'Copied!';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Phrase copied to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy');
+            });
+        }
+
+        /* Slider Helper */
+        function updateSliderVal(id) {
+            const val = document.getElementById(id).value;
+            document.getElementById('val-' + id).textContent = val;
+        }
+
+        /* LocalStorage History Manager */
+        function saveToHistory(toolId, dataSummary, fullData) {
+            const key = `dateagain_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                summary: dataSummary,
+                data: fullData
+            };
+
+            history.unshift(newItem);
+            if (history.length > 30) history = history.slice(0, 30);
+            
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = `dateagain_history_${toolId}`;
+            const listContainer = document.getElementById(`hist-list-${toolId}`);
+            if (!listContainer) return;
+
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            if (history.length === 0) {
+                listContainer.innerHTML = '<div style="color:var(--text-muted); padding:10px; font-size:0.85rem;">No saved records yet.</div>';
+                return;
+            }
+
+            listContainer.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div>
+                        <strong>${item.summary}</strong>
+                        <div class="history-date">${item.date}</div>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="clearSingleHistory('${toolId}', ${item.id})"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function clearSingleHistory(toolId, itemId) {
+            const key = `dateagain_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            history = history.filter(i => i.id !== itemId);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function toggleHistory(toolId) {
+            const list = document.getElementById(`hist-list-${toolId}`);
+            const icon = document.getElementById(`hist-icon-${toolId}`);
+            if (list.style.display === 'none') {
+                list.style.display = 'flex';
+                icon.className = 'fa-solid fa-chevron-up';
+                renderHistory(toolId);
+            } else {
+                list.style.display = 'none';
+                icon.className = 'fa-solid fa-chevron-down';
+            }
+        }
+
+        /* ----------------------------------------------------
+           TOOL 1 LOGIC: PATTERN REVEAL
+        ---------------------------------------------------- */
+        function loadSampleTool1() {
+            document.getElementById('t1-bad').value = "He was extremely jealous when I saw my friends, constantly texted demanding updates, and accused me of flirting if I was polite to servers.";
+            document.getElementById('t1-role').value = "I stayed too long";
+            document.getElementById('t1-flags').value = "In week two he got upset because I took 3 hours to reply while at work. He also talked trash about all his 'crazy' exes.";
+            document.getElementById('t1-stay').value = "Hope they'd change";
+            document.getElementById('t1-ended').value = "I left";
+            document.getElementById('t1-time').value = "6mo-1yr";
+            showToast("Sample Scenario Loaded!");
+        }
+
+        function analyzeTool1() {
+            const bad = document.getElementById('t1-bad').value;
+            const role = document.getElementById('t1-role').value;
+            const flags = document.getElementById('t1-flags').value;
+            const stay = document.getElementById('t1-stay').value;
+            const ended = document.getElementById('t1-ended').value;
+            const time = document.getElementById('t1-time').value;
+
+            // Template Logic Engine
+            let patternName = "The Loyalty Trap";
+            let attractionFactor = "High intensity and rapid emotional closeness disguised as deep passion.";
+            
+            if (role === "I tried to fix them" || stay === "Hope they'd change") {
+                patternName = "The Fixer / Project Dynamic";
+                attractionFactor = "Potential over reality—you are drawn to people with 'raw potential' or vulnerabilities that make you feel needed.";
+            } else if (role === "I lost myself" || role === "I stayed too long") {
+                patternName = "The Minimizer / Over-Adapter";
+                attractionFactor = "Initial intense focus and charisma that feels like total devotion before shifting to control.";
+            } else if (stay === "Didn't recognize it as bad" || role === "I was mistreated") {
+                patternName = "The Slow-Erosion Trap";
+                attractionFactor = "Charming behavior that slowly introduces subtle boundaries testing under the radar.";
+            }
+
+            const earlyWarning = [
+                "Premature intensity (Love-bombing, asking for big commitments early).",
+                "Subtle boundary pushes (e.g., subtle pouting or sarcasm when you spend time with others).",
+                "Disproportionate emotional reactions to minor delays or autonomous decisions."
+            ];
+
+            const stayTrigger = `Your primary vulnerability was <strong>${stay}</strong>. This mindset convinced you that enduring temporary discomfort would eventually yield long-term emotional safety.`;
+
+            const exitPractice = "Set 1 hard boundary in week 2 (e.g., keeping a planned friend night without changing it). If they react with guilt or agitation, exit immediately without negotiating.";
+
+            const selfTrustRebuild = `You successfully recognized the danger and <strong>${ended.toLowerCase()}</strong>. The fact that you are analyzing this ${time} later shows your protective instincts are active and evolving.`;
+
+            const resultsDiv = document.getElementById('results-tool1');
+            resultsDiv.innerHTML = `
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-triangle-exclamation"></i> The Pattern Name</div>
+                    <div class="result-text"><strong>${patternName}</strong></div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-radar"></i> The Early Warning System</div>
+                    <div class="result-text">
+                        <ul style="padding-left: 20px;">
+                            ${earlyWarning.map(w => `<li>${w}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-magnet"></i> The Attraction Factor</div>
+                    <div class="result-text">${attractionFactor}</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-anchor"></i> The Stay Trigger</div>
+                    <div class="result-text">${stayTrigger}</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-door-open"></i> The Exit Practice</div>
+                    <div class="result-text">${exitPractice}</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-shield-cat"></i> The Self-Trust Rebuild</div>
+                    <div class="result-text">${selfTrustRebuild}</div>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+
+            saveToHistory('tool1', `Pattern: ${patternName}`, { patternName, time });
+        }
+
+
+        /* ----------------------------------------------------
+           TOOL 2 LOGIC: TRUST CALIBRATION
+        ---------------------------------------------------- */
+        function loadSampleTool2() {
+            document.getElementById('t2-behavior').value = "Going on dates but keeping walls up";
+            document.getElementById('t2-nervous').value = "They were 25 minutes late to our second date and didn't text ahead of time.";
+            document.getElementById('t2-reaction').value = "Ended it immediately";
+            document.getElementById('t2-gut').value = "It was manipulated";
+            document.getElementById('t2-fear').value = "A good person because I'm scared";
+            showToast("Sample Scenario Loaded!");
+        }
+
+        function analyzeTool2() {
+            const behavior = document.getElementById('t2-behavior').value;
+            const nervous = document.getElementById('t2-nervous').value;
+            const reaction = document.getElementById('t2-reaction').value;
+            const gut = document.getElementById('t2-gut').value;
+            const fear = document.getElementById('t2-fear').value;
+
+            let calibrationState = "Hyper-Guarded Protection Mode";
+            let nervousSystem = "Trauma response overlay. Your nervous system is treating minor inconsistency as an existential threat to keep you safe.";
+
+            if (reaction === "Ignored it" || behavior === "Already attached too fast") {
+                calibrationState = "Under-Protected / Minimizing";
+                nervousSystem = "Anxiety driving self-suppression. You are sacrificing your boundary cues to maintain connection.";
+            } else if (reaction === "Asked friends" || reaction === "Confronted them") {
+                calibrationState = "Appropriately Cautious & Processing";
+                nervousSystem = "Healthy caution trying to distinguish real flags from hypervigilance.";
+            }
+
+            const dataGatherer = "Instead of cutting ties or ignoring it, collect 2 more data points. Observe if they take genuine accountability without defensiveness when brought up casually.";
+            const rule3Date = "Dates 1-3 are purely for observing behavioral consistency, not evaluating long-term potential or making quick executions.";
+            const friendFilter = "Pick ONE grounded, objective friend who knows your past to act as a sanity check before taking action on minor triggers.";
+            const slowOpen = "Share non-critical personal stories first. Gauge whether they hold space with curiosity or turn the conversation back onto themselves.";
+
+            const resultsDiv = document.getElementById('results-tool2');
+            resultsDiv.innerHTML = `
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-scale-balanced"></i> The Calibration</div>
+                    <div class="result-text"><strong>Status: ${calibrationState}</strong></div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-heart-pulse"></i> The Nervous System Check</div>
+                    <div class="result-text">${nervousSystem}</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-binoculars"></i> The Data Gatherer</div>
+                    <div class="result-text">${dataGatherer}</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-calendar-days"></i> The 3-Date Rule</div>
+                    <div class="result-text">${rule3Date}</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-user-check"></i> The Friend Filter</div>
+                    <div class="result-text">${friendFilter}</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-water"></i> The Slow Open</div>
+                    <div class="result-text">${slowOpen}</div>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+
+            saveToHistory('tool2', `Calibration: ${calibrationState}`, { calibrationState });
+        }
+
+
+        /* ----------------------------------------------------
+           TOOL 3 LOGIC: RED FLAG / GREEN FLAG
+        ---------------------------------------------------- */
+        function loadSampleTool3() {
+            document.getElementById('t3-worries').value = "They talk about how all their past exes were 'psycho' and crazy, taking zero responsibility.";
+            document.getElementById('t3-comforts').value = "They always text back consistently and remember small details I mentioned earlier.";
+            document.getElementById('t3-exes').value = "Blames all";
+            document.getElementById('t3-conflict').value = "Avoid";
+            document.getElementById('t3-boundaries').value = "Not tested";
+            showToast("Sample Scenario Loaded!");
+        }
+
+        function analyzeTool3() {
+            const worries = document.getElementById('t3-worries').value;
+            const comforts = document.getElementById('t3-comforts').value;
+            const exes = document.getElementById('t3-exes').value;
+            const conflict = document.getElementById('t3-conflict').value;
+            const boundaries = document.getElementById('t3-boundaries').value;
+
+            let redScore = 0;
+            let greenScore = 0;
+
+            if (exes === "Blames all" || exes === "Trash talk") redScore += 3;
+            if (exes === "Respectfully") greenScore += 3;
+
+            if (conflict === "Escalate" || conflict === "Shut down") redScore += 3;
+            if (conflict === "Discuss") greenScore += 3;
+
+            if (boundaries === "Respects") greenScore += 4;
+            if (boundaries === "Tests" || boundaries === "Ignores") redScore += 4;
+
+            let plan = "PROCEED WITH CAUTION";
+            if (redScore >= 6) plan = "PAUSE OR END - HIGH RISK OF REPEAT PATTERN";
+            if (greenScore >= 6 && redScore <= 2) plan = "PROCEED SAFELY - POSITIVE INDICATORS";
+
+            const convPrompt = "How did your last relationship end, and what do you wish you had done differently?";
+
+            const resultsDiv = document.getElementById('results-tool3');
+            resultsDiv.innerHTML = `
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-flag" style="color:var(--danger)"></i> Red Flag Severity Score</div>
+                    <div class="result-text">Score: <strong>${redScore} / 10</strong> — ${worries ? 'Main concern noted: "' + worries + '"' : 'No major text concerns noted.'}</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-flag" style="color:var(--success)"></i> Green Flag Strength Score</div>
+                    <div class="result-text">Score: <strong>${greenScore} / 10</strong> — ${comforts ? 'Positive trait noted: "' + comforts + '"' : 'No major green traits noted.'}</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-triangle-exclamation" style="color:var(--warning)"></i> The Amber Zone</div>
+                    <div class="result-text">Conflict style is currently listed as: <strong>${conflict}</strong>. Watch how they react when plans need to change unexpectedly.</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-ban"></i> Dealbreaker Standard</div>
+                    <div class="result-text">Blaming all exes and ignoring boundaries are non-negotiable dealbreakers for healthy attachment.</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-route"></i> Proceed Plan</div>
+                    <div class="result-text"><strong>Recommendation: ${plan}</strong></div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-comments"></i> Key Conversation Prompt</div>
+                    <div class="result-text">
+                        Ask them: <em>"${convPrompt}"</em>
+                        <div class="copy-phrase-box">
+                            <span>"${convPrompt}"</span>
+                            <button class="btn btn-outline btn-sm" onclick="copyToClipboard('${convPrompt}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+
+            saveToHistory('tool3', `Flag Check: Red ${redScore} / Green ${greenScore}`, { redScore, greenScore });
+        }
+
+
+        /* ----------------------------------------------------
+           TOOL 4 LOGIC: VULNERABILITY PLAN
+        ---------------------------------------------------- */
+        function loadSampleTool4() {
+            document.getElementById('t4-overshare').value = "Details of my ex's emotional abuse and my deepest fears of abandonment.";
+            document.getElementById('t4-hide').value = "My actual dinner preference or when I feel hurt by a small offhand joke.";
+            document.getElementById('t4-attachment').value = "Fearful";
+            document.getElementById('t4-feels').value = "Test";
+            document.getElementById('t4-their-level').value = "Guarded";
+            showToast("Sample Scenario Loaded!");
+        }
+
+        function analyzeTool4() {
+            const overshare = document.getElementById('t4-overshare').value;
+            const hide = document.getElementById('t4-hide').value;
+            const attachment = document.getElementById('t4-attachment').value;
+            const feels = document.getElementById('t4-feels').value;
+            const theirLevel = document.getElementById('t4-their-level').value;
+
+            const boundaryPhrase = "I'm not ready to talk about that yet, but I'll let you know when I am.";
+
+            const resultsDiv = document.getElementById('results-tool4');
+            resultsDiv.innerHTML = `
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-stairs"></i> Vulnerability Pacing Roadmap</div>
+                    <div class="result-text">
+                        <ul style="padding-left:20px;">
+                            <li><strong>Dates 1-3:</strong> General life story, hobbies, humorous personal quirks.</li>
+                            <li><strong>Dates 4-6:</strong> Core values, relationship expectations, past lessons.</li>
+                            <li><strong>Date 7+:</strong> Deep personal history and trauma narratives (only if earned).</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-hand-holding-medical"></i> Overshare & Guarded Check</div>
+                    <div class="result-text">
+                        You tend to overshare: <em>"${overshare || 'heavy topics early'}"</em> while hiding: <em>"${hide || 'daily preferences'}"</em>.<br>
+                        <strong>Correction:</strong> Reverse this! Practice expressing tiny present-moment preferences first.
+                    </div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-arrows-rotate"></i> The Reciprocity Test</div>
+                    <div class="result-text">Their openness level is: <strong>${theirLevel}</strong>. Do not invest deeper vulnerability than they are matching.</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-mug-hot"></i> Safe Topic Menu</div>
+                    <div class="result-text">Career ambitions, favorite travel memories, personal boundaries around communication, and music preferences.</div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-shield-cat"></i> Boundary Protection Phrase</div>
+                    <div class="result-text">
+                        Use this when pushed too early:
+                        <div class="copy-phrase-box">
+                            <span>"${boundaryPhrase}"</span>
+                            <button class="btn btn-outline btn-sm" onclick="copyToClipboard('${boundaryPhrase}')"><i class="fa-solid fa-copy"></i> Copy Phrase</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+
+            saveToHistory('tool4', `Plan for ${attachment} style`, { attachment });
+        }
+
+
+        /* ----------------------------------------------------
+           TOOL 5 LOGIC: SELF-CHECK
+        ---------------------------------------------------- */
+        function loadSampleTool5() {
+            document.getElementById('t5-s1').value = 6;
+            document.getElementById('t5-s2').value = 9;
+            document.getElementById('t5-s3').value = 3;
+            document.getElementById('t5-s4').value = 7;
+            document.getElementById('t5-s5').value = 8;
+            document.getElementById('t5-s6').value = 3;
+
+            for(let i=1; i<=6; i++) updateSliderVal(`t5-s${i}`);
+            showToast("Sample Scenario Loaded!");
+        }
+
+        function analyzeTool5() {
+            const s1 = parseInt(document.getElementById('t5-s1').value);
+            const s2 = parseInt(document.getElementById('t5-s2').value);
+            const s3 = parseInt(document.getElementById('t5-s3').value);
+            const s4 = parseInt(document.getElementById('t5-s4').value);
+            const s5 = parseInt(document.getElementById('t5-s5').value);
+            const s6 = parseInt(document.getElementById('t5-s6').value);
+
+            const scores = [
+                { name: "Wholeness", val: s1 },
+                { name: "Danger Spotting", val: s2 },
+                { name: "Goodness Spotting", val: s3 },
+                { name: "Additive Dating Intent", val: s4 },
+                { name: "Ability to Walk Away", val: s5 },
+                { name: "Hopefulness", val: s6 }
+            ];
+
+            const avg = (s1 + s2 + s3 + s4 + s5 + s6) / 6;
+
+            let verdict = "Cautiously Ready";
+            if (avg >= 7.5) verdict = "Ready for Healthy Connection";
+            if (avg < 5) verdict = "Focus on Self-Healing First";
+
+            function getBarColor(val) {
+                if (val >= 7) return 'bg-success';
+                if (val >= 4) return 'bg-warning';
+                return 'bg-danger';
+            }
+
+            const resultsDiv = document.getElementById('results-tool5');
+            resultsDiv.innerHTML = `
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-chart-simple"></i> Readiness Dashboard</div>
+                    <div class="result-text" style="margin-top:12px;">
+                        ${scores.map(s => `
+                            <div style="margin-bottom:12px;">
+                                <div style="display:flex; justify-between; font-size:0.85rem; font-weight:600;">
+                                    <span>${s.name}</span>
+                                    <span>${s.val} / 10</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill ${getBarColor(s.val)}" style="width: ${s.val * 10}%;"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-stamp"></i> Readiness Verdict</div>
+                    <div class="result-text"><strong>${verdict}</strong></div>
+                </div>
+
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-heart-circle-check"></i> Primary Healing Focus</div>
+                    <div class="result-text">
+                        ${s3 < 5 ? "Your ability to spot goodness is low relative to danger spotting. Work on recognizing safe, calm, green-flag behavior without mistaking it for boredom." : "Continue practicing walking away at the first sign of non-negotiable dealbreakers."}
+                    </div>
+                </div>
+
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-gauge"></i> Recommended Pacing</div>
+                    <div class="result-text">Limit yourself to maximum 1 date per week to allow full emotional processing and integration between interactions.</div>
+                </div>
+
+                <div class="result-block">
+                    <div class="result-title"><i class="fa-solid fa-quote-left"></i> Core Affirmation</div>
+                    <div class="result-text" style="font-size:1.1rem; font-weight:600; color:var(--primary); text-align:center; padding:10px 0;">
+                        "You are not damaged. You are experienced."
+                    </div>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+
+            saveToHistory('tool5', `Readiness: ${verdict} (${avg.toFixed(1)}/10)`, { avg, verdict });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InterruptionShield — Focus Protection Toolkit</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --midnight-blue: #1B263B;
+            --soft-coral: #F8AD9D;
+            --coral-hover: #f69783;
+            --bg-gradient-start: #EDF2F4;
+            --bg-gradient-end: #FFF0F3;
+            --card-bg: #FFFFFF;
+            --text-main: #2B2D42;
+            --text-muted: #6C757D;
+            --border-color: #E9ECEF;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Layout Architecture */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 24px;
+            color: var(--midnight-blue);
+        }
+
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--midnight-blue);
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 20px 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item button {
+            width: 100%;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item button:hover {
+            background-color: rgba(27, 38, 59, 0.04);
+            color: var(--midnight-blue);
+        }
+
+        .nav-item.active button {
+            background-color: rgba(27, 38, 59, 0.08);
+            color: var(--midnight-blue);
+            border-left-color: var(--midnight-blue);
+            font-weight: 600;
+        }
+
+        .nav-item button i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            background-color: var(--card-bg);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .mobile-toggle {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--midnight-blue);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 950;
+        }
+
+        /* Main Content Workspace */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        .view-panel {
+            display: none;
+        }
+
+        .view-panel.active {
+            display: block;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* UI Cards & Forms */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, var(--midnight-blue), #2c3e50);
+            color: white;
+            padding: 36px 28px;
+            margin-bottom: 32px;
+        }
+
+        .hero-card h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .hero-card p {
+            color: #D8E2DC;
+            font-size: 16px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .dash-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+
+        .dash-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .dash-card-header i {
+            font-size: 20px;
+            color: var(--midnight-blue);
+            background: var(--bg-gradient-end);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .dash-card h3 {
+            font-size: 16px;
+            color: var(--midnight-blue);
+        }
+
+        .dash-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Form Controls */
+        .tool-header {
+            margin-bottom: 24px;
+        }
+
+        .tool-header h2 {
+            font-size: 22px;
+            color: var(--midnight-blue);
+            margin-bottom: 6px;
+        }
+
+        .tool-problem {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-main);
+            background-color: #FAFBFD;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--midnight-blue);
+            background-color: #FFF;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #FAFBFD;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .radio-label:hover {
+            background: #F0F4F8;
+        }
+
+        .radio-label input[type="radio"] {
+            accent-color: var(--midnight-blue);
+        }
+
+        /* Buttons */
+        .button-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s, opacity 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--midnight-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: #E2E8F0;
+            color: var(--midnight-blue);
+        }
+
+        .btn-secondary:hover {
+            background-color: #CBD5E1;
+        }
+
+        .btn-accent {
+            background-color: var(--soft-coral);
+            color: var(--midnight-blue);
+        }
+
+        .btn-accent:hover {
+            background-color: var(--coral-hover);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Outputs Section */
+        .output-container {
+            margin-top: 32px;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .output-card {
+            border-left: 4px solid var(--soft-coral);
+            margin-bottom: 16px;
+        }
+
+        .output-card h3 {
+            font-size: 15px;
+            color: var(--midnight-blue);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-card p, .output-card ul {
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .output-card ul {
+            padding-left: 20px;
+        }
+
+        .script-box {
+            background-color: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 13px;
+            color: #0F172A;
+            white-space: pre-wrap;
+            position: relative;
+        }
+
+        .metric-highlight {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--midnight-blue);
+            margin: 8px 0;
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .history-header h3 {
+            font-size: 16px;
+            color: var(--midnight-blue);
+        }
+
+        .history-content {
+            display: none;
+            margin-top: 16px;
+        }
+
+        .history-content.active {
+            display: block;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .history-item .timestamp {
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: var(--midnight-blue);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 2000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 20px 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .main-content {
+                padding: 20px 16px;
+            }
+
+            .hero-card {
+                padding: 24px 20px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-shield-halved" style="color: var(--midnight-blue); font-size: 20px;"></i>
+            <span style="font-weight: 700; color: var(--midnight-blue);">InterruptionShield</span>
+        </div>
+        <button class="mobile-toggle" id="mobileMenuBtn" aria-label="Toggle menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h1>InterruptionShield</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item active" data-view="dashboard">
+                    <button><i class="fa-solid fa-chart-pie"></i> Dashboard</button>
+                </li>
+                <li class="nav-item" data-view="tool1">
+                    <button><i class="fa-solid fa-calculator"></i> Interruption Audit</button>
+                </li>
+                <li class="nav-item" data-view="tool2">
+                    <button><i class="fa-solid fa-traffic-light"></i> Signal System</button>
+                </li>
+                <li class="nav-item" data-view="tool3">
+                    <button><i class="fa-solid fa-comments"></i> The Conversation</button>
+                </li>
+                <li class="nav-item" data-view="tool4">
+                    <button><i class="fa-solid fa-sliders"></i> Environment Hack</button>
+                </li>
+                <li class="nav-item" data-view="tool5">
+                    <button><i class="fa-solid fa-users"></i> Team Solution</button>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-wrapper">
+            <main class="main-content">
+                
+                <!-- DASHBOARD PANEL -->
+                <section id="dashboard" class="view-panel active">
+                    <div class="card hero-card">
+                        <h2>Interruption Shield</h2>
+                        <p>Your focus is not a free resource. Protect it.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card dash-card" onclick="switchView('tool1')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <i class="fa-solid fa-calculator"></i>
+                                    <h3>Interruption Audit</h3>
+                                </div>
+                                <p>Quantify lost hours, refocus costs, and map availability triggers.</p>
+                            </div>
+                        </div>
+
+                        <div class="card dash-card" onclick="switchView('tool2')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <i class="fa-solid fa-traffic-light"></i>
+                                    <h3>Signal System</h3>
+                                </div>
+                                <p>Set clear physical and digital availability boundaries effortlessly.</p>
+                            </div>
+                        </div>
+
+                        <div class="card dash-card" onclick="switchView('tool3')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <i class="fa-solid fa-comments"></i>
+                                    <h3>The Conversation</h3>
+                                </div>
+                                <p>Get professional, firm scripts to address interrupters directly.</p>
+                            </div>
+                        </div>
+
+                        <div class="card dash-card" onclick="switchView('tool4')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <i class="fa-solid fa-sliders"></i>
+                                    <h3>Environment Hack</h3>
+                                </div>
+                                <p>Re-engineer your physical and digital space for deep focus work.</p>
+                            </div>
+                        </div>
+
+                        <div class="card dash-card" onclick="switchView('tool5')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <i class="fa-solid fa-users"></i>
+                                    <h3>Team Solution</h3>
+                                </div>
+                                <p>Propose team-wide norms, focus windows, and chat etiquette.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: THE INTERRUPTION AUDIT -->
+                <section id="tool1" class="view-panel">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2>Tool 1 — The Interruption Audit</h2>
+                            <p class="tool-problem">"I need to understand exactly how much this is costing me."</p>
+                        </div>
+
+                        <form id="form-tool1" onsubmit="handleAuditSubmit(event)">
+                            <div class="form-group">
+                                <label for="t1-who">Who interrupts you?</label>
+                                <textarea id="t1-who" class="form-control" placeholder="e.g., Alex from marketing, frequent desk drop-ins" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-frequency">How often?</label>
+                                <select id="t1-frequency" class="form-control" required>
+                                    <option value="1-2">1-2 times per hour</option>
+                                    <option value="3-5">3-5 times per hour</option>
+                                    <option value="6-10">6-10 times per hour</option>
+                                    <option value="constantly">Constantly (10+ per hour)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-intent">What do they want?</label>
+                                <select id="t1-intent" class="form-control" required>
+                                    <option value="quick">Quick question</option>
+                                    <option value="chat">Casual Chat / Socializing</option>
+                                    <option value="help">Help with their work</option>
+                                    <option value="urgent-real">Urgent (Real emergency)</option>
+                                    <option value="urgent-fake">Urgent (Fake emergency / Poor planning)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-refocus">How long to refocus after an interruption?</label>
+                                <select id="t1-refocus" class="form-control" required>
+                                    <option value="2">&lt; 2 minutes</option>
+                                    <option value="5">2 - 5 minutes</option>
+                                    <option value="15">5 - 15 minutes</option>
+                                    <option value="23">15+ minutes</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-workspace">Your workspace:</label>
+                                <select id="t1-workspace" class="form-control" required>
+                                    <option value="open">Open Office Floorplan</option>
+                                    <option value="cubicle">Cubicle Workspace</option>
+                                    <option value="shared">Shared Private Room</option>
+                                    <option value="private">Private Office</option>
+                                    <option value="remote">Remote / Work-from-home</option>
+                                </select>
+                            </div>
+
+                            <div class="button-row">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-line"></i> Calculate Impact</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool1" class="output-container">
+                        <!-- Calculated Dynamic Results -->
+                    </div>
+
+                    <div class="history-section card">
+                        <div class="history-header" onclick="toggleHistory('tool1')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Audit History</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="clearHistory('tool1', event)">Clear History</button>
+                        </div>
+                        <div id="history-tool1" class="history-content"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: THE SIGNAL SYSTEM -->
+                <section id="tool2" class="view-panel">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2>Tool 2 — The Signal System</h2>
+                            <p class="tool-problem">"I need a way to show I'm in focus mode without being rude."</p>
+                        </div>
+
+                        <form id="form-tool2" onsubmit="handleSignalSubmit(event)">
+                            <div class="form-group">
+                                <label for="t2-limits">Your workspace limitations:</label>
+                                <textarea id="t2-limits" class="form-control" placeholder="e.g., Desk faces main aisle, no door, high foot-traffic zone" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-current">What signals do you currently use?</label>
+                                <select id="t2-current" class="form-control" required>
+                                    <option value="headphones">Headphones</option>
+                                    <option value="door">Closed Door</option>
+                                    <option value="away">Status / Away Message</option>
+                                    <option value="nothing">Nothing / No clear signals</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-culture">Your team culture:</label>
+                                <select id="t2-culture" class="form-control" required>
+                                    <option value="respects">Respects Boundaries</option>
+                                    <option value="mixed">Mixed Awareness</option>
+                                    <option value="interrupts">Interrupts Freely</option>
+                                    <option value="nonorms">No Norms Established</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-directness">Your comfort with directness:</label>
+                                <select id="t2-directness" class="form-control" required>
+                                    <option value="direct">Very Direct</option>
+                                    <option value="moderate">Moderate</option>
+                                    <option value="subtle">Prefer Subtle</option>
+                                </select>
+                            </div>
+
+                            <div class="button-row">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gears"></i> Generate Signals</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool2" class="output-container"></div>
+
+                    <div class="history-section card">
+                        <div class="history-header" onclick="toggleHistory('tool2')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Signal History</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="clearHistory('tool2', event)">Clear History</button>
+                        </div>
+                        <div id="history-tool2" class="history-content"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: THE CONVERSATION -->
+                <section id="tool3" class="view-panel">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2>Tool 3 — The Conversation</h2>
+                            <p class="tool-problem">"I need to tell them to stop without creating conflict."</p>
+                        </div>
+
+                        <form id="form-tool3" onsubmit="handleConversationSubmit(event)">
+                            <div class="form-group">
+                                <label for="t3-interrupter">Who is the interrupter?</label>
+                                <select id="t3-interrupter" class="form-control" required>
+                                    <option value="peer">Peer / Coworker</option>
+                                    <option value="boss">Boss / Manager</option>
+                                    <option value="junior">Junior / Direct Report</option>
+                                    <option value="friend">Workplace Friend</option>
+                                    <option value="multiple">Multiple People</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Your relationship:</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t3-rel" value="close" required> Close</label>
+                                    <label class="radio-label"><input type="radio" name="t3-rel" value="friendly"> Friendly</label>
+                                    <label class="radio-label"><input type="radio" name="t3-rel" value="neutral"> Neutral</label>
+                                    <label class="radio-label"><input type="radio" name="t3-rel" value="strained"> Strained</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What do you want?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t3-outcome" value="fewer" required> Fewer Interruptions</label>
+                                    <label class="radio-label"><input type="radio" name="t3-outcome" value="scheduled"> Scheduled Check-ins</label>
+                                    <label class="radio-label"><input type="radio" name="t3-outcome" value="urgent"> Only Urgent Matters</label>
+                                    <label class="radio-label"><input type="radio" name="t3-outcome" value="venting"> Just Venting</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Their likely reaction:</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t3-reaction" value="understanding" required> Understanding</label>
+                                    <label class="radio-label"><input type="radio" name="t3-reaction" value="surprised"> Surprised</label>
+                                    <label class="radio-label"><input type="radio" name="t3-reaction" value="defensive"> Defensive</label>
+                                    <label class="radio-label"><input type="radio" name="t3-reaction" value="hurt"> Hurt</label>
+                                </div>
+                            </div>
+
+                            <div class="button-row">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-comment-dots"></i> Build Dialogue Script</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool3" class="output-container"></div>
+
+                    <div class="history-section card">
+                        <div class="history-header" onclick="toggleHistory('tool3')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Script History</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="clearHistory('tool3', event)">Clear History</button>
+                        </div>
+                        <div id="history-tool3" class="history-content"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: THE ENVIRONMENT HACK -->
+                <section id="tool4" class="view-panel">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2>Tool 4 — The Environment Hack</h2>
+                            <p class="tool-problem">"I can't change them, so I need to change my environment."</p>
+                        </div>
+
+                        <form id="form-tool4" onsubmit="handleEnvironmentSubmit(event)">
+                            <div class="form-group">
+                                <label for="t4-location">Where do you work?</label>
+                                <select id="t4-location" class="form-control" required>
+                                    <option value="desk">Desk Only</option>
+                                    <option value="mobile">Can Move Around Office</option>
+                                    <option value="remote">Remote</option>
+                                    <option value="hybrid">Hybrid</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-focustime">When do you need focus most?</label>
+                                <select id="t4-focustime" class="form-control" required>
+                                    <option value="morning">Mornings</option>
+                                    <option value="afternoon">Afternoons</option>
+                                    <option value="project">Specific Project Blocks</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-spaces">What spaces are available?</label>
+                                <select id="t4-spaces" class="form-control" required>
+                                    <option value="conference">Conference Rooms</option>
+                                    <option value="coffeeshop">Coffee Shop</option>
+                                    <option value="home">Home / Remote Desk</option>
+                                    <option value="library">Library / Quiet Zone</option>
+                                    <option value="otherfloor">Other Floors / Nooks</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Can you change your working hours?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t4-hours" value="yes" required> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t4-hours" value="no"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t4-hours" value="partially"> Partially (±1 hour)</label>
+                                </div>
+                            </div>
+
+                            <div class="button-row">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-compass"></i> Map Environment Hacks</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool4" class="output-container"></div>
+
+                    <div class="history-section card">
+                        <div class="history-header" onclick="toggleHistory('tool4')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Hacks History</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="clearHistory('tool4', event)">Clear History</button>
+                        </div>
+                        <div id="history-tool4" class="history-content"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: THE TEAM SOLUTION -->
+                <section id="tool5" class="view-panel">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2>Tool 5 — The Team Solution</h2>
+                            <p class="tool-problem">"This is a team-wide problem and we need a collective fix."</p>
+                        </div>
+
+                        <form id="form-tool5" onsubmit="handleTeamSubmit(event)">
+                            <div class="form-group">
+                                <label>Do others get interrupted too?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5-others" value="yes" required> Yes, widespread</label>
+                                    <label class="radio-label"><input type="radio" name="t5-others" value="justme"> Primarily Just Me</label>
+                                    <label class="radio-label"><input type="radio" name="t5-others" value="notsure"> Not Sure</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-champion">Who could champion a fix?</label>
+                                <select id="t5-champion" class="form-control" required>
+                                    <option value="manager">Team Manager</option>
+                                    <option value="me">Myself</option>
+                                    <option value="vote">Team Consensus / Vote</option>
+                                    <option value="hr">HR / People Ops</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-tried">What has been tried so far?</label>
+                                <textarea id="t5-tried" class="form-control" placeholder="e.g., Casual complaints, informal quiet hours that were ignored" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-energy">Your energy for leading change:</label>
+                                <select id="t5-energy" class="form-control" required>
+                                    <option value="high">High (Ready to pitch & facilitate)</option>
+                                    <option value="medium">Medium (Will participate / share template)</option>
+                                    <option value="low">Low (Prefer low effort / manager led)</option>
+                                    <option value="none">None (Exhausted / Just need basic guidance)</option>
+                                </select>
+                            </div>
+
+                            <div class="button-row">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-bullhorn"></i> Build Proposal Strategy</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool5" class="output-container"></div>
+
+                    <div class="history-section card">
+                        <div class="history-header" onclick="toggleHistory('tool5')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Proposal History</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="clearHistory('tool5', event)">Clear History</button>
+                        </div>
+                        <div id="history-tool5" class="history-content"></div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Global Footer -->
+            <footer>
+                <p>For workplace productivity and communication strategy only. Not a substitute for team norms or management guidance. For harassment or bullying, consult HR.</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <script>
+        // --- ROUTING & NAVIGATION ---
+        const navItems = document.querySelectorAll('.nav-item');
+        const viewPanels = document.querySelectorAll('.view-panel');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+
+        function switchView(viewId) {
+            navItems.forEach(item => {
+                if(item.dataset.view === viewId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            viewPanels.forEach(panel => {
+                if(panel.id === viewId) {
+                    panel.classList.add('active');
+                } else {
+                    panel.classList.remove('active');
+                }
+            });
+
+            // Close mobile menu if open
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                switchView(item.dataset.view);
+            });
+        });
+
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('active');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // --- TOAST NOTIFICATION ---
+        function showToast(message = 'Copied to clipboard!') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied to clipboard!');
+            }).catch(err => {
+                showToast('Failed to copy');
+            });
+        }
+
+        // --- LOCAL STORAGE & HISTORY MANAGEMENT ---
+        function saveToHistory(toolId, data) {
+            const storageKey = `interrupt_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            history.unshift({
+                timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                data: data
+            });
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(storageKey, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const storageKey = `interrupt_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const container = document.getElementById(`history-${toolId}`);
+            if (!container) return;
+
+            if (history.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">No history recorded yet.</p>';
+                return;
+            }
+
+            container.innerHTML = history.map((item, idx) => `
+                <div class="history-item">
+                    <span>${escapeHtml(item.data.summary || 'Audit Log Record')}</span>
+                    <span class="timestamp">${item.timestamp}</span>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistory(toolId) {
+            const container = document.getElementById(`history-${toolId}`);
+            if (container) container.classList.toggle('active');
+        }
+
+        function clearHistory(toolId, event) {
+            event.stopPropagation();
+            localStorage.removeItem(`interrupt_history_${toolId}`);
+            renderHistory(toolId);
+            showToast('History cleared');
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+            });
+        }
+
+        // --- TOOL 1 LOGIC ---
+        function loadSampleTool1() {
+            document.getElementById('t1-who').value = 'Alex (Chatty Coworker)';
+            document.getElementById('t1-frequency').value = '3-5';
+            document.getElementById('t1-intent').value = 'chat';
+            document.getElementById('t1-refocus').value = '15';
+            document.getElementById('t1-workspace').value = 'open';
+        }
+
+        function handleAuditSubmit(e) {
+            e.preventDefault();
+            const who = document.getElementById('t1-who').value;
+            const freqVal = document.getElementById('t1-frequency').value;
+            const intent = document.getElementById('t1-intent').value;
+            const refocus = parseInt(document.getElementById('t1-refocus').value);
+            const workspace = document.getElementById('t1-workspace').value;
+
+            // Mathematical calculation of time drain
+            let countPerDay = 3;
+            if (freqVal === '3-5') countPerDay = 16;
+            if (freqVal === '6-10') countPerDay = 32;
+            if (freqVal === 'constantly') countPerDay = 48;
+            if (freqVal === '1-2') countPerDay = 6;
+
+            const avgInterruptionMins = 4;
+            const minutesLostPerDay = countPerDay * (avgInterruptionMins + refocus);
+            const hoursPerDay = (minutesLostPerDay / 60).toFixed(1);
+            const hoursPerWeek = ((minutesLostPerDay * 5) / 60).toFixed(1);
+
+            const out = document.getElementById('output-tool1');
+            out.innerHTML = `
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-clock"></i> The Cost Calculator</h3>
+                    <div class="metric-highlight">${hoursPerDay} hrs lost / day (${hoursPerWeek} hrs / week)</div>
+                    <p>Includes direct chat time + cognitive switching penalty (~${refocus} mins to regain full depth of focus per instance).</p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-magnifying-glass-chart"></i> The Pattern</h3>
+                    <p>Your open setup (${workspace}) paired with "${intent}" requests creates an ongoing low-friction avenue for interruptions. Disruptions peak during transition periods (mid-morning & post-lunch).</p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-eye"></i> The Trigger Map</h3>
+                    <ul>
+                        <li><strong>Eye Contact:</strong> Looking up when someone walks by flags immediate availability.</li>
+                        <li><strong>Headphones Off:</strong> Bare ears signal open capacity to chat.</li>
+                        <li><strong>Instant Response:</strong> Answering casual questions instantly teaches others to skip self-solve attempts.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-bullseye"></i> The Real Urgency</h3>
+                    <p>${intent === 'urgent-real' ? 'Real urgency demands immediate triage, but systematic tracking often reveals <20% of interruptions actually require immediate action.' : 'Estimated true urgency of these requests is low (<15%). Most topics can wait for designated check-in blocks.'}</p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-arrows-rotate"></i> The Self-Check</h3>
+                    <p>Reflect: Do you stop by ${who.split(' ')[0]}'s desk when taking coffee breaks or seeking a mental breather? Standardize your break habits to set a mutual standard.</p>
+                </div>
+            `;
+            out.classList.add('active');
+
+            saveToHistory('tool1', { summary: `${who}: ~${hoursPerDay}h/day lost (${freqVal} freq)` });
+        }
+
+        // --- TOOL 2 LOGIC ---
+        function loadSampleTool2() {
+            document.getElementById('t2-limits').value = 'Open office floorplan, desk positioned near main corridor without door';
+            document.getElementById('t2-current').value = 'headphones';
+            document.getElementById('t2-culture').value = 'mixed';
+            document.getElementById('t2-directness').value = 'moderate';
+        }
+
+        function handleSignalSubmit(e) {
+            e.preventDefault();
+            const limits = document.getElementById('t2-limits').value;
+            const current = document.getElementById('t2-current').value;
+            const culture = document.getElementById('t2-culture').value;
+            const directness = document.getElementById('t2-directness').value;
+
+            const scriptDecline = `"I'm in the middle of a deep-focus task right now. Can I ping you back around 2:30 PM?"`;
+            const scriptBatch = `"Hey! I'm holding all quick questions for my open window at 3:00 PM. Drop it in Slack or let's catch up then!"`;
+
+            const out = document.getElementById('output-tool2');
+            out.innerHTML = `
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-lightbulb"></i> The Physical Signals</h3>
+                    <ul>
+                        <li><strong>Over-Ear Headphones:</strong> High visibility. Keep on even with audio paused.</li>
+                        <li><strong>Visual Desk Flag:</strong> Use a desk-card or monitor signal (Red = Focus Mode, Green = Available).</li>
+                        <li><strong>Angle Adjustment:</strong> Turn seat 45 degrees away from traffic lanes to reduce casual eye contact.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-laptop"></i> The Digital Signals</h3>
+                    <p>Set Slack/Teams status to 🔴 <em>"Focus Block (Back at 2:00 PM)"</em> and enable Do Not Disturb auto-responses.</p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-users-gear"></i> The Team Norm</h3>
+                    <p>Propose a trial of "Quiet Hours" (e.g., 9:00 AM - 11:30 AM daily) where team members reserve chat and drop-ins for urgent emergencies only.</p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-hand"></i> The Polite Decline</h3>
+                    <div class="script-box" id="script-decline">${scriptDecline}</div>
+                    <button class="btn btn-accent btn-sm" onclick="copyToClipboard(document.getElementById('script-decline').innerText)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-calendar-check"></i> The Batch Offer</h3>
+                    <div class="script-box" id="script-batch">${scriptBatch}</div>
+                    <button class="btn btn-accent btn-sm" onclick="copyToClipboard(document.getElementById('script-batch').innerText)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+            `;
+            out.classList.add('active');
+
+            saveToHistory('tool2', { summary: `Signals generated for ${culture} culture (${directness} style)` });
+        }
+
+        // --- TOOL 3 LOGIC ---
+        function loadSampleTool3() {
+            document.getElementById('t3-interrupter').value = 'peer';
+            document.querySelector('input[name="t3-rel"][value="friendly"]').checked = true;
+            document.querySelector('input[name="t3-outcome"][value="fewer"]').checked = true;
+            document.querySelector('input[name="t3-reaction"][value="surprised"]').checked = true;
+        }
+
+        function handleConversationSubmit(e) {
+            e.preventDefault();
+            const interrupter = document.getElementById('t3-interrupter').value;
+            const rel = document.querySelector('input[name="t3-rel"]:checked')?.value || 'friendly';
+            const outcome = document.querySelector('input[name="t3-outcome"]:checked')?.value || 'fewer';
+            const reaction = document.querySelector('input[name="t3-reaction"]:checked')?.value || 'surprised';
+
+            const scriptOpener = `"Hey, I really value working together, but I've noticed I'm struggling to get into deep work lately with frequent drop-ins. Could we batch our questions into a daily 15-minute check-in at 2 PM instead?"`;
+
+            const out = document.getElementById('output-tool3');
+            out.innerHTML = `
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-comment-dots"></i> The Script</h3>
+                    <div class="script-box" id="script-opener">${scriptOpener}</div>
+                    <button class="btn btn-accent btn-sm" onclick="copyToClipboard(document.getElementById('script-opener').innerText)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-crop-simple"></i> The Framing</h3>
+                    <p>Focus on your own productivity needs, not their behavior. Frame it as: <strong>"I am trying to fix my attention span and deadlines"</strong> rather than <em>"You keep bothering me."</em></p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-shuffle"></i> The Alternative</h3>
+                    <p>Replace instant availability with reliable scheduled availability. Offer a standing 15-minute sync or a shared asynchronous task queue (e.g., Trello or Slack canvas).</p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-heart-crack"></i> If They're Hurt or Defensive</h3>
+                    <p>Reassure them: <em>"This isn't about not wanting to talk to you—I just need continuous focus time to hit my deliverables. I still want to make sure you get what you need."</em></p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-shield-cat"></i> If They Ignore It</h3>
+                    <p>Escalate gracefully. Apply firm physical boundaries (working in secondary spaces, blocking calendar slots) and loop in manager alignment during 1-on-1s regarding focus priorities.</p>
+                </div>
+            `;
+            out.classList.add('active');
+
+            saveToHistory('tool3', { summary: `Script for ${interrupter} (${rel} relationship)` });
+        }
+
+        // --- TOOL 4 LOGIC ---
+        function loadSampleTool4() {
+            document.getElementById('t4-location').value = 'desk';
+            document.getElementById('t4-focustime').value = 'morning';
+            document.getElementById('t4-spaces').value = 'conference';
+            document.querySelector('input[name="t4-hours"][value="partially"]').checked = true;
+        }
+
+        function handleEnvironmentSubmit(e) {
+            e.preventDefault();
+            const location = document.getElementById('t4-location').value;
+            const focusTime = document.getElementById('t4-focustime').value;
+            const spaces = document.getElementById('t4-spaces').value;
+            const hours = document.querySelector('input[name="t4-hours"]:checked')?.value || 'no';
+
+            const out = document.getElementById('output-tool4');
+            out.innerHTML = `
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-map-location-dot"></i> The Location Strategy</h3>
+                    <p>When focus is required in ${focusTime}s, relocate to a ${spaces} spot for 90-minute sprints. Physical absence prevents spontaneous drop-ins.</p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-business-time"></i> The Hour Shift</h3>
+                    <p>${hours === 'yes' || hours === 'partially' ? 'Shift schedule 30-60 minutes earlier or later. Working during low-density office hours guarantees uninterrupted output.' : 'If hours are fixed, create calendar blocks marked "Deep Work - Offline Triage".'}</p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-house-laptop"></i> The Remote Block</h3>
+                    <p>If hybrid or remote, update status during focus sprints: <em>"Focus Block Active — Checking messages at 12 PM & 4 PM."</em> Mute non-essential notifications.</p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-calendar-xmark"></i> The Meeting Substitute</h3>
+                    <p>Convert vague "got a minute?" chats into concise 5-minute async screen recordings (Loom) or typed bullet points before scheduling a call.</p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-cubes"></i> The Physical Barriers</h3>
+                    <p>Position monitor screens to block direct line of sight from doorways/hallways. Place physical objects (notebooks, desk plants) to define boundary territory.</p>
+                </div>
+            `;
+            out.classList.add('active');
+
+            saveToHistory('tool4', { summary: `Environment hacks for ${location} (${spaces})` });
+        }
+
+        // --- TOOL 5 LOGIC ---
+        function loadSampleTool5() {
+            document.querySelector('input[name="t5-others"][value="yes"]').checked = true;
+            document.getElementById('t5-champion').value = 'manager';
+            document.getElementById('t5-tried').value = 'Informal verbal requests during standups that faded after a few days';
+            document.getElementById('t5-energy').value = 'medium';
+        }
+
+        function handleTeamSubmit(e) {
+            e.preventDefault();
+            const others = document.querySelector('input[name="t5-others"]:checked')?.value || 'yes';
+            const champion = document.getElementById('t5-champion').value;
+            const tried = document.getElementById('t5-tried').value;
+            const energy = document.getElementById('t5-energy').value;
+
+            const scriptAgenda = `"I'd like to propose a 10-minute discussion on establishing shared team focus hours so we can all hit our core deliverables with fewer context switches."`;
+
+            const out = document.getElementById('output-tool5');
+            out.innerHTML = `
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-file-contract"></i> The Team Norm Proposal</h3>
+                    <ul>
+                        <li><strong>No-Interruption Zones:</strong> 10:00 AM - 12:00 PM designated daily for deep focus.</li>
+                        <li><strong>Channel Etiquette:</strong> Urgent = Phone Call/PagerDuty, Non-Urgent = Slack/Email with 4-hr expected SLA.</li>
+                        <li><strong>Status Transparency:</strong> Universal adoption of Slack focus status indicators.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-list-check"></i> The Meeting Agenda</h3>
+                    <p>Bring up in your next retro or team sync using this pitch:</p>
+                    <div class="script-box" id="script-agenda">${scriptAgenda}</div>
+                    <button class="btn btn-accent btn-sm" onclick="copyToClipboard(document.getElementById('script-agenda').innerText)"><i class="fa-regular fa-copy"></i> Copy Agenda Pitch</button>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-vial"></i> The 2-Week Pilot</h3>
+                    <p>Propose a low-risk, time-boxed trial: <em>"Let's test 'Focus Mornings' for 2 weeks, track productivity improvements, and retro on whether to keep it."</em></p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-bullhorn"></i> The Accountability Protocol</h3>
+                    <p>Use gentle team reminders: <em>"Friendly reminder—we're currently in focus hours until 12 PM! Catch you right after."</em></p>
+                </div>
+
+                <div class="card output-card">
+                    <h3><i class="fa-solid fa-user-shield"></i> If Culture Won't Change</h3>
+                    <p>Focus on local control: Secure individual manager backing for your personal focus blocks, use physical location shifts, and maintain firm personal boundaries.</p>
+                </div>
+            `;
+            out.classList.add('active');
+
+            saveToHistory('tool5', { summary: `Proposal championed by ${champion} (${energy} energy)` });
+        }
+
+        // --- INIT & SETUP ---
+        document.addEventListener('DOMContentLoaded', () => {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(id => renderHistory(id));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeetingConfidence - Participation Toolkit</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary-teal: #006D77;
+      --primary-teal-hover: #00565e;
+      --primary-teal-light: #e6f3f4;
+      --soft-blush: #FFDDD2;
+      --soft-blush-hover: #f8cdbf;
+      --soft-blush-dark: #e5a998;
+      --bg-gradient: linear-gradient(135deg, #EDF6F9 0%, #FFF0F3 100%);
+      --card-bg: #FFFFFF;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --radius-xl: 1rem;
+      --sidebar-width: 240px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* Layout Structure */
+    .app-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--card-bg);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-brand-icon {
+      width: 38px;
+      height: 38px;
+      background-color: var(--primary-teal);
+      color: #fff;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .sidebar-brand-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--primary-teal);
+      line-height: 1.2;
+    }
+
+    .sidebar-nav {
+      padding: 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.6rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn i {
+      font-size: 1.1rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .nav-btn:hover {
+      background-color: var(--primary-teal-light);
+      color: var(--primary-teal);
+    }
+
+    .nav-btn.active {
+      background-color: var(--primary-teal);
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .nav-btn.active i {
+      color: var(--soft-blush);
+    }
+
+    /* Mobile Header & Backdrop */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 1rem;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 90;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .mobile-menu-btn {
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      color: var(--primary-teal);
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 95;
+      backdrop-filter: blur(2px);
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 2.5rem 1.5rem 4rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .content-wrapper {
+      width: 100%;
+      max-width: 800px;
+    }
+
+    /* View Containers */
+    .view-section {
+      display: none;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    /* Hero Section (Dashboard) */
+    .hero-card {
+      background: linear-gradient(135deg, var(--primary-teal) 0%, #004d54 100%);
+      color: #FFFFFF;
+      padding: 2.5rem 2rem;
+      border-radius: var(--radius-xl);
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: '';
+      position: absolute;
+      right: -30px;
+      bottom: -30px;
+      width: 180px;
+      height: 180px;
+      background: var(--soft-blush);
+      opacity: 0.15;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-tagline {
+      font-size: 1.15rem;
+      color: var(--soft-blush);
+      font-weight: 400;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .dash-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      text-align: left;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-teal);
+    }
+
+    .dash-card-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 0.75rem;
+      background-color: var(--primary-teal-light);
+      color: var(--primary-teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+
+    .dash-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .dash-card-desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Section Headers */
+    .tool-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .tool-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary-teal);
+      margin-bottom: 0.25rem;
+    }
+
+    .tool-problem {
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* Forms & Inputs */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.925rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .form-control, .form-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 0.6rem;
+      border: 1px solid var(--border-color);
+      font-family: inherit;
+      font-size: 0.925rem;
+      color: var(--text-main);
+      background-color: #FAFAFA;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--primary-teal);
+      background-color: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(0, 109, 119, 0.12);
+    }
+
+    textarea.form-control {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    /* Checkbox & Radio Groups */
+    .checkbox-grid, .radio-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .check-item, .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 0.8rem;
+      background: #FAFAFA;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .check-item:hover, .radio-item:hover {
+      border-color: var(--primary-teal);
+      background-color: var(--primary-teal-light);
+    }
+
+    .check-item input, .radio-item input {
+      accent-color: var(--primary-teal);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    /* Form Action Buttons */
+    .form-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.6rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-teal);
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-teal-hover);
+      box-shadow: 0 4px 12px rgba(0, 109, 119, 0.25);
+    }
+
+    .btn-secondary {
+      background-color: var(--soft-blush);
+      color: var(--primary-teal);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--soft-blush-hover);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .btn-outline:hover {
+      background: #F1F5F9;
+      color: var(--text-main);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+      border-radius: 0.4rem;
+    }
+
+    /* Results Sections */
+    .result-container {
+      margin-top: 2rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .result-section {
+      background: #FFFFFF;
+      border-left: 4px solid var(--primary-teal);
+      border-radius: 0 0.75rem 0.75rem 0;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .result-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary-teal);
+      margin-bottom: 0.35rem;
+    }
+
+    .result-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    .result-body {
+      font-size: 0.925rem;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    .result-body p {
+      margin-bottom: 0.5rem;
+    }
+
+    .result-body p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Script / Quote Box with Copy Button */
+    .script-box {
+      background-color: #F8FAFC;
+      border: 1px solid var(--border-color);
+      border-radius: 0.6rem;
+      padding: 1rem;
+      margin: 0.75rem 0;
+      position: relative;
+    }
+
+    .script-text {
+      font-family: inherit;
+      font-size: 0.925rem;
+      color: #0F172A;
+      font-weight: 500;
+      line-height: 1.5;
+      padding-right: 80px;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: var(--primary-teal-light);
+      color: var(--primary-teal);
+      border: none;
+      padding: 0.35rem 0.65rem;
+      border-radius: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      background: var(--primary-teal);
+      color: #FFFFFF;
+    }
+
+    /* History Accordion */
+    .history-card {
+      margin-top: 2rem;
+      border-top: 2px dashed var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .history-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .history-item {
+      border: 1px solid var(--border-color);
+      border-radius: 0.6rem;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+      background: #FFFFFF;
+    }
+
+    .history-summary {
+      padding: 0.85rem 1rem;
+      background: #FAFAFA;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .history-summary:hover {
+      background: #F1F5F9;
+    }
+
+    .history-details {
+      padding: 1rem;
+      display: none;
+      border-top: 1px solid var(--border-color);
+      background: #FFFFFF;
+    }
+
+    .history-item.open .history-details {
+      display: block;
+    }
+
+    .history-date {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-md);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast i {
+      color: #4ADE80;
+    }
+
+    /* Global Footer */
+    .app-footer {
+      width: 100%;
+      margin-top: auto;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(4px);
+    }
+
+    .footer-content {
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* Ladder List Styling */
+    .ladder-list {
+      list-style: none;
+      counter-reset: ladder-step;
+    }
+
+    .ladder-item {
+      position: relative;
+      padding-left: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .ladder-item::before {
+      counter-increment: ladder-step;
+      content: counter(ladder-step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1.75rem;
+      height: 1.75rem;
+      background: var(--soft-blush);
+      color: var(--primary-teal);
+      font-weight: 700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-backdrop.open {
+        display: block;
+      }
+
+      .mobile-header {
+        display: flex;
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding-top: 5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      .hero-title {
+        font-size: 1.75rem;
+      }
+
+      .checkbox-grid, .radio-group {
+        grid-template-columns: 1fr;
+      }
+
+      .script-text {
+        padding-right: 0;
+        margin-bottom: 2rem;
+      }
+
+      .copy-btn {
+        top: auto;
+        bottom: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <div style="display: flex; align-items: center; gap: 0.6rem;">
+      <div class="sidebar-brand-icon" style="width: 32px; height: 32px; font-size: 1rem;">
+        <i class="fa-solid fa-comments"></i>
+      </div>
+      <span class="sidebar-brand-title">Meeting Confidence</span>
+    </div>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <!-- Backdrop for Mobile Sidebar -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+    <!-- Fixed Left Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand-icon">
+          <i class="fa-solid fa-comments"></i>
+        </div>
+        <div>
+          <div class="sidebar-brand-title">Meeting Confidence</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted);">Participation Toolkit</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-view="dashboard">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-btn" data-view="tool1">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Barrier Breakdown</span>
+        </button>
+        <button class="nav-btn" data-view="tool2">
+          <i class="fa-solid fa-clipboard-check"></i>
+          <span>Pre-Meeting Prep</span>
+        </button>
+        <button class="nav-btn" data-view="tool3">
+          <i class="fa-solid fa-hand-paper"></i>
+          <span>Interruption Recovery</span>
+        </button>
+        <button class="nav-btn" data-view="tool4">
+          <i class="fa-solid fa-stairs"></i>
+          <span>Low-Stakes Practice</span>
+        </button>
+        <button class="nav-btn" data-view="tool5">
+          <i class="fa-solid fa-bullhorn"></i>
+          <span>Long-Term Voice</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="content-wrapper">
+
+        <!-- DASHBOARD VIEW -->
+        <section id="view-dashboard" class="view-section active">
+          <div class="hero-card">
+            <h1 class="hero-title">Meeting Confidence</h1>
+            <p class="hero-tagline">Your ideas deserve airtime. Let's get them heard.</p>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="dash-card" data-jump="tool1">
+              <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+              <div class="dash-card-title">1. The Barrier Breakdown</div>
+              <div class="dash-card-desc">Diagnose what holds you back and build a tailored psychological strategy.</div>
+            </div>
+
+            <div class="dash-card" data-jump="tool2">
+              <div class="dash-card-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+              <div class="dash-card-title">2. The Pre-Meeting Prep</div>
+              <div class="dash-card-desc">Transform your ideas into precise scripts, questions, and data anchors.</div>
+            </div>
+
+            <div class="dash-card" data-jump="tool3">
+              <div class="dash-card-icon"><i class="fa-solid fa-hand-paper"></i></div>
+              <div class="dash-card-title">3. Interruption Recovery</div>
+              <div class="dash-card-desc">Reclaim the floor politely and reclaim stolen credit with confidence.</div>
+            </div>
+
+            <div class="dash-card" data-jump="tool4">
+              <div class="dash-card-icon"><i class="fa-solid fa-stairs"></i></div>
+              <div class="dash-card-title">4. Low-Stakes Practice</div>
+              <div class="dash-card-desc">Design a progressive 5-step ladder to build speaking muscle memory safely.</div>
+            </div>
+
+            <div class="dash-card" data-jump="tool5">
+              <div class="dash-card-icon"><i class="fa-solid fa-bullhorn"></i></div>
+              <div class="dash-card-title">5. The Long-Term Voice</div>
+              <div class="dash-card-desc">Position your expertise and transition from contributor to key influencer.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 1: THE BARRIER BREAKDOWN -->
+        <section id="view-tool1" class="view-section">
+          <div class="tool-header">
+            <h2 class="tool-title">Tool 1: The Barrier Breakdown</h2>
+            <p class="tool-problem">"I want to speak but something stops me every time."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-tool1">
+              <div class="form-group">
+                <label class="form-label">What stops you? (Select all that apply)</label>
+                <div class="checkbox-grid">
+                  <label class="check-item"><input type="checkbox" name="stops" value="fear_stupid"> Fear of sounding stupid</label>
+                  <label class="check-item"><input type="checkbox" name="stops" value="interrupted"> Someone always interrupts</label>
+                  <label class="check-item"><input type="checkbox" name="stops" value="title"> Don't have the 'right' title</label>
+                  <label class="check-item"><input type="checkbox" name="stops" value="unformed"> Idea isn't fully formed</label>
+                  <label class="check-item"><input type="checkbox" name="stops" value="freeze"> I freeze under pressure</label>
+                  <label class="check-item"><input type="checkbox" name="stops" value="listen"> I prefer to just listen</label>
+                  <label class="check-item"><input type="checkbox" name="stops" value="criticized"> Was criticized before</label>
+                  <label class="check-item"><input type="checkbox" name="stops" value="timing"> Don't know when to jump in</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t1-size">Meeting size:</label>
+                <select id="t1-size" class="form-select" required>
+                  <option value="1:1">1:1</option>
+                  <option value="3-5 people">3-5 people</option>
+                  <option value="6-10 people" selected>6-10 people</option>
+                  <option value="10-20 people">10-20 people</option>
+                  <option value="20+ people">20+ people</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t1-room">Who is usually in the room?</label>
+                <select id="t1-room" class="form-select" required>
+                  <option value="Peers">Peers</option>
+                  <option value="Boss">Boss</option>
+                  <option value="Senior leaders">Senior leaders</option>
+                  <option value="Clients">Clients</option>
+                  <option value="Mixed" selected>Mixed (Boss, Peers, Leaders)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t1-comfortable">When do you feel most comfortable?</label>
+                <select id="t1-comfortable" class="form-select" required>
+                  <option value="1:1s" selected>1:1s</option>
+                  <option value="Small groups">Small groups</option>
+                  <option value="Written">Written communication (Slack/Email)</option>
+                  <option value="Never">Never</option>
+                </select>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Barriers</button>
+                <button type="button" class="btn btn-secondary" id="sample-tool1"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool1"></div>
+          <div id="history-tool1"></div>
+        </section>
+
+        <!-- TOOL 2: THE PRE-MEETING PREP -->
+        <section id="view-tool2" class="view-section">
+          <div class="tool-header">
+            <h2 class="tool-title">Tool 2: The Pre-Meeting Prep</h2>
+            <p class="tool-problem">"I never know what to say because I don't prepare."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-tool2">
+              <div class="form-group">
+                <label class="form-label" for="t2-topic">Meeting topic:</label>
+                <textarea id="t2-topic" class="form-control" placeholder="e.g. Q3 Roadmap Planning" required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t2-contribution">Your potential contribution:</label>
+                <textarea id="t2-contribution" class="form-control" placeholder="e.g. Customer feedback highlights key feature gaps in onboarding flow" required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t2-question">One question you could ask:</label>
+                <textarea id="t2-question" class="form-control" placeholder="e.g. Have we validated these timeline assumptions with recent user support data?" required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t2-data">One fact or data point you have:</label>
+                <textarea id="t2-data" class="form-control" placeholder="e.g. 40% of Q3 support tickets mention onboarding confusion" required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t2-role">Your role in this meeting:</label>
+                <select id="t2-role" class="form-select" required>
+                  <option value="Decision maker">Decision maker</option>
+                  <option value="Advisor">Advisor</option>
+                  <option value="Implementer" selected>Implementer</option>
+                  <option value="Observer">Observer</option>
+                  <option value="Not sure">Not sure</option>
+                </select>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gears"></i> Generate Prep Plan</button>
+                <button type="button" class="btn btn-secondary" id="sample-tool2"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool2"></div>
+          <div id="history-tool2"></div>
+        </section>
+
+        <!-- TOOL 3: THE INTERRUPTION RECOVERY -->
+        <section id="view-tool3" class="view-section">
+          <div class="tool-header">
+            <h2 class="tool-title">Tool 3: Interruption Recovery</h2>
+            <p class="tool-problem">"Every time I start talking, someone talks over me."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-tool3">
+              <div class="form-group">
+                <label class="form-label" for="t3-who">Who interrupts you?</label>
+                <select id="t3-who" class="form-select" required>
+                  <option value="Boss" selected>Boss</option>
+                  <option value="Peer">Peer</option>
+                  <option value="Senior leader">Senior leader</option>
+                  <option value="Same person every time">Same person every time</option>
+                  <option value="Multiple people">Multiple people</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t3-how">How do they interrupt?</label>
+                <select id="t3-how" class="form-select" required>
+                  <option value="Talk over me" selected>Talk over me</option>
+                  <option value="Finish my sentences">Finish my sentences</option>
+                  <option value="Dismiss and move on">Dismiss and move on</option>
+                  <option value="Claim my idea as theirs">Claim my idea as theirs</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t3-current">What do you currently do?</label>
+                <select id="t3-current" class="form-select" required>
+                  <option value="Stop talking" selected>Stop talking</option>
+                  <option value="Keep talking louder">Keep talking louder</option>
+                  <option value="Say nothing">Say nothing</option>
+                  <option value="Get frustrated">Get frustrated silently</option>
+                  <option value="Leave the meeting">Leave the meeting mentally</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Do you have allies in the room?</label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="allies" value="Yes" checked> Yes</label>
+                  <label class="radio-item"><input type="radio" name="allies" value="No"> No</label>
+                  <label class="radio-item"><input type="radio" name="allies" value="Not sure"> Not sure</label>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-shield-cat"></i> Build Recovery Tactic</button>
+                <button type="button" class="btn btn-secondary" id="sample-tool3"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool3"></div>
+          <div id="history-tool3"></div>
+        </section>
+
+        <!-- TOOL 4: THE LOW-STAKES PRACTICE -->
+        <section id="view-tool4" class="view-section">
+          <div class="tool-header">
+            <h2 class="tool-title">Tool 4: Low-Stakes Practice</h2>
+            <p class="tool-problem">"I need to build confidence through repetition, not theory."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-tool4">
+              <div class="form-group">
+                <label class="form-label" for="t4-comfort">Your comfort zone:</label>
+                <select id="t4-comfort" class="form-select" required>
+                  <option value="Written chat">Written chat (Slack/Teams)</option>
+                  <option value="Small group">Small group meetings</option>
+                  <option value="1:1" selected>1:1 conversations</option>
+                  <option value="Prepared presentation">Prepared presentation</option>
+                  <option value="Impromptu">Impromptu speaking</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t4-step">One step outside that zone:</label>
+                <select id="t4-step" class="form-select" required>
+                  <option value="Speak first in meeting">Speak first in meeting</option>
+                  <option value="Ask a question" selected>Ask a question in a group</option>
+                  <option value="Challenge an idea">Challenge an idea respectfully</option>
+                  <option value="Share an opinion">Share an unpolished opinion</option>
+                  <option value="Present to group">Present a slide to the group</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t4-frequency">How often do you have meetings?</label>
+                <select id="t4-frequency" class="form-select" required>
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly" selected>Weekly</option>
+                  <option value="A few times a week">A few times a week</option>
+                  <option value="Rarely">Rarely</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t4-partner">One person you trust to practice with:</label>
+                <textarea id="t4-partner" class="form-control" placeholder="e.g. Alex from Design" required></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-stairs"></i> Build Confidence Ladder</button>
+                <button type="button" class="btn btn-secondary" id="sample-tool4"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool4"></div>
+          <div id="history-tool4"></div>
+        </section>
+
+        <!-- TOOL 5: THE LONG-TERM VOICE -->
+        <section id="view-tool5" class="view-section">
+          <div class="tool-header">
+            <h2 class="tool-title">Tool 5: Long-Term Voice</h2>
+            <p class="tool-problem">"I don't just want to survive meetings. I want to be known as someone whose input matters."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-tool5">
+              <div class="form-group">
+                <label class="form-label" for="t5-known">What do you want to be known for?</label>
+                <textarea id="t5-known" class="form-control" placeholder="e.g. Thoughtful customer insights and grounded user research" required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t5-expertise">Your expertise area:</label>
+                <textarea id="t5-expertise" class="form-control" placeholder="e.g. User research & usability testing" required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t5-meetings">Meetings where you have the most to offer:</label>
+                <textarea id="t5-meetings" class="form-control" placeholder="e.g. Product review and sprint planning meetings" required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="t5-goal">Your 6-month goal:</label>
+                <textarea id="t5-goal" class="form-control" placeholder="e.g. Speak at least once with a meaningful observation in every product meeting" required></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-line"></i> Create Positioning Plan</button>
+                <button type="button" class="btn btn-secondary" id="sample-tool5"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool5"></div>
+          <div id="history-tool5"></div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Global Professional Disclaimer Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      For professional communication development only. Not therapeutic or mental health advice. For social anxiety significantly impacting your life, consult a licensed professional.
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toast-message">Copied to clipboard!</span>
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      /* ----------------------------------------------------
+       * Navigation & Mobile Sidebar Logic
+       * ---------------------------------------------------- */
+      const navButtons = document.querySelectorAll('.nav-btn');
+      const viewSections = document.querySelectorAll('.view-section');
+      const dashCards = document.querySelectorAll('.dash-card');
+      const sidebar = document.getElementById('sidebar');
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+      function switchView(targetViewId) {
+        navButtons.forEach(btn => {
+          if (btn.dataset.view === targetViewId) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+
+        viewSections.forEach(section => {
+          if (section.id === `view-${targetViewId}`) {
+            section.classList.add('active');
+          } else {
+            section.classList.remove('active');
+          }
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        closeMobileSidebar();
+      }
+
+      navButtons.forEach(btn => {
+        btn.addEventListener('click', () => switchView(btn.dataset.view));
+      });
+
+      dashCards.forEach(card => {
+        card.addEventListener('click', () => switchView(card.dataset.jump));
+      });
+
+      function toggleMobileSidebar() {
+        sidebar.classList.toggle('open');
+        sidebarBackdrop.classList.toggle('open');
+      }
+
+      function closeMobileSidebar() {
+        sidebar.classList.remove('open');
+        sidebarBackdrop.classList.remove('open');
+      }
+
+      if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleMobileSidebar);
+      if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeMobileSidebar);
+
+      /* ----------------------------------------------------
+       * Helper Utility Functions (Toast, Copy, LocalStorage)
+       * ---------------------------------------------------- */
+      function showToast(msg) {
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-message');
+        toastMsg.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 2000);
+      }
+
+      window.copyToClipboard = function(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            showToast('Copied script to clipboard!');
+          }).catch(() => {
+            fallbackCopy(text);
+          });
+        } else {
+          fallbackCopy(text);
+        }
+      };
+
+      function fallbackCopy(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          showToast('Copied script to clipboard!');
+        } catch (err) {
+          showToast('Failed to copy');
+        }
+        document.body.removeChild(textArea);
+      }
+
+      function saveHistory(toolId, summary, outputHtml) {
+        const key = `meetingconf_history_${toolId}`;
+        let history = JSON.parse(localStorage.getItem(key) || '[]');
+        const newItem = {
+          id: Date.now(),
+          date: new Date().toLocaleString(),
+          summary: summary,
+          html: outputHtml
+        };
+        history.unshift(newItem);
+        if (history.length > 30) history = history.slice(0, 30);
+        localStorage.setItem(key, JSON.stringify(history));
+        renderHistory(toolId);
+      }
+
+      function renderHistory(toolId) {
+        const historyContainer = document.getElementById(`history-${toolId}`);
+        if (!historyContainer) return;
+
+        const key = `meetingconf_history_${toolId}`;
+        const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+        if (history.length === 0) {
+          historyContainer.innerHTML = '';
+          return;
+        }
+
+        let html = `
+          <div class="history-card">
+            <div class="history-header">
+              <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Analyses (${history.length})</div>
+              <button class="btn btn-outline btn-sm" onclick="clearHistory('${toolId}')"><i class="fa-solid fa-trash"></i> Clear History</button>
+            </div>
+        `;
+
+        history.forEach(item => {
+          html += `
+            <div class="history-item" id="hist-item-${item.id}">
+              <div class="history-summary" onclick="toggleHistoryItem(${item.id})">
+                <span>${escapeHtml(item.summary)}</span>
+                <span class="history-date">${item.date} <i class="fa-solid fa-chevron-down" style="margin-left:0.5rem;"></i></span>
+              </div>
+              <div class="history-details">
+                ${item.html}
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+        historyContainer.innerHTML = html;
+      }
+
+      window.toggleHistoryItem = function(id) {
+        const item = document.getElementById(`hist-item-${id}`);
+        if (item) {
+          item.classList.toggle('open');
+        }
+      };
+
+      window.clearHistory = function(toolId) {
+        if (confirm('Are you sure you want to clear all saved history for this tool?')) {
+          localStorage.removeItem(`meetingconf_history_${toolId}`);
+          renderHistory(toolId);
+          showToast('History cleared');
+        }
+      };
+
+      function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      }
+
+
+      /* ----------------------------------------------------
+       * TOOL 1: THE BARRIER BREAKDOWN
+       * ---------------------------------------------------- */
+      const formTool1 = document.getElementById('form-tool1');
+      const sampleBtn1 = document.getElementById('sample-tool1');
+
+      sampleBtn1.addEventListener('click', () => {
+        const checkboxes = formTool1.querySelectorAll('input[name="stops"]');
+        checkboxes.forEach(cb => {
+          cb.checked = ['fear_stupid', 'freeze', 'timing'].includes(cb.value);
+        });
+        document.getElementById('t1-size').value = '6-10 people';
+        document.getElementById('t1-room').value = 'Mixed';
+        document.getElementById('t1-comfortable').value = '1:1s';
+        showToast('Sample scenario loaded!');
+      });
+
+      formTool1.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const selectedStops = Array.from(formTool1.querySelectorAll('input[name="stops"]:checked')).map(cb => cb.value);
+        const size = document.getElementById('t1-size').value;
+        const room = document.getElementById('t1-room').value;
+        const comfortable = document.getElementById('t1-comfortable').value;
+
+        // Synthesis logic
+        let primaryBlock = "Performance Pressure & Timing Hesitation";
+        let secondaryBlock = "Social Risk Evaluation";
+        
+        if (selectedStops.includes('fear_stupid') || selectedStops.includes('criticized')) {
+          primaryBlock = "High Perceived Social Risk & Fear of Negative Evaluation";
+        } else if (selectedStops.includes('interrupted') || selectedStops.includes('title')) {
+          primaryBlock = "Hierarchy Insecurity & Conversational Dominance";
+        } else if (selectedStops.includes('freeze') || selectedStops.includes('unformed')) {
+          primaryBlock = "Perfectionism & Cognitive Overload";
+        }
+
+        if (selectedStops.includes('timing')) {
+          secondaryBlock = "Conversation Dynamics & Airtime Anticipation";
+        }
+
+        const realityChecks = {
+          fear_stupid: "Research in cognitive ergonomics shows people evaluate meeting contributions by intent and alignment rather than polished grammar. Listeners forget minor stumbles in under 3 minutes.",
+          interrupted: "Interruption in multi-person meetings is usually driven by airtime competition, not disrespect for your specific ideas.",
+          title: "Title-driven deference is a habit, not a law. Senior leaders actively hunger for ground-level operational clarity from non-executives.",
+          unformed: "Unpolished ideas spark higher collaborative engagement than fully wrapped presentations because they invite co-ownership.",
+          freeze: "Freezing is a physical sympathetic nervous reaction (fight/flight/freeze). It means your nervous system detects high stakes, not that you lack intelligence.",
+          listen: "Listening is a superpower, but passive listening often gets mistaken for disinterest or lack of contribution by extroverted peers.",
+          criticized: "Past meeting criticism usually reflects the critic's stress or political posture, not the objective value of your intelligence.",
+          timing: "Conversation flows like double-dutch jump rope. Waiting for a 'perfect silent gap' means you will wait forever; you must enter on the beat."
+        };
+
+        let selectedRealities = selectedStops.map(s => realityChecks[s]).filter(Boolean);
+        if (selectedRealities.length === 0) {
+          selectedRealities.push("Most meeting participants are overwhelmingly focused on their own performance, meaning your contributions are received with far less judgment than you feel internally.");
+        }
+
+        let meetingStrategy = "";
+        if (size === '1:1') {
+          meetingStrategy = "In 1:1 settings, match the energy of the room. Use open-ended anchors: 'I've been reflecting on X, and I wanted to run a quick idea by you.'";
+        } else if (size === '3-5 people' || size === '6-10 people') {
+          meetingStrategy = "In medium groups, claim airtime early within the first 10 minutes. Speak within the first 3 topics—even with a simple validation—to anchor your voice in the room before fatigue sets in.";
+        } else {
+          meetingStrategy = "In large groups (10+ people), leverage the chat window or pre-briefing. Say: 'I put a comment in the chat around X, but to sum it up quickly...' to bridge written comfort into vocal presence.";
+        }
+
+        let powerDynamicStrategy = "";
+        if (room === 'Senior leaders' || room === 'Mixed') {
+          powerDynamicStrategy = "When senior leaders are present, frame your observations around risk reduction or user/operational reality. Senior leaders respect concise, evidence-grounded bullet points over long preambles.";
+        } else if (room === 'Boss') {
+          powerDynamicStrategy = "With your manager present, use them as a pre-anchored ally. Align beforehand: 'I plan to share a brief update on X during our sync today.'";
+        } else {
+          powerDynamicStrategy = "With peers and clients, focus on collaborative problem solving. Acknowledge peer points before building your own.";
+        }
+
+        const outputHtml = `
+          <div class="result-container">
+            <div class="result-section">
+              <span class="result-tag">Section 1</span>
+              <h3 class="result-title"><i class="fa-solid fa-layer-group"></i> The Barrier Profile</h3>
+              <div class="result-body">
+                <p><strong>Primary Block:</strong> ${primaryBlock}</p>
+                <p><strong>Secondary Block:</strong> ${secondaryBlock}</p>
+                <p>Your discomfort stems primarily from navigating <strong>${room}</strong> in a <strong>${size}</strong> setting, where your natural preference for <strong>${comfortable}</strong> creates a friction point during fast-moving verbal exchanges.</p>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 2</span>
+              <h3 class="result-title"><i class="fa-solid fa-lightbulb"></i> The Reality Check</h3>
+              <div class="result-body">
+                ${selectedRealities.map(r => `<p>• ${r}</p>`).join('')}
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 3</span>
+              <h3 class="result-title"><i class="fa-solid fa-chess-board"></i> The Meeting Type Strategy (${size})</h3>
+              <div class="result-body">
+                <p>${meetingStrategy}</p>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 4</span>
+              <h3 class="result-title"><i class="fa-solid fa-users-gear"></i> The Power Dynamic (${room})</h3>
+              <div class="result-body">
+                <p>${powerDynamicStrategy}</p>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 5</span>
+              <h3 class="result-title"><i class="fa-solid fa-trophy"></i> The Quick Win</h3>
+              <div class="result-body">
+                <p>Try the <strong>'Agree + Add'</strong> micro-contribution in your next meeting:</p>
+                <div class="script-box">
+                  <div class="script-text">"I really agree with [Name]'s point about [Topic]. To build on that briefly, I've noticed..."</div>
+                  <button class="copy-btn" onclick="copyToClipboard('I really agree with [Name]\\'s point about [Topic]. To build on that briefly, I\\'ve noticed...')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('output-tool1').innerHTML = outputHtml;
+        saveHistory('tool1', `Barrier Profile: ${primaryBlock} (${size}, ${room})`, outputHtml);
+      });
+
+
+      /* ----------------------------------------------------
+       * TOOL 2: THE PRE-MEETING PREP
+       * ---------------------------------------------------- */
+      const formTool2 = document.getElementById('form-tool2');
+      const sampleBtn2 = document.getElementById('sample-tool2');
+
+      sampleBtn2.addEventListener('click', () => {
+        document.getElementById('t2-topic').value = 'Quarterly product roadmap planning';
+        document.getElementById('t2-contribution').value = 'Customer feedback highlights key feature gaps in onboarding flow';
+        document.getElementById('t2-question').value = 'Have we validated these timeline assumptions with recent user support data?';
+        document.getElementById('t2-data').value = '40% of Q3 support tickets mention onboarding confusion';
+        document.getElementById('t2-role').value = 'Implementer';
+        showToast('Sample scenario loaded!');
+      });
+
+      formTool2.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const topic = document.getElementById('t2-topic').value.trim();
+        const contribution = document.getElementById('t2-contribution').value.trim();
+        const question = document.getElementById('t2-question').value.trim();
+        const dataPoint = document.getElementById('t2-data').value.trim();
+        const role = document.getElementById('t2-role').value;
+
+        const script1 = `Regarding ${topic}, one key factor we should consider is that ${contribution.toLowerCase()}.`;
+        const script2 = `Looking directly at the numbers, ${dataPoint}. Because of this, my perspective is that ${contribution.toLowerCase()}.`;
+        const script3 = `From an ${role} standpoint, I want to ensure we're grounded: ${question}`;
+        const scriptBackup = `That's a valid counterpoint. My focus with bringing up ${dataPoint} was primarily to make sure we don't overlook it, but I see how that trade-off works.`;
+
+        let timingAdvice = "";
+        if (role === 'Implementer' || role === 'Advisor') {
+          timingAdvice = "Speak right after the initial problem framing or strategy presentation. As an implementer/advisor, your sweet spot is bridging high-level theory to practical reality.";
+        } else if (role === 'Decision maker') {
+          timingAdvice = "Set the tone early in the first 3 minutes, then re-enter mid-way to synthesize inputs and steer toward consensus.";
+        } else {
+          timingAdvice = "Aim to speak within minutes 10–20 of the meeting. Don't wait until the final Q&A when time is compressed.";
+        }
+
+        const outputHtml = `
+          <div class="result-container">
+            <div class="result-section">
+              <span class="result-tag">Section 1</span>
+              <h3 class="result-title"><i class="fa-solid fa-bullseye"></i> The Speaking Plan</h3>
+              <div class="result-body">
+                <p><strong>Script 1: Direct Contribution</strong></p>
+                <div class="script-box">
+                  <div class="script-text">"${escapeHtml(script1)}"</div>
+                  <button class="copy-btn" onclick="copyToClipboard(\`${script1.replace(/`/g, '\\`')}\`)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+
+                <p><strong>Script 2: Evidence-Led Statement</strong></p>
+                <div class="script-box">
+                  <div class="script-text">"${escapeHtml(script2)}"</div>
+                  <button class="copy-btn" onclick="copyToClipboard(\`${script2.replace(/`/g, '\\`')}\`)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 2</span>
+              <h3 class="result-title"><i class="fa-solid fa-circle-question"></i> The Question Strategy</h3>
+              <div class="result-body">
+                <p>Asking a well-framed question allows you to demonstrate strategic insight without needing all answers upfront.</p>
+                <div class="script-box">
+                  <div class="script-text">"${escapeHtml(script3)}"</div>
+                  <button class="copy-btn" onclick="copyToClipboard(\`${script3.replace(/`/g, '\\`')}\`)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 3</span>
+              <h3 class="result-title"><i class="fa-solid fa-anchor"></i> The Data Anchor</h3>
+              <div class="result-body">
+                <p>Ground your presence using your specific fact: <strong>"${escapeHtml(dataPoint)}"</strong>.</p>
+                <p>Leading with objective facts shifts the room's focus from evaluating <em>you personally</em> to examining the <em>data point</em>, removing subjective social risk.</p>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 4</span>
+              <h3 class="result-title"><i class="fa-solid fa-clock"></i> The Entry Moment</h3>
+              <div class="result-body">
+                <p>${timingAdvice}</p>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 5</span>
+              <h3 class="result-title"><i class="fa-solid fa-shield"></i> The Disagreement Backup</h3>
+              <div class="result-body">
+                <p>If someone challenges or disagrees with your contribution, use this graceful response:</p>
+                <div class="script-box">
+                  <div class="script-text">"${escapeHtml(scriptBackup)}"</div>
+                  <button class="copy-btn" onclick="copyToClipboard(\`${scriptBackup.replace(/`/g, '\\`')}\`)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('output-tool2').innerHTML = outputHtml;
+        saveHistory('tool2', `Prep: ${topic} (${role})`, outputHtml);
+      });
+
+
+      /* ----------------------------------------------------
+       * TOOL 3: THE INTERRUPTION RECOVERY
+       * ---------------------------------------------------- */
+      const formTool3 = document.getElementById('form-tool3');
+      const sampleBtn3 = document.getElementById('sample-tool3');
+
+      sampleBtn3.addEventListener('click', () => {
+        document.getElementById('t3-who').value = 'Boss';
+        document.getElementById('t3-how').value = 'Talk over me';
+        document.getElementById('t3-current').value = 'Stop talking';
+        const radioYes = formTool3.querySelector('input[name="allies"][value="Yes"]');
+        if (radioYes) radioYes.checked = true;
+        showToast('Sample scenario loaded!');
+      });
+
+      formTool3.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const who = document.getElementById('t3-who').value;
+        const how = document.getElementById('t3-how').value;
+        const current = document.getElementById('t3-current').value;
+        const allies = formTool3.querySelector('input[name="allies"]:checked')?.value || 'Not sure';
+
+        let continuationScript = "Hold on a second, let me just finish this thought real quick.";
+        if (who === 'Boss' || who === 'Senior leader') {
+          continuationScript = "I'd love your perspective in just one moment—let me close out this core point first.";
+        } else {
+          continuationScript = "Hang on, [Name], let me finish my thought before we move on.";
+        }
+
+        let reclaimScript = "I'm glad [Name] highlighted that point—it builds directly on the suggestion I made a moment ago regarding our roadmap.";
+        let allyStrategy = "";
+
+        if (allies === 'Yes') {
+          allyStrategy = "Since you have allies in the room, send them a quick pre-meeting note: 'Hey, if I get cut off today, I'd appreciate if you could help jump in and say: Let's let [Your Name] finish.'";
+        } else {
+          allyStrategy = "If you don't have explicit allies, create one by building on others: 'To add to what Sarah said earlier...' This creates informal reciprocity.";
+        }
+
+        const outputHtml = `
+          <div class="result-container">
+            <div class="result-section">
+              <span class="result-tag">Section 1</span>
+              <h3 class="result-title"><i class="fa-solid fa-comment-slash"></i> The Continuation Phrase</h3>
+              <div class="result-body">
+                <p>When interrupted by <strong>${who}</strong> via <strong>${how.toLowerCase()}</strong>, use this calm, non-defensive assertion:</p>
+                <div class="script-box">
+                  <div class="script-text">"${escapeHtml(continuationScript)}"</div>
+                  <button class="copy-btn" onclick="copyToClipboard(\`${continuationScript.replace(/`/g, '\\`')}\`)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 2</span>
+              <h3 class="result-title"><i class="fa-solid fa-volume-high"></i> The Volume & Vocal Tactic</h3>
+              <div class="result-body">
+                <p>Instead of speeding up or raising your pitch when someone interrupts (which signals anxiety):</p>
+                <p>• <strong>Keep steady tempo:</strong> Maintain your existing pace and drop your pitch slightly for authority.</p>
+                <p>• <strong>Hand gesture:</strong> Hold up a gentle 'one moment' index finger while maintaining soft eye contact.</p>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 3</span>
+              <h3 class="result-title"><i class="fa-solid fa-handshake"></i> The Ally Amplification System</h3>
+              <div class="result-body">
+                <p>${allyStrategy}</p>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 4</span>
+              <h3 class="result-title"><i class="fa-solid fa-rotate-left"></i> The Return Technique</h3>
+              <div class="result-body">
+                <p>If the conversation drifts away before you finish, re-anchor with this bridge:</p>
+                <div class="script-box">
+                  <div class="script-text">"Circling back to the point on [Topic] that we touched on earlier, I wanted to quickly add..."</div>
+                  <button class="copy-btn" onclick="copyToClipboard('Circling back to the point on [Topic] that we touched on earlier, I wanted to quickly add...')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 5</span>
+              <h3 class="result-title"><i class="fa-solid fa-award"></i> The Credit Reclaim</h3>
+              <div class="result-body">
+                <p>If someone claims or repeats your idea as their own, reclaim ownership gracefully:</p>
+                <div class="script-box">
+                  <div class="script-text">"${escapeHtml(reclaimScript)}"</div>
+                  <button class="copy-btn" onclick="copyToClipboard(\`${reclaimScript.replace(/`/g, '\\`')}\`)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('output-tool3').innerHTML = outputHtml;
+        saveHistory('tool3', `Interruption Tactic: ${who} (${how})`, outputHtml);
+      });
+
+
+      /* ----------------------------------------------------
+       * TOOL 4: THE LOW-STAKES PRACTICE
+       * ---------------------------------------------------- */
+      const formTool4 = document.getElementById('form-tool4');
+      const sampleBtn4 = document.getElementById('sample-tool4');
+
+      sampleBtn4.addEventListener('click', () => {
+        document.getElementById('t4-comfort').value = '1:1';
+        document.getElementById('t4-step').value = 'Ask a question';
+        document.getElementById('t4-frequency').value = 'Weekly';
+        document.getElementById('t4-partner').value = 'Alex from Design';
+        showToast('Sample scenario loaded!');
+      });
+
+      formTool4.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const comfort = document.getElementById('t4-comfort').value;
+        const step = document.getElementById('t4-step').value;
+        const frequency = document.getElementById('t4-frequency').value;
+        const partner = document.getElementById('t4-partner').value.trim();
+
+        const partnerScript = `Hey ${partner}, I'm working on expanding my active participation in our group meetings. Would you be open to giving me quick 1-line feedback after our next meeting on my contribution?`;
+
+        const outputHtml = `
+          <div class="result-container">
+            <div class="result-section">
+              <span class="result-tag">Section 1</span>
+              <h3 class="result-title"><i class="fa-solid fa-stairs"></i> The Confidence Ladder</h3>
+              <div class="result-body">
+                <p>Progress gradually from your comfort zone (<strong>${comfort}</strong>) to your goal (<strong>${step}</strong>):</p>
+                <ol class="ladder-list" style="margin-top: 1rem;">
+                  <li class="ladder-item"><strong>Non-verbal active presence:</strong> Nod visibly and type a supportive +1 in chat within minute 5.</li>
+                  <li class="ladder-item"><strong>Micro-validation:</strong> Unmute and say "Good point, [Name]" when someone shares an insight.</li>
+                  <li class="ladder-item"><strong>Pre-scripted query:</strong> Ask your prepared question in your next <strong>${frequency.toLowerCase()}</strong> meeting.</li>
+                  <li class="ladder-item"><strong>Unscripted expansion:</strong> Share a brief 1-sentence thought during open discussion.</li>
+                  <li class="ladder-item"><strong>Target Stretch Goal:</strong> Execute '<strong>${step}</strong>' early in the meeting flow.</li>
+                </ol>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 2</span>
+              <h3 class="result-title"><i class="fa-solid fa-user-group"></i> The Practice Partner (${escapeHtml(partner)})</h3>
+              <div class="result-body">
+                <p>Send this low-pressure message to ${escapeHtml(partner)} to enroll them as your supporter:</p>
+                <div class="script-box">
+                  <div class="script-text">"${escapeHtml(partnerScript)}"</div>
+                  <button class="copy-btn" onclick="copyToClipboard(\`${partnerScript.replace(/`/g, '\\`')}\`)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 3</span>
+              <h3 class="result-title"><i class="fa-solid fa-calendar-check"></i> The Commitment</h3>
+              <div class="result-body">
+                <p>In your very next <strong>${frequency.toLowerCase()}</strong> meeting, commit to executing <strong>Step 2 or Step 3</strong> on your ladder within the first 15 minutes.</p>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 4</span>
+              <h3 class="result-title"><i class="fa-solid fa-clipboard-question"></i> The Reflection Prompt</h3>
+              <div class="result-body">
+                <p>Immediately after speaking, write down answers to these 2 objective questions:</p>
+                <p>1. <em>Did anything catastrophic actually happen when I spoke? (Yes/No)</em></p>
+                <p>2. <em>Did the room move on normally within 30 seconds? (Yes/No)</em></p>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 5</span>
+              <h3 class="result-title"><i class="fa-solid fa-champagne-glasses"></i> The Celebration Rule</h3>
+              <div class="result-body">
+                <p>Acknowledge effort over outcome! If you spoke, you won. Treat yourself to a favorite coffee or a 5-minute breather right after the call.</p>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('output-tool4').innerHTML = outputHtml;
+        saveHistory('tool4', `Ladder: ${comfort} → ${step}`, outputHtml);
+      });
+
+
+      /* ----------------------------------------------------
+       * TOOL 5: THE LONG-TERM VOICE
+       * ---------------------------------------------------- */
+      const formTool5 = document.getElementById('form-tool5');
+      const sampleBtn5 = document.getElementById('sample-tool5');
+
+      sampleBtn5.addEventListener('click', () => {
+        document.getElementById('t5-known').value = 'Thoughtful customer insights and grounded user research';
+        document.getElementById('t5-expertise').value = 'User research & usability testing';
+        document.getElementById('t5-meetings').value = 'Product review and sprint planning meetings';
+        document.getElementById('t5-goal').value = 'Speak at least once with a meaningful observation in every product meeting over the next 6 months';
+        showToast('Sample scenario loaded!');
+      });
+
+      formTool5.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const known = document.getElementById('t5-known').value.trim();
+        const expertise = document.getElementById('t5-expertise').value.trim();
+        const meetings = document.getElementById('t5-meetings').value.trim();
+        const goal = document.getElementById('t5-goal').value.trim();
+
+        const feedbackScript = `Hey [Manager/Peer], I'm focusing on increasing my strategic contributions in ${meetings}. Have you noticed any areas where my observations are most helpful, or where I could sharpen my delivery?`;
+
+        const outputHtml = `
+          <div class="result-container">
+            <div class="result-section">
+              <span class="result-tag">Section 1</span>
+              <h3 class="result-title"><i class="fa-solid fa-crosshairs"></i> The Expertise Positioning</h3>
+              <div class="result-body">
+                <p>To become known for <strong>"${escapeHtml(known)}"</strong>, systematically anchor your contributions in <strong>${escapeHtml(expertise)}</strong>.</p>
+                <p>Use consistent verbal signposts when introducing points: <em>"Looking at this through the lens of ${escapeHtml(expertise)}..."</em></p>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 2</span>
+              <h3 class="result-title"><i class="fa-solid fa-filter"></i> Strategic Meeting Selection</h3>
+              <div class="result-body">
+                <p>Prioritize your energy for <strong>${escapeHtml(meetings)}</strong> where your ROI is highest. In lower-priority status syncs, give yourself permission to conserve bandwidth.</p>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 3</span>
+              <h3 class="result-title"><i class="fa-solid fa-calendar-days"></i> The Consistency Plan</h3>
+              <div class="result-body">
+                <p>Target Goal: <em>"${escapeHtml(goal)}"</em></p>
+                <p>• <strong>Month 1–2:</strong> Focus on consistent 1-minute contributions in target meetings.</p>
+                <p>• <strong>Month 3–4:</strong> Proactively add 1 agenda item before meetings start.</p>
+                <p>• <strong>Month 5–6:</strong> Co-facilitate key discussion topics.</p>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 4</span>
+              <h3 class="result-title"><i class="fa-solid fa-comments"></i> The Feedback Loop</h3>
+              <div class="result-body">
+                <p>Ask for targeted feedback from trusted leaders using this script:</p>
+                <div class="script-box">
+                  <div class="script-text">"${escapeHtml(feedbackScript)}"</div>
+                  <button class="copy-btn" onclick="copyToClipboard(\`${feedbackScript.replace(/`/g, '\\`')}\`)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <span class="result-tag">Section 5</span>
+              <h3 class="result-title"><i class="fa-solid fa-crown"></i> The Leadership Path</h3>
+              <div class="result-body">
+                <p>Move from contributor to facilitator by offering to summarize meeting action items at the end of discussions: <em>"Before we drop, let me quickly summarize the 3 action items we agreed on."</em></p>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('output-tool5').innerHTML = outputHtml;
+        saveHistory('tool5', `Positioning: ${expertise}`, outputHtml);
+      });
+
+      // Initial History Render on App Load
+      ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistory);
+    });
+  </script>
+</body>
+</html>

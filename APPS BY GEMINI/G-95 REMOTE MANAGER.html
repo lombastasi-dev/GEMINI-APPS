@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remote Manager Toolkit</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* ==========================================
+       DESIGN SYSTEM & BASE STYLES
+       ========================================== */
+    :root {
+      --navy: #1D3557;
+      --gold: #F4A261;
+      --gold-hover: #E76F51;
+      --bg-start: #F1FAEE;
+      --bg-end: #FFF8E7;
+      --card-bg: #FFFFFF;
+      --text-main: #2B2D42;
+      --text-muted: #6C757D;
+      --border-color: #E9ECEF;
+      --sidebar-width: 240px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-main);
+      background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Layout Structure */
+    .app-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* ==========================================
+       SIDEBAR NAVIGATION
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: #FFFFFF;
+      border-right: 1px solid var(--border-color);
+      box-shadow: 2px 0 8px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-header i {
+      font-size: 1.5rem;
+      color: var(--navy);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.2;
+    }
+
+    .nav-links {
+      list-style: none;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover {
+      background-color: var(--bg-start);
+      color: var(--navy);
+    }
+
+    .nav-item.active {
+      background-color: var(--navy);
+      color: #FFFFFF;
+    }
+
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Mobile Header & Toggle */
+    .mobile-header {
+      display: none;
+      background-color: #FFFFFF;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .mobile-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--navy);
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0,0,0,0.4);
+      z-index: 95;
+    }
+
+    /* ==========================================
+       MAIN CONTENT AREA
+       ========================================== */
+    .main-wrapper {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      width: calc(100% - var(--sidebar-width));
+    }
+
+    .main-content {
+      flex: 1;
+      width: 100%;
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .view-screen {
+      display: none;
+    }
+
+    .view-screen.active {
+      display: block;
+    }
+
+    /* Cards & Components */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border-color);
+    }
+
+    .hero-card {
+      background: linear-gradient(135deg, var(--navy) 0%, #2B4C7E 100%);
+      color: #FFFFFF;
+      border: none;
+      padding: 32px;
+    }
+
+    .hero-card h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .hero-card p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 300;
+    }
+
+    /* Grid for Dashboard */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .tool-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+      border-color: var(--gold);
+    }
+
+    .tool-card-icon {
+      width: 48px;
+      height: 48px;
+      background-color: rgba(244, 162, 97, 0.15);
+      color: var(--navy);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 16px;
+    }
+
+    .tool-card h3 {
+      font-size: 1.1rem;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .tool-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Forms & Inputs */
+    .problem-banner {
+      background-color: rgba(29, 53, 87, 0.05);
+      border-left: 4px solid var(--navy);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 24px;
+      font-style: italic;
+      color: var(--navy);
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      color: var(--navy);
+    }
+
+    .form-control, select, textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      background-color: #FAFAFA;
+      color: var(--text-main);
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .form-control:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--navy);
+      background-color: #FFFFFF;
+    }
+
+    .checkbox-group, .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .checkbox-label, .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 400;
+    }
+
+    .checkbox-label input, .radio-label input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--navy);
+    }
+
+    /* Form Actions */
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background-color: var(--navy);
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+      background-color: #152842;
+    }
+
+    .btn-secondary {
+      background-color: var(--gold);
+      color: #FFFFFF;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--gold-hover);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .btn-outline:hover {
+      background-color: #F8F9FA;
+      color: var(--text-main);
+    }
+
+    /* Output Section */
+    .output-section {
+      margin-top: 32px;
+      display: none;
+    }
+
+    .output-section.active {
+      display: block;
+    }
+
+    .output-block {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .output-block h4 {
+      font-size: 1.05rem;
+      color: var(--navy);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid rgba(244, 162, 97, 0.3);
+      padding-bottom: 6px;
+    }
+
+    .output-content {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-main);
+    }
+
+    .script-box {
+      background-color: #F8F9FA;
+      border: 1px dashed var(--navy);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 12px;
+      position: relative;
+      font-family: inherit;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .copy-btn:hover {
+      background-color: var(--bg-start);
+    }
+
+    /* History Accordion */
+    .history-section {
+      margin-top: 40px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 24px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .history-header h3 {
+      font-size: 1.1rem;
+      color: var(--navy);
+    }
+
+    .history-item {
+      background-color: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    .history-item-header {
+      padding: 12px 16px;
+      background-color: #FAFAFA;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .history-item-header:hover {
+      background-color: #F0F0F0;
+    }
+
+    .history-item-body {
+      padding: 16px;
+      display: none;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .history-item-body.open {
+      display: block;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: var(--navy);
+      color: #FFFFFF;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Footer */
+    footer {
+      background-color: #FFFFFF;
+      border-top: 1px solid var(--border-color);
+      padding: 20px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+
+    /* Responsive Queries */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .mobile-header {
+        display: flex;
+      }
+
+      .main-wrapper {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .overlay.show {
+        display: block;
+      }
+
+      .main-content {
+        padding: 20px 16px;
+      }
+
+      .hero-card {
+        padding: 20px;
+      }
+
+      .hero-card h2 {
+        font-size: 1.5rem;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MOBILE HEADER -->
+  <header class="mobile-header">
+    <div class="mobile-brand">
+      <i class="fa-solid fa-compass"></i>
+      <span>RemoteManager</span>
+    </div>
+    <button class="hamburger-btn" id="mobile-toggle" aria-label="Toggle Navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <!-- OVERLAY FOR MOBILE SIDEBAR -->
+  <div class="overlay" id="overlay"></div>
+
+  <div class="app-container">
+    <!-- FIXED SIDEBAR NAVIGATION -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-compass"></i>
+        <h1>Remote Manager<br><span style="font-weight: 400; font-size: 0.85rem; color: var(--text-muted);">Toolkit</span></h1>
+      </div>
+      <ul class="nav-links">
+        <li>
+          <a class="nav-item active" data-target="dashboard">
+            <i class="fa-solid fa-house"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-target="tool1">
+            <i class="fa-solid fa-handshake"></i>
+            <span>Trust Rebuild</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-target="tool2">
+            <i class="fa-solid fa-list-check"></i>
+            <span>Accountability</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-target="tool3">
+            <i class="fa-solid fa-users"></i>
+            <span>Connection</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-target="tool4">
+            <i class="fa-solid fa-comments"></i>
+            <span>Hard Conversation</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-target="tool5">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Self-Management</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-wrapper">
+      <main class="main-content">
+
+        <!-- ================= DASHBOARD SCREEN ================= -->
+        <section id="dashboard" class="view-screen active">
+          <div class="card hero-card">
+            <h2>Remote Manager Toolkit</h2>
+            <p>Lead a team you can't see without driving them—or yourself—crazy.</p>
+          </div>
+
+          <div class="tools-grid">
+            <div class="tool-card" onclick="switchView('tool1')">
+              <div class="tool-card-icon"><i class="fa-solid fa-handshake"></i></div>
+              <h3>1. Trust Rebuild</h3>
+              <p>Shift from presence-based paranoia to outcome-based clarity without micromanaging.</p>
+            </div>
+
+            <div class="tool-card" onclick="switchView('tool2')">
+              <div class="tool-card-icon"><i class="fa-solid fa-list-check"></i></div>
+              <h3>2. Accountability System</h3>
+              <p>Surface risks early and build clear task ownership before deadlines slip.</p>
+            </div>
+
+            <div class="tool-card" onclick="switchView('tool3')">
+              <div class="tool-card-icon"><i class="fa-solid fa-users"></i></div>
+              <h3>3. Connection Builder</h3>
+              <p>Foster genuine team cohesion and culture without forced virtual fun.</p>
+            </div>
+
+            <div class="tool-card" onclick="switchView('tool4')">
+              <div class="tool-card-icon"><i class="fa-solid fa-comments"></i></div>
+              <h3>4. Hard Conversation</h3>
+              <p>Prepare, structure, and script difficult performance feedback over video.</p>
+            </div>
+
+            <div class="tool-card" onclick="switchView('tool5')">
+              <div class="tool-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+              <h3>5. Self-Management</h3>
+              <p>Set sustainable boundaries, combat burnout, and stop managing out of fear.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TOOL 1: TRUST REBUILD ================= -->
+        <section id="tool1" class="view-screen">
+          <div class="card">
+            <h2>The Trust Rebuild</h2>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">Move away from presence tracking and rebuild psychological safety.</p>
+            <div class="problem-banner">
+              "I don't know if my team is working when I can't see them, and it's making me a micromanager."
+            </div>
+
+            <form id="form-tool1">
+              <div class="form-group">
+                <label for="t1-checkin">Your current check-in style:</label>
+                <select id="t1-checkin" class="form-control">
+                  <option value="Daily standups">Daily standups</option>
+                  <option value="Random pings">Random pings</option>
+                  <option value="Weekly 1:1s">Weekly 1:1s</option>
+                  <option value="Only when needed">Only when needed</option>
+                  <option value="Constant monitoring">Constant monitoring</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>What makes you anxious? (Select all that apply)</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-label"><input type="checkbox" value="Missed deadlines" name="t1-anxiety"> Missed deadlines</label>
+                  <label class="checkbox-label"><input type="checkbox" value="Slow responses" name="t1-anxiety"> Slow responses</label>
+                  <label class="checkbox-label"><input type="checkbox" value="Quiet team" name="t1-anxiety"> Quiet team</label>
+                  <label class="checkbox-label"><input type="checkbox" value="Quality drops" name="t1-anxiety"> Quality drops</label>
+                  <label class="checkbox-label"><input type="checkbox" value="Past betrayal" name="t1-anxiety"> Past betrayal / broken trust</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t1-size">Team size:</label>
+                <select id="t1-size" class="form-control">
+                  <option value="1-3">1-3 people</option>
+                  <option value="4-7">4-7 people</option>
+                  <option value="8-12">8-12 people</option>
+                  <option value="12+">12+ people</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t1-tenure">Team tenure:</label>
+                <select id="t1-tenure" class="form-control">
+                  <option value="New">New (Under 6 months)</option>
+                  <option value="Mixed">Mixed tenure</option>
+                  <option value="Established">Established (1+ years)</option>
+                  <option value="Inherited">Inherited recently</option>
+                </select>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn btn-primary" onclick="processTool1()">
+                  <i class="fa-solid fa-gears"></i> Generate Strategy
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Output Container -->
+          <div id="output-tool1" class="output-section"></div>
+
+          <!-- History Section -->
+          <div class="history-section">
+            <div class="history-header">
+              <h3>Previous Strategies (Saved Locally)</h3>
+              <button class="btn btn-outline" onclick="clearHistory('tool1')"><i class="fa-solid fa-trash"></i> Clear History</button>
+            </div>
+            <div id="history-tool1"></div>
+          </div>
+        </section>
+
+        <!-- ================= TOOL 2: ACCOUNTABILITY SYSTEM ================= -->
+        <section id="tool2" class="view-screen">
+          <div class="card">
+            <h2>The Accountability System</h2>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">Create early visibility on deliverables without hovering over chat.</p>
+            <div class="problem-banner">
+              "Deadlines slip and I don't know about problems until it's too late."
+            </div>
+
+            <form id="form-tool2">
+              <div class="form-group">
+                <label for="t2-assignment">How are tasks assigned?</label>
+                <select id="t2-assignment" class="form-control">
+                  <option value="Project tool">Project Tool (Asana/Jira/Trello)</option>
+                  <option value="Email">Email threads</option>
+                  <option value="Chat">Chat messages (Slack/Teams)</option>
+                  <option value="Verbal">Verbal (Meetings)</option>
+                  <option value="Not clear">Not clearly defined</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t2-tracking">How do you track progress?</label>
+                <select id="t2-tracking" class="form-control">
+                  <option value="Dashboard">Shared dashboard</option>
+                  <option value="Status updates">Status updates when asked</option>
+                  <option value="Trust">Pure trust / Assume it's fine</option>
+                  <option value="I don't">I don't have a reliable way</option>
+                  <option value="Constant checking">Constant checking / Ping-driven</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t2-fails">What fails most often?</label>
+                <select id="t2-fails" class="form-control">
+                  <option value="Deadlines">Missed Deadlines</option>
+                  <option value="Quality">Work Quality</option>
+                  <option value="Communication">Communication / Radio silence</option>
+                  <option value="Handoffs">Team Handoffs</option>
+                  <option value="Initiation">Getting started / Initiation</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t2-style">Team's preferred working style:</label>
+                <select id="t2-style" class="form-control">
+                  <option value="Highly autonomous">Highly autonomous</option>
+                  <option value="Needs structure">Needs high structure</option>
+                  <option value="Mixed">Mixed capabilities</option>
+                  <option value="Need more data">Unsure / Need more data</option>
+                </select>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn btn-primary" onclick="processTool2()">
+                  <i class="fa-solid fa-gears"></i> Generate System
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool2" class="output-section"></div>
+
+          <div class="history-section">
+            <div class="history-header">
+              <h3>Previous Systems (Saved Locally)</h3>
+              <button class="btn btn-outline" onclick="clearHistory('tool2')"><i class="fa-solid fa-trash"></i> Clear History</button>
+            </div>
+            <div id="history-tool2"></div>
+          </div>
+        </section>
+
+        <!-- ================= TOOL 3: CONNECTION BUILDER ================= -->
+        <section id="tool3" class="view-screen">
+          <div class="card">
+            <h2>The Connection Builder</h2>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">Build genuine remote team cohesion without forced fun.</p>
+            <div class="problem-banner">
+              "My team feels disconnected and I don't know how to build culture remotely."
+            </div>
+
+            <form id="form-tool3">
+              <div class="form-group">
+                <label for="t3-level">Current team connection level:</label>
+                <select id="t3-level" class="form-control">
+                  <option value="Strong">Strong - Collaborative & friendly</option>
+                  <option value="Okay">Okay - Transactional but pleasant</option>
+                  <option value="Weak">Weak - Siloed & disconnected</option>
+                  <option value="Nonexistent">Nonexistent - Cold & isolated</option>
+                  <option value="Don't know">Don't know / Hard to tell</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t3-tried">What have you tried so far?</label>
+                <textarea id="t3-tried" rows="3" class="form-control" placeholder="e.g. Virtual happy hours, casual channels..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t3-appetite">Team's social appetite:</label>
+                <select id="t3-appetite" class="form-control">
+                  <option value="High">High - Loves chatter & social events</option>
+                  <option value="Medium">Medium - Likes light banter, protects focus</option>
+                  <option value="Low">Low - Introverted, prefers work-only focus</option>
+                  <option value="Mixed">Mixed appetite</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t3-comfort">Your own comfort with virtual socializing:</label>
+                <select id="t3-comfort" class="form-control">
+                  <option value="Love it">Love it - Natural host</option>
+                  <option value="Okay">Okay - Fine with standard effort</option>
+                  <option value="Awkward">Awkward - Feels forced/stilted</option>
+                  <option value="Hate it">Hate it - Prefer to strictly work</option>
+                </select>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn btn-primary" onclick="processTool3()">
+                  <i class="fa-solid fa-gears"></i> Build Connection Plan
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool3" class="output-section"></div>
+
+          <div class="history-section">
+            <div class="history-header">
+              <h3>Previous Connection Plans</h3>
+              <button class="btn btn-outline" onclick="clearHistory('tool3')"><i class="fa-solid fa-trash"></i> Clear History</button>
+            </div>
+            <div id="history-tool3"></div>
+          </div>
+        </section>
+
+        <!-- ================= TOOL 4: HARD CONVERSATION ================= -->
+        <section id="tool4" class="view-screen">
+          <div class="card">
+            <h2>The Hard Conversation</h2>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">Address delicate or poor performance issues remotely without damaging trust.</p>
+            <div class="problem-banner">
+              "I need to give feedback or address performance and doing it over video feels terrible."
+            </div>
+
+            <form id="form-tool4">
+              <div class="form-group">
+                <label for="t4-issue">The core issue:</label>
+                <textarea id="t4-issue" rows="3" class="form-control" placeholder="Describe the specific behavior or missed expectation..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t4-who">Who is this conversation with?</label>
+                <select id="t4-who" class="form-control">
+                  <option value="Strong performer">Strong performer (Uncharacteristic drop)</option>
+                  <option value="Average">Average performer</option>
+                  <option value="Struggling">Consistently struggling performer</option>
+                  <option value="New hire">New hire / Still onboarding</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Your relationship with them:</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="t4-rel" value="Strong" checked> Strong (High trust)</label>
+                  <label class="radio-label"><input type="radio" name="t4-rel" value="Neutral"> Neutral (Professional)</label>
+                  <label class="radio-label"><input type="radio" name="t4-rel" value="Strained"> Strained (Tense/Guarded)</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Have you addressed this before?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="t4-prev" value="Yes"> Yes, explicitly</label>
+                  <label class="radio-label"><input type="radio" name="t4-prev" value="Hinted" checked> Hinted / Mentioned in passing</label>
+                  <label class="radio-label"><input type="radio" name="t4-prev" value="No"> No, this is the first time</label>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn btn-primary" onclick="processTool4()">
+                  <i class="fa-solid fa-gears"></i> Generate Script & Prep
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool4" class="output-section"></div>
+
+          <div class="history-section">
+            <div class="history-header">
+              <h3>Previous Conversation Scripts</h3>
+              <button class="btn btn-outline" onclick="clearHistory('tool4')"><i class="fa-solid fa-trash"></i> Clear History</button>
+            </div>
+            <div id="history-tool4"></div>
+          </div>
+        </section>
+
+        <!-- ================= TOOL 5: SELF-MANAGEMENT ================= -->
+        <section id="tool5" class="view-screen">
+          <div class="card">
+            <h2>The Self-Management Framework</h2>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">Protect your energy, set boundaries, and manage remote management stress.</p>
+            <div class="problem-banner">
+              "I'm burned out from managing a team I never see and I need to protect myself."
+            </div>
+
+            <form id="form-tool5">
+              <div class="form-group">
+                <label for="t5-hours">Your typical working hours:</label>
+                <select id="t5-hours" class="form-control">
+                  <option value="9-5">Standard (40 hrs/wk)</option>
+                  <option value="Often extend">Often extend (45-55 hrs/wk)</option>
+                  <option value="Always on">Always on / Checking messages constantly</option>
+                  <option value="Not sure when work ends">Blurry (Not sure when work ends)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t5-drain">What drains you most?</label>
+                <select id="t5-drain" class="form-control">
+                  <option value="Constant availability">Constant availability / Notifications</option>
+                  <option value="Decision fatigue">Decision fatigue / Context switching</option>
+                  <option value="Loneliness">Isolation / Lack of peer connection</option>
+                  <option value="Team drama">Team friction / Interpersonal drama</option>
+                  <option value="Imposter feelings">Imposter syndrome / Self-doubt</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t5-support">Support you currently have:</label>
+                <select id="t5-support" class="form-control">
+                  <option value="Skip-level">Supportive Skip-level Manager</option>
+                  <option value="Peer managers">Peer manager network</option>
+                  <option value="Mentor">Dedicated mentor/coach</option>
+                  <option value="None">None / Operating alone</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t5-fear">Your biggest fear as a remote manager:</label>
+                <textarea id="t5-fear" rows="3" class="form-control" placeholder="e.g. My team thinks I'm useless, or senior leadership thinks I've lost control..."></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn btn-primary" onclick="processTool5()">
+                  <i class="fa-solid fa-gears"></i> Build Self-Care Protocol
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool5" class="output-section"></div>
+
+          <div class="history-section">
+            <div class="history-header">
+              <h3>Previous Protocols</h3>
+              <button class="btn btn-outline" onclick="clearHistory('tool5')"><i class="fa-solid fa-trash"></i> Clear History</button>
+            </div>
+            <div id="history-tool5"></div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- GLOBAL FOOTER -->
+      <footer>
+        For management development and team coordination only. Not legal, HR, or executive coaching. For formal management training, consult your organization's L&D department.
+      </footer>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toast-message">Copied to clipboard!</span>
+  </div>
+
+  <script>
+    /* ==========================================
+       NAVIGATION & ROUTING SYSTEM
+       ========================================== */
+    const navItems = document.querySelectorAll('.nav-item');
+    const viewScreens = document.querySelectorAll('.view-screen');
+    const mobileToggle = document.getElementById('mobile-toggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+
+    function switchView(targetId) {
+      navItems.forEach(item => {
+        if (item.getAttribute('data-target') === targetId) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
+      viewScreens.forEach(screen => {
+        if (screen.id === targetId) {
+          screen.classList.add('active');
+        } else {
+          screen.classList.remove('active');
+        }
+      });
+
+      // Mobile menu cleanup
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    navItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = item.getAttribute('data-target');
+        switchView(target);
+      });
+    });
+
+    // Mobile Navigation Controls
+    mobileToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+    });
+
+    /* ==========================================
+       UTILITY FUNCTIONS
+       ========================================== */
+    function showToast(message = "Copied to clipboard!") {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      toastMsg.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Copied to clipboard!");
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+    }
+
+    // Local Storage Wrapper
+    const MAX_HISTORY = 30;
+
+    function saveToHistory(toolId, item) {
+      const key = `remotemgr_history_${toolId}`;
+      let history = JSON.parse(localStorage.getItem(key) || "[]");
+      history.unshift({
+        id: Date.now(),
+        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        data: item
+      });
+      if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+      localStorage.setItem(key, JSON.stringify(history));
+      renderHistory(toolId);
+    }
+
+    function getHistory(toolId) {
+      const key = `remotemgr_history_${toolId}`;
+      return JSON.parse(localStorage.getItem(key) || "[]");
+    }
+
+    function clearHistory(toolId) {
+      const key = `remotemgr_history_${toolId}`;
+      localStorage.removeItem(key);
+      renderHistory(toolId);
+      showToast("History cleared");
+    }
+
+    function renderHistory(toolId) {
+      const container = document.getElementById(`history-${toolId}`);
+      if (!container) return;
+      const history = getHistory(toolId);
+
+      if (history.length === 0) {
+        container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem; font-style: italic;">No saved analysis history yet.</p>`;
+        return;
+      }
+
+      container.innerHTML = history.map((item, idx) => `
+        <div class="history-item">
+          <div class="history-item-header" onclick="toggleHistoryItem('${toolId}', ${idx})">
+            <span><i class="fa-solid fa-clock-rotate-left"></i> ${item.data.summary || 'Saved Session'}</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">${item.date}</span>
+          </div>
+          <div class="history-item-body" id="hist-body-${toolId}-${idx}">
+            ${item.data.html}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleHistoryItem(toolId, idx) {
+      const el = document.getElementById(`hist-body-${toolId}-${idx}`);
+      if (el) {
+        el.classList.toggle('open');
+      }
+    }
+
+    // Initialize all history rendering on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistory);
+    });
+
+    /* ==========================================
+       TOOL 1 LOGIC — TRUST REBUILD
+       ========================================== */
+    function loadSampleTool1() {
+      document.getElementById('t1-checkin').value = 'Random pings';
+      document.querySelectorAll('input[name="t1-anxiety"]').forEach(cb => {
+        cb.checked = (cb.value === 'Slow responses' || cb.value === 'Quiet team');
+      });
+      document.getElementById('t1-size').value = '4-7';
+      document.getElementById('t1-tenure').value = 'Mixed';
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function processTool1() {
+      const checkin = document.getElementById('t1-checkin').value;
+      const anxieties = Array.from(document.querySelectorAll('input[name="t1-anxiety"]:checked')).map(c => c.value);
+      const size = document.getElementById('t1-size').value;
+      const tenure = document.getElementById('t1-tenure').value;
+
+      const anxietyList = anxieties.length > 0 ? anxieties.join(', ') : 'Uncertainty around presence';
+
+      const html = `
+        <div class="output-block">
+          <h4><i class="fa-solid fa-brain"></i> THE ANXIETY AUDIT</h4>
+          <div class="output-content">
+            Your primary anxiety triggers are <strong>${anxietyList}</strong>. In a remote environment, checking in via <em>"${checkin}"</em> often stems from an internal need to manage your own uncertainty rather than an actual deficit in team performance. Managing remote teams forces us to confront the uncomfortable truth: <strong>presence was never proof of productivity.</strong>
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-bullseye"></i> THE OUTPUT FRAME</h4>
+          <div class="output-content">
+            Shift the conversation from <em>"When are you online?"</em> to <em>"What does 'done' look like?"</em><br>
+            For your ${tenure.toLowerCase()} team of ${size} people, define 2–3 clear weekly deliverables per person. Evaluate work purely by milestone completion and quality, not by Slack status light indicators.
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-calendar-check"></i> THE CHECK-IN REDESIGN</h4>
+          <div class="output-content">
+            Replace random pings with a predictable drumbeat:
+            <ul style="margin-left: 20px; margin-top: 8px;">
+              <li><strong>Monday Morning (Async):</strong> Everyone posts 3 main priorities for the week in chat.</li>
+              <li><strong>Mid-week (15-min Sync):</strong> Blocker clearing ONLY. No status reporting.</li>
+              <li><strong>Weekly 1:1 (30-min):</strong> Dedicated to individual support, growth, and feedback.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-network-wired"></i> THE ASYNC TOOLS</h4>
+          <div class="output-content">
+            Implement transparent asynchronous tracking. Use a simple Kanban board (To Do, In Progress, Blocked, Done). Require team members to flag blockers directly on cards rather than expecting you to ping them for updates.
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-heart-pulse"></i> THE SELF-CHECK</h4>
+          <div class="output-content">
+            Ask yourself before sending a ping: <em>"Am I asking this right now to help them finish a task, or am I asking to soothe my own anxiety about what they are doing?"</em> If it's the latter, pause for 2 hours before messaging.
+          </div>
+        </div>
+      `;
+
+      const outputContainer = document.getElementById('output-tool1');
+      outputContainer.innerHTML = html;
+      outputContainer.classList.add('active');
+
+      saveToHistory('tool1', {
+        summary: `Style: ${checkin} | Team: ${size} (${tenure})`,
+        html: html
+      });
+    }
+
+    /* ==========================================
+       TOOL 2 LOGIC — ACCOUNTABILITY SYSTEM
+       ========================================== */
+    function loadSampleTool2() {
+      document.getElementById('t2-assignment').value = 'Email';
+      document.getElementById('t2-tracking').value = 'Status updates';
+      document.getElementById('t2-fails').value = 'Communication';
+      document.getElementById('t2-style').value = 'Mixed';
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function processTool2() {
+      const assignment = document.getElementById('t2-assignment').value;
+      const tracking = document.getElementById('t2-tracking').value;
+      const fails = document.getElementById('t2-fails').value;
+      const style = document.getElementById('t2-style').value;
+
+      const template1on1 = `1. Priority Review: What were your top 2 wins this week?
+2. Current Blockers: Where are you waiting on others or stuck?
+3. Upcoming Deliverables: What is due next week, and what is your confidence level (1-5)?
+4. Manager Support: What can I remove from your plate to help you execute?`;
+
+      const html = `
+        <div class="output-block">
+          <h4><i class="fa-solid fa-sitemap"></i> THE SYSTEM SETUP</h4>
+          <div class="output-content">
+            Currently relying on <strong>${assignment}</strong> for task assignment and <strong>${tracking}</strong> for tracking creates severe information gaps. Transition to a single source of truth. Every task must have:
+            <ul style="margin-left: 20px; margin-top: 8px;">
+              <li><strong>DRI:</strong> Exactly ONE Directly Responsible Individual (never shared).</li>
+              <li><strong>Definition of Done (DoD):</strong> Specific criteria required for completion.</li>
+              <li><strong>Hard Target Date:</strong> Precise deadline, not "end of week."</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-triangle-exclamation"></i> THE EARLY WARNING</h4>
+          <div class="output-content">
+            Since your team experiences issues with <strong>${fails.toLowerCase()}</strong>, establish a strict <strong>"Traffic Light"</strong> protocol:
+            <br>Require team members to flag status on active tasks 48 hours before deadlines: 🟢 On Track, 🟡 At Risk (needs internal adjustment), 🔴 Blocked (needs manager intervention). Normalize 🔴 status as a sign of responsibility, not failure.
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-clipboard-list"></i> THE 1:1 TEMPLATE</h4>
+          <div class="output-content">
+            Use this exact 4-part agenda for weekly check-ins:
+            <div class="script-box">
+              <button class="copy-btn" onclick="copyToClipboard(\`${template1on1.replace(/`/g, '\\`')}\`)"><i class="fa-solid fa-copy"></i> Copy</button>
+              <pre style="font-family: inherit; white-space: pre-wrap;">${template1on1}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-user-check"></i> THE DELEGATION FRAME</h4>
+          <div class="output-content">
+            Given your team's <strong>${style.toLowerCase()}</strong> nature, delegate using levels of authority:
+            <br><em>"Research options and make a decision, but inform me before acting"</em> vs <em>"Take full ownership and execute, update me in our weekly 1:1."</em>
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-life-ring"></i> THE FAILURE PROTOCOL</h4>
+          <div class="output-content">
+            When a deadline is missed:
+            <br>1. Address it within 24 hours (do not let it slide).
+            <br>2. Focus on process over personality: <em>"Where did the workflow break down?"</em> rather than <em>"Why didn't you finish?"</em>
+            <br>3. Co-design a guardrail to prevent repeat occurrences.
+          </div>
+        </div>
+      `;
+
+      const outputContainer = document.getElementById('output-tool2');
+      outputContainer.innerHTML = html;
+      outputContainer.classList.add('active');
+
+      saveToHistory('tool2', {
+        summary: `Fails: ${fails} | Track: ${tracking}`,
+        html: html
+      });
+    }
+
+    /* ==========================================
+       TOOL 3 LOGIC — CONNECTION BUILDER
+       ========================================== */
+    function loadSampleTool3() {
+      document.getElementById('t3-level').value = 'Weak';
+      document.getElementById('t3-tried').value = 'Tried virtual happy hours that no one enjoyed or attended willingly.';
+      document.getElementById('t3-appetite').value = 'Mixed';
+      document.getElementById('t3-comfort').value = 'Awkward';
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function processTool3() {
+      const level = document.getElementById('t3-level').value;
+      const tried = document.getElementById('t3-tried').value;
+      const appetite = document.getElementById('t3-appetite').value;
+      const comfort = document.getElementById('t3-comfort').value;
+
+      const html = `
+        <div class="output-block">
+          <h4><i class="fa-solid fa-bolt"></i> THE MICRO-CONNECTION</h4>
+          <div class="output-content">
+            When connection is <strong>${level.toLowerCase()}</strong> and social appetite is <strong>${appetite.toLowerCase()}</strong>, forced social hours fail. Instead, integrate micro-connections into existing work:
+            <ul style="margin-left: 20px; margin-top: 8px;">
+              <li><strong>5-Minute Opener:</strong> Begin team meetings with a non-intrusive prompt (e.g., "What was your first job?" or "Best purchase under $50 recently?").</li>
+              <li><strong>Asynchronous Question of the Week:</strong> Post a fun, optional prompt in chat every Monday.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-comments"></i> THE MEANINGFUL 1:1</h4>
+          <div class="output-content">
+            Build rapport through individual care rather than group events. Spend the first 5 minutes of 1:1s asking about the human, not the workload: <em>"How is your energy level overall this week?"</em>
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-glass-cheers"></i> THE OPTIONAL SOCIAL</h4>
+          <div class="output-content">
+            You noted past attempts: <em>"${tried || 'None'}"</em>. <br>
+            Replace awkward virtual drinks with low-pressure optional activities:
+            <ul style="margin-left: 20px; margin-top: 8px;">
+              <li><strong>Async Show-and-Tell:</strong> Share photos of workspace, pets, or weekend hobbies in a dedicated channel.</li>
+              <li><strong>Co-working / Deep Work Sprint:</strong> Open an optional video room where people work silently together with background lo-fi music.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-award"></i> THE CELEBRATION HABIT</h4>
+          <div class="output-content">
+            Establish a peer-to-peer appreciation channel (e.g., #kudos or #shoutouts). Publicly recognize small wins and behind-the-scenes effort weekly.
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-shield"></i> THE BOUNDARY MODEL</h4>
+          <div class="output-content">
+            Since your comfort level with virtual socializing is <strong>${comfort.toLowerCase()}</strong>, lead by example in setting boundaries. Protect your team's off-hours to prevent remote fatigue. Connection thrives when people feel respected, not over-scheduled.
+          </div>
+        </div>
+      `;
+
+      const outputContainer = document.getElementById('output-tool3');
+      outputContainer.innerHTML = html;
+      outputContainer.classList.add('active');
+
+      saveToHistory('tool3', {
+        summary: `Connection: ${level} | Appetite: ${appetite}`,
+        html: html
+      });
+    }
+
+    /* ==========================================
+       TOOL 4 LOGIC — HARD CONVERSATION
+       ========================================== */
+    function loadSampleTool4() {
+      document.getElementById('t4-issue').value = 'Missed crucial client deliverable deadline without giving advance notice.';
+      document.getElementById('t4-who').value = 'Average';
+      document.querySelector('input[name="t4-rel"][value="Neutral"]').checked = true;
+      document.querySelector('input[name="t4-prev"][value="Hinted"]').checked = true;
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function processTool4() {
+      const issue = document.getElementById('t4-issue').value || 'Unmet performance expectations';
+      const who = document.getElementById('t4-who').value;
+      const rel = document.querySelector('input[name="t4-rel"]:checked').value;
+      const prev = document.querySelector('input[name="t4-prev"]:checked').value;
+
+      const scriptText = `I requested this meeting to talk about: ${issue}.
+
+When this happened, the impact was that it created extra friction for the project and team.
+
+I know remote communication can sometimes obscure context. What was happening on your side when this occurred?
+
+Moving forward, my expectation is that deadlines are met or flagged 48 hours in advance. Can we agree on this step?`;
+
+      const html = `
+        <div class="output-block">
+          <h4><i class="fa-solid fa-video"></i> THE VIDEO SETUP</h4>
+          <div class="output-content">
+            Difficult video conversations require clear technical and environmental prep:
+            <ul style="margin-left: 20px; margin-top: 8px;">
+              <li>Keep camera ON at eye level.</li>
+              <li>Schedule 30 minutes, avoiding late Friday afternoons.</li>
+              <li>Ensure uninterrupted privacy on both ends.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-comment-dots"></i> THE SCRIPT</h4>
+          <div class="output-content">
+            Tailored script for a <strong>${who.toLowerCase()}</strong> with a <strong>${rel.toLowerCase()}</strong> relationship (Previous feedback: <em>${prev}</em>):
+            <div class="script-box">
+              <button class="copy-btn" onclick="copyToClipboard(\`${scriptText.replace(/`/g, '\\`')}\`)"><i class="fa-solid fa-copy"></i> Copy Script</button>
+              <pre style="font-family: inherit; white-space: pre-wrap;">${scriptText}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-file-signature"></i> THE DOCUMENTATION</h4>
+          <div class="output-content">
+            Send a follow-up summary email within 2 hours after the call to ensure mutual alignment:
+            <br><em>"Hi [Name], thanks for speaking with me today. To summarize our agreement: [Insert Action Steps/Expectations]. Let me know if I missed anything!"</em>
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-arrows-spin"></i> THE FOLLOW-UP</h4>
+          <div class="output-content">
+            Set a calendar check-in for exactly 14 days out to review progress. Praise immediate corrections promptly in writing to reinforce positive change.
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-hand-holding-heart"></i> THE EMPATHY CHECK</h4>
+          <div class="output-content">
+            Acknowledge remote challenges (isolation, unclear specs) without excusing non-performance: <em>"I recognize working remotely creates communication hurdles, and I want to support you, but the outcome still needs to meet our standards."</em>
+          </div>
+        </div>
+      `;
+
+      const outputContainer = document.getElementById('output-tool4');
+      outputContainer.innerHTML = html;
+      outputContainer.classList.add('active');
+
+      saveToHistory('tool4', {
+        summary: `Issue: ${issue.substring(0, 25)}... | Rel: ${rel}`,
+        html: html
+      });
+    }
+
+    /* ==========================================
+       TOOL 5 LOGIC — SELF-MANAGEMENT
+       ========================================== */
+    function loadSampleTool5() {
+      document.getElementById('t5-hours').value = 'Often extend';
+      document.getElementById('t5-drain').value = 'Constant availability';
+      document.getElementById('t5-support').value = 'None';
+      document.getElementById('t5-fear').value = 'My team thinks I am a micromanager and senior leadership thinks I am underperforming.';
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function processTool5() {
+      const hours = document.getElementById('t5-hours').value;
+      const drain = document.getElementById('t5-drain').value;
+      const support = document.getElementById('t5-support').value;
+      const fear = document.getElementById('t5-fear').value || 'Uncertainty about managerial effectiveness';
+
+      const html = `
+        <div class="output-block">
+          <h4><i class="fa-solid fa-hourglass-half"></i> THE BOUNDARY MODEL</h4>
+          <div class="output-content">
+            Your hours currently <strong>${hours.toLowerCase()}</strong> due to <strong>${drain.toLowerCase()}</strong>. 
+            Set firm digital boundaries:
+            <ul style="margin-left: 20px; margin-top: 8px;">
+              <li>Turn off chat notifications outside core working hours.</li>
+              <li>Use scheduled send for off-hours messages so you don't set a precedent of instant availability.</li>
+              <li>Block 2-hour uninterrupted "Focus Time" windows in your public calendar daily.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-diagram-next"></i> THE DELEGATION AUDIT</h4>
+          <div class="output-content">
+            List every task you performed this past week. Mark items that can be <strong>Automated</strong>, <strong>Delegated</strong> to a team member as a growth opportunity, or <strong>Eliminated</strong> entirely. Aim to offload 20% of your operational workload.
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-user-group"></i> THE PEER SUPPORT</h4>
+          <div class="output-content">
+            You listed your current support as: <strong>${support}</strong>. Managing remotely in isolation is unsustainable. Establish a bi-weekly peer coffee chat with another remote manager inside or outside your company to swap tactics and vent safely.
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-chart-line"></i> THE METRICS THAT MATTER</h4>
+          <div class="output-content">
+            To stop worrying about hidden underperformance, narrow your tracking focus to 3 macro indicators:
+            <br>1. On-time delivery rate of core milestones.
+            <br>2. Work quality/rework rate.
+            <br>3. Team retention and sentiment.
+          </div>
+        </div>
+
+        <div class="output-block">
+          <h4><i class="fa-solid fa-anchor"></i> THE CONFIDENCE BUILDER</h4>
+          <div class="output-content">
+            Addressing your fear: <em>"${fear}"</em><br>
+            Remote management is inherently challenging because feedback loops are muted. Keep a <strong>"Wins & Impact Log"</strong> folder. Save positive feedback, completed projects, and team thank-yous to review whenever imposter feelings surface.
+          </div>
+        </div>
+      `;
+
+      const outputContainer = document.getElementById('output-tool5');
+      outputContainer.innerHTML = html;
+      outputContainer.classList.add('active');
+
+      saveToHistory('tool5', {
+        summary: `Hours: ${hours} | Drain: ${drain}`,
+        html: html
+      });
+    }
+  </script>
+</body>
+</html>

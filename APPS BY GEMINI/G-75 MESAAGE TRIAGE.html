@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MessageTriage — Communication Recovery Toolkit</title>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Base & Variables */
+        :root {
+            --slate-blue: #475569;
+            --slate-dark: #1e293b;
+            --slate-light: #64748b;
+            --soft-coral: #FF9F7F;
+            --coral-hover: #f38b69;
+            --bg-gradient: linear-gradient(135deg, #F8FAFC 0%, #FFF5F2 100%);
+            --card-bg: #FFFFFF;
+            --border-color: #e2e8f0;
+            --sidebar-width: 260px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+            --radius-xl: 1rem;
+            --radius-md: 0.5rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: #334155;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #FFFFFF;
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--soft-coral);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--slate-dark);
+            letter-spacing: -0.025em;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--slate-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background-color: #f8fafc;
+            color: var(--slate-dark);
+        }
+
+        .nav-item.active {
+            background-color: var(--slate-blue);
+            color: #ffffff;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        /* Mobile Header & Overlay */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 1rem;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-header-title {
+            font-weight: 700;
+            color: var(--slate-dark);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hamburger-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--slate-dark);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 95;
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .content-container {
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 3rem 1.5rem;
+            flex: 1;
+        }
+
+        /* Tool Sections */
+        .tool-screen {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tool-screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Styling */
+        .dashboard-hero {
+            background: #ffffff;
+            border-radius: var(--radius-xl);
+            padding: 2.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--slate-blue), var(--soft-coral));
+        }
+
+        .dashboard-hero h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--slate-dark);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.03em;
+        }
+
+        .dashboard-hero p {
+            font-size: 1.1rem;
+            color: var(--slate-light);
+            font-weight: 400;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            height: 100%;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--soft-coral);
+        }
+
+        .tool-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 0.75rem;
+            background: #f1f5f9;
+            color: var(--slate-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .tool-card:hover .tool-card-icon {
+            background: #FFF5F2;
+            color: var(--soft-coral);
+        }
+
+        .tool-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--slate-dark);
+        }
+
+        .tool-card p {
+            font-size: 0.875rem;
+            color: var(--slate-light);
+            line-height: 1.4;
+        }
+
+        /* Tool Forms & Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .tool-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--slate-dark);
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .tool-header .problem-statement {
+            color: var(--slate-light);
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--slate-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, select, textarea {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            font-size: 0.925rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background-color: #f8fafc;
+            color: var(--slate-dark);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus, select:focus, textarea:focus {
+            border-color: var(--slate-blue);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #f8fafc;
+            padding: 0.5rem 0.85rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            font-size: 0.875rem;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+
+        .radio-option:hover, .checkbox-option:hover {
+            border-color: var(--slate-blue);
+        }
+
+        .radio-option input, .checkbox-option input {
+            accent-color: var(--slate-blue);
+            cursor: pointer;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--slate-blue);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--slate-dark);
+        }
+
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: var(--slate-dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+
+        .btn-coral {
+            background-color: var(--soft-coral);
+            color: #ffffff;
+        }
+
+        .btn-coral:hover {
+            background-color: var(--coral-hover);
+        }
+
+        .btn-sm {
+            padding: 0.35rem 0.65rem;
+            font-size: 0.775rem;
+        }
+
+        /* Output Card Styling */
+        .output-card {
+            display: none;
+            background: #ffffff;
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-top: 1.5rem;
+            border-top: 4px solid var(--soft-coral);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .output-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--slate-dark);
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .output-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .output-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--slate-blue);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .output-content {
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.6;
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid #edf2f7;
+        }
+
+        .verdict-badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            font-weight: 700;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            color: #fff;
+            background-color: var(--slate-blue);
+            margin-top: 0.25rem;
+        }
+
+        .script-box {
+            position: relative;
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 1rem 1rem 1rem 1rem;
+            border-radius: var(--radius-md);
+            font-family: monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            margin-top: 0.5rem;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 2rem;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 1.25rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .history-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--slate-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.65rem 0.85rem;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .history-item:hover {
+            border-color: var(--slate-blue);
+            background: #ffffff;
+        }
+
+        .history-time {
+            font-size: 0.75rem;
+            color: var(--slate-light);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--slate-dark);
+            color: #ffffff;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast i {
+            color: #4ade80;
+        }
+
+        /* Footer */
+        .app-footer {
+            margin-top: auto;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem;
+            text-align: center;
+            font-size: 0.775rem;
+            color: var(--slate-light);
+            line-height: 1.5;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 60px;
+            }
+
+            .content-container {
+                padding: 1.25rem 1rem 2.5rem 1rem;
+            }
+
+            .dashboard-hero {
+                padding: 1.5rem;
+            }
+
+            .dashboard-hero h2 {
+                font-size: 1.5rem;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toast {
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Top Navigation Header -->
+    <header class="mobile-header">
+        <div class="mobile-header-title">
+            <i class="fa-solid fa-tower-broadcast" style="color: var(--soft-coral);"></i>
+            <span>MessageTriage</span>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-tower-broadcast"></i>
+                <h1>MessageTriage</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tool="dashboard">
+                    <i class="fa-solid fa-border-all"></i> Dashboard
+                </button>
+                <button class="nav-item" data-tool="tool1">
+                    <i class="fa-solid fa-boxes-packing"></i> Inbox Autopsy
+                </button>
+                <button class="nav-item" data-tool="tool2">
+                    <i class="fa-solid fa-code-branch"></i> Decision Tree
+                </button>
+                <button class="nav-item" data-tool="tool3">
+                    <i class="fa-solid fa-shield-halved"></i> Boundary Setter
+                </button>
+                <button class="nav-item" data-tool="tool4">
+                    <i class="fa-solid fa-arrows-spin"></i> Zero-Inbox Routine
+                </button>
+                <button class="nav-item" data-tool="tool5">
+                    <i class="fa-solid fa-chart-pie"></i> Comm Audit
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-wrapper">
+            <main class="content-container">
+
+                <!-- DASHBOARD SCREEN -->
+                <section id="dashboard" class="tool-screen active">
+                    <div class="dashboard-hero">
+                        <h2>Message Triage</h2>
+                        <p>Not every ping is a fire. Most aren't even warm.</p>
+                    </div>
+
+                    <div class="tools-grid">
+                        <div class="tool-card" onclick="switchTool('tool1')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-boxes-packing"></i></div>
+                            <h3>Inbox Autopsy</h3>
+                            <p>Break down hundreds of unread messages and get a tactical survival plan for your immediate available time.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTool('tool2')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-code-branch"></i></div>
+                            <h3>Response Decision Tree</h3>
+                            <p>Evaluate an individual message to determine if you need to reply, wait, delegate, or simply ignore it.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTool('tool3')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h3>Chat Boundary Setter</h3>
+                            <p>Reclaim control over relentless Slack/Teams noise with tailored status templates and batch schedules.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTool('tool4')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-arrows-spin"></i></div>
+                            <h3>Zero-Inbox Maintenance</h3>
+                            <p>Prevent future overload with a structured 4-folder framework and quick daily triage rituals.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTool('tool5')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                            <h3>Communication Audit</h3>
+                            <p>Calculate your wasted communication hours and generate a script to reset expectations with leadership.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: INBOX AUTOPSY -->
+                <section id="tool1" class="tool-screen">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-boxes-packing" style="color:var(--slate-blue);"></i> Inbox Autopsy</h2>
+                            <div class="problem-statement">"I have hundreds of unread messages and I don't know where to start."</div>
+                        </div>
+
+                        <form id="form-tool1">
+                            <div class="form-group">
+                                <label for="t1-unread-emails">Total unread emails:</label>
+                                <input type="number" id="t1-unread-emails" class="form-control" placeholder="e.g. 347" min="0">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-unread-chats">Total unread chats (Slack/Teams/WhatsApp):</label>
+                                <input type="number" id="t1-unread-chats" class="form-control" placeholder="e.g. 89" min="0">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-oldest">How old is the oldest unread message?</label>
+                                <select id="t1-oldest" class="form-control">
+                                    <option value="Today">Today</option>
+                                    <option value="This week">This week</option>
+                                    <option value="This month">This month</option>
+                                    <option value="2-3mo">2-3 months ago</option>
+                                    <option value="6mo+">6 months or older</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-afraid">What are you afraid of missing?</label>
+                                <textarea id="t1-afraid" placeholder="e.g. Urgent request from boss, missed client inquiry, critical project blocker..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-time">How many hours can you dedicate to clearing now?</label>
+                                <select id="t1-time" class="form-control">
+                                    <option value="30min">30 minutes</option>
+                                    <option value="1hr">1 hour</option>
+                                    <option value="2hr">2 hours</option>
+                                    <option value="Half day">Half day (4 hours)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool1()">
+                                    <i class="fa-solid fa-bolt"></i> Generate Autopsy
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()">
+                                    <i class="fa-solid fa-flask"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool1" class="output-card"></div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Autopsies</span>
+                            <button class="btn btn-secondary btn-sm" onclick="clearToolHistory('tool1')">Clear History</button>
+                        </div>
+                        <div id="history-tool1" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: RESPONSE DECISION TREE -->
+                <section id="tool2" class="tool-screen">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-code-branch" style="color:var(--slate-blue);"></i> The Response Decision Tree</h2>
+                            <div class="problem-statement">"I stare at messages wondering if I need to reply or if I can ignore them."</div>
+                        </div>
+
+                        <form id="form-tool2">
+                            <div class="form-group">
+                                <label for="t2-sender">The message is from:</label>
+                                <select id="t2-sender" class="form-control">
+                                    <option value="Boss">Boss / Direct Manager</option>
+                                    <option value="Direct report">Direct report</option>
+                                    <option value="Peer">Peer / Teammate</option>
+                                    <option value="Other department">Other department / Cross-functional</option>
+                                    <option value="Client">Client / External stakeholder</option>
+                                    <option value="Group chat">Group chat / Channel ping</option>
+                                    <option value="Newsletter/system">Newsletter / Automated system notification</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Does it ask you to do something?</label>
+                                <div class="radio-group">
+                                    <label class="radio-option"><input type="radio" name="t2-action" value="Yes explicitly" checked> Yes explicitly</label>
+                                    <label class="radio-option"><input type="radio" name="t2-action" value="Yes implied"> Yes implied</label>
+                                    <label class="radio-option"><input type="radio" name="t2-action" value="No"> No</label>
+                                    <label class="radio-option"><input type="radio" name="t2-action" value="Not sure"> Not sure</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Is there an explicit deadline?</label>
+                                <div class="radio-group">
+                                    <label class="radio-option"><input type="radio" name="t2-deadline" value="Yes"> Yes</label>
+                                    <label class="radio-option"><input type="radio" name="t2-deadline" value="No" checked> No</label>
+                                    <label class="radio-option"><input type="radio" name="t2-deadline" value="Not stated"> Not stated</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Are you the primary recipient?</label>
+                                <div class="radio-group">
+                                    <label class="radio-option"><input type="radio" name="t2-recipient" value="Yes"> Yes (Direct To/DM)</label>
+                                    <label class="radio-option"><input type="radio" name="t2-recipient" value="Small group" checked> Small group (&lt;5 people)</label>
+                                    <label class="radio-option"><input type="radio" name="t2-recipient" value="Large group"> Large group / @here</label>
+                                    <label class="radio-option"><input type="radio" name="t2-recipient" value="CC'd"> CC'd only</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-age">How long since it arrived?</label>
+                                <select id="t2-age" class="form-control">
+                                    <option value="<1hr">&lt; 1 hour ago</option>
+                                    <option value="Today">Earlier today</option>
+                                    <option value="This week" selected>This week</option>
+                                    <option value="This month">This month</option>
+                                    <option value="Older">Older than a month</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool2()">
+                                    <i class="fa-solid fa-compass"></i> Evaluate Decision
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()">
+                                    <i class="fa-solid fa-flask"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool2" class="output-card"></div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Decisions</span>
+                            <button class="btn btn-secondary btn-sm" onclick="clearToolHistory('tool2')">Clear History</button>
+                        </div>
+                        <div id="history-tool2" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: CHAT BOUNDARY SETTER -->
+                <section id="tool3" class="tool-screen">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-shield-halved" style="color:var(--slate-blue);"></i> Chat Boundary Setter</h2>
+                            <div class="problem-statement">"Slack/Teams never stops and I feel like I have to be always on."</div>
+                        </div>
+
+                        <form id="form-tool3">
+                            <div class="form-group">
+                                <label for="t3-app">Which app is worst?</label>
+                                <select id="t3-app" class="form-control">
+                                    <option value="Slack">Slack</option>
+                                    <option value="Teams">Microsoft Teams</option>
+                                    <option value="WhatsApp">WhatsApp / Chat apps</option>
+                                    <option value="Text">SMS / iMessage</option>
+                                    <option value="Email">Email</option>
+                                    <option value="All equally">All equally overwhelming</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-expected">Perceived expected response time on your team:</label>
+                                <select id="t3-expected" class="form-control">
+                                    <option value="Instant">Instant (&lt; 5 minutes)</option>
+                                    <option value="Within hour">Within the hour</option>
+                                    <option value="Same day">Same business day</option>
+                                    <option value="Next day">Next business day</option>
+                                    <option value="Unclear">Completely unclear / Chaotic</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>When do you currently check notifications? (Check all that apply)</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-option"><input type="checkbox" class="t3-check" value="Before work"> Before work</label>
+                                    <label class="checkbox-option"><input type="checkbox" class="t3-check" value="During work"> During work</label>
+                                    <label class="checkbox-option"><input type="checkbox" class="t3-check" value="Lunch"> Lunch break</label>
+                                    <label class="checkbox-option"><input type="checkbox" class="t3-check" value="After work"> Immediately after work</label>
+                                    <label class="checkbox-option"><input type="checkbox" class="t3-check" value="Evenings"> Late evenings</label>
+                                    <label class="checkbox-option"><input type="checkbox" class="t3-check" value="Weekends"> Weekends</label>
+                                    <label class="checkbox-option"><input type="checkbox" class="t3-check" value="Constantly" checked> Constantly throughout day</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-availability">Your ideal target availability:</label>
+                                <select id="t3-availability" class="form-control">
+                                    <option value="9-5 only">Strict business hours (9-5 only)</option>
+                                    <option value="Some evenings">Business hours + occasional urgent evening window</option>
+                                    <option value="Always on">Always available (needs immediate intervention)</option>
+                                    <option value="Trying to set limits" selected>Trying to set firm focus boundaries</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool3()">
+                                    <i class="fa-solid fa-sliders"></i> Generate Boundary Plan
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()">
+                                    <i class="fa-solid fa-flask"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool3" class="output-card"></div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Boundary Plan History</span>
+                            <button class="btn btn-secondary btn-sm" onclick="clearToolHistory('tool3')">Clear History</button>
+                        </div>
+                        <div id="history-tool3" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: ZERO-INBOX MAINTENANCE -->
+                <section id="tool4" class="tool-screen">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-arrows-spin" style="color:var(--slate-blue);"></i> The Zero-Inbox Maintenance</h2>
+                            <div class="problem-statement">"I cleared my inbox once and it was back to chaos in 48 hours."</div>
+                        </div>
+
+                        <form id="form-tool4">
+                            <div class="form-group">
+                                <label for="t4-volume">How many messages do you receive per day?</label>
+                                <select id="t4-volume" class="form-control">
+                                    <option value="<20">&lt; 20 messages</option>
+                                    <option value="20-50">20 - 50 messages</option>
+                                    <option value="50-100" selected>50 - 100 messages</option>
+                                    <option value="100+">100+ messages</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-actionable">What percentage actually requires action from you?</label>
+                                <select id="t4-actionable" class="form-control">
+                                    <option value="<10%">&lt; 10% (Mostly noise/FYI)</option>
+                                    <option value="25%" selected>~ 25% (Quarter need tasks/replies)</option>
+                                    <option value="50%">~ 50% (Half need real action)</option>
+                                    <option value="75%+">75%+ (Heavy operational volume)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Do you currently use folders or labels?</label>
+                                <div class="radio-group">
+                                    <label class="radio-option"><input type="radio" name="t4-folders" value="Yes"> Yes, extensive folder tree</label>
+                                    <label class="radio-option"><input type="radio" name="t4-folders" value="No" checked> No, everything stays in Inbox</label>
+                                    <label class="radio-option"><input type="radio" name="t4-folders" value="Tried but failed"> Tried but gave up / system broke down</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-noise">Biggest source of unnecessary noise:</label>
+                                <select id="t4-noise" class="form-control">
+                                    <option value="Group chats" selected>Group chats &amp; persistent channels</option>
+                                    <option value="CC emails">FYI / CC'd email threads</option>
+                                    <option value="Notifications">Automated alerts &amp; system notifications</option>
+                                    <option value="Newsletters">Marketing, newsletters &amp; industry lists</option>
+                                    <option value="All of it">All of it equally</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool4()">
+                                    <i class="fa-solid fa-wrench"></i> Generate Maintenance System
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()">
+                                    <i class="fa-solid fa-flask"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool4" class="output-card"></div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Routine History</span>
+                            <button class="btn btn-secondary btn-sm" onclick="clearToolHistory('tool4')">Clear History</button>
+                        </div>
+                        <div id="history-tool4" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: THE COMMUNICATION AUDIT -->
+                <section id="tool5" class="tool-screen">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-chart-pie" style="color:var(--slate-blue);"></i> The Communication Audit</h2>
+                            <div class="problem-statement">"I spend all day responding and never do my actual job."</div>
+                        </div>
+
+                        <form id="form-tool5">
+                            <div class="form-group">
+                                <label for="t5-hours">Estimated hours spent daily on email &amp; chat:</label>
+                                <select id="t5-hours" class="form-control">
+                                    <option value="<1hr">&lt; 1 hour</option>
+                                    <option value="1-2hr">1 - 2 hours</option>
+                                    <option value="2-4hr" selected>2 - 4 hours</option>
+                                    <option value="4hr+">4+ hours (Half or more of working day)</option>
+                                    <option value="I can't measure">I can't measure (It feels continuous)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-deepwork">When do you currently find time for deep, focused work?</label>
+                                <select id="t5-deepwork" class="form-control">
+                                    <option value="Early morning">Early morning before team starts</option>
+                                    <option value="Late evening">Late evening after hours</option>
+                                    <option value="Never">Never (It simply doesn't happen)</option>
+                                    <option value="Stolen moments" selected>Stolen 15-minute windows between pings</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-suffers">What critical core work suffers most from this reactive state?</label>
+                                <textarea id="t5-suffers" placeholder="e.g. Strategic planning, coding, project documentation, client deliverables, analysis..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Have you discussed this volume/load with your manager?</label>
+                                <div class="radio-group">
+                                    <label class="radio-option"><input type="radio" name="t5-manager" value="Yes"> Yes, but no solution reached</label>
+                                    <label class="radio-option"><input type="radio" name="t5-manager" value="No" checked> No, afraid of seeming uncooperative</label>
+                                    <label class="radio-option"><input type="radio" name="t5-manager" value="They are the problem"> They are the primary source of pings</label>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool5()">
+                                    <i class="fa-solid fa-calculator"></i> Run Communication Audit
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()">
+                                    <i class="fa-solid fa-flask"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool5" class="output-card"></div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Audit History</span>
+                            <button class="btn btn-secondary btn-sm" onclick="clearToolHistory('tool5')">Clear History</button>
+                        </div>
+                        <div id="history-tool5" class="history-list"></div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Global Footer -->
+            <footer class="app-footer">
+                For communication management only. Not a substitute for team norms or management guidance.<br>
+                For anxiety related to digital communication, consult a healthcare professional.
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // UI Navigation & Mobile Sidebar Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const navItems = document.querySelectorAll('.nav-item');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const tool = item.getAttribute('data-tool');
+                    switchTool(tool);
+                    closeSidebar();
+                });
+            });
+
+            hamburgerBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-open');
+                sidebarOverlay.classList.toggle('active');
+            });
+
+            sidebarOverlay.addEventListener('click', closeSidebar);
+
+            // Initialize histories on load
+            renderHistory('tool1');
+            renderHistory('tool2');
+            renderHistory('tool3');
+            renderHistory('tool4');
+            renderHistory('tool5');
+        });
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        function switchTool(toolId) {
+            document.querySelectorAll('.tool-screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const targetScreen = document.getElementById(toolId);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            }
+
+            const activeBtn = document.querySelector(`.nav-item[data-tool="${toolId}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Toast Helper
+        function showToast(message = "Copied to clipboard!") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Copy Text Helper
+        function copyToClipboard(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const textToCopy = el.innerText || el.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(err => {
+                console.error("Copy failed: ", err);
+            });
+        }
+
+        // LocalStorage Management
+        function saveToHistory(toolId, summary, fullData) {
+            const storageKey = `message_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(storageKey) || "[]");
+            
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                summary: summary,
+                fullData: fullData
+            };
+
+            history.unshift(newItem);
+            if (history.length > 30) {
+                history = history.slice(0, 30);
+            }
+
+            localStorage.setItem(storageKey, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const storageKey = `message_history_${toolId}`;
+            const historyList = document.getElementById(`history-${toolId}`);
+            if (!historyList) return;
+
+            const history = JSON.parse(localStorage.getItem(storageKey) || "[]");
+
+            if (history.length === 0) {
+                historyList.innerHTML = `<div style="font-size:0.85rem; color: var(--slate-light); font-style:italic; padding: 0.5rem 0;">No saved history yet.</div>`;
+                return;
+            }
+
+            historyList.innerHTML = history.map(item => `
+                <div class="history-item" onclick="restoreHistoryItem('${toolId}', ${item.id})">
+                    <span><strong>${escapeHtml(item.summary)}</strong></span>
+                    <span class="history-time">${item.timestamp}</span>
+                </div>
+            `).join('');
+        }
+
+        function clearToolHistory(toolId) {
+            const storageKey = `message_history_${toolId}`;
+            localStorage.removeItem(storageKey);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function restoreHistoryItem(toolId, itemId) {
+            const storageKey = `message_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(storageKey) || "[]");
+            const item = history.find(i => i.id === itemId);
+            if (!item) return;
+
+            const outputDiv = document.getElementById(`output-${toolId}`);
+            outputDiv.innerHTML = item.fullData.html;
+            outputDiv.style.display = 'block';
+            outputDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+
+        /* ==========================================================================
+           TOOL 1: INBOX AUTOPSY
+           ========================================================================== */
+        function loadSampleTool1() {
+            document.getElementById('t1-unread-emails').value = 347;
+            document.getElementById('t1-unread-chats').value = 89;
+            document.getElementById('t1-oldest').value = "This month";
+            document.getElementById('t1-afraid').value = "Missing an urgent project sign-off or direct request from my manager that got buried.";
+            document.getElementById('t1-time').value = "1hr";
+        }
+
+        function analyzeTool1() {
+            const emails = parseInt(document.getElementById('t1-unread-emails').value) || 0;
+            const chats = parseInt(document.getElementById('t1-unread-chats').value) || 0;
+            const oldest = document.getElementById('t1-oldest').value;
+            const afraid = document.getElementById('t1-afraid').value || "unspecified important messages";
+            const time = document.getElementById('t1-time').value;
+
+            const total = emails + chats;
+
+            // Calculate Time Allocations based on dedicated time
+            let timeBreakdown = "";
+            if (time === "30min") {
+                timeBreakdown = "• Pass 1 (Delete/Archive): 5 mins | Pass 2 (Boss Filter): 10 mins | Pass 3 (Quick Reply): 10 mins | Pass 4 (Triage rest): 5 mins";
+            } else if (time === "1hr") {
+                timeBreakdown = "• Pass 1 (Delete/Archive): 15 mins | Pass 2 (Boss/VIP Filter): 15 mins | Pass 3 (Quick &lt;2min Replies): 15 mins | Pass 4 (Deep Reply Block): 15 mins";
+            } else if (time === "2hr") {
+                timeBreakdown = "• Pass 1 (Bulk Purge): 25 mins | Pass 2 (VIP & Direct Reports): 35 mins | Pass 3 (Quick Wins): 30 mins | Pass 4 (Project Actionables): 30 mins";
+            } else { // Half day
+                timeBreakdown = "• Pass 1 (Mass Archive Olders): 45 mins | Pass 2 (Priority Senders): 60 mins | Pass 3 (Task Extraction): 60 mins | Pass 4 (System Reset): 45 mins";
+            }
+
+            const html = `
+                <h3><i class="fa-solid fa-clipboard-check"></i> Inbox Autopsy &amp; Action Plan</h3>
+                
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-filter"></i> 1. The 4-Pass System (${total} Total Unread)</div>
+                    <div class="output-content">
+                        <strong>Pass 1: Mass Archive/Delete (Do not read):</strong> Select all notification emails, system alerts, and newsletters older than 7 days. Select all group chat @here pings older than 3 days. Bulk archive immediately.<br><br>
+                        <strong>Pass 2: Delegate:</strong> Any request that belongs to a teammate or direct report — forward immediately with "Over to you for handling."<br><br>
+                        <strong>Pass 3: Quick Reply (&lt;2 Mins):</strong> Scan remaining titles for questions requiring a simple Yes/No, link, or quick acknowledgment. Dispatch immediately.<br><br>
+                        <strong>Pass 4: Deep Work Block:</strong> Schedule the remaining 5% of complex messages into dedicated calendar slots. Do not reply right now.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-stopwatch"></i> 2. Time Allocation (${time} Dedicated)</div>
+                    <div class="output-content">
+                        ${timeBreakdown}
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-user-shield"></i> 3. The Boss Filter &amp; Fear Mitigator</div>
+                    <div class="output-content">
+                        You indicated fear of missing: <em>"${escapeHtml(afraid)}"</em>.<br><br>
+                        <strong>Action Steps:</strong>
+                        <ol style="margin-left: 1.25rem; margin-top: 0.5rem;">
+                            <li>Search bar query: <code>from:manager@company.com is:unread</code> (or Slack filter: <code>from:@boss</code>).</li>
+                            <li>If any exist older than 48 hours, send a 1-line interim response: <em>"Received, reviewing today."</em></li>
+                            <li>If zero exist, your primary panic trigger is mathematically disproved. Take a deep breath.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-bolt-lightning"></i> 4. The 5-Minute Emergency Scan</div>
+                    <div class="output-content">
+                        Sort by sender (not date). Look ONLY at names that sign your paycheck or control your core deliverables. Ignore all group channels and threads with &gt;4 participants.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-heart-pulse"></i> 5. The Reality Check</div>
+                    <div class="output-content">
+                        Oldest message age: <strong>${oldest}</strong>. If a true critical emergency occurred ${oldest.toLowerCase()} ago, someone would have called, texted, or physically walked up to you. Silence for days means the issue either resolved itself, was handled by someone else, or was never urgent to begin with.
+                    </div>
+                </div>
+            `;
+
+            const outputDiv = document.getElementById('output-tool1');
+            outputDiv.innerHTML = html;
+            outputDiv.style.display = 'block';
+
+            saveToHistory('tool1', `Autopsy: ${total} unread (${emails} email, ${chats} chat) - ${time} available`, { html });
+            outputDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+
+        /* ==========================================================================
+           TOOL 2: THE RESPONSE DECISION TREE
+           ========================================================================== */
+        function loadSampleTool2() {
+            document.getElementById('t2-sender').value = "Peer";
+            document.querySelector('input[name="t2-action"][value="Yes explicitly"]').checked = true;
+            document.querySelector('input[name="t2-deadline"][value="No"]').checked = true;
+            document.querySelector('input[name="t2-recipient"][value="Small group"]').checked = true;
+            document.getElementById('t2-age').value = "This week";
+        }
+
+        function analyzeTool2() {
+            const sender = document.getElementById('t2-sender').value;
+            const action = document.querySelector('input[name="t2-action"]:checked').value;
+            const deadline = document.querySelector('input[name="t2-deadline"]:checked').value;
+            const recipient = document.querySelector('input[name="t2-recipient"]:checked').value;
+            const age = document.getElementById('t2-age').value;
+
+            let verdict = "REPLY THIS WEEK";
+            let badgeColor = "#475569";
+            let responseGuideline = "";
+            let templateText = "";
+            let followUpText = "";
+            let delegationCheck = "";
+
+            // Decision Matrix Logic
+            if (sender === "Newsletter/system" || action === "No") {
+                verdict = "ARCHIVE / IGNORE";
+                badgeColor = "#64748b";
+                responseGuideline = "No response required. Mark as read or archive immediately.";
+                templateText = "N/A - Archive without responding.";
+                delegationCheck = "No delegation needed.";
+                followUpText = "None required.";
+            } else if (sender === "Boss" && (deadline === "Yes" || action === "Yes explicitly")) {
+                verdict = "REPLY NOW";
+                badgeColor = "#ef4444";
+                responseGuideline = "Target response within 1-2 hours max.";
+                templateText = "Hi [Name], got this. I am on it and will provide a full update by [Time/Day].";
+                delegationCheck = "Can you delegate the execution while staying the owner of the communication?";
+                followUpText = "If delayed: 'Hi [Name], reviewing this now. Expect my detailed response by [Time].'";
+            } else if (sender === "Client" && action !== "No") {
+                verdict = "REPLY TODAY";
+                badgeColor = "#f59e0b";
+                responseGuideline = "Acknowledge within business day. Protect client trust without dropping everything.";
+                templateText = "Hi [Name], thanks for reaching out. I've received your request regarding [Topic] and am working on it. Will follow up by [Day].";
+                delegationCheck = "Is there a designated account manager or support specialist who should own this?";
+                followUpText = "'Thanks for your patience — currently looking into this with the technical team.'";
+            } else if (recipient === "Large group" || recipient === "CC'd") {
+                verdict = "IGNORE OR WAIT";
+                badgeColor = "#10b981";
+                responseGuideline = "Wait 24 hours. Let primary recipients handle it first unless specifically tagged.";
+                templateText = "Thanks for the heads up, [Name]!";
+                delegationCheck = "You are only CC'd. Do not steal ownership unless explicitly transferred.";
+                followUpText = "If asked directly later: 'Thanks for looping me in, watching thread.'";
+            } else {
+                // Peers / Direct reports / Other depts with no strict deadline
+                if (age === "This week" || age === "This month" || age === "Older") {
+                    verdict = "REPLY THIS WEEK OR BATCH";
+                    badgeColor = "#3b82f6";
+                    responseGuideline = "Batch response into your end-of-day or weekly triage window.";
+                    templateText = "Hi [Name], thanks for checking in. Regarding [Topic]: [Brief Answer/Decision]. Let me know if you need anything else!";
+                    delegationCheck = "Can a direct report or peer answer this faster than you can?";
+                    followUpText = "'Hi [Name], saw this! Scheduling time to look at this on [Day].'";
+                } else {
+                    verdict = "REPLY TODAY";
+                    badgeColor = "#f59e0b";
+                    responseGuideline = "Address during afternoon communication sweep.";
+                    templateText = "Hi [Name], thanks for reaching out! Here is the info on [Topic]: [Brief response].";
+                    delegationCheck = "If this is operational, delegate to team lead.";
+                    followUpText = "'Received! Will review by EOD.'";
+                }
+            }
+
+            const html = `
+                <h3><i class="fa-solid fa-tree"></i> Decision Tree Verdict</h3>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-gavel"></i> The Verdict</div>
+                    <div class="output-content">
+                        <span class="verdict-badge" style="background-color: ${badgeColor};">${verdict}</span>
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-clock"></i> Response SLA &amp; Guideline</div>
+                    <div class="output-content">${responseGuideline}</div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-comment-dots"></i> Ready-to-Use Response Template</div>
+                    <div class="script-box" id="t2-script">${escapeHtml(templateText)}<button class="copy-btn" onclick="copyToClipboard('t2-script')"><i class="fa-regular fa-copy"></i> Copy</button></div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-share-nodes"></i> Delegation Check</div>
+                    <div class="output-content">${delegationCheck}</div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-hourglass-half"></i> Holding / Follow-Up Strategy</div>
+                    <div class="output-content">${followUpText}</div>
+                </div>
+            `;
+
+            const outputDiv = document.getElementById('output-tool2');
+            outputDiv.innerHTML = html;
+            outputDiv.style.display = 'block';
+
+            saveToHistory('tool2', `${verdict} - From: ${sender} (${action})`, { html });
+            outputDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+
+        /* ==========================================================================
+           TOOL 3: CHAT BOUNDARY SETTER
+           ========================================================================== */
+        function loadSampleTool3() {
+            document.getElementById('t3-app').value = "Slack";
+            document.getElementById('t3-expected').value = "Within hour";
+            
+            document.querySelectorAll('.t3-check').forEach(chk => chk.checked = false);
+            document.querySelectorAll('.t3-check')[1].checked = true; // During work
+            document.querySelectorAll('.t3-check')[6].checked = true; // Constantly
+
+            document.getElementById('t3-availability').value = "Trying to set limits";
+        }
+
+        function analyzeTool3() {
+            const app = document.getElementById('t3-app').value;
+            const expected = document.getElementById('t3-expected').value;
+            const availability = document.getElementById('t3-availability').value;
+
+            const selectedChecks = Array.from(document.querySelectorAll('.t3-check:checked')).map(c => c.value);
+
+            const statusText = `🎯 Deep Work Mode | Checking ${app} at 11am & 3pm | For urgent fires, call phone.`;
+
+            const html = `
+                <h3><i class="fa-solid fa-shield-halved"></i> Chat Boundary Strategy</h3>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-user-tag"></i> 1. Professional Status Message</div>
+                    <div class="script-box" id="t3-script">${escapeHtml(statusText)}<button class="copy-btn" onclick="copyToClipboard('t3-script')"><i class="fa-regular fa-copy"></i> Copy</button></div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-calendar-days"></i> 2. The Batch Schedule</div>
+                    <div class="output-content">
+                        <strong>Recommended Check Windows for ${app}:</strong><br>
+                        • <strong>09:30 AM - 09:45 AM:</strong> Morning Triage (Clear blockers only)<br>
+                        • <strong>01:30 PM - 02:00 PM:</strong> Midday Processing (Address inquiries)<br>
+                        • <strong>04:30 PM - 05:00 PM:</strong> End-of-Day Sweep (Clear pending & update status)
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-fire-extinguisher"></i> 3. Urgency Filter</div>
+                    <div class="output-content">
+                        <strong>If team expects response '${expected}':</strong> Explain the difference between synchronous communication (phone calls/emergencies) and asynchronous communication (chat pings). A true emergency requires a phone call. If it can sit in ${app}, it can wait until your next batch window.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-users"></i> 4. Team Conversation Script</div>
+                    <div class="script-box" id="t3-team-script">"Hey team! To increase my deep focus time on deliverables, I'm testing a new routine where I process ${app} in dedicated batches at 11am and 3pm. If anything is a true emergency that cannot wait, please feel free to call my mobile."<button class="copy-btn" onclick="copyToClipboard('t3-team-script')"><i class="fa-regular fa-copy"></i> Copy</button></div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-sliders"></i> 5. Notification Surgery for ${app}</div>
+                    <div class="output-content">
+                        <ul style="margin-left: 1.25rem;">
+                            <li>Turn OFF desktop badges/red dots. They hijack dopamine and focus.</li>
+                            <li>Set notifications to "Direct mentions and keywords only" (disable all channel pings).</li>
+                            <li>Mute high-volume channels (e.g. #general, #random, #announcements).</li>
+                            <li>Disable mobile app notifications entirely past your business hours.</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            const outputDiv = document.getElementById('output-tool3');
+            outputDiv.innerHTML = html;
+            outputDiv.style.display = 'block';
+
+            saveToHistory('tool3', `Boundary Plan for ${app} (${availability})`, { html });
+            outputDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+
+        /* ==========================================================================
+           TOOL 4: THE ZERO-INBOX MAINTENANCE
+           ========================================================================== */
+        function loadSampleTool4() {
+            document.getElementById('t4-volume').value = "50-100";
+            document.getElementById('t4-actionable').value = "25%";
+            document.querySelector('input[name="t4-folders"][value="No"]').checked = true;
+            document.getElementById('t4-noise').value = "Group chats";
+        }
+
+        function analyzeTool4() {
+            const volume = document.getElementById('t4-volume').value;
+            const actionable = document.getElementById('t4-actionable').value;
+            const noise = document.getElementById('t4-noise').value;
+
+            const html = `
+                <h3><i class="fa-solid fa-arrows-spin"></i> Zero-Inbox Maintenance System</h3>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-folder-tree"></i> 1. The Simple 4-Folder Architecture</div>
+                    <div class="output-content">
+                        Abandon multi-layered nested folder trees. Replace everything with 4 simple folders/labels:<br><br>
+                        • <code>@1_ACTION</code>: Tasks requiring immediate execution/reply this week.<br>
+                        • <code>@2_WAITING</code>: Delegated items or emails awaiting responses from others.<br>
+                        • <code>@3_READ</code>: Articles, updates, newsletters to review during downtime.<br>
+                        • <code>ARCHIVE</code>: Everything else (Search bar handles the rest).
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-wand-magic-sparkles"></i> 2. Auto-Sorting Rules</div>
+                    <div class="output-content">
+                        <strong>Rule 1 (Kill CC Noise):</strong> Filter messages where you are on the CC line straight to a <code>@3_READ</code> or <code>FYI</code> folder, skipping the Inbox.<br>
+                        <strong>Rule 2 (Automated Reports):</strong> Set notifications from Jira/Github/Asana/Hubspot to automatically skip Inbox and apply <code>System Alerts</code> label.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-sun-plant-wilt"></i> 3. The 10-Minute Daily Routine</div>
+                    <div class="output-content">
+                        • <strong>Morning (5 mins):</strong> Scan Inbox. Touch each message ONCE. Delete, archive, or drag to <code>@1_ACTION</code>. Leave Inbox empty.<br>
+                        • <strong>Evening (5 mins):</strong> Process <code>@1_ACTION</code> items created today. Send quick replies, re-archive completed threads.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-calendar-check"></i> 4. The 30-Minute Weekly Review</div>
+                    <div class="output-content">
+                        Every Friday at 4:00 PM: Review <code>@2_WAITING</code>. Send ping follow-ups for unresolved items. Clear <code>@1_ACTION</code> folder. Empty trash.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-ban"></i> 5. Unsubscribe Sprint (Targeting: ${noise})</div>
+                    <div class="output-content">
+                        Your biggest noise source is <strong>${noise}</strong>.<br>
+                        • Search <code>unsubscribe</code> in your inbox and purge 10 lists today.<br>
+                        • Leave 3 inactive group channels or set them to muted digest mode.<br>
+                        • Turn off notification emails for platform activity comments.
+                    </div>
+                </div>
+            `;
+
+            const outputDiv = document.getElementById('output-tool4');
+            outputDiv.innerHTML = html;
+            outputDiv.style.display = 'block';
+
+            saveToHistory('tool4', `Maintenance System (${volume} msgs/day, ${actionable} actionable)`, { html });
+            outputDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+
+        /* ==========================================================================
+           TOOL 5: THE COMMUNICATION AUDIT
+           ========================================================================== */
+        function loadSampleTool5() {
+            document.getElementById('t5-hours').value = "2-4hr";
+            document.getElementById('t5-deepwork').value = "Stolen moments";
+            document.getElementById('t5-suffers').value = "Strategic project planning, client deliverable creation, deep analysis reports.";
+            document.querySelector('input[name="t5-manager"][value="No"]').checked = true;
+        }
+
+        function analyzeTool5() {
+            const hours = document.getElementById('t5-hours').value;
+            const deepwork = document.getElementById('t5-deepwork').value;
+            const suffers = document.getElementById('t5-suffers').value || "core key performance indicators";
+            const manager = document.querySelector('input[name="t5-manager"]:checked').value;
+
+            let reclaimEst = "1.5 to 2.5 hours daily";
+            if (hours === "<1hr") reclaimEst = "30 minutes daily";
+            if (hours === "1-2hr") reclaimEst = "1 hour daily";
+            if (hours === "4hr+") reclaimEst = "2.5 to 3.5 hours daily";
+
+            const managerScript = `"Hi [Manager Name], I noticed that I'm spending roughly ${hours} each day managing reactive messaging and pings. This severely impacts my ability to focus on ${suffers}. I want to propose blocking 2-3 hours daily for dedicated deep work where I step away from immediate chat responses. Can we align on this to protect critical project deadlines?"`;
+
+            const html = `
+                <h3><i class="fa-solid fa-chart-pie"></i> Communication Audit Results</h3>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-clock-rotate-left"></i> 1. The Time Reclaim Opportunity</div>
+                    <div class="output-content">
+                        By implementing asynchronous batching and clear response windows, you can realistically recover <strong>${reclaimEst}</strong> to reinvest directly into deep work.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-comments"></i> 2. Manager Proposal Script</div>
+                    <div class="script-box" id="t5-script">${escapeHtml(managerScript)}<button class="copy-btn" onclick="copyToClipboard('t5-script')"><i class="fa-regular fa-copy"></i> Copy</button></div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-phone-slash"></i> 3. The Meeting / Thread Alternative</div>
+                    <div class="output-content">
+                        <strong>Rule of 3:</strong> If a chat/email thread exceeds 3 back-and-forth exchanges without resolution, stop typing. Initiate a quick 7-minute direct voice huddle. Resolving live saves an average of 15 back-and-forth pings.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-handshake"></i> 4. Async Agreement Rules</div>
+                    <div class="output-content">
+                        Propose these 3 team norms:<br>
+                        1. Emergency = Phone call / SMS.<br>
+                        2. Urgent (&lt;2 hrs) = Direct chat message tagged [Urgent].<br>
+                        3. Standard (&lt;24 hrs) = Email or regular chat thread.
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-title"><i class="fa-solid fa-scale-balanced"></i> 5. The Bottom Line Diagnosis</div>
+                    <div class="output-content">
+                        ${manager === 'They are the problem' ? 
+                            '<strong>Diagnosis: Systemic Culture Problem.</strong> Your primary issue stems from managerial micro-messaging. You need to align explicit communication protocols and urgent escalation channels with your manager immediately.' : 
+                            '<strong>Diagnosis: Habit &amp; Perception Shift Needed.</strong> Most of the pressure you feel is internal expectation rather than explicit policy. Enforcing batching boundaries will increase your real output without negative fallout.'}
+                    </div>
+                </div>
+            `;
+
+            const outputDiv = document.getElementById('output-tool5');
+            outputDiv.innerHTML = html;
+            outputDiv.style.display = 'block';
+
+            saveToHistory('tool5', `Comm Audit (${hours}/day comms - ${deepwork} deep work)`, { html });
+            outputDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

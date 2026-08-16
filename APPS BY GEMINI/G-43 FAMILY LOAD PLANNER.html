@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Load Planner</title>
+  
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* CSS RESET & VARIABLES */
+    :root {
+      --deep-teal: #264653;
+      --warm-amber: #E9C46A;
+      --burnt-sienna: #E76F51;
+      --sandy-brown: #F4A261;
+      --bg-gradient: linear-gradient(135deg, #F8F9FA 0%, #FFF3E0 100%);
+      --text-main: #2B2D42;
+      --text-muted: #6C757D;
+      --card-bg: #FFFFFF;
+      --border-color: #E9ECEF;
+      --sidebar-width: 260px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* LAYOUT STRUCTURE */
+    .app-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--card-bg);
+      border-right: 1px solid var(--border-color);
+      box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--deep-teal);
+    }
+
+    .sidebar-header i {
+      font-size: 24px;
+      color: var(--sandy-brown);
+    }
+
+    .sidebar-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .sidebar-nav {
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .nav-btn i {
+      font-size: 16px;
+      width: 20px;
+      color: var(--text-muted);
+    }
+
+    .nav-btn:hover {
+      background: rgba(38, 70, 83, 0.05);
+      color: var(--deep-teal);
+    }
+
+    .nav-btn.active {
+      background: var(--deep-teal);
+      color: #FFFFFF;
+    }
+
+    .nav-btn.active i {
+      color: var(--warm-amber);
+    }
+
+    /* MOBILE NAVBAR TOP BAR */
+    .mobile-header {
+      display: none;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 20px;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--deep-teal);
+      cursor: pointer;
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 40px 20px 80px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: calc(100% - var(--sidebar-width));
+    }
+
+    .content-wrapper {
+      width: 100%;
+      max-width: 800px;
+    }
+
+    /* CARD COMPONENTS */
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .hero-card {
+      background: var(--deep-teal);
+      color: #FFFFFF;
+      text-align: center;
+      padding: 36px 24px;
+    }
+
+    .hero-card h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .hero-card p {
+      color: var(--warm-amber);
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .tool-header {
+      margin-bottom: 24px;
+    }
+
+    .tool-header h2 {
+      font-size: 22px;
+      color: var(--deep-teal);
+      margin-bottom: 6px;
+    }
+
+    .tool-header .problem-statement {
+      font-size: 14px;
+      color: var(--burnt-sienna);
+      font-style: italic;
+      background: #FDF2E9;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* FORM STYLES */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--deep-teal);
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      accent-color: var(--deep-teal);
+      width: 16px;
+      height: 16px;
+    }
+
+    select, textarea, input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    select:focus, textarea:focus, input:focus {
+      border-color: var(--deep-teal);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .range-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .range-group input[type="range"] {
+      flex: 1;
+      accent-color: var(--burnt-sienna);
+    }
+
+    .range-value {
+      font-weight: 700;
+      width: 30px;
+      text-align: right;
+      color: var(--burnt-sienna);
+    }
+
+    /* BUTTONS */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s ease;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn-primary {
+      background: var(--deep-teal);
+      color: #FFFFFF;
+    }
+
+    .btn-secondary {
+      background: var(--warm-amber);
+      color: var(--deep-teal);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-copy {
+      padding: 4px 8px;
+      font-size: 12px;
+      background: #EAECEE;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--deep-teal);
+      float: right;
+    }
+
+    /* RESULTS OUTPUT */
+    .results-container {
+      margin-top: 32px;
+      display: none;
+    }
+
+    .results-container.active {
+      display: block;
+    }
+
+    .output-card {
+      background: #FAF9F6;
+      border-left: 4px solid var(--deep-teal);
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .output-card h3 {
+      font-size: 15px;
+      color: var(--deep-teal);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .output-card p, .output-card ul {
+      font-size: 14px;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .output-card ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+
+    /* DASHBOARD GRID */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .dash-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+    }
+
+    .dash-card i {
+      font-size: 24px;
+      color: var(--sandy-brown);
+      margin-bottom: 12px;
+    }
+
+    .dash-card h3 {
+      font-size: 16px;
+      color: var(--deep-teal);
+      margin-bottom: 6px;
+    }
+
+    .dash-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* HISTORY ACCORDION */
+    .history-section {
+      margin-top: 32px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: 10px 0;
+    }
+
+    .history-header h4 {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .history-list {
+      display: none;
+      margin-top: 12px;
+      gap: 8px;
+      flex-direction: column;
+    }
+
+    .history-list.active {
+      display: flex;
+    }
+
+    .history-item {
+      background: #FFFFFF;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: auto;
+      width: 100%;
+    }
+
+    /* TOAST NOTIFICATION */
+    #toast {
+      visibility: hidden;
+      min-width: 200px;
+      background-color: var(--deep-teal);
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 12px 16px;
+      position: fixed;
+      z-index: 1000;
+      bottom: 30px;
+      right: 30px;
+      font-size: 14px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    #toast.show {
+      visibility: visible;
+      animation: fadein 0.3s, fadeout 0.3s 1.7s;
+    }
+
+    @keyframes fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 30px; opacity: 1;}
+    }
+
+    @keyframes fadeout {
+      from {bottom: 30px; opacity: 1;}
+      to {bottom: 0; opacity: 0;}
+    }
+
+    /* STAMINA METER */
+    .stamina-meter {
+      height: 12px;
+      background: #E9ECEF;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .stamina-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    .fill-red { background: var(--burnt-sienna); }
+    .fill-yellow { background: var(--warm-amber); }
+    .fill-green { background: #2A9D8F; }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .mobile-header {
+        display: flex;
+      }
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px 12px 40px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MOBILE TOP HEADER -->
+  <div class="mobile-header">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <i class="fa-solid fa-scale-balanced" style="color:var(--sandy-brown); font-size:20px;"></i>
+      <span style="font-weight:700; color:var(--deep-teal);">Family Load Planner</span>
+    </div>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+
+  <div class="app-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-scale-balanced"></i>
+        <h2>Family Load<br>Planner</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" onclick="switchTool('dashboard')">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-btn" onclick="switchTool('tool1')">
+          <i class="fa-solid fa-clipboard-list"></i>
+          <span>1. Load Audit</span>
+        </button>
+        <button class="nav-btn" onclick="switchTool('tool2')">
+          <i class="fa-solid fa-calendar-check"></i>
+          <span>2. Appointment Center</span>
+        </button>
+        <button class="nav-btn" onclick="switchTool('tool3')">
+          <i class="fa-solid fa-children"></i>
+          <span>3. Sibling Balance</span>
+        </button>
+        <button class="nav-btn" onclick="switchTool('tool4')">
+          <i class="fa-solid fa-handshake"></i>
+          <span>4. Partner Realignment</span>
+        </button>
+        <button class="nav-btn" onclick="switchTool('tool5')">
+          <i class="fa-solid fa-battery-half"></i>
+          <span>5. Parent Stamina</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="main-content">
+      <div class="content-wrapper">
+
+        <!-- DASHBOARD VIEW -->
+        <section id="dashboard" class="tool-view">
+          <div class="card hero-card">
+            <h1>Family Load Planner</h1>
+            <p>Hold the extra weight without dropping yourself.</p>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="dash-card" onclick="switchTool('tool1')">
+              <i class="fa-solid fa-clipboard-list"></i>
+              <h3>1. Load Audit</h3>
+              <p>Name and quantify the invisible caregiving load so it can be seen and addressed.</p>
+            </div>
+            <div class="dash-card" onclick="switchTool('tool2')">
+              <i class="fa-solid fa-calendar-check"></i>
+              <h3>2. Appointment Center</h3>
+              <p>Bring structure to intense appointment schedules, prep questions, and claims.</p>
+            </div>
+            <div class="dash-card" onclick="switchTool('tool3')">
+              <i class="fa-solid fa-children"></i>
+              <h3>3. Sibling Balance</h3>
+              <p>Support siblings with micro-moments and clear scripts without extra guilt.</p>
+            </div>
+            <div class="dash-card" onclick="switchTool('tool4')">
+              <i class="fa-solid fa-handshake"></i>
+              <h3>4. Partner Realignment</h3>
+              <p>Shift from survival-mode friction to structured team communication and task swaps.</p>
+            </div>
+            <div class="dash-card" onclick="switchTool('tool5')">
+              <i class="fa-solid fa-battery-half"></i>
+              <h3>5. Parent Stamina</h3>
+              <p>Gauge your personal reserve levels and implement immediate, non-negotiable breaks.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 1: LOAD AUDIT -->
+        <section id="tool1" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="tool-header">
+              <h2>Tool 1 — Load Audit</h2>
+              <span class="problem-statement">"I can't name everything I do, so nobody sees it — including me."</span>
+            </div>
+
+            <form id="form1" onsubmit="handleForm1Submit(event)">
+              <div class="form-group">
+                <label>Child's Needs Categories:</label>
+                <div class="checkbox-grid">
+                  <label class="checkbox-item"><input type="checkbox" name="needs" value="Medical appointments"> Medical appointments</label>
+                  <label class="checkbox-item"><input type="checkbox" name="needs" value="Therapy (OT/PT/Speech)"> Therapy (OT/PT/Speech)</label>
+                  <label class="checkbox-item"><input type="checkbox" name="needs" value="Behavioral support"> Behavioral support</label>
+                  <label class="checkbox-item"><input type="checkbox" name="needs" value="Educational/IEP"> Educational/IEP</label>
+                  <label class="checkbox-item"><input type="checkbox" name="needs" value="Medication management"> Medication management</label>
+                  <label class="checkbox-item"><input type="checkbox" name="needs" value="Mobility support"> Mobility support</label>
+                  <label class="checkbox-item"><input type="checkbox" name="needs" value="Feeding/nutrition"> Feeding/nutrition</label>
+                  <label class="checkbox-item"><input type="checkbox" name="needs" value="Sleep support"> Sleep support</label>
+                  <label class="checkbox-item"><input type="checkbox" name="needs" value="Emotional regulation"> Emotional regulation</label>
+                  <label class="checkbox-item"><input type="checkbox" name="needs" value="Social skills coaching"> Social skills coaching</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t1_hours">Weekly hours spent on care tasks:</label>
+                <select id="t1_hours" required>
+                  <option value="">Select option...</option>
+                  <option value="10-20">10–20 hours</option>
+                  <option value="20-40">20–40 hours</option>
+                  <option value="40-60">40–60 hours</option>
+                  <option value="60+">60+ hours</option>
+                  <option value="constant">I don't know, it's constant</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t1_who">Who does the care:</label>
+                <select id="t1_who" required>
+                  <option value="">Select option...</option>
+                  <option value="Me alone">Me alone</option>
+                  <option value="Me primarily">Me primarily</option>
+                  <option value="Shared equally">Shared equally</option>
+                  <option value="Partner primarily">Partner primarily</option>
+                  <option value="Extended family helps">Extended family helps</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Paid support:</label>
+                <div class="checkbox-grid">
+                  <label class="checkbox-item"><input type="checkbox" name="paid" value="Nurse"> Nurse</label>
+                  <label class="checkbox-item"><input type="checkbox" name="paid" value="Aide"> Aide</label>
+                  <label class="checkbox-item"><input type="checkbox" name="paid" value="Therapist"> Therapist</label>
+                  <label class="checkbox-item"><input type="checkbox" name="paid" value="Respite"> Respite</label>
+                  <label class="checkbox-item"><input type="checkbox" name="paid" value="School services"> School services</label>
+                  <label class="checkbox-item"><input type="checkbox" name="paid" value="None"> None</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t1_siblings">Siblings' needs being back-burnered:</label>
+                <textarea id="t1_siblings" placeholder="Describe any concerns regarding other children..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t1_work">Your work status:</label>
+                <select id="t1_work" required>
+                  <option value="">Select option...</option>
+                  <option value="Full-time">Full-time</option>
+                  <option value="Part-time">Part-time</option>
+                  <option value="On leave">On leave</option>
+                  <option value="Quit">Quit work</option>
+                  <option value="Never returned">Never returned</option>
+                  <option value="Remote with interruptions">Remote with interruptions</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Audit Load</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSample1()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+
+            <!-- OUTPUT SECTION -->
+            <div id="results1" class="results-container">
+              <div class="output-card">
+                <h3>THE CARE MAP</h3>
+                <p id="out1_careMap"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE INVISIBLE LOAD</h3>
+                <p id="out1_invisible"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE SIBLING GAP</h3>
+                <p id="out1_sibling"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE PARTNER GAP</h3>
+                <p id="out1_partner"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE BURNOUT RISK</h3>
+                <p id="out1_burnout"></p>
+              </div>
+              <div class="output-card">
+                <h3>ONE DELEGATION</h3>
+                <p id="out1_delegation"></p>
+              </div>
+            </div>
+
+            <!-- HISTORY -->
+            <div class="history-section">
+              <div class="history-header" onclick="toggleHistory('tool1')">
+                <h4><i class="fa-solid fa-clock-rotate-left"></i> History Log</h4>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="history-list" id="history1"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 2: APPOINTMENT COMMAND CENTER -->
+        <section id="tool2" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="tool-header">
+              <h2>Tool 2 — Appointment Command Center</h2>
+              <span class="problem-statement">"We have 8 appointments a week and I can't keep them straight."</span>
+            </div>
+
+            <form id="form2" onsubmit="handleForm2Submit(event)">
+              <div class="form-group">
+                <label for="t2_appts">Current appointments this month:</label>
+                <textarea id="t2_appts" placeholder="List doctors, therapies, school meetings..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t2_who">Who schedules them:</label>
+                <select id="t2_who" required>
+                  <option value="">Select option...</option>
+                  <option value="Me">Me</option>
+                  <option value="Partner">Partner</option>
+                  <option value="Both">Both</option>
+                  <option value="School">School</option>
+                  <option value="Medical office">Medical office</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t2_trans">Transportation method:</label>
+                <select id="t2_trans" required>
+                  <option value="">Select option...</option>
+                  <option value="I drive">I drive</option>
+                  <option value="Partner drives">Partner drives</option>
+                  <option value="School bus">School bus</option>
+                  <option value="Medical transport">Medical transport</option>
+                  <option value="Mix">Mix of methods</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t2_missed">Missed appointments last month:</label>
+                <input type="number" id="t2_missed" min="0" value="0" required>
+              </div>
+
+              <div class="form-group">
+                <label for="t2_billing">Insurance/billing confusion:</label>
+                <textarea id="t2_billing" placeholder="Claims denied, pre-authorizations pending, unexpected bills..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t2_questions">Questions you keep forgetting to ask providers:</label>
+                <textarea id="t2_questions" placeholder="Medication side effects, progress milestones, next steps..."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-list-check"></i> Organize Appointments</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSample2()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+
+            <div id="results2" class="results-container">
+              <div class="output-card">
+                <h3>THE SCHEDULE TEMPLATE</h3>
+                <p id="out2_schedule"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE QUESTION CATCHER</h3>
+                <p id="out2_questions"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE INSURANCE TRACKER</h3>
+                <p id="out2_insurance"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE TRANSPORTATION PLAN</h3>
+                <p id="out2_transport"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE PREP CHECKLIST</h3>
+                <p id="out2_prep"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE CANCELLATION PROTOCOL</h3>
+                <p id="out2_cancel"></p>
+              </div>
+            </div>
+
+            <div class="history-section">
+              <div class="history-header" onclick="toggleHistory('tool2')">
+                <h4><i class="fa-solid fa-clock-rotate-left"></i> History Log</h4>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="history-list" id="history2"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 3: SIBLING BALANCE -->
+        <section id="tool3" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="tool-header">
+              <h2>Tool 3 — Sibling Balance</h2>
+              <span class="problem-statement">"My other children feel invisible and I feel guilty every day."</span>
+            </div>
+
+            <form id="form3" onsubmit="handleForm3Submit(event)">
+              <div class="form-group">
+                <label for="t3_count">Number of siblings:</label>
+                <input type="number" id="t3_count" min="1" value="1" required>
+              </div>
+
+              <div class="form-group">
+                <label for="t3_ages">Sibling ages:</label>
+                <input type="text" id="t3_ages" placeholder="e.g., 7 and 10" required>
+              </div>
+
+              <div class="form-group">
+                <label for="t3_complaints">Sibling complaints you've heard:</label>
+                <textarea id="t3_complaints" placeholder="e.g., 'You always spend time with them', 'Why do we have to leave early?'"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t3_time">One-on-one time with siblings:</label>
+                <select id="t3_time" required>
+                  <option value="">Select option...</option>
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly">Weekly</option>
+                  <option value="Monthly">Monthly</option>
+                  <option value="Rarely">Rarely</option>
+                  <option value="Never">Never</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t3_state">Sibling emotional state:</label>
+                <select id="t3_state" required>
+                  <option value="">Select option...</option>
+                  <option value="Resentful">Resentful</option>
+                  <option value="Protective">Protective</option>
+                  <option value="Withdrawn">Withdrawn</option>
+                  <option value="Angry">Angry</option>
+                  <option value="Fine">Fine</option>
+                  <option value="I don't know">I don't know</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t3_wish">What you wish you could give siblings:</label>
+                <textarea id="t3_wish" placeholder="More uninterrupted time, quiet, normal outings..."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-heart"></i> Analyze Sibling Dynamics</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSample3()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+
+            <div id="results3" class="results-container">
+              <div class="output-card">
+                <h3>THE SIBLING IMPACT</h3>
+                <p id="out3_impact"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE GUILT CHECK</h3>
+                <p id="out3_guilt"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE MICRO-MOMENT PLAN</h3>
+                <p id="out3_micro"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE SPECIAL TIME</h3>
+                <p id="out3_special"></p>
+              </div>
+              <div class="output-card">
+                <h3>
+                  THE EXPLANATION SCRIPT
+                  <button class="btn-copy" onclick="copyText('out3_script')"><i class="fa-regular fa-copy"></i> Copy</button>
+                </h3>
+                <p id="out3_script" style="white-space: pre-line; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top:6px;"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE SIBLING CHECK-IN</h3>
+                <p id="out3_checkin"></p>
+              </div>
+            </div>
+
+            <div class="history-section">
+              <div class="history-header" onclick="toggleHistory('tool3')">
+                <h4><i class="fa-solid fa-clock-rotate-left"></i> History Log</h4>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="history-list" id="history3"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 4: PARTNER REALIGNMENT -->
+        <section id="tool4" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="tool-header">
+              <h2>Tool 4 — Partner Realignment</h2>
+              <span class="problem-statement">"We are so exhausted by care tasks that we stopped being a couple."</span>
+            </div>
+
+            <form id="form4" onsubmit="handleForm4Submit(event)">
+              <div class="form-group">
+                <label for="t4_couple">Current couple time:</label>
+                <select id="t4_couple" required>
+                  <option value="">Select option...</option>
+                  <option value="None">None</option>
+                  <option value="Brief check-ins">Brief check-ins</option>
+                  <option value="Meals together">Meals together</option>
+                  <option value="TV together">TV together</option>
+                  <option value="Date nights">Date nights</option>
+                  <option value="Can't remember last real conversation">Can't remember last real conversation</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t4_split">Care task split:</label>
+                <select id="t4_split" required>
+                  <option value="">Select option...</option>
+                  <option value="I do everything">I do everything</option>
+                  <option value="I do most">I do most</option>
+                  <option value="Shared">Shared equally</option>
+                  <option value="Partner does most">Partner does most</option>
+                  <option value="Outsourced">Outsourced/Paid support</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Resentment level (1 to 10):</label>
+                <div class="range-group">
+                  <input type="range" id="t4_resentment" min="1" max="10" value="5" oninput="document.getElementById('resentment_val').innerText = this.value">
+                  <span id="resentment_val" class="range-value">5</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t4_miss">What you miss about your partner:</label>
+                <textarea id="t4_miss" placeholder="Humor, quiet moments, feeling like teammates..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t4_need">What you need from them:</label>
+                <textarea id="t4_need" placeholder="Ownership of specific tasks, proactive initiative, emotional validation..."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-comments"></i> Realign Team</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSample4()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+
+            <div id="results4" class="results-container">
+              <div class="output-card">
+                <h3>THE MARRIAGE GAP</h3>
+                <p id="out4_gap"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE TASK SWAP</h3>
+                <p id="out4_swap"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE 15-MINUTE RULE</h3>
+                <p id="out4_rule"></p>
+              </div>
+              <div class="output-card">
+                <h3>
+                  THE RESENTMENT RELEASE SCRIPT
+                  <button class="btn-copy" onclick="copyText('out4_script')"><i class="fa-regular fa-copy"></i> Copy</button>
+                </h3>
+                <p id="out4_script" style="white-space: pre-line; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top:6px;"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE DATE NIGHT PLAN</h3>
+                <p id="out4_date"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE THERAPY PROMPT</h3>
+                <p id="out4_therapy"></p>
+              </div>
+            </div>
+
+            <div class="history-section">
+              <div class="history-header" onclick="toggleHistory('tool4')">
+                <h4><i class="fa-solid fa-clock-rotate-left"></i> History Log</h4>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="history-list" id="history4"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 5: PARENT STAMINA -->
+        <section id="tool5" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="tool-header">
+              <h2>Tool 5 — Parent Stamina</h2>
+              <span class="problem-statement">"I am running on fumes and I don't see a break coming."</span>
+            </div>
+
+            <form id="form5" onsubmit="handleForm5Submit(event)">
+              <div class="form-group">
+                <label>My physical energy (1-10):</label>
+                <div class="range-group">
+                  <input type="range" id="t5_phys" min="1" max="10" value="5" oninput="document.getElementById('v5_1').innerText = this.value">
+                  <span id="v5_1" class="range-value">5</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>My emotional reserves (1-10):</label>
+                <div class="range-group">
+                  <input type="range" id="t5_emot" min="1" max="10" value="5" oninput="document.getElementById('v5_2').innerText = this.value">
+                  <span id="v5_2" class="range-value">5</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>My sleep quality (1-10):</label>
+                <div class="range-group">
+                  <input type="range" id="t5_sleep" min="1" max="10" value="5" oninput="document.getElementById('v5_3').innerText = this.value">
+                  <span id="v5_3" class="range-value">5</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>My support from others (1-10):</label>
+                <div class="range-group">
+                  <input type="range" id="t5_supp" min="1" max="10" value="5" oninput="document.getElementById('v5_4').innerText = this.value">
+                  <span id="v5_4" class="range-value">5</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>My hope about the future (1-10):</label>
+                <div class="range-group">
+                  <input type="range" id="t5_hope" min="1" max="10" value="5" oninput="document.getElementById('v5_5').innerText = this.value">
+                  <span id="v5_5" class="range-value">5</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>My identity outside of caregiving (1-10):</label>
+                <div class="range-group">
+                  <input type="range" id="t5_ident" min="1" max="10" value="5" oninput="document.getElementById('v5_6').innerText = this.value">
+                  <span id="v5_6" class="range-value">5</span>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gauge-high"></i> Assess Stamina</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSample5()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+
+            <div id="results5" class="results-container">
+              <div class="output-card">
+                <h3>THE STAMINA DASHBOARD</h3>
+                <div id="out5_bars"></div>
+              </div>
+              <div class="output-card">
+                <h3>THE CRISIS CHECK</h3>
+                <p id="out5_crisis"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE ONE BREAK</h3>
+                <p id="out5_break"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE SUPPORT LADDER</h3>
+                <p id="out5_ladder"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE SELF-IDENTITY ACTION</h3>
+                <p id="out5_identity"></p>
+              </div>
+              <div class="output-card">
+                <h3>THE PERMISSION</h3>
+                <p id="out5_permission" style="font-weight:600; color:var(--burnt-sienna);"></p>
+              </div>
+            </div>
+
+            <div class="history-section">
+              <div class="history-header" onclick="toggleHistory('tool5')">
+                <h4><i class="fa-solid fa-clock-rotate-left"></i> History Log</h4>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="history-list" id="history5"></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- FIXED FOOTER -->
+  <footer>
+    For practical planning purposes only. Not medical, therapeutic, or legal advice. For medical decisions, consult your child's care team.
+  </footer>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast">Copied to clipboard!</div>
+
+  <script>
+    /* MOBILE NAVIGATION TOGGLE */
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const sidebar = document.getElementById('sidebar');
+
+    hamburgerBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+
+    // Close sidebar on click outside on mobile
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768) {
+        if (!sidebar.contains(e.target) && !hamburgerBtn.contains(e.target) && sidebar.classList.contains('open')) {
+          sidebar.classList.remove('open');
+        }
+      }
+    });
+
+    /* VIEW SWITCHING LOGIC */
+    function switchTool(toolId) {
+      document.querySelectorAll('.tool-view').forEach(view => {
+        view.style.display = 'none';
+      });
+      document.getElementById(toolId).style.display = 'block';
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => 
+        btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(toolId)
+      );
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('open');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* TOAST UTILITY */
+    function showToast(text = "Copied to clipboard!") {
+      const toast = document.getElementById('toast');
+      toast.innerText = text;
+      toast.className = "show";
+      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
+    }
+
+    /* COPY UTILITY */
+    function copyText(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Copied!");
+      });
+    }
+
+    /* HISTORY SYSTEM (localStorage, max 30 items) */
+    function saveHistory(toolId, summaryData) {
+      const storageKey = `familyload_history_${toolId}`;
+      let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      
+      const newItem = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        summary: summaryData
+      };
+
+      history.unshift(newItem);
+      if (history.length > 30) history = history.slice(0, 30);
+
+      localStorage.setItem(storageKey, JSON.stringify(history));
+      renderHistory(toolId);
+    }
+
+    function renderHistory(toolId) {
+      const storageKey = `familyload_history_${toolId}`;
+      const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const listElem = document.getElementById(`history${toolId.replace('tool', '')}`);
+
+      if (!listElem) return;
+
+      if (history.length === 0) {
+        listElem.innerHTML = `<div style="font-size:12px; color:var(--text-muted); padding:8px 0;">No history logged yet.</div>`;
+        return;
+      }
+
+      let html = `<div style="display:flex; justify-content:flex-end;"><button class="btn-copy" style="float:none; margin-bottom:8px;" onclick="clearHistory('${toolId}')">Clear History</button></div>`;
+      
+      history.forEach(item => {
+        html += `
+          <div class="history-item">
+            <span><strong>${item.date}:</strong> ${item.summary}</span>
+          </div>
+        `;
+      });
+
+      listElem.innerHTML = html;
+    }
+
+    function clearHistory(toolId) {
+      localStorage.removeItem(`familyload_history_${toolId}`);
+      renderHistory(toolId);
+      showToast("History cleared.");
+    }
+
+    function toggleHistory(toolId) {
+      const listElem = document.getElementById(`history${toolId.replace('tool', '')}`);
+      listElem.classList.toggle('active');
+    }
+
+    // Initial History Render
+    ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(id => renderHistory(id));
+
+
+    /* ==========================================================
+       TOOL 1 LOGIC & SAMPLE SCENARIO
+       ========================================================== */
+    function loadSample1() {
+      const form = document.getElementById('form1');
+      form.reset();
+
+      // Check all needs
+      const checkboxes = form.querySelectorAll('input[name="needs"]');
+      checkboxes.forEach(cb => cb.checked = true);
+
+      document.getElementById('t1_hours').value = '40-60';
+      document.getElementById('t1_who').value = 'Me alone';
+
+      const paidBox = form.querySelector('input[name="paid"][value="School services"]');
+      if (paidBox) paidBox.checked = true;
+
+      document.getElementById('t1_siblings').value = "Getting almost no direct 1-on-1 attention; complaints about constant disruption to outings.";
+      document.getElementById('t1_work').value = 'Quit';
+    }
+
+    function handleForm1Submit(e) {
+      e.preventDefault();
+      const needs = Array.from(document.querySelectorAll('input[name="needs"]:checked')).map(cb => cb.value);
+      const hours = document.getElementById('t1_hours').value;
+      const who = document.getElementById('t1_who').value;
+      const paid = Array.from(document.querySelectorAll('input[name="paid"]:checked')).map(cb => cb.value);
+      const siblings = document.getElementById('t1_siblings').value.trim();
+      const work = document.getElementById('t1_work').value;
+
+      // Logic Templates
+      document.getElementById('out1_careMap').innerText = `You are coordinating/executing ${needs.length || 0} distinct functional care categories (${needs.join(', ') || 'None specified'}). Dedicated commitment: estimated ${hours} hrs/week. Work status: ${work}.`;
+
+      document.getElementById('out1_invisible').innerText = `Beyond physical tasks, you carry full cognitive management: appointment scheduling, tracking insurance authorizations, researching therapies, and constantly anticipating needs. This structural planning is equivalent to a full-time logistics role.`;
+
+      document.getElementById('out1_sibling').innerText = siblings ? `Siblings are directly impacted by system scarcity: "${siblings}". This reflects structural strain, not emotional neglect.` : "No specific sibling gaps noted, but ongoing monitoring is advised as schedule density shifts.";
+
+      document.getElementById('out1_partner').innerText = who === 'Me alone' ? "Care load distribution is structurally isolated (Me alone). High single-point-of-failure risk." : `Current care delivery model: ${who}. Friction often occurs when communication lacks explicit task ownership boundaries.`;
+
+      document.getElementById('out1_burnout').innerText = (hours === '60+' || hours === 'constant' || who === 'Me alone') ? "CRITICAL BURNOUT RISK: High workload combined with minimal operational distribution creates sustained physical and cognitive overload." : "MODERATE/HIGH BURNOUT RISK: Continuous vigilance without defined respite shifts taxes central endurance reserves.";
+
+      document.getElementById('out1_delegation').innerText = paid.includes('None') || paid.length === 0 ? "Identify ONE administrative item (e.g., calling insurance for prescription refills or scheduling recurring rides) to outsource or automate immediately." : `Given current support (${paid.join(', ')}), assign the logistics of scheduling/reauthorizations specifically to an external contact or partner.`;
+
+      document.getElementById('results1').classList.add('active');
+      saveHistory('tool1', `Audit: ${hours} hrs/wk, ${who}`);
+    }
+
+
+    /* ==========================================================
+       TOOL 2 LOGIC & SAMPLE SCENARIO
+       ========================================================== */
+    function loadSample2() {
+      document.getElementById('t2_appts').value = "6 appointments: 2x Speech Therapy, 2x OT, 1x Pediatrician, 1x IEP Meeting.";
+      document.getElementById('t2_who').value = "Me";
+      document.getElementById('t2_trans').value = "I drive";
+      document.getElementById('t2_missed').value = "2";
+      document.getElementById('t2_billing').value = "Insurance denied claim for Speech Therapy session on the 12th; billing office asking for pre-authorization code.";
+      document.getElementById('t2_questions').value = "Forgot to ask doctor about new dosage side effects and baseline behavioral regression.";
+    }
+
+    function handleForm2Submit(e) {
+      e.preventDefault();
+      const appts = document.getElementById('t2_appts').value;
+      const who = document.getElementById('t2_who').value;
+      const trans = document.getElementById('t2_trans').value;
+      const missed = document.getElementById('t2_missed').value;
+      const billing = document.getElementById('t2_billing').value;
+      const questions = document.getElementById('t2_questions').value;
+
+      document.getElementById('out2_schedule').innerText = `Monthly Volume logged: ${appts}. Primary scheduler: ${who}. Recommended action: Create a single visual 7-day wall calendar solely for clinical/school events to offload mental tracking.`;
+
+      document.getElementById('out2_questions').innerText = questions ? `Unasked Questions Queue:\n• ${questions}\n\nProtocol: Write these directly in your phone notes prior to entering the exam room. Do not leave until all items are addressed.` : "No pending questions logged. Maintain a running list on your phone notes as items arise during the week.";
+
+      document.getElementById('out2_insurance').innerText = billing ? `Pending Billing Issues:\n${billing}\n\nAction Step: Set a dedicated 30-minute operational block once a week (e.g., Tuesday 10 AM) to address claims. Do not resolve claims piecemeal.` : "No active billing claims flagged. Keep electronic or paper copies of all explanation of benefits (EOB) documents in one binder.";
+
+      document.getElementById('out2_transport').innerText = `Primary Transit: ${trans}. ${missed > 0 ? `Note: ${missed} appointment(s) missed last month. Secondary backup driver or medical transit option needs formal designation.` : 'Transit structure is currently stable.'}`;
+
+      document.getElementById('out2_prep').innerText = "Standard Appointment Folder Setup:\n1. Print copy of latest IEP/medical summary.\n2. Medication list with exact dosages.\n3. Hardcopy of insurance pre-authorization codes.";
+
+      document.getElementById('out2_cancel').innerText = "Cancellation Standard Operating Procedure: If a slot must be cancelled, request immediate placement on the provider's 'cancellation/short-notice' call list to retain position.";
+
+      document.getElementById('results2').classList.add('active');
+      saveHistory('tool2', `Appointments logged; ${missed} missed`);
+    }
+
+
+    /* ==========================================================
+       TOOL 3 LOGIC & SAMPLE SCENARIO
+       ========================================================== */
+    function loadSample3() {
+      document.getElementById('t3_count').value = "2";
+      document.getElementById('t3_ages').value = "7 and 10";
+      document.getElementById('t3_complaints').value = "Everything is always about [sibling]! We never get to do what I want.";
+      document.getElementById('t3_time').value = "Rarely";
+      document.getElementById('t3_state').value = "Resentful";
+      document.getElementById('t3_wish').value = "Uninterrupted quiet outings, uninterrupted conversation at dinner.";
+    }
+
+    function handleForm3Submit(e) {
+      e.preventDefault();
+      const count = document.getElementById('t3_count').value;
+      const ages = document.getElementById('t3_ages').value;
+      const complaints = document.getElementById('t3_complaints').value;
+      const time = document.getElementById('t3_time').value;
+      const state = document.getElementById('t3_state').value;
+      const wish = document.getElementById('t3_wish').value;
+
+      document.getElementById('out3_impact').innerText = `Managing ${count} sibling(s) (ages ${ages}). Current perceived emotional posture: ${state}. Hearing complaints like "${complaints || 'None noted'}" is a normal response to living in a high-need household system, not a failure of love.`;
+
+      document.getElementById('out3_guilt').innerText = "Reframe: You are operating within real resource constraints (time, energy, attention). Feeling guilty proves your deep care, but guilt is not an operational strategy. Acknowledge the constraint without taking on moral blame.";
+
+      document.getElementById('out3_micro').innerText = "Implement '5-Minute Anchor Windows':\n• Bedtime 1-on-1 check-in without phones.\n• Short drive together to grab a drink/snack.\n• Specific daily praise for their independence.";
+
+      document.getElementById('out3_special').innerText = `Current 1-on-1 frequency: ${time}. Target: Schedule ONE non-negotiable 30-minute block per week per sibling. Put it on the main calendar so they can visually rely on it.`;
+
+      document.getElementById('out3_script').innerText = `Script to use with sibling:\n"I hear you when you say it feels like [Child] takes up a lot of time. You are right that our house has extra medical and therapy steps. It isn't always fair to you, and it is completely okay if you feel mad or sad about it sometimes. I love you just as much, and your time with me matters just as much."`;
+
+      document.getElementById('out3_checkin').innerText = "Weekly 10-Minute Ritual: Every Sunday, ask them two questions: 1. 'What was one hard part about this week?' 2. 'What is one thing you and I can do together this week?'";
+
+      document.getElementById('results3').classList.add('active');
+      saveHistory('tool3', `Siblings (${ages}): ${state}`);
+    }
+
+
+    /* ==========================================================
+       TOOL 4 LOGIC & SAMPLE SCENARIO
+       ========================================================== */
+    function loadSample4() {
+      document.getElementById('t4_couple').value = "Can't remember last real conversation";
+      document.getElementById('t4_split').value = "I do most";
+      document.getElementById('t4_resentment').value = "8";
+      document.getElementById('resentment_val').innerText = "8";
+      document.getElementById('t4_miss').value = "Laughing together, talking about things other than medical bills and school forms.";
+      document.getElementById('t4_need').value = "Take complete ownership of handling school calls and coordinating therapy schedules.";
+    }
+
+    function handleForm4Submit(e) {
+      e.preventDefault();
+      const couple = document.getElementById('t4_couple').value;
+      const split = document.getElementById('t4_split').value;
+      const resentment = document.getElementById('t4_resentment').value;
+      const miss = document.getElementById('t4_miss').value;
+      const need = document.getElementById('t4_need').value;
+
+      document.getElementById('out4_gap').innerText = `Couple interaction status: ${couple}. Task distribution: ${split}. High care demands naturally transform romantic partnerships into purely operational logistics units if unmanaged.`;
+
+      document.getElementById('out4_swap').innerText = need ? `Target Handoff: Request full ownership of this area:\n"${need}"\n\nOwnership means they manage it from start to finish without asking you for reminders.` : "Select one specific administrative sector (e.g., pharmacy management) and hand over complete responsibility.";
+
+      document.getElementById('out4_rule').innerText = "The 15-Minute Protocol: Set a timer for 15 minutes each evening. Rule: Zero discussion of appointments, therapies, bills, or logistics. Talk only about news, personal thoughts, or shared memories.";
+
+      document.getElementById('out4_script').innerText = `Communication Script:\n"We are running on survival mode, and I don't like how far apart we've felt. Resentment is building up because the care load is heavy. I don't want us to just be co-managers of a crisis. Can we look at handing off [Target Task] completely to you so we can get some space back?"`;
+
+      document.getElementById('out4_date').innerText = miss ? `At-Home Connection Plan: Focus on what you miss ("${miss}"). Instead of high-effort outings, schedule a 45-minute at-home evening block after bedtime (no phones, simple takeout).` : "Schedule an at-home connection evening with minimal setup required.";
+
+      document.getElementById('out4_therapy').innerText = Number(resentment) >= 7 ? `Current Resentment Level: ${resentment}/10. High friction detected. Engaging a professional counselor experienced in special-needs parenting or chronic load is strongly advised.` : "Resentment levels are manageable. Regular weekly check-ins remain effective.";
+
+      document.getElementById('results4').classList.add('active');
+      saveHistory('tool4', `Couple time: ${couple}, Resentment: ${resentment}/10`);
+    }
+
+
+    /* ==========================================================
+       TOOL 5 LOGIC & SAMPLE SCENARIO
+       ========================================================== */
+    function loadSample5() {
+      const ids = ['t5_phys', 't5_emot', 't5_sleep', 't5_supp', 't5_hope', 't5_ident'];
+      ids.forEach((id, idx) => {
+        const input = document.getElementById(id);
+        input.value = 2;
+        document.getElementById(`v5_${idx+1}`).innerText = "2";
+      });
+    }
+
+    function handleForm5Submit(e) {
+      e.preventDefault();
+      const phys = parseInt(document.getElementById('t5_phys').value);
+      const emot = parseInt(document.getElementById('t5_emot').value);
+      const sleep = parseInt(document.getElementById('t5_sleep').value);
+      const supp = parseInt(document.getElementById('t5_supp').value);
+      const hope = parseInt(document.getElementById('t5_hope').value);
+      const ident = parseInt(document.getElementById('t5_ident').value);
+
+      const items = [
+        { label: 'Physical Energy', val: phys },
+        { label: 'Emotional Reserves', val: emot },
+        { label: 'Sleep Quality', val: sleep },
+        { label: 'Support System', val: supp },
+        { label: 'Future Hope', val: hope },
+        { label: 'Self Identity', val: ident }
+      ];
+
+      // Build Bars Output
+      let barsHtml = '';
+      let lowCount = 0;
+
+      items.forEach(item => {
+        let colorClass = 'fill-green';
+        if (item.val <= 3) {
+          colorClass = 'fill-red';
+          lowCount++;
+        } else if (item.val <= 6) {
+          colorClass = 'fill-yellow';
+        }
+
+        barsHtml += `
+          <div style="margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:600;">
+              <span>${item.label}</span>
+              <span>${item.val}/10</span>
+            </div>
+            <div class="stamina-meter">
+              <div class="stamina-fill ${colorClass}" style="width: ${item.val * 10}%;"></div>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById('out5_bars').innerHTML = barsHtml;
+
+      document.getElementById('out5_crisis').innerText = lowCount >= 3 ? "CRITICAL RESERVE WARNING: Multiple indicators are in the red zone (1–3). Operating at this capacity leads to physical exhaustion and immune strain. Immediate load reduction is required." : "STABLE RESIDUAL LEVEL: Reserves are taxed but functional. Focus on protective boundaries to avoid dipping into critical zones.";
+
+      document.getElementById('out5_break').innerText = "Securing Respite: Block ONE 60-minute window this week. Leave the house or stay in a locked room. Do not complete administrative work or chores during this window.";
+
+      document.getElementById('out5_ladder').innerText = "Support Activation Order:\n1. Partner / Co-parent (Direct task shift)\n2. Extended Family / Close Friends (Specific request: e.g., 'Bring dinner Tuesday')\n3. Paid Respite / Local Community Services";
+
+      document.getElementById('out5_identity').innerText = "Identity Reclaim Step: Re-engage with ONE micro-activity unrelated to caregiving or parenting (e.g., read 10 pages of a book, listen to a specific podcast, or do a craft for 15 minutes).";
+
+      document.getElementById('out5_permission').innerText = "PERMISSIONS LOG:\nYou cannot pour from an empty cup. Rest is an essential operational requirement, not an indulgence.";
+
+      document.getElementById('results5').classList.add('active');
+      saveHistory('tool5', `Stamina Assessment (${lowCount} critical indicators)`);
+    }
+  </script>
+</body>
+</html>

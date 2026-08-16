@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remote Belonging Builder - Connection Toolkit for Remote Workers</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* CSS Variables & Theme */
+    :root {
+      --primary: #0077B6;
+      --primary-hover: #005f93;
+      --primary-light: #E0F2FE;
+      --secondary: #D4A373;
+      --secondary-light: #FAEDCD;
+      --bg-gradient: linear-gradient(135deg, #F0F9FF 0%, #FDF6EC 100%);
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --card-bg: #FFFFFF;
+      --border-color: #E2E8F0;
+      --sidebar-width: 260px;
+      --radius-xl: 1rem;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
+
+    /* App Container Layout */
+    .app-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* Mobile Header & Hamburger */
+    .mobile-header {
+      display: none;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 1.5rem;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .mobile-header .brand {
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--text-main);
+      cursor: pointer;
+      padding: 0.25rem;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--card-bg);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 50;
+      transition: transform 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .sidebar-header p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      overflow-y: auto;
+    }
+
+    .nav-item button {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item button i {
+      width: 20px;
+      text-align: center;
+      color: var(--text-muted);
+      transition: color 0.2s ease;
+    }
+
+    .nav-item button:hover {
+      background-color: #F1F5F9;
+      color: var(--primary);
+    }
+
+    .nav-item button:hover i {
+      color: var(--primary);
+    }
+
+    .nav-item.active button {
+      background-color: var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .nav-item.active button i {
+      color: var(--primary);
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 45;
+    }
+
+    /* Main Content Area */
+    .main-wrapper {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content {
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      flex: 1;
+    }
+
+    /* Card Component */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Typography & Utilities */
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .problem-box {
+      background-color: #FEF3C7;
+      border-left: 4px solid var(--secondary);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      color: #78350F;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .problem-box i {
+      margin-top: 0.2rem;
+      color: var(--secondary);
+    }
+
+    /* Forms & Inputs */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .form-control, select, textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      background-color: #FAFAFA;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .form-control:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background-color: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background: #FAFAFA;
+      padding: 0.5rem 0.85rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s;
+    }
+
+    .radio-label:hover {
+      border-color: var(--primary);
+    }
+
+    .radio-label input[type="radio"] {
+      accent-color: var(--primary);
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary {
+      background-color: #F1F5F9;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #E2E8F0;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--primary-light);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    /* Dashboard View */
+    .dashboard-hero {
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .dashboard-hero h2 {
+      font-size: 2.25rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .dashboard-hero p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .tool-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-light);
+    }
+
+    .tool-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 0.75rem;
+      background-color: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .tool-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .tool-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    /* Output Results Display */
+    .output-container {
+      margin-top: 2rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--primary-light);
+    }
+
+    .output-header h3 {
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+
+    .result-block {
+      background: #FAFAFA;
+      border-left: 4px solid var(--primary);
+      border-radius: 0 0.5rem 0.5rem 0;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .result-block.secondary {
+      border-left-color: var(--secondary);
+    }
+
+    .result-block h4 {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .result-block p, .result-block ul {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      white-space: pre-wrap;
+    }
+
+    .result-block ul {
+      padding-left: 1.25rem;
+    }
+
+    .result-block li {
+      margin-bottom: 0.25rem;
+    }
+
+    .copy-btn {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* History Component */
+    .history-section {
+      margin-top: 2rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .history-header h4 {
+      font-size: 1rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .history-list {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      background: #FAFAFA;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 0.85rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .history-item:hover {
+      background: var(--primary-light);
+    }
+
+    .history-item-date {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1E293B;
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      box-shadow: var(--shadow-lg);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Universal Footer */
+    footer {
+      background-color: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-top: auto;
+    }
+
+    /* Screen Visibility Toggle */
+    .view-panel {
+      display: none;
+    }
+
+    .view-panel.active {
+      display: block;
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 768px) {
+      .mobile-header {
+        display: flex;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay.open {
+        display: block;
+      }
+
+      .main-wrapper {
+        margin-left: 0;
+      }
+
+      .main-content {
+        padding: 1.5rem 1rem;
+      }
+
+      .dashboard-hero h2 {
+        font-size: 1.75rem;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Top Header -->
+  <header class="mobile-header">
+    <div class="brand">
+      <i class="fa-solid fa-compass"></i> Belonging Builder
+    </div>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="app-container">
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Navigation Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1><i class="fa-solid fa-compass"></i> Remote Belonging</h1>
+        <p>Intentional Workplace Connection</p>
+      </div>
+      <nav>
+        <ul class="nav-list">
+          <li class="nav-item active" data-view="dashboard">
+            <button><i class="fa-solid fa-house"></i> Dashboard</button>
+          </li>
+          <li class="nav-item" data-view="tool1">
+            <button><i class="fa-solid fa-magnifying-glass-chart"></i> Connection Audit</button>
+          </li>
+          <li class="nav-item" data-view="tool2">
+            <button><i class="fa-solid fa-seedling"></i> Relationship Seeder</button>
+          </li>
+          <li class="nav-item" data-view="tool3">
+            <button><i class="fa-solid fa-eye"></i> Visibility Builder</button>
+          </li>
+          <li class="nav-item" data-view="tool4">
+            <button><i class="fa-solid fa-wand-magic-sparkles"></i> Team Culture Hack</button>
+          </li>
+          <li class="nav-item" data-view="tool5">
+            <button><i class="fa-solid fa-tree"></i> Offline Balance</button>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <main class="main-content">
+
+        <!-- VIEW: DASHBOARD -->
+        <section id="view-dashboard" class="view-panel active">
+          <div class="dashboard-hero">
+            <h2>Remote Belonging Builder</h2>
+            <p>You don't have to feel alone just because you work from home. A practical, low-friction toolkit to build authentic connection without forcing awkward socializing.</p>
+          </div>
+
+          <div class="tools-grid">
+            <div class="tool-card" onclick="switchView('tool1')">
+              <div class="tool-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+              <h3>The Connection Audit</h3>
+              <p>Diagnose exactly what kind of loneliness you are experiencing and pinpoint the specific missing link in your setup.</p>
+            </div>
+
+            <div class="tool-card" onclick="switchView('tool2')">
+              <div class="tool-icon"><i class="fa-solid fa-seedling"></i></div>
+              <h3>The Relationship Seeder</h3>
+              <p>Start genuine, non-awkward 1:1 work friendships using tailored scripts based on shared interests.</p>
+            </div>
+
+            <div class="tool-card" onclick="switchView('tool3')">
+              <div class="tool-icon"><i class="fa-solid fa-eye"></i></div>
+              <h3>The Visibility Builder</h3>
+              <p>Make your achievements and presence known without feeling like you are bragging or self-promoting.</p>
+            </div>
+
+            <div class="tool-card" onclick="switchView('tool4')">
+              <div class="tool-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+              <h3>The Team Culture Hack</h3>
+              <p>Introduce micro-rituals or join team dynamics naturally without forcing toxic positivity.</p>
+            </div>
+
+            <div class="tool-card" onclick="switchView('tool5')">
+              <div class="tool-icon"><i class="fa-solid fa-tree"></i></div>
+              <h3>The Offline Balance</h3>
+              <p>Build a fulfilling local, physical social life so you don't depend entirely on a computer screen for human connection.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: TOOL 1 - THE CONNECTION AUDIT -->
+        <section id="view-tool1" class="view-panel">
+          <div class="card">
+            <h2>The Connection Audit</h2>
+            <p class="subtitle">Diagnose the specific dimension of isolation you're feeling and map your next move.</p>
+
+            <div class="problem-box">
+              <i class="fa-solid fa-circle-info"></i>
+              <div><strong>The Problem:</strong> "I feel lonely but I don't know what kind of connection I'm actually missing."</div>
+            </div>
+
+            <form id="form-tool1" onsubmit="event.preventDefault(); processTool1();">
+              <div class="form-group">
+                <label for="t1-tenure">How long have you been remote?</label>
+                <select id="t1-tenure" required>
+                  <option value="">Select option...</option>
+                  <option value="<3mo">&lt; 3 months</option>
+                  <option value="3-6mo">3 - 6 months</option>
+                  <option value="6mo-1yr">6 months - 1 year</option>
+                  <option value="1yr+">1 year +</option>
+                  <option value="pre-pandemic">Since pre-pandemic</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t1-type">What type of loneliness dominates most?</label>
+                <select id="t1-type" required>
+                  <option value="">Select option...</option>
+                  <option value="no-friends">No work friends / pure transactional work</option>
+                  <option value="casual-chat">Miss casual banter / hallway chats</option>
+                  <option value="invisible">Feel invisible / effort goes unnoticed</option>
+                  <option value="unknown">No one really knows the real me</option>
+                  <option value="collaboration">Miss creative energy / live brainstorming</option>
+                  <option value="all">All of the above</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t1-frequency">Team interaction frequency:</label>
+                <select id="t1-frequency" required>
+                  <option value="">Select option...</option>
+                  <option value="daily">Daily multiple touchpoints</option>
+                  <option value="weekly">Weekly standups/syncs only</option>
+                  <option value="monthly">Monthly town halls / rarely</option>
+                  <option value="rarely">Rarely / asynchronous text only</option>
+                  <option value="initiate">Only when I initiate it</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Do you have regular 1:1s with your lead or peers?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="t1-oneOnOne" value="regularly" required> Yes, regularly</label>
+                  <label class="radio-label"><input type="radio" name="t1-oneOnOne" value="sometimes"> Sometimes</label>
+                  <label class="radio-label"><input type="radio" name="t1-oneOnOne" value="never"> Never</label>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-pie"></i> Analyze Connection Gap</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool1" class="output-container" style="display: none;"></div>
+          <div id="history-tool1" class="history-section"></div>
+        </section>
+
+        <!-- VIEW: TOOL 2 - THE RELATIONSHIP SEEDER -->
+        <section id="view-tool2" class="view-panel">
+          <div class="card">
+            <h2>The Relationship Seeder</h2>
+            <p class="subtitle">Organic templates to initiate 1:1 rapport without awkward virtual coffee invites.</p>
+
+            <div class="problem-box">
+              <i class="fa-solid fa-circle-info"></i>
+              <div><strong>The Problem:</strong> "I want work friends but I don't know how to start without being awkward."</div>
+            </div>
+
+            <form id="form-tool2" onsubmit="event.preventDefault(); processTool2();">
+              <div class="form-group">
+                <label for="t2-teammates">Who on your team seems approachable?</label>
+                <textarea id="t2-teammates" placeholder="e.g., Alex from design, Sarah who mentioned her dog on Slack..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t2-common">What do you have in common (or potential shared context)?</label>
+                <textarea id="t2-common" placeholder="e.g., Both like hiking, both struggling with the new software, similar roles..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t2-comfort">Your comfort level with virtual socializing:</label>
+                <select id="t2-comfort" required>
+                  <option value="">Select option...</option>
+                  <option value="love">Love it - energetic & ready</option>
+                  <option value="okay">Okay - fine once conversation starts</option>
+                  <option value="awkward">Awkward - self-conscious or introverted</option>
+                  <option value="hate">Hate forced social interactions</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t2-medium">What communication medium feels most natural to you?</label>
+                <select id="t2-medium" required>
+                  <option value="">Select option...</option>
+                  <option value="text">Async Text / Slack / Teams chat</option>
+                  <option value="voice">Voice note / Async audio message</option>
+                  <option value="video">Short 15-min Video Call</option>
+                  <option value="interest">Sharing articles / media link</option>
+                  <option value="help">Offering help on a task</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Generate Outreach Strategy</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool2" class="output-container" style="display: none;"></div>
+          <div id="history-tool2" class="history-section"></div>
+        </section>
+
+        <!-- VIEW: TOOL 3 - THE VISIBILITY BUILDER -->
+        <section id="view-tool3" class="view-panel">
+          <div class="card">
+            <h2>The Visibility Builder</h2>
+            <p class="subtitle">Tactics to highlight your contributions authentically and build professional presence.</p>
+
+            <div class="problem-box">
+              <i class="fa-solid fa-circle-info"></i>
+              <div><strong>The Problem:</strong> "I do good work but nobody seems to know I exist."</div>
+            </div>
+
+            <form id="form-tool3" onsubmit="event.preventDefault(); processTool3();">
+              <div class="form-group">
+                <label for="t3-sharing">How do you currently share updates about your work?</label>
+                <select id="t3-sharing" required>
+                  <option value="">Select option...</option>
+                  <option value="meetings">Team meetings / Standups only</option>
+                  <option value="1on1">1:1s with my manager</option>
+                  <option value="chat">Public chat channels</option>
+                  <option value="email">Email status reports</option>
+                  <option value="dont">I don't really share updates</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t3-audience">Who should ideally know about your work and skills?</label>
+                <textarea id="t3-audience" placeholder="e.g., Skip-level manager, cross-functional partners, lead engineer..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t3-achievement">What are you proud of achieving recently?</label>
+                <textarea id="t3-achievement" placeholder="e.g., Fixed a legacy bug, streamlined a documentation workflow..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t3-hesitation">What feels uncomfortable about self-promotion?</label>
+                <textarea id="t3-hesitation" placeholder="e.g., Feels like bragging, fear of looking attention-seeking..." required></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-bullhorn"></i> Build Visibility Plan</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool3" class="output-container" style="display: none;"></div>
+          <div id="history-tool3" class="history-section"></div>
+        </section>
+
+        <!-- VIEW: TOOL 4 - THE TEAM CULTURE HACK -->
+        <section id="view-tool4" class="view-panel">
+          <div class="card">
+            <h2>The Team Culture Hack</h2>
+            <p class="subtitle">Low-drag methods to spark warmth and informal interaction in your team environment.</p>
+
+            <div class="problem-box">
+              <i class="fa-solid fa-circle-info"></i>
+              <div><strong>The Problem:</strong> "My team has no culture. We just trade tasks in chat."</div>
+            </div>
+
+            <form id="form-tool4" onsubmit="event.preventDefault(); processTool4();">
+              <div class="form-group">
+                <label for="t4-current">What does your team currently do for connection?</label>
+                <select id="t4-current" required>
+                  <option value="">Select option...</option>
+                  <option value="nothing">Nothing / Pure task updates</option>
+                  <option value="mandatory">Mandatory virtual happy hours / games</option>
+                  <option value="optional">Optional social calls</option>
+                  <option value="celebrations">Project wrap-up celebrations</option>
+                  <option value="informal">Informal chat channels (#random, #pets)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t4-past">What have you enjoyed on past teams (or in past jobs)?</label>
+                <textarea id="t4-past" placeholder="e.g., Casual Friday check-ins, asynchronous trivia, demo days..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t4-organize">What would you be willing to introduce or help with?</label>
+                <select id="t4-organize" required>
+                  <option value="">Select option...</option>
+                  <option value="nothing">Nothing - prefer others to take the lead</option>
+                  <option value="small-ritual">A 2-minute weekly async ritual</option>
+                  <option value="virtual-event">A monthly low-pressure virtual event</option>
+                  <option value="channel">Creating/moderating an interest channel</option>
+                  <option value="recognition">A peer appreciation / shout-out system</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t4-energy">Your current energy level for culture building:</label>
+                <select id="t4-energy" required>
+                  <option value="">Select option...</option>
+                  <option value="high">High - ready to lead initiative</option>
+                  <option value="medium">Medium - willing to facilitate small ideas</option>
+                  <option value="low">Low - small effort only</option>
+                  <option value="delegate">I just want someone else to fix it</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-lightbulb"></i> Generate Culture Hacks</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool4" class="output-container" style="display: none;"></div>
+          <div id="history-tool4" class="history-section"></div>
+        </section>
+
+        <!-- VIEW: TOOL 5 - THE OFFLINE BALANCE -->
+        <section id="view-tool5" class="view-panel">
+          <div class="card">
+            <h2>The Offline Balance</h2>
+            <p class="subtitle">Anchor your belonging in physical space so your job isn't your sole social source.</p>
+
+            <div class="problem-box">
+              <i class="fa-solid fa-circle-info"></i>
+              <div><strong>The Problem:</strong> "I can't get all my social needs from a screen. I need real human connection."</div>
+            </div>
+
+            <form id="form-tool5" onsubmit="event.preventDefault(); processTool5();">
+              <div class="form-group">
+                <label for="t5-local">Local friends / contacts who aren't coworkers:</label>
+                <textarea id="t5-local" placeholder="e.g., Old college friend nearby, neighbor, none currently..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t5-hobbies">Hobbies or interests outside work:</label>
+                <textarea id="t5-hobbies" placeholder="e.g., Running, board games, coffee roasting, pottery, reading..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t5-outside">Time spent outside your home per week:</label>
+                <select id="t5-outside" required>
+                  <option value="">Select option...</option>
+                  <option value="daily">Daily outings / routine</option>
+                  <option value="few">A few times a week</option>
+                  <option value="once">Once a week</option>
+                  <option value="rarely">Rarely leave the house on weekdays</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t5-desired">What specifically would make you feel socially fulfilled in-person?</label>
+                <textarea id="t5-desired" placeholder="e.g., Weekly casual chat over coffee, group workout class, shared activity group..." required></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-compass-drafting"></i> Design Offline Action Plan</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool5" class="output-container" style="display: none;"></div>
+          <div id="history-tool5" class="history-section"></div>
+        </section>
+
+      </main>
+
+      <!-- Universal Footer -->
+      <footer>
+        For workplace social connection planning only. Not therapeutic or mental health advice. For significant loneliness or depression, consult a healthcare professional.
+      </footer>
+    </div>
+  </div>
+
+  <!-- Toast Notification element -->
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-check-circle"></i>
+    <span id="toast-message">Copied to clipboard!</span>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       Global Application Navigation & State Engine
+       ========================================================================== */
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initNavigation();
+      initHistoryAccordions();
+    });
+
+    function initNavigation() {
+      const navItems = document.querySelectorAll('.nav-item');
+      const hamburgerBtn = document.getElementById('hamburgerBtn');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+
+      navItems.forEach(item => {
+        item.addEventListener('click', () => {
+          const viewTarget = item.getAttribute('data-view');
+          switchView(viewTarget);
+          closeSidebar();
+        });
+      });
+
+      hamburgerBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('open');
+      });
+
+      overlay.addEventListener('click', closeSidebar);
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    function switchView(viewId) {
+      // Update sidebar nav UI
+      document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.getAttribute('data-view') === viewId) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
+      // Update visible section panel
+      document.querySelectorAll('.view-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+      
+      const activePanel = document.getElementById(`view-${viewId}`);
+      if (activePanel) {
+        activePanel.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Render history if opening a tool
+        if (viewId.startsWith('tool')) {
+          renderHistoryUI(viewId);
+        }
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      toastMsg.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard!');
+      }).catch(() => {
+        showToast('Failed to copy text.');
+      });
+    }
+
+    /* ==========================================================================
+       Local Storage History Manager
+       ========================================================================== */
+
+    function saveHistoryItem(toolId, inputSummary, outputHTML) {
+      const storageKey = `belonging_history_${toolId}`;
+      let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      
+      const newEntry = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        summary: inputSummary,
+        output: outputHTML
+      };
+
+      history.unshift(newEntry);
+      if (history.length > 30) history = history.slice(0, 30); // Max 30 limit
+
+      localStorage.setItem(storageKey, JSON.stringify(history));
+      renderHistoryUI(toolId);
+    }
+
+    function getHistory(toolId) {
+      const storageKey = `belonging_history_${toolId}`;
+      return JSON.parse(localStorage.getItem(storageKey) || '[]');
+    }
+
+    function clearHistory(toolId) {
+      const storageKey = `belonging_history_${toolId}`;
+      localStorage.removeItem(storageKey);
+      renderHistoryUI(toolId);
+      showToast('History cleared.');
+    }
+
+    function renderHistoryUI(toolId) {
+      const container = document.getElementById(`history-${toolId}`);
+      if (!container) return;
+
+      const history = getHistory(toolId);
+      if (history.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = `
+        <div class="history-header" onclick="toggleHistoryList('${toolId}')">
+          <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Analysis History (${history.length})</h4>
+          <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('${toolId}')">Clear</button>
+        </div>
+        <div class="history-list" id="history-list-${toolId}" style="display: none;">
+      `;
+
+      history.forEach(item => {
+        html += `
+          <div class="history-item" onclick="loadHistoryItem('${toolId}', ${item.id})">
+            <div class="history-item-date">${item.date}</div>
+            <div><strong>Scenario:</strong> ${escapeHTML(item.summary)}</div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    function toggleHistoryList(toolId) {
+      const list = document.getElementById(`history-list-${toolId}`);
+      if (list) {
+        list.style.display = list.style.display === 'none' ? 'flex' : 'none';
+      }
+    }
+
+    function loadHistoryItem(toolId, itemId) {
+      const history = getHistory(toolId);
+      const item = history.find(i => i.id === itemId);
+      if (item) {
+        const outputContainer = document.getElementById(`output-${toolId}`);
+        outputContainer.innerHTML = item.output;
+        outputContainer.style.display = 'block';
+        outputContainer.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+
+    function initHistoryAccordions() {
+      ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistoryUI);
+    }
+
+
+    /* ==========================================================================
+       TOOL 1: THE CONNECTION AUDIT LOGIC
+       ========================================================================== */
+
+    function loadSampleTool1() {
+      document.getElementById('t1-tenure').value = '1yr+';
+      document.getElementById('t1-type').value = 'casual-chat';
+      document.getElementById('t1-frequency').value = 'weekly';
+      
+      const radios = document.getElementsByName('t1-oneOnOne');
+      radios.forEach(r => { if (r.value === 'sometimes') r.checked = true; });
+      showToast('Sample scenario loaded');
+    }
+
+    function processTool1() {
+      const tenure = document.getElementById('t1-tenure').value;
+      const type = document.getElementById('t1-type').value;
+      const frequency = document.getElementById('t1-frequency').value;
+      const oneOnOne = document.querySelector('input[name="t1-oneOnOne"]:checked')?.value || 'never';
+
+      // Matrix calculation logic
+      let lonelinessType = "";
+      let teamMap = "";
+      let gap = "";
+      let expectation = "";
+      let firstStep = "";
+
+      // Determine Loneliness Category
+      if (type === 'no-friends' || type === 'casual-chat') {
+        lonelinessType = "Social Isolation (Lack of low-stakes camaraderie)";
+        gap = "Missing informal 'micro-interactions' that naturally build trust and warmth without scheduled meeting agendas.";
+      } else if (type === 'invisible' || type === 'unknown') {
+        lonelinessType = "Identity & Emotional Disconnect (Feeling unseen)";
+        gap = "A deficit in authentic self-expression where your efforts and personal identity feel detached from your work outputs.";
+      } else if (type === 'collaboration') {
+        lonelinessType = "Professional Isolation (Lack of creative synergy)";
+        gap = "Absence of real-time intellectual exchange, leaving you executing tasks in a vacuum rather than co-creating.";
+      } else {
+        lonelinessType = "Comprehensive Remote Drift (Multi-faceted disconnect)";
+        gap = "Structural erosion of structural, social, and emotional ties across all daily workflows.";
+      }
+
+      // Determine Map & Dynamics
+      if (frequency === 'rarely' || frequency === 'initiate') {
+        teamMap = "High friction / Reactive circle. Interactions are strictly transactional and asymmetrical.";
+      } else if (frequency === 'weekly') {
+        teamMap = "Moderate connection gap. Communication exists in scheduled bursts but lacks spontaneous continuity.";
+      } else {
+        teamMap = "High transaction, low depth. Frequent touchpoints exist, but they focus purely on operational output.";
+      }
+
+      // Realistic Expectations based on tenure & 1:1 status
+      if (tenure === '1yr+' || tenure === 'pre-pandemic') {
+        expectation = "Remote work cannot replicate the serendipitous energy of a physical office effortlessly. Over 1+ years, active social maintenance is required—belonging in remote setups must be designed, not waited for.";
+      } else {
+        expectation = "It takes 6+ months to establish psychological safety in a virtual environment. Experiencing isolation early on is completely normal as you learn the team's unspoken communication norms.";
+      }
+
+      // Actionable low-effort first step
+      if (oneOnOne === 'never' || oneOnOne === 'sometimes') {
+        firstStep = "Ask your manager or a peer for a recurring bi-weekly check-in dedicated 50% to professional growth and 50% to casual personal catch-up.";
+      } else {
+        firstStep = "Send a low-stakes 2-sentence Slack/Teams message to one colleague this week referencing a shared topic or asking for their opinion on a small project detail.";
+      }
+
+      const outputHTML = `
+        <div class="output-header">
+          <h3><i class="fa-solid fa-clipboard-check"></i> Connection Audit Diagnostics</h3>
+        </div>
+
+        <div class="result-block">
+          <h4><i class="fa-solid fa-fingerprint"></i> Primary Loneliness Type</h4>
+          <p><strong>${lonelinessType}</strong></p>
+        </div>
+
+        <div class="result-block secondary">
+          <h4><i class="fa-solid fa-sitemap"></i> The Team Interaction Map</h4>
+          <p>${teamMap}</p>
+        </div>
+
+        <div class="result-block">
+          <h4><i class="fa-solid fa-bridge-water"></i> The Structural Gap</h4>
+          <p>${gap}</p>
+        </div>
+
+        <div class="result-block secondary">
+          <h4><i class="fa-solid fa-compass"></i> Realistic Expectation Setting</h4>
+          <p>${expectation}</p>
+        </div>
+
+        <div class="result-block">
+          <h4><i class="fa-solid fa-lightbulb"></i> Low-Effort First Step</h4>
+          <p>${firstStep}</p>
+        </div>
+      `;
+
+      const container = document.getElementById('output-tool1');
+      container.innerHTML = outputHTML;
+      container.style.display = 'block';
+      container.scrollIntoView({ behavior: 'smooth' });
+
+      saveHistoryItem('tool1', `Tenure: ${tenure} | Loneliness: ${type}`, outputHTML);
+    }
+
+
+    /* ==========================================================================
+       TOOL 2: THE RELATIONSHIP SEEDER LOGIC
+       ========================================================================== */
+
+    function loadSampleTool2() {
+      document.getElementById('t2-teammates').value = 'Alex (UI designer) and Marcus (Frontend Dev)';
+      document.getElementById('t2-common').value = 'Both have dogs, enjoy hiking, and work on the product UI refresh.';
+      document.getElementById('t2-comfort').value = 'okay';
+      document.getElementById('t2-medium').value = 'text';
+      showToast('Sample scenario loaded');
+    }
+
+    function processTool2() {
+      const teammates = document.getElementById('t2-teammates').value;
+      const common = document.getElementById('t2-common').value;
+      const comfort = document.getElementById('t2-comfort').value;
+      const medium = document.getElementById('t2-medium').value;
+
+      let openingScript = "";
+      let inviteScript = "";
+      let followUpScript = "";
+
+      if (medium === 'text' || medium === 'interest') {
+        openingScript = `Hey ${teammates.split(' ')[0] || 'there'}, noticed we both share a context with ${common.slice(0, 40)}... thought I'd share this quick link/note. Hope your week is going well!`;
+        inviteScript = `Hey! Enjoyed chatting about ${common.slice(0, 25)}. If you ever have 15 mins to grab a virtual coffee and talk more about it, I'd love to connect. Zero pressure though!`;
+      } else if (medium === 'help') {
+        openingScript = `Hi ${teammates.split(' ')[0] || 'there'}, I saw your update on the recent project. I've been looking into ${common.slice(0, 30)} as well—let me know if you ever want a quick sounding board!`;
+        inviteScript = `Hey, if you're free sometime this week, want to jump on a quick 15-min call to bounce ideas around on ${common.slice(0, 25)}?`;
+      } else {
+        openingScript = `Hey ${teammates.split(' ')[0] || 'there'}! I know virtual comms can be dry, but since we both have ${common.slice(0, 30)} in common, wanted to say hello!`;
+        inviteScript = `Would love to put a face to the name over a quick 15-minute informal chat this week if your calendar allows!`;
+      }
+
+      followUpScript = `Hey! Thanks again for the chat the other day. Loved your insights on ${common.slice(0, 20)}. Catch you in the channel!`;
+
+      const outputHTML = `
+        <div class="output-header">
+          <h3><i class="fa-solid fa-comments"></i> Tailored Relationship Outreach Plan</h3>
+        </div>
+
+        <div class="result-block">
+          <h4>
+            <span><i class="fa-solid fa-comment-dots"></i> The Opening Message</span>
+            <button class="copy-btn" onclick="copyToClipboard(\`${openingScript.replace(/'/g, "\\'")}\`)"><i class="fa-regular fa-copy"></i> Copy</button>
+          </h4>
+          <p>${openingScript}</p>
+        </div>
+
+        <div class="result-block secondary">
+          <h4><i class="fa-solid fa-link"></i> The Shared Interest Bridge</h4>
+          <p>Leverage your mutual ground: <strong>"${common}"</strong>. Use this non-work tether to create organic conversations rather than forcing corporate small talk.</p>
+        </div>
+
+        <div class="result-block">
+          <h4>
+            <span><i class="fa-solid fa-mug-hot"></i> The Low-Stakes Invite</span>
+            <button class="copy-btn" onclick="copyToClipboard(\`${inviteScript.replace(/'/g, "\\'")}\`)"><i class="fa-regular fa-copy"></i> Copy</button>
+          </h4>
+          <p>${inviteScript}</p>
+        </div>
+
+        <div class="result-block secondary">
+          <h4>
+            <span><i class="fa-solid fa-arrows-rotate"></i> The Follow-Up (Keep Momentum)</span>
+            <button class="copy-btn" onclick="copyToClipboard(\`${followUpScript.replace(/'/g, "\\'")}\`)"><i class="fa-regular fa-copy"></i> Copy</button>
+          </h4>
+          <p>${followUpScript}</p>
+        </div>
+
+        <div class="result-block">
+          <h4><i class="fa-solid fa-shield-halved"></i> If They're Busy (Mindset Protection)</h4>
+          <p>Remote workers are often drowning in async notifications. A delayed or brief response usually means calendar overload, not personal rejection. Give it a week before any casual follow-up, and keep your expectations relaxed.</p>
+        </div>
+      `;
+
+      const container = document.getElementById('output-tool2');
+      container.innerHTML = outputHTML;
+      container.style.display = 'block';
+      container.scrollIntoView({ behavior: 'smooth' });
+
+      saveHistoryItem('tool2', `Teammates: ${teammates.slice(0, 30)} | Medium: ${medium}`, outputHTML);
+    }
+
+
+    /* ==========================================================================
+       TOOL 3: THE VISIBILITY BUILDER LOGIC
+       ========================================================================== */
+
+    function loadSampleTool3() {
+      document.getElementById('t3-sharing').value = 'meetings';
+      document.getElementById('t3-audience').value = 'Skip-level engineering director and product partners.';
+      document.getElementById('t3-achievement').value = 'Optimized database queries, reducing dashboard load times by 40%.';
+      document.getElementById('t3-hesitation').value = 'It feels like bragging or showing off in front of peers.';
+      showToast('Sample scenario loaded');
+    }
+
+    function processTool3() {
+      const sharing = document.getElementById('t3-sharing').value;
+      const audience = document.getElementById('t3-audience').value;
+      const achievement = document.getElementById('t3-achievement').value;
+      const hesitation = document.getElementById('t3-hesitation').value;
+
+      const humbleShareTemplate = `🚀 Quick team update: Recently tackled ${achievement}. Big shoutout to the team for the collaboration! Documented the process here for anyone interested.`;
+
+      const outputHTML = `
+        <div class="output-header">
+          <h3><i class="fa-solid fa-bullhorn"></i> Authentic Visibility Plan</h3>
+        </div>
+
+        <div class="result-block">
+          <h4><i class="fa-solid fa-calendar-check"></i> The Update Rhythm Template</h4>
+          <p>Implement a bi-weekly "Wins & Work-In-Progress" summary. Post a brief 3-bullet update in your team channel every second Friday at 2 PM to maintain steady visibility.</p>
+        </div>
+
+        <div class="result-block secondary">
+          <h4><i class="fa-solid fa-network-wired"></i> Channel & Audience Strategy</h4>
+          <p>To reach <strong>${audience}</strong> without spamming, share insights in public project channels or tag relevant partners when delivering major milestones.</p>
+        </div>
+
+        <div class="result-block">
+          <h4>
+            <span><i class="fa-solid fa-award"></i> The Humble Share Script</span>
+            <button class="copy-btn" onclick="copyToClipboard(\`${humbleShareTemplate.replace(/'/g, "\\'")}\`)"><i class="fa-regular fa-copy"></i> Copy</button>
+          </h4>
+          <p>${humbleShareTemplate}</p>
+        </div>
+
+        <div class="result-block secondary">
+          <h4><i class="fa-solid fa-file-code"></i> Project Documentation as Visibility</h4>
+          <p>Turn your work into reusable assets. Documenting how you achieved <em>"${achievement.slice(0, 30)}..."</em> in a shared Notion/Confluence page builds lasting authority far better than self-promotion.</p>
+        </div>
+
+        <div class="result-block">
+          <h4><i class="fa-solid fa-microphone"></i> Speaking Up in Virtual Meetings</h4>
+          <p>Overcome feeling like you're "${hesitation.slice(0, 30)}" by shifting focus to helpfulness. Frame your contributions as problem-solving or sharing lessons learned that benefit the wider team.</p>
+        </div>
+      `;
+
+      const container = document.getElementById('output-tool3');
+      container.innerHTML = outputHTML;
+      container.style.display = 'block';
+      container.scrollIntoView({ behavior: 'smooth' });
+
+      saveHistoryItem('tool3', `Target: ${audience.slice(0, 30)} | Achievement: ${achievement.slice(0, 30)}`, outputHTML);
+    }
+
+
+    /* ==========================================================================
+       TOOL 4: THE TEAM CULTURE HACK LOGIC
+       ========================================================================== */
+
+    function loadSampleTool4() {
+      document.getElementById('t4-current').value = 'nothing';
+      document.getElementById('t4-past').value = 'Friday wins channel and weekly async trivia questions.';
+      document.getElementById('t4-organize').value = 'small-ritual';
+      document.getElementById('t4-energy').value = 'medium';
+      showToast('Sample scenario loaded');
+    }
+
+    function processTool4() {
+      const current = document.getElementById('t4-current').value;
+      const past = document.getElementById('t4-past').value;
+      const organize = document.getElementById('t4-organize').value;
+      const energy = document.getElementById('t4-energy').value;
+
+      const proposalScript = `Hey team! 👋 Thinking it might be fun to start a low-key weekly thread every Friday where we share one small win or highlight from the week (work or non-work). Zero pressure to participate, just a space to stay connected. What do you think?`;
+
+      const outputHTML = `
+        <div class="output-header">
+          <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Team Culture Blueprints</h3>
+        </div>
+
+        <div class="result-block">
+          <h4><i class="fa-solid fa-bolt"></i> Recommended Micro-Ritual</h4>
+          <p><strong>Async "Friday Wins & Weekend Plans" Thread:</strong> Post a prompt every Friday morning in your main team channel. Low effort, highly inclusive, and requires no synchronous meeting time.</p>
+        </div>
+
+        <div class="result-block secondary">
+          <h4>
+            <span><i class="fa-solid fa-paper-plane"></i> The Proposal Template</span>
+            <button class="copy-btn" onclick="copyToClipboard(\`${proposalScript.replace(/'/g, "\\'")}\`)"><i class="fa-regular fa-copy"></i> Copy</button>
+          </h4>
+          <p>${proposalScript}</p>
+        </div>
+
+        <div class="result-block">
+          <h4><i class="fa-solid fa-users-line"></i> The Low-Energy Participation Model</h4>
+          <p>If your energy is <strong>${energy}</strong>, don't try to be the team cheerleader. Instead, simply react with thoughtful emojis (e.g., 🙌, 🔥, ❤️) and leave short, encouraging comments on teammates' updates.</p>
+        </div>
+
+        <div class="result-block secondary">
+          <h4><i class="fa-solid fa-hand-holding-heart"></i> Energy Boundaries</h4>
+          <p>Invest energy only in proportion to team engagement. If a ritual doesn't take off immediately, let it evolve naturally without taking the responsibility personally.</p>
+        </div>
+
+        <div class="result-block">
+          <h4><i class="fa-solid fa-door-open"></i> Finding Belonging Beyond the Immediate Team</h4>
+          <p>If your immediate team remains strictly transactional, seek community in cross-departmental interest channels (#pets, #gaming, #reading) or company Employee Resource Groups (ERGs).</p>
+        </div>
+      `;
+
+      const container = document.getElementById('output-tool4');
+      container.innerHTML = outputHTML;
+      container.style.display = 'block';
+      container.scrollIntoView({ behavior: 'smooth' });
+
+      saveHistoryItem('tool4', `Organize: ${organize} | Energy: ${energy}`, outputHTML);
+    }
+
+
+    /* ==========================================================================
+       TOOL 5: THE OFFLINE BALANCE LOGIC
+       ========================================================================== */
+
+    function loadSampleTool5() {
+      document.getElementById('t5-local').value = 'Two former colleagues living nearby, plus a neighbor.';
+      document.getElementById('t5-hobbies').value = 'Trail running, board games, and espresso brewing.';
+      document.getElementById('t5-outside').value = 'rarely';
+      document.getElementById('t5-desired').value = 'Regular weekly in-person interaction away from screens.';
+      showToast('Sample scenario loaded');
+    }
+
+    function processTool5() {
+      const local = document.getElementById('t5-local').value;
+      const hobbies = document.getElementById('t5-hobbies').value;
+      const outside = document.getElementById('t5-outside').value;
+      const desired = document.getElementById('t5-desired').value;
+
+      const outputHTML = `
+        <div class="output-header">
+          <h3><i class="fa-solid fa-tree"></i> Physical Belonging & Offline Blueprint</h3>
+        </div>
+
+        <div class="result-block">
+          <h4><i class="fa-solid fa-location-dot"></i> Local Community Search Strategy</h4>
+          <p>Based on your interest in <strong>"${hobbies}"</strong>, explore local clubs or meetup groups (e.g., local run clubs, board game cafes, or community workshops). Real-world connection thrives on recurring, structured activities.</p>
+        </div>
+
+        <div class="result-block secondary">
+          <h4><i class="fa-solid fa-laptop-house"></i> Remote Worker Third Places</h4>
+          <p>Transition from working exclusively at home to visiting a local coffee shop, library, or coworking space 1–2 times per week. Physical ambient presence reduces isolation significantly.</p>
+        </div>
+
+        <div class="result-block">
+          <h4><i class="fa-solid fa-calendar-days"></i> Structured Social Routine</h4>
+          <p>Reach out to your local contacts (<em>"${local.slice(0, 30)}..."</em>) to set up a fixed, recurring event—like a monthly Saturday breakfast or bi-weekly evening walk.</p>
+        </div>
+
+        <div class="result-block secondary">
+          <h4><i class="fa-solid fa-brain"></i> Psychological Work Decoupling</h4>
+          <p>Reframe your remote job as a professional relationship rather than your main social hub. Diversifying your social sources protects you from feeling depleted when work gets quiet or transactional.</p>
+        </div>
+
+        <div class="result-block">
+          <h4><i class="fa-solid fa-person-walking"></i> One Action Step for This Week</h4>
+          <p><strong>Challenge:</strong> Schedule one offline outing this week centered around <em>"${hobbies.split(',')[0] || 'your hobby'}"</em>. Step away from screens and connect with physical surroundings.</p>
+        </div>
+      `;
+
+      const container = document.getElementById('output-tool5');
+      container.innerHTML = outputHTML;
+      container.style.display = 'block';
+      container.scrollIntoView({ behavior: 'smooth' });
+
+      saveHistoryItem('tool5', `Hobbies: ${hobbies.slice(0, 30)} | Outings: ${outside}`, outputHTML);
+    }
+  </script>
+</body>
+</html>

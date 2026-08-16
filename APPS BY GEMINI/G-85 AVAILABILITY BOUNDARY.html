@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvailabilityBoundary — Reclaim Your Life</title>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --midnight-blue: #1B263B;
+            --soft-coral: #FF9F7F;
+            --coral-hover: #ff8b66;
+            --bg-gradient-start: #EDF2F4;
+            --bg-gradient-end: #FFF5F2;
+            --card-bg: #FFFFFF;
+            --text-main: #2B2D42;
+            --text-muted: #6C757D;
+            --border-color: #E2E8F0;
+            --sidebar-width: 260px;
+            --shadow-sm: 0 2px 8px rgba(27, 38, 59, 0.05);
+            --shadow-md: 0 4px 16px rgba(27, 38, 59, 0.08);
+            --radius-xl: 1rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* App Layout Structure */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--soft-coral);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--midnight-blue);
+            line-height: 1.2;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 1rem 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            border-left: 4px solid transparent;
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover {
+            background-color: #F8FAFC;
+            color: var(--midnight-blue);
+        }
+
+        .nav-item.active {
+            color: var(--midnight-blue);
+            background-color: #F1F5F9;
+            border-left-color: var(--soft-coral);
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            background: var(--card-bg);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--midnight-blue);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 999;
+        }
+
+        /* Main Content Viewport */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem 1.5rem;
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Reusable Components & Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-banner {
+            background: var(--midnight-blue);
+            color: white;
+            border-radius: var(--radius-xl);
+            padding: 2.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,159,127,0.15) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+
+        .hero-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: white;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-tagline {
+            font-size: 1.1rem;
+            color: #E2E8F0;
+            font-weight: 400;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .page-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--midnight-blue);
+            margin-bottom: 0.25rem;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--soft-coral);
+        }
+
+        .dash-card .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #FFF0EB;
+            color: var(--soft-coral);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            color: var(--midnight-blue);
+        }
+
+        .dash-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--midnight-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+            background-color: #FAFAFA;
+        }
+
+        .form-control:focus {
+            border-color: var(--midnight-blue);
+            background-color: white;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 0.85rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+
+        .checkbox-label:hover, .radio-label:hover {
+            border-color: var(--soft-coral);
+        }
+
+        .checkbox-label input, .radio-label input {
+            accent-color: var(--soft-coral);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--midnight-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2c3e50;
+        }
+
+        .btn-secondary {
+            background-color: #E2E8F0;
+            color: var(--midnight-blue);
+        }
+
+        .btn-secondary:hover {
+            background-color: #CBD5E1;
+        }
+
+        .btn-coral {
+            background-color: var(--soft-coral);
+            color: white;
+        }
+
+        .btn-coral:hover {
+            background-color: var(--coral-hover);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        /* Output Sections */
+        .output-container {
+            display: none;
+            margin-top: 2rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .output-block {
+            background: white;
+            border-left: 4px solid var(--soft-coral);
+            border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .output-block h4 {
+            color: var(--midnight-blue);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-block p, .output-block ul {
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .output-block ul {
+            padding-left: 1.25rem;
+        }
+
+        .code-snippet {
+            background: #27272A;
+            color: #F4F4F5;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+
+        .metric-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #FFF0EB;
+            color: #D9534F;
+            font-weight: 700;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-header h3 {
+            font-size: 1.1rem;
+            color: var(--midnight-blue);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .history-summary {
+            padding: 0.75rem 1rem;
+            background: #F8FAFC;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--midnight-blue);
+        }
+
+        .history-details {
+            padding: 1rem;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            background: white;
+        }
+
+        .history-item.open .history-details {
+            display: block;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--midnight-blue);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            padding: 2rem 0 1rem 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem 1rem;
+            }
+
+            .hero-title {
+                font-size: 1.6rem;
+            }
+
+            .hero-tagline {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header Navigation -->
+    <div class="mobile-header">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+            <i class="fa-solid font-awesome fa-shield-halved" style="color:var(--soft-coral)"></i>
+            <span style="font-weight:700; color:var(--midnight-blue)">AvailabilityBoundary</span>
+        </div>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle Navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h1>Availability<br>Boundary</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item active" data-view="dashboard">
+                    <i class="fa-solid fa-gauge"></i> Dashboard
+                </li>
+                <li class="nav-item" data-view="tool1">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Availability Audit
+                </li>
+                <li class="nav-item" data-view="tool2">
+                    <i class="fa-solid fa-bell-slash"></i> Expectation Reset
+                </li>
+                <li class="nav-item" data-view="tool3">
+                    <i class="fa-solid fa-umbrella-beach"></i> Vacation Protector
+                </li>
+                <li class="nav-item" data-view="tool4">
+                    <i class="fa-solid fa-handshake"></i> On-Call Negotiation
+                </li>
+                <li class="nav-item" data-view="tool5">
+                    <i class="fa-solid fa-moon"></i> Shutdown Ritual
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Viewport -->
+        <main class="main-content">
+            
+            <!-- VIEW: DASHBOARD -->
+            <section id="dashboard" class="view-section active">
+                <div class="hero-banner">
+                    <h2 class="hero-title">Availability Boundary</h2>
+                    <p class="hero-tagline">You are not a utility. You are a person who needs to turn off.</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dash-card" onclick="switchView('tool1')">
+                        <div class="icon-wrapper"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                        <h3>Availability Audit</h3>
+                        <p>Calculate your real work week, recovery deficit, and invisible overtime costs.</p>
+                    </div>
+
+                    <div class="dash-card" onclick="switchView('tool2')">
+                        <div class="icon-wrapper"><i class="fa-solid fa-bell-slash"></i></div>
+                        <h3>Expectation Reset</h3>
+                        <p>Retrain colleagues, draft professional boundary scripts, and set urgency rules.</p>
+                    </div>
+
+                    <div class="dash-card" onclick="switchView('tool3')">
+                        <div class="icon-wrapper"><i class="fa-solid fa-umbrella-beach"></i></div>
+                        <h3>Vacation Protector</h3>
+                        <p>Lock down true off-time with bulletproof out-of-office scripts and handoffs.</p>
+                    </div>
+
+                    <div class="dash-card" onclick="switchView('tool4')">
+                        <div class="icon-wrapper"><i class="fa-solid fa-handshake"></i></div>
+                        <h3>On-Call Negotiation</h3>
+                        <p>Draft strategic requests for compensation, rotations, or scope adjustments.</p>
+                    </div>
+
+                    <div class="dash-card" onclick="switchView('tool5')">
+                        <div class="icon-wrapper"><i class="fa-solid fa-moon"></i></div>
+                        <h3>Shutdown Ritual</h3>
+                        <p>Build end-of-day practices to release psychological tension and sleep cleanly.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: TOOL 1 (AVAILABILITY AUDIT) -->
+            <section id="tool1" class="view-section">
+                <div class="page-header">
+                    <h2>The Availability Audit</h2>
+                    <p>"I don't even realize how much I'm working because it never formally ends."</p>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool1" onsubmit="runAudit(event)">
+                        <div class="form-group">
+                            <label for="t1-official-end">When does your workday officially end?</label>
+                            <input type="text" id="t1-official-end" class="form-control" placeholder="e.g., 5:00 PM" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="t1-actual-end">When do you actually stop working/checking messages?</label>
+                            <input type="text" id="t1-actual-end" class="form-control" placeholder="e.g., 9:00 PM" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="t1-days-week">How many days per week do you work or respond to messages?</label>
+                            <input type="number" id="t1-days-week" class="form-control" min="1" max="7" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="t1-weekends-month">How many weekends per month do you log in or check work?</label>
+                            <input type="number" id="t1-weekends-month" class="form-control" min="0" max="4" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="t1-vacation-used">How many vacation days did you use last year?</label>
+                            <input type="number" id="t1-vacation-used" class="form-control" min="0" max="365" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="t1-vacation-off">How many of those vacation days were TRULY off (zero work/email)?</label>
+                            <input type="number" id="t1-vacation-off" class="form-control" min="0" max="365" required>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-coral"><i class="fa-solid fa-calculator"></i> Run Audit</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()">Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool1" class="output-container">
+                    <div class="output-block">
+                        <h4>The Real Work Week</h4>
+                        <div id="t1-res-real-week" class="metric-badge"></div>
+                        <p id="t1-res-real-week-desc"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>The Recovery Deficit</h4>
+                        <p id="t1-res-recovery"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>The Always-On Cost</h4>
+                        <p id="t1-res-cost"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>Contract vs. Reality</h4>
+                        <p id="t1-res-comparison"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>The Wake-Up Call</h4>
+                        <p id="t1-res-wakeup"></p>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>Audit History</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="clearToolHistory('tool1')">Clear History</button>
+                    </div>
+                    <div id="history-tool1" class="history-list"></div>
+                </div>
+            </section>
+
+            <!-- VIEW: TOOL 2 (EXPECTATION RESET) -->
+            <section id="tool2" class="view-section">
+                <div class="page-header">
+                    <h2>The Expectation Reset</h2>
+                    <p>"People expect me to respond at all hours and I need to retrain them."</p>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool2" onsubmit="runExpectationReset(event)">
+                        <div class="form-group">
+                            <label for="t2-violator">Who violates your off-hours most?</label>
+                            <select id="t2-violator" class="form-control" required>
+                                <option value="">Select option...</option>
+                                <option value="Boss">Boss / Direct Manager</option>
+                                <option value="Team">Team / Peers</option>
+                                <option value="Clients">Clients / External Stakeholders</option>
+                                <option value="System alerts">System Alerts / On-Call Pagers</option>
+                                <option value="Myself">Myself (Self-imposed checking)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>How do they reach you? (Select all that apply)</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label"><input type="checkbox" name="t2-channels" value="Email"> Email</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t2-channels" value="Text"> Text / SMS</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t2-channels" value="Call"> Phone Call</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t2-channels" value="Chat"> Chat (Slack/Teams)</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t2-channels" value="Calendar invites"> Calendar Invites</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Have you stated your hours?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t2-stated" value="Yes clearly" required> Yes, clearly</label>
+                                <label class="radio-label"><input type="radio" name="t2-stated" value="Vaguely"> Vaguely</label>
+                                <label class="radio-label"><input type="radio" name="t2-stated" value="No"> No</label>
+                                <label class="radio-label"><input type="radio" name="t2-stated" value="They know but ignore"> They know but ignore</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t2-role">Your role profile:</label>
+                            <select id="t2-role" class="form-control" required>
+                                <option value="">Select option...</option>
+                                <option value="Individual contributor">Individual Contributor</option>
+                                <option value="Manager">Manager / Team Lead</option>
+                                <option value="Executive">Executive / Director</option>
+                                <option value="On-call by contract">On-call by formal contract</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-coral"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Protocol</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()">Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool2" class="output-container">
+                    <div class="output-block">
+                        <h4>The Hours Declaration
+                            <button class="btn btn-secondary btn-sm" onclick="copyText('t2-declaration-text')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </h4>
+                        <div class="code-snippet" id="t2-declaration-text"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>The Auto-Reply Template
+                            <button class="btn btn-secondary btn-sm" onclick="copyText('t2-autoreply-text')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </h4>
+                        <div class="code-snippet" id="t2-autoreply-text"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>The Team Norm Proposal</h4>
+                        <p id="t2-res-norm"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>The Urgency Protocol</h4>
+                        <p id="t2-res-urgency"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>Self-Check: Reinforcement Loop</h4>
+                        <p id="t2-res-selfcheck"></p>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>Reset History</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="clearToolHistory('tool2')">Clear History</button>
+                    </div>
+                    <div id="history-tool2" class="history-list"></div>
+                </div>
+            </section>
+
+            <!-- VIEW: TOOL 3 (VACATION PROTECTOR) -->
+            <section id="tool3" class="view-section">
+                <div class="page-header">
+                    <h2>The Vacation Protector</h2>
+                    <p>"I take time off but I'm still answering emails and calls."</p>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool3" onsubmit="runVacationProtector(event)">
+                        <div class="form-group">
+                            <label>What interrupts your time off? (Select all that apply)</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label"><input type="checkbox" name="t3-interrupts" value="Email"> Email</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-interrupts" value="Chat"> Chat / Slack</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-interrupts" value="Calls"> Phone Calls</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-interrupts" value="My own checking"> My own compulsion to check</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-interrupts" value="Guilt"> Guilt</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-interrupts" value="Fear of backlog"> Fear of workload backlog</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Do you set an out-of-office message?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t3-ooo" value="Yes" required> Yes, robust one</label>
+                                <label class="radio-label"><input type="radio" name="t3-ooo" value="Brief one"> Brief / Basic one</label>
+                                <label class="radio-label"><input type="radio" name="t3-ooo" value="No"> No</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Do you have a designated backup person?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t3-backup" value="Yes" required> Yes, fully trained</label>
+                                <label class="radio-label"><input type="radio" name="t3-backup" value="No"> No backup</label>
+                                <label class="radio-label"><input type="radio" name="t3-backup" value="I'm the only one who knows"> I'm the only one who knows my work</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t3-fear">What are you most afraid will happen if you completely disconnect?</label>
+                            <textarea id="t3-fear" class="form-control" placeholder="e.g., Looking unreliable to leadership, returning to 500 unanswered emails..." required></textarea>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-coral"><i class="fa-solid fa-shield-cat"></i> Build Fortress Plan</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()">Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool3" class="output-container">
+                    <div class="output-block">
+                        <h4>The Bulletproof OOO Template
+                            <button class="btn btn-secondary btn-sm" onclick="copyText('t3-ooo-text')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </h4>
+                        <div class="code-snippet" id="t3-ooo-text"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>The Pre-Departure Handoff Checklist</h4>
+                        <div id="t3-res-handoff"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>Phone & Digital Surgery</h4>
+                        <p id="t3-res-phonesurgery"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>The Return-to-Work Buffer Plan</h4>
+                        <p id="t3-res-returnplan"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>The Guilt Antidote</h4>
+                        <p id="t3-res-guilt"></p>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>Protection History</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="clearToolHistory('tool3')">Clear History</button>
+                    </div>
+                    <div id="history-tool3" class="history-list"></div>
+                </div>
+            </section>
+
+            <!-- VIEW: TOOL 4 (ON-CALL NEGOTIATION) -->
+            <section id="tool4" class="view-section">
+                <div class="page-header">
+                    <h2>The On-Call Negotiation</h2>
+                    <p>"I'm expected to be available but I'm not getting paid or compensated for it."</p>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool4" onsubmit="runOnCallNegotiation(event)">
+                        <div class="form-group">
+                            <label>Are you contractually on-call?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t4-contract" value="Yes" required> Yes (written contract)</label>
+                                <label class="radio-label"><input type="radio" name="t4-contract" value="No"> No contract</label>
+                                <label class="radio-label"><input type="radio" name="t4-contract" value="Unclear"> Unclear / Gray area</label>
+                                <label class="radio-label"><input type="radio" name="t4-contract" value="Informal expectation"> Informal cultural expectation</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-frequency">How often are you contacted after hours?</label>
+                            <select id="t4-frequency" class="form-control" required>
+                                <option value="">Select option...</option>
+                                <option value="Rarely">Rarely (Once a month or less)</option>
+                                <option value="Weekly">Weekly (1-2 times a week)</option>
+                                <option value="Several times a week">Several times a week</option>
+                                <option value="Daily">Daily</option>
+                                <option value="Multiple times daily">Multiple times daily / constantly</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-comp">What compensation do you currently receive for availability?</label>
+                            <select id="t4-comp" class="form-control" required>
+                                <option value="">Select option...</option>
+                                <option value="On-call pay">Dedicated On-Call Stipend / Pay</option>
+                                <option value="Comp time">Compensatory Time Off (Comp Time)</option>
+                                <option value="Nothing">Nothing</option>
+                                <option value="Occasional thanks">Occasional verbal thanks / Praise</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-leverage">Your negotiation leverage level:</label>
+                            <select id="t4-leverage" class="form-control" required>
+                                <option value="">Select option...</option>
+                                <option value="High">High (Key specialized skills, hard to replace)</option>
+                                <option value="Medium">Medium (Good standing, solid performer)</option>
+                                <option value="Low">Low (New hire or highly competitive team)</option>
+                                <option value="None">None (High risk environment)</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-coral"><i class="fa-solid fa-file-contract"></i> Draft Strategy</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()">Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool4" class="output-container">
+                    <div class="output-block">
+                        <h4>The Compensation / Comp-Time Proposal
+                            <button class="btn btn-secondary btn-sm" onclick="copyText('t4-ask-text')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </h4>
+                        <div class="code-snippet" id="t4-ask-text"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>Scope Definition Framework</h4>
+                        <p id="t4-res-scope"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>The Rotation / Sharing Proposal</h4>
+                        <p id="t4-res-rotation"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>Formalizing Informal Expectations</h4>
+                        <p id="t4-res-formalize"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>Boundary Strategy If Denied</h4>
+                        <p id="t4-res-denied"></p>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>Negotiation History</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="clearToolHistory('tool4')">Clear History</button>
+                    </div>
+                    <div id="history-tool4" class="history-list"></div>
+                </div>
+            </section>
+
+            <!-- VIEW: TOOL 5 (SHUTDOWN RITUAL) -->
+            <section id="tool5" class="view-section">
+                <div class="page-header">
+                    <h2>The Shutdown Ritual</h2>
+                    <p>"Even when I stop working, my brain is still at the office."</p>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool5" onsubmit="runShutdownRitual(event)">
+                        <div class="form-group">
+                            <label>What keeps you mentally tied to work after hours? (Select all that apply)</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label"><input type="checkbox" name="t5-anchors" value="Unfinished tasks"> Unfinished tasks</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t5-anchors" value="Tomorrow's worries"> Tomorrow's worries</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t5-anchors" value="Notifications"> Push Notifications</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t5-anchors" value="Conflict"> Interpersonal conflict</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t5-anchors" value="Ambition"> Career pressure / Ambition</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t5-anchors" value="Fear"> Fear of missing something</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t5-routine">Your current end-of-day routine (if any):</label>
+                            <textarea id="t5-routine" class="form-control" placeholder="e.g., Close laptop lid, walk to couch, continue checking Slack on phone..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t5-space">Where do you sleep relative to your workspace?</label>
+                            <select id="t5-space" class="form-control" required>
+                                <option value="">Select option...</option>
+                                <option value="Same room as desk">Same room as my desk / Bedroom office</option>
+                                <option value="Different room">Different room / Dedicated office</option>
+                                <option value="No home office">No set workspace (Dining table, couch, etc.)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t5-sleep">How long does it typically take you to fall asleep?</label>
+                            <select id="t5-sleep" class="form-control" required>
+                                <option value="">Select option...</option>
+                                <option value="<10min">&lt; 10 minutes</option>
+                                <option value="10-30min">10 - 30 minutes</option>
+                                <option value="30-60min">30 - 60 minutes</option>
+                                <option value="1hr+">1 hour or more</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-coral"><i class="fa-solid fa-power-off"></i> Build Shutdown Protocol</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()">Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool5" class="output-container">
+                    <div class="output-block">
+                        <h4>The 5-Step Physical Shutdown Ritual</h4>
+                        <div id="t5-res-physical"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>Digital Boundary Configuration</h4>
+                        <p id="t5-res-digital"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>Spatial Separation Protocol</h4>
+                        <p id="t5-res-spatial"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>The End-of-Day Brain Dump Protocol</h4>
+                        <p id="t5-res-braindump"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <h4>The Morning Delay Standard</h4>
+                        <p id="t5-res-morning"></p>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>Ritual History</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="clearToolHistory('tool5')">Clear History</button>
+                    </div>
+                    <div id="history-tool5" class="history-list"></div>
+                </div>
+            </section>
+
+            <!-- Global App Footer -->
+            <footer>
+                <p>For work-life boundary planning only. Not legal, therapeutic, or medical advice. For contract or labor law questions, consult an attorney or HR representative.</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check" style="color:var(--soft-coral)"></i>
+        <span id="toast-message">Copied!</span>
+    </div>
+
+    <!-- Application Script Logic -->
+    <script>
+        // --- ROUTING & NAVIGATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            initHistoryViews();
+        });
+
+        function initNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const viewTarget = item.getAttribute('data-view');
+                    switchView(viewTarget);
+                    closeMobileSidebar();
+                });
+            });
+
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            
+            hamburgerBtn.addEventListener('click', toggleMobileSidebar);
+            sidebarOverlay.addEventListener('click', closeMobileSidebar);
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.toggle('active', el.getAttribute('data-view') === viewId);
+            });
+
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.toggle('active', el.id === viewId);
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+            document.getElementById('sidebarOverlay').classList.toggle('mobile-open');
+        }
+
+        function closeMobileSidebar() {
+            document.getElementById('sidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('mobile-open');
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        function showToast(msg = 'Copied!') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyText(elementId) {
+            const textToCopy = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast('Copied to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy text');
+            });
+        }
+
+        // --- LOCALSTORAGE HISTORY SYSTEM ---
+        function saveToHistory(toolId, summary, fullData) {
+            const key = `avail_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString(),
+                summary: summary,
+                data: fullData
+            };
+
+            history.unshift(newItem);
+            if (history.length > 30) history = history.slice(0, 30); // Cap at 30 items
+            
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = `avail_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const container = document.getElementById(`history-${toolId}`);
+            
+            if (!container) return;
+
+            if (history.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-muted); font-size:0.875rem;">No saved calculations yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="history-summary" onclick="toggleHistoryItem(this)">
+                        <span>${item.summary}</span>
+                        <span style="font-weight:400; color:var(--text-muted); font-size:0.75rem;">${item.timestamp} <i class="fa-solid fa-chevron-down" style="margin-left:0.5rem"></i></span>
+                    </div>
+                    <div class="history-details">
+                        ${item.data}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistoryItem(el) {
+            const parent = el.parentElement;
+            parent.classList.toggle('open');
+        }
+
+        function clearToolHistory(toolId) {
+            if (confirm('Are you sure you want to clear history for this tool?')) {
+                localStorage.removeItem(`avail_history_${toolId}`);
+                renderHistory(toolId);
+                showToast('History cleared');
+            }
+        }
+
+        function initHistoryViews() {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistory);
+        }
+
+        // ==========================================
+        // TOOL 1: AVAILABILITY AUDIT
+        // ==========================================
+        function loadSampleTool1() {
+            document.getElementById('t1-official-end').value = "5:00 PM";
+            document.getElementById('t1-actual-end').value = "9:00 PM";
+            document.getElementById('t1-days-week').value = "6";
+            document.getElementById('t1-weekends-month').value = "3";
+            document.getElementById('t1-vacation-used').value = "10";
+            document.getElementById('t1-vacation-off').value = "2";
+        }
+
+        function runAudit(e) {
+            e.preventDefault();
+
+            const officialEnd = document.getElementById('t1-official-end').value;
+            const actualEnd = document.getElementById('t1-actual-end').value;
+            const daysPerWeek = parseFloat(document.getElementById('t1-days-week').value) || 0;
+            const weekendsPerMonth = parseFloat(document.getElementById('t1-weekends-month').value) || 0;
+            const vacUsed = parseFloat(document.getElementById('t1-vacation-used').value) || 0;
+            const vacOff = parseFloat(document.getElementById('t1-vacation-off').value) || 0;
+
+            // Simple heuristics
+            const baseHoursPerDay = 8; 
+            const overtimePerDay = 4; // Estimate based on 5pm vs 9pm gap
+            const totalWeeklyHours = (baseHoursPerDay * 5) + (overtimePerDay * daysPerWeek) + (weekendsPerMonth * 4);
+            const unpaidOvertimeWeekly = totalWeeklyHours > 40 ? totalWeeklyHours - 40 : 0;
+            const unpaidOvertimeYearly = unpaidOvertimeWeekly * 50;
+            const compromisedVacDays = vacUsed - vacOff;
+
+            // Populate Output UI
+            document.getElementById('t1-res-real-week').innerText = `${totalWeeklyHours} Hours / Week`;
+            document.getElementById('t1-res-real-week-desc').innerText = `Your contractual arrangement likely assumes 40 hours/week. You are logging roughly ${unpaidOvertimeWeekly} hours of invisible overtime every single week.`;
+            
+            document.getElementById('t1-res-recovery').innerHTML = `You lose approximately <strong>${unpaidOvertimeYearly} hours per year</strong> to uncompensated availability. Furthermore, <strong>${compromisedVacDays} of your ${vacUsed} vacation days</strong> last year were contaminated by work tasks, preventing true nervous system recovery.`;
+            
+            document.getElementById('t1-res-cost').innerText = `Working past ${actualEnd} on ${daysPerWeek} days a week keeps your autonomic nervous system in persistent sympathetic activation ("fight or flight"). This directly causes sleep fragmentation, elevated baseline cortisol, chronic fatigue, and emotional withdrawal from family and personal life.`;
+            
+            document.getElementById('t1-res-comparison').innerText = `Contractually, you are paid for a finite scope. Culturally, you are functioning as an unscheduled on-call asset. You are effectively donating ${Math.round(unpaidOvertimeYearly / 8)} unpaid work days per year to your employer.`;
+            
+            document.getElementById('t1-res-wakeup').innerText = `No salary compensates for cumulative exhaustion. Continuously working at this intensity accelerates career burnout, erodes personal relationships, and sets an unsustainable standard that will eventually result in forced rest via illness or breakdown.`;
+
+            const outputContainer = document.getElementById('output-tool1');
+            outputContainer.style.display = 'block';
+            outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+            // Save to LocalStorage History
+            const summary = `Audit: ${totalWeeklyHours} hrs/wk (${unpaidOvertimeWeekly}h unpaid overtime)`;
+            const historyHtml = `
+                <p><strong>Official vs. Actual End:</strong> ${officialEnd} vs ${actualEnd}</p>
+                <p><strong>Weekly Hours:</strong> ${totalWeeklyHours} hrs/week</p>
+                <p><strong>Contaminated Vacation Days:</strong> ${compromisedVacDays} days</p>
+            `;
+            saveToHistory('tool1', summary, historyHtml);
+        }
+
+        // ==========================================
+        // TOOL 2: EXPECTATION RESET
+        // ==========================================
+        function loadSampleTool2() {
+            document.getElementById('t2-violator').value = "Boss";
+            
+            const channels = document.querySelectorAll('input[name="t2-channels"]');
+            channels.forEach(cb => {
+                cb.checked = (cb.value === "Email" || cb.value === "Chat");
+            });
+
+            document.querySelector('input[name="t2-stated"][value="Vaguely"]').checked = true;
+            document.getElementById('t2-role').value = "Individual contributor";
+        }
+
+        function runExpectationReset(e) {
+            e.preventDefault();
+
+            const violator = document.getElementById('t2-violator').value;
+            const channels = Array.from(document.querySelectorAll('input[name="t2-channels"]:checked')).map(cb => cb.value);
+            const stated = document.querySelector('input[name="t2-stated"]:checked')?.value || 'No';
+            const role = document.getElementById('t2-role').value;
+
+            const channelListText = channels.length > 0 ? channels.join(', ') : 'digital messaging';
+
+            // Generate customized outputs
+            const declarationScript = `Hi team,\n\nTo ensure I can deliver high-quality work and maintain focused output during business hours, I am updating my availability schedule. Moving forward, my primary working hours are 9:00 AM to 5:00 PM. Outside of these hours, I turn off notifications across ${channelListText}.\n\nIf a true critical emergency arises that requires immediate attention outside these hours, please follow our established Urgency Protocol. Otherwise, I will prioritize your message first thing on the next business day. Thank you for supporting sustainable work practices!`;
+
+            const autoReplyScript = `Thank you for your message. My standard working hours are Monday through Friday, 9:00 AM to 5:00 PM.\n\nI am currently offline and focused on non-work hours to recharge. I have not received a push notification for this email/message. I will review and reply to your note promptly when I log back in tomorrow morning.\n\nIf this is an outage or operational blocker, please trigger the formal emergency procedure.`;
+
+            document.getElementById('t2-declaration-text').innerText = declarationScript;
+            document.getElementById('t2-autoreply-text').innerText = autoReplyScript;
+
+            document.getElementById('t2-res-norm').innerText = `When addressing your ${violator.toLowerCase()}, frame boundaries around output quality: "In order to maintain deep focus and deliver my best work as a ${role}, I am establishing clear offline hours. Uninterrupted recovery directly improves my execution speed and accuracy during the workday."`;
+
+            document.getElementById('t2-res-urgency').innerText = `Define what constitutes a "True Emergency" vs. "Urgent Feeling." Establish that true emergencies require a direct phone call—not an email, Slack ping, or casual text. Moving emergency channels to phone calls instantly filters out 95% of non-critical after-hours pings.`;
+
+            document.getElementById('t2-res-selfcheck').innerText = `Every time you answer a non-urgent message via ${channelListText} after hours, you train ${violator.toLowerCase()} that your stated hours are meaningless. You are teaching people how to treat your time. Stop rewarding after-hours contact with instant replies.`;
+
+            const outputContainer = document.getElementById('output-tool2');
+            outputContainer.style.display = 'block';
+            outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+            // Save to History
+            const summary = `Reset: Boundary for ${violator} via ${channels.join('/') || 'messaging'}`;
+            const historyHtml = `
+                <p><strong>Primary Violator:</strong> ${violator}</p>
+                <p><strong>Channels:</strong> ${channelListText}</p>
+                <p><strong>Role Profile:</strong> ${role}</p>
+            `;
+            saveToHistory('tool2', summary, historyHtml);
+        }
+
+        // ==========================================
+        // TOOL 3: VACATION PROTECTOR
+        // ==========================================
+        function loadSampleTool3() {
+            const interrupts = document.querySelectorAll('input[name="t3-interrupts"]');
+            interrupts.forEach(cb => {
+                cb.checked = (cb.value === "Email" || cb.value === "My own checking" || cb.value === "Guilt");
+            });
+
+            document.querySelector('input[name="t3-ooo"][value="Brief one"]').checked = true;
+            document.querySelector('input[name="t3-backup"][value="No"]').checked = true;
+            document.getElementById('t3-fear').value = "I am afraid of looking unreliable to leadership and returning to an overwhelming wall of chaos and missed pings.";
+        }
+
+        function runVacationProtector(e) {
+            e.preventDefault();
+
+            const interrupts = Array.from(document.querySelectorAll('input[name="t3-interrupts"]:checked')).map(cb => cb.value);
+            const oooType = document.querySelector('input[name="t3-ooo"]:checked')?.value || 'No';
+            const backupType = document.querySelector('input[name="t3-backup"]:checked')?.value || 'No';
+            const fearText = document.getElementById('t3-fear').value;
+
+            // Script Generation
+            const oooScript = `Hello,\n\nI am currently on annual leave, returning on [Date]. During this time, I will have NO ACCESS to email, messaging apps, or work calls. I am completely offline to recharge.\n\n${backupType === 'Yes' ? 'For urgent matters, please contact [Backup Name] at [Backup Email].' : 'I will not be checking messages during this period. Your email will be reviewed upon my return.'}\n\nIf your request requires my personal input, please resend it after [Return Date]. Messages received during my absence will not be automatically flagged.`;
+
+            document.getElementById('t3-ooo-text').innerText = oooScript;
+
+            document.getElementById('t3-res-handoff').innerHTML = `
+                <ul>
+                    <li><strong>1 Week Before:</strong> Publish a "Vacation Coverage Document" mapping active projects, key links, and decision points.</li>
+                    <li><strong>2 Days Before:</strong> Decline all meetings scheduled for your return date to reserve time for catch-up.</li>
+                    <li><strong>1 Day Before:</strong> Set your out-of-office status to start 2 hours BEFORE your actual departure time to prevent last-minute task dumps.</li>
+                </ul>
+            `;
+
+            document.getElementById('t3-res-phonesurgery').innerText = `To combat ${interrupts.includes('My own checking') ? 'compulsive checking' : 'digital interruptions'}, move all work communication apps (Slack, Teams, Work Email) into a dedicated "Work" folder, hide app notifications, or temporarily delete/sign out of them entirely for the duration of your leave.`;
+
+            document.getElementById('t3-res-returnplan').innerText = `Block off your ENTIRE first day back on your calendar as "Catch-Up / Do Not Book." Do not jump into meetings on Day 1. Process emails chronologically from newest to oldest—most issues resolve themselves while you are away.`;
+
+            document.getElementById('t3-res-guilt').innerText = `Regarding your fear ("${fearText.slice(0, 80)}..."): Remember that taking complete, uncompromised rest is an act of professional performance maintenance. An exhausted employee makes poor decisions. Disconnecting isn't selfish; it preserves your capacity to do high-value work long-term.`;
+
+            const outputContainer = document.getElementById('output-tool3');
+            outputContainer.style.display = 'block';
+            outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+            // History
+            const summary = `Vacation Plan: Backup (${backupType}), OOO (${oooType})`;
+            const historyHtml = `
+                <p><strong>Interrupts:</strong> ${interrupts.join(', ') || 'None'}</p>
+                <p><strong>Backup Status:</strong> ${backupType}</p>
+                <p><strong>Core Fear:</strong> ${fearText}</p>
+            `;
+            saveToHistory('tool3', summary, historyHtml);
+        }
+
+        // ==========================================
+        // TOOL 4: ON-CALL NEGOTIATION
+        // ==========================================
+        function loadSampleTool4() {
+            document.querySelector('input[name="t4-contract"][value="No"]').checked = true;
+            document.getElementById('t4-frequency').value = "Several times a week";
+            document.getElementById('t4-comp').value = "Nothing";
+            document.getElementById('t4-leverage').value = "Medium";
+        }
+
+        function runOnCallNegotiation(e) {
+            e.preventDefault();
+
+            const contract = document.querySelector('input[name="t4-contract"]:checked')?.value || 'No';
+            const freq = document.getElementById('t4-frequency').value;
+            const comp = document.getElementById('t4-comp').value;
+            const leverage = document.getElementById('t4-leverage').value;
+
+            const askScript = `Hi [Manager Name],\n\nI want to discuss our after-hours response schedule. Over the past few months, I have been responding to calls/messages ${freq.toLowerCase()} outside of standard hours. Currently, this availability is uncompensated and informal.\n\nBecause maintaining continuous availability directly impacts personal recovery time, I would like to propose formalizing an On-Call Agreement that includes either a structured stipend or compensatory time off (Comp Time) for after-hours duties. Let's schedule 15 minutes this week to discuss a fair path forward.`;
+
+            document.getElementById('t4-ask-text').innerText = askScript;
+
+            document.getElementById('t4-res-scope').innerText = `Clearly define what warrants after-hours engagement. Create a written taxonomy: Priority 1 (System Down / Revenue Loss = immediate action) vs. Priority 2/3 (Questions / Planning = strictly next business day). Currently, your frequency (${freq}) indicates a lack of severity filtering.`;
+
+            document.getElementById('t4-res-rotation').innerText = `Propose an on-call rotation schedule across team members rather than having a single point of failure. A rotating schedule (e.g., 1 week on, 3 weeks off) restores predictability and allows team members to completely switch off during off-weeks.`;
+
+            document.getElementById('t4-res-formalize').innerText = `Given that your current status is "${contract}", move away from informal verbal expectations. Send a summary email after every after-hours incident logging the time spent, issue resolved, and business value delivered. Create a paper trail.`;
+
+            document.getElementById('t4-res-denied').innerText = `If leadership refuses both monetary compensation and comp time, leverage your ${leverage.toLowerCase()} leverage to establish strict boundary response SLAs (e.g., "Non-compensated after-hours pings will be responded to within 12 hours rather than immediately"). Protect your personal time if the business refuses to compensate it.`;
+
+            const outputContainer = document.getElementById('output-tool4');
+            outputContainer.style.display = 'block';
+            outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+            // History
+            const summary = `Negotiation Strategy: Freq (${freq}), Comp (${comp})`;
+            const historyHtml = `
+                <p><strong>Contract Status:</strong> ${contract}</p>
+                <p><strong>Frequency:</strong> ${freq}</p>
+                <p><strong>Leverage:</strong> ${leverage}</p>
+            `;
+            saveToHistory('tool4', summary, historyHtml);
+        }
+
+        // ==========================================
+        // TOOL 5: SHUTDOWN RITUAL
+        // ==========================================
+        function loadSampleTool5() {
+            const anchors = document.querySelectorAll('input[name="t5-anchors"]');
+            anchors.forEach(cb => {
+                cb.checked = (cb.value === "Unfinished tasks" || cb.value === "Tomorrow's worries" || cb.value === "Notifications");
+            });
+
+            document.getElementById('t5-routine').value = "Close my laptop lid, immediately walk to the living room, and continue checking work messages on my phone in bed.";
+            document.getElementById('t5-space').value = "Same room as desk";
+            document.getElementById('t5-sleep').value = "30-60min";
+        }
+
+        function runShutdownRitual(e) {
+            e.preventDefault();
+
+            const anchors = Array.from(document.querySelectorAll('input[name="t5-anchors"]:checked')).map(cb => cb.value);
+            const routine = document.getElementById('t5-routine').value;
+            const space = document.getElementById('t5-space').value;
+            const sleep = document.getElementById('t5-sleep').value;
+
+            document.getElementById('t5-res-physical').innerHTML = `
+                <ol style="padding-left:1.25rem; line-height:1.7;">
+                    <li><strong>Review Completed Tasks:</strong> Spend 2 minutes reviewing what you accomplished today to activate psychological closure.</li>
+                    <li><strong>Capture Open Loops:</strong> Write down every unfinished item onto tomorrow's task list. Do not leave them in working memory.</li>
+                    <li><strong>The Verbal Cue:</strong> Explicitly say aloud: <em>"Shutdown Complete."</em> (This signals your brain to transition states).</li>
+                    <li><strong>Physical Separation:</strong> Power down the computer monitor, close all work tabs, and hide work hardware.</li>
+                    <li><strong>Transit Transition:</strong> Perform a non-work physical action (e.g., 5-minute walk, change out of work clothes, wash hands).</li>
+                </ol>
+            `;
+
+            document.getElementById('t5-res-digital').innerText = `Set automated Do Not Disturb (DND) modes on your mobile devices to trigger automatically at your end-of-day time. Remove work email accounts and chat platforms from your personal phone completely if possible.`;
+
+            document.getElementById('t5-res-spatial').innerText = space === "Same room as desk" 
+                ? "Since your desk is in your sleeping space, place a decorative throw blanket or screen over your workstation at the end of the day. If you can see your computer from your bed, your brain will remain in a state of hyper-vigilance."
+                : "Consistently leave your workspace at the end of the day and do not re-enter it until the next morning. Treat your office space as a place of work, and the rest of your home as a sanctuary.";
+
+            document.getElementById('t5-res-braindump').innerText = `Keep a dedicated paper notebook on your nightstand. If work worries or unresolved tasks intrude while trying to sleep (taking you ${sleep}), write them down immediately on paper to offload executive control processing from your brain.`;
+
+            document.getElementById('t5-res-morning').innerText = `Do NOT check work emails or chat pings for at least 30 to 60 minutes after waking up. Starting your morning in a reactive state immediately surges stress hormones and undoes overnight nervous system recovery.`;
+
+            const outputContainer = document.getElementById('output-tool5');
+            outputContainer.style.display = 'block';
+            outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+            // History
+            const summary = `Shutdown Plan: Sleep Latency (${sleep}), Workspace (${space})`;
+            const historyHtml = `
+                <p><strong>Mental Anchors:</strong> ${anchors.join(', ') || 'None'}</p>
+                <p><strong>Workspace Location:</strong> ${space}</p>
+                <p><strong>Sleep Time:</strong> ${sleep}</p>
+            `;
+            saveToHistory('tool5', summary, historyHtml);
+        }
+    </script>
+</body>
+</html>

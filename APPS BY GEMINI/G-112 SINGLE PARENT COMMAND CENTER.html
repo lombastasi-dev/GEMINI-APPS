@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SingleParentOS — Command Center</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --navy: #1D3557;
+            --coral: #E76F51;
+            --soft-teal: #457B9D;
+            --bg-start: #F1FAEE;
+            --bg-end: #FFF5F2;
+            --card-bg: #FFFFFF;
+            --text-main: #2B2D42;
+            --text-muted: #6C757D;
+            --border-color: #E9ECEF;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* App Wrapper */
+        #app-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            color: var(--coral);
+            font-size: 1.5rem;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            color: var(--navy);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 16px 12px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            margin-bottom: 4px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background-color: #F8F9FA;
+            color: var(--navy);
+        }
+
+        .nav-link.active {
+            background-color: var(--navy);
+            color: #FFFFFF;
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .nav-link.active i {
+            color: var(--coral);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .content-body {
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 32px 24px 60px;
+            flex-grow: 1;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            background-color: var(--card-bg);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--navy);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 950;
+        }
+
+        /* Shared UI Elements */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0,0,0,0.03);
+            margin-bottom: 24px;
+        }
+
+        .hero-banner {
+            text-align: center;
+            padding: 32px 20px;
+            margin-bottom: 28px;
+            background: linear-gradient(135deg, var(--navy) 0%, #2A4365 100%);
+            color: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(29, 53, 87, 0.15);
+        }
+
+        .hero-banner h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .hero-banner p {
+            font-size: 1.05rem;
+            color: #E2E8F0;
+            font-weight: 300;
+        }
+
+        .tool-header {
+            margin-bottom: 24px;
+        }
+
+        .tool-header h2 {
+            font-size: 1.5rem;
+            color: var(--navy);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tool-header p.problem-statement {
+            color: var(--coral);
+            font-style: italic;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--card-bg);
+            padding: 16px 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--coral);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-card .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            transition: border-color 0.2s ease;
+            background-color: #FAFAFA;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--soft-teal);
+            background-color: #FFFFFF;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 400;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background-color: #F8F9FA;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--coral);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #D65A3C;
+        }
+
+        .btn-secondary {
+            background-color: #E9ECEF;
+            color: var(--navy);
+        }
+
+        .btn-secondary:hover {
+            background-color: #DEE2E6;
+        }
+
+        .btn-copy {
+            background-color: var(--navy);
+            color: white;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--soft-teal);
+        }
+
+        /* Dashboard Tools Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            border-color: var(--soft-teal);
+        }
+
+        .tool-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background-color: #FFF5F2;
+            color: var(--coral);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+        }
+
+        .tool-card h3 {
+            font-size: 1.1rem;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+
+        .tool-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+
+        /* Results Output Styling */
+        .results-section {
+            margin-top: 32px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-box {
+            background-color: #F8F9FA;
+            border-left: 4px solid var(--soft-teal);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 16px;
+        }
+
+        .result-box.alert {
+            border-left-color: var(--coral);
+            background-color: #FFF5F2;
+        }
+
+        .result-box.win {
+            border-left-color: #2A9D8F;
+            background-color: #E8F5E9;
+        }
+
+        .result-box h4 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--navy);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .script-box {
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            margin-top: 6px;
+            color: #1A202C;
+        }
+
+        /* Grid for Schedule */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .day-column {
+            background: #F8F9FA;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 0.8rem;
+        }
+
+        .day-column h5 {
+            text-align: center;
+            color: var(--navy);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .heat-high { background-color: #FFCDD2; border-color: #EF9A9A; }
+        .heat-med { background-color: #FFF9C4; border-color: #FFF59D; }
+        .heat-low { background-color: #C8E6C9; border-color: #A5D6A7; }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .history-header h3 {
+            font-size: 1rem;
+            color: var(--navy);
+        }
+
+        .history-list {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Footer */
+        .app-footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            margin-top: auto;
+        }
+
+        /* Toast Notifications */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--navy);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 2000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        /* View Switcher */
+        .view-content {
+            display: none;
+        }
+
+        .view-content.active {
+            display: block;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .schedule-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-compass"></i>
+                <h1>SingleParentOS</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a class="nav-link active" data-view="dashboard">
+                        <i class="fa-solid fa-gauge"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-view="money-map">
+                        <i class="fa-solid fa-wallet"></i>
+                        <span>Money Map</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-view="schedule-solver">
+                        <i class="fa-solid fa-calendar-week"></i>
+                        <span>Schedule Solver</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-view="coparent-boundary">
+                        <i class="fa-solid fa-comments"></i>
+                        <span>Co-Parent Boundary</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-view="guilt-check">
+                        <i class="fa-solid fa-heart-shield"></i>
+                        <span>Guilt Check</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-view="solo-planner">
+                        <i class="fa-solid fa-battery-charging"></i>
+                        <span>Solo Time Planner</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Mobile Header -->
+            <div class="mobile-header">
+                <div class="mobile-title">
+                    <i class="fa-solid fa-compass" style="color: var(--coral);"></i>
+                    <span>SingleParentOS</span>
+                </div>
+                <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+
+            <div class="content-body">
+                
+                <!-- VIEW 0: DASHBOARD -->
+                <div id="view-dashboard" class="view-content active">
+                    <div class="hero-banner">
+                        <h2>Single Parent Command Center</h2>
+                        <p>Run your household like a team of one.</p>
+                    </div>
+
+                    <div class="stats-bar">
+                        <div class="stat-card">
+                            <div class="label">This Week</div>
+                            <div class="value" id="dashboard-entries-count">0 Saved Entries</div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="tool-card" onclick="switchView('money-map')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-wallet"></i></div>
+                            <h3>Money Map</h3>
+                            <p>Tame one-income finances and plug hidden budget leaks.</p>
+                        </div>
+                        <div class="tool-card" onclick="switchView('schedule-solver')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-calendar-week"></i></div>
+                            <h3>Schedule Solver</h3>
+                            <p>Solve 40-hour demands with 24-hour realities.</p>
+                        </div>
+                        <div class="tool-card" onclick="switchView('coparent-boundary')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-comments"></i></div>
+                            <h3>Co-Parent Boundary</h3>
+                            <p>Draft calm, firm, business-like messages instantly.</p>
+                        </div>
+                        <div class="tool-card" onclick="switchView('guilt-check')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-heart-shield"></i></div>
+                            <h3>Guilt Check</h3>
+                            <p>Reframe single-parent guilt into realistic self-compassion.</p>
+                        </div>
+                        <div class="tool-card" onclick="switchView('solo-planner')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-battery-charging"></i></div>
+                            <h3>Solo Time Planner</h3>
+                            <p>Carve out zero-cost recharging slots without the burn-out.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 1: MONEY MAP -->
+                <div id="view-money-map" class="view-content">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-wallet" style="color: var(--coral);"></i> Money Map</h2>
+                        <p class="problem-statement">"One income. Too many outflows. No idea where it goes."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-money-map">
+                            <div class="form-group">
+                                <label for="mm-income">Monthly income (after tax):</label>
+                                <input type="number" id="mm-income" class="form-control" placeholder="e.g. 3500" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="mm-support">Child support received (optional):</label>
+                                <input type="number" id="mm-support" class="form-control" placeholder="e.g. 400">
+                            </div>
+                            <div class="form-group">
+                                <label for="mm-fixed">Fixed expenses (rent, insurance, childcare):</label>
+                                <input type="number" id="mm-fixed" class="form-control" placeholder="e.g. 2200" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="mm-variable">Variable expenses (food, gas, activities, extras):</label>
+                                <input type="number" id="mm-variable" class="form-control" placeholder="e.g. 1100" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="mm-debt">Debt payments:</label>
+                                <input type="number" id="mm-debt" class="form-control" placeholder="e.g. 300" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="mm-savings">Savings goal this month (optional):</label>
+                                <input type="number" id="mm-savings" class="form-control" placeholder="e.g. 150">
+                            </div>
+                            <div class="btn-row">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Calculate Map</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleMoneyMap()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="results-money-map" class="results-section">
+                        <!-- Dynamic Output -->
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('money-map')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Saved Money Maps</h3>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-money-map"></i>
+                        </div>
+                        <div class="history-list" id="history-list-money-map"></div>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: WEEKLY SCHEDULE SOLVER -->
+                <div id="view-schedule-solver" class="view-content">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-calendar-week" style="color: var(--coral);"></i> Weekly Schedule Solver</h2>
+                        <p class="problem-statement">"I have 40 hours of responsibilities and 24 hours in a day."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-schedule-solver">
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Map out your typical week to identify pinch points and coverage gaps.</p>
+                            
+                            <div id="schedule-days-container">
+                                <!-- Days will be generated by JS -->
+                            </div>
+
+                            <div class="btn-row">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Solve Schedule</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleSchedule()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="results-schedule-solver" class="results-section">
+                        <!-- Dynamic Output -->
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('schedule-solver')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Saved Schedules</h3>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-schedule-solver"></i>
+                        </div>
+                        <div class="history-list" id="history-list-schedule-solver"></div>
+                    </div>
+                </div>
+
+                <!-- VIEW 3: CO-PARENT BOUNDARY -->
+                <div id="view-coparent-boundary" class="view-content">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-comments" style="color: var(--coral);"></i> Co-Parent Boundary</h2>
+                        <p class="problem-statement">"Communication with my ex is a minefield."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-coparent-boundary">
+                            <div class="form-group">
+                                <label for="cp-issue">What is the issue?</label>
+                                <textarea id="cp-issue" class="form-control" placeholder="e.g., Ex consistently drops off kids 45 minutes late without texting." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="cp-need">What do you need from them?</label>
+                                <textarea id="cp-need" class="form-control" placeholder="e.g., On-time drop-offs or 30-minute advance notice." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="cp-style">Current communication style:</label>
+                                <select id="cp-style" class="form-control" required>
+                                    <option value="Hostile">Hostile</option>
+                                    <option value="Cold" selected>Cold</option>
+                                    <option value="Civil">Civil</option>
+                                    <option value="Friendly">Friendly</option>
+                                    <option value="Inconsistent">Inconsistent</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Is this urgent?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="cp-urgent" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="cp-urgent" value="No" checked> No</label>
+                                    <label class="radio-label"><input type="radio" name="cp-urgent" value="Can wait"> Can wait</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cp-fear">What is your fear if you say nothing?</label>
+                                <textarea id="cp-fear" class="form-control" placeholder="e.g., It becomes the new norm and my evenings keep getting disrupted." required></textarea>
+                            </div>
+                            <div class="btn-row">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Draft Boundary</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleCoparent()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="results-coparent-boundary" class="results-section">
+                        <!-- Dynamic Output -->
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('coparent-boundary')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Saved Boundary Scripts</h3>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-coparent-boundary"></i>
+                        </div>
+                        <div class="history-list" id="history-list-coparent-boundary"></div>
+                    </div>
+                </div>
+
+                <!-- VIEW 4: GUILT CHECK -->
+                <div id="view-guilt-check" class="view-content">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-heart-shield" style="color: var(--coral);"></i> Guilt Check</h2>
+                        <p class="problem-statement">"I feel like I'm failing at everything."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-guilt-check">
+                            <div class="form-group">
+                                <label for="gc-feeling">What are you feeling guilty about right now?</label>
+                                <textarea id="gc-feeling" class="form-control" placeholder="e.g., I worked late twice this week and ordered fast food for dinner again." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Is this about your child, work, needs, or ex?</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="gc-target" value="Child" checked> Child</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="gc-target" value="Work"> Work</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="gc-target" value="Your Needs"> Your Needs</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="gc-target" value="Your Ex"> Your Ex</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="gc-advice">What would you tell another single parent in this exact situation?</label>
+                                <textarea id="gc-advice" class="form-control" placeholder="e.g., You're working hard to provide. One pizza night won't ruin your kids." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="gc-done-well">What did you do well today? (optional)</label>
+                                <textarea id="gc-done-well" class="form-control" placeholder="e.g., Made sure everyone brushed their teeth and gave big hugs before bed."></textarea>
+                            </div>
+                            <div class="btn-row">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-arrows-rotate"></i> Reframe Guilt</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleGuilt()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="results-guilt-check" class="results-section">
+                        <!-- Dynamic Output -->
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('guilt-check')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Saved Guilt Checks</h3>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-guilt-check"></i>
+                        </div>
+                        <div class="history-list" id="history-list-guilt-check"></div>
+                    </div>
+                </div>
+
+                <!-- VIEW 5: SOLO TIME PLANNER -->
+                <div id="view-solo-planner" class="view-content">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-battery-charging" style="color: var(--coral);"></i> Solo Time Planner</h2>
+                        <p class="problem-statement">"I haven't been alone in weeks and I'm burning out."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-solo-planner">
+                            <div class="form-group">
+                                <label for="st-hours">How many hours of solo time did you get last week?</label>
+                                <input type="number" id="st-hours" class="form-control" placeholder="e.g., 0" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label>What recharges you?</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="st-recharge" value="Quiet" checked> Quiet</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="st-recharge" value="Exercise"> Exercise</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="st-recharge" value="Social"> Social</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="st-recharge" value="Creative"> Creative</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="st-recharge" value="Nature"> Nature</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="st-recharge" value="Sleep"> Sleep</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="st-childcare">Childcare options available:</label>
+                                <textarea id="st-childcare" class="form-control" placeholder="e.g., Grandparents on Saturday, school hours, weekend co-parent schedule" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="st-budget">Budget for self-care:</label>
+                                <select id="st-budget" class="form-control" required>
+                                    <option value="$0">$0</option>
+                                    <option value="Under $20" selected>Under $20</option>
+                                    <option value="Under $50">Under $50</option>
+                                    <option value="Whatever I need">Whatever I need</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="st-obstacle">Biggest obstacle to solo time:</label>
+                                <select id="st-obstacle" class="form-control" required>
+                                    <option value="No childcare">No childcare</option>
+                                    <option value="Guilt" selected>Guilt</option>
+                                    <option value="Money">Money</option>
+                                    <option value="Energy">Energy</option>
+                                    <option value="Don't know what to do">Don't know what to do</option>
+                                </select>
+                            </div>
+                            <div class="btn-row">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calendar-plus"></i> Generate Solo Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleSolo()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="results-solo-planner" class="results-section">
+                        <!-- Dynamic Output -->
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('solo-planner')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Saved Solo Plans</h3>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-solo-planner"></i>
+                        </div>
+                        <div class="history-list" id="history-list-solo-planner"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Global Footer -->
+            <footer class="app-footer">
+                For practical planning purposes only. Not legal, financial, or therapeutic advice.
+            </footer>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast">Copied to clipboard!</div>
+
+    <script>
+        // --- NAVIGATION & VIEW SWITCHING ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const viewContents = document.querySelectorAll('.view-content');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+
+        function switchView(targetViewId) {
+            navLinks.forEach(link => {
+                if (link.getAttribute('data-view') === targetViewId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            viewContents.forEach(view => {
+                if (view.id === `view-${targetViewId}`) {
+                    view.classList.add('active');
+                } else {
+                    view.classList.remove('active');
+                }
+            });
+
+            // Close mobile sidebar if open
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('open');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            updateDashboardStats();
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const view = link.getAttribute('data-view');
+                switchView(view);
+            });
+        });
+
+        hamburgerBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('open');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('open');
+        });
+
+        // --- LOCAL STORAGE & HISTORY MANAGEMENT ---
+        const TOOLS = ['money-map', 'schedule-solver', 'coparent-boundary', 'guilt-check', 'solo-planner'];
+
+        function saveToHistory(toolId, data) {
+            const key = `singleparent_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            history.unshift({
+                id: Date.now(),
+                timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                data: data
+            });
+            // Cap at max 30 items per tool
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+            updateDashboardStats();
+        }
+
+        function getHistory(toolId) {
+            const key = `singleparent_history_${toolId}`;
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+
+        function clearHistory(toolId) {
+            const key = `singleparent_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            updateDashboardStats();
+            showToast("History cleared.");
+        }
+
+        function renderHistory(toolId) {
+            const listEl = document.getElementById(`history-list-${toolId}`);
+            if (!listEl) return;
+            const history = getHistory(toolId);
+
+            if (history.length === 0) {
+                listEl.innerHTML = `<p style="font-size:0.85rem; color: var(--text-muted); padding: 8px 0;">No saved history yet.</p>`;
+                return;
+            }
+
+            let html = `<div style="text-align:right; margin-bottom: 8px;">
+                <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="clearHistory('${toolId}')">Clear History</button>
+            </div>`;
+
+            history.forEach(item => {
+                let summaryText = "Entry";
+                if (toolId === 'money-map') summaryText = `Income: $${item.data.income} | Outflows: $${item.data.totalOutflow}`;
+                else if (toolId === 'schedule-solver') summaryText = `Weekly schedule run`;
+                else if (toolId === 'coparent-boundary') summaryText = `Issue: ${item.data.issue.substring(0, 30)}...`;
+                else if (toolId === 'guilt-check') summaryText = `Guilt reframe: ${item.data.feeling.substring(0, 30)}...`;
+                else if (toolId === 'solo-planner') summaryText = `Solo Hours: ${item.data.hours}h | Budget: ${item.data.budget}`;
+
+                html += `
+                <div class="history-item">
+                    <div>
+                        <strong>${summaryText}</strong>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${item.timestamp}</div>
+                    </div>
+                </div>`;
+            });
+
+            listEl.innerHTML = html;
+        }
+
+        function toggleHistory(toolId) {
+            const listEl = document.getElementById(`history-list-${toolId}`);
+            const arrowEl = document.getElementById(`history-arrow-${toolId}`);
+            if (listEl.style.display === 'block') {
+                listEl.style.display = 'none';
+                arrowEl.className = 'fa-solid fa-chevron-down';
+            } else {
+                listEl.style.display = 'block';
+                arrowEl.className = 'fa-solid fa-chevron-up';
+            }
+        }
+
+        function updateDashboardStats() {
+            let totalSaved = 0;
+            TOOLS.forEach(tool => {
+                totalSaved += getHistory(tool).length;
+            });
+            const countEl = document.getElementById('dashboard-entries-count');
+            if (countEl) countEl.innerText = `${totalSaved} Saved Entries`;
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            toast.innerText = text;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        // --- GENERATE SCHEDULE INPUT GRID ---
+        const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        function buildScheduleGrid() {
+            const container = document.getElementById('schedule-days-container');
+            if (!container) return;
+            let html = '';
+            DAYS.forEach(day => {
+                html += `
+                <div class="card" style="padding: 16px; margin-bottom: 12px; background: #FAFDFC;">
+                    <h4 style="color: var(--navy); margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">${day}</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight:600;">Work Hours:</label>
+                            <input type="text" id="sch-work-${day}" class="form-control" placeholder="e.g., 9-5">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight:600;">Childcare Coverage:</label>
+                            <input type="text" id="sch-care-${day}" class="form-control" placeholder="e.g., School / Grandma">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight:600;">Must-do Tasks:</label>
+                            <input type="text" id="sch-tasks-${day}" class="form-control" placeholder="e.g., Doctor appointment">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight:600;">Your Energy Level:</label>
+                            <select id="sch-energy-${day}" class="form-control">
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // --- TOOL 1: MONEY MAP LOGIC ---
+        document.getElementById('form-money-map').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const income = parseFloat(document.getElementById('mm-income').value) || 0;
+            const support = parseFloat(document.getElementById('mm-support').value) || 0;
+            const fixed = parseFloat(document.getElementById('mm-fixed').value) || 0;
+            const variable = parseFloat(document.getElementById('mm-variable').value) || 0;
+            const debt = parseFloat(document.getElementById('mm-debt').value) || 0;
+            const savings = parseFloat(document.getElementById('mm-savings').value) || 0;
+
+            const totalIncome = income + support;
+            const totalOutflow = fixed + variable + debt + savings;
+            const net = totalIncome - totalOutflow;
+
+            const fixedPct = Math.round((fixed / totalIncome) * 100) || 0;
+            const varPct = Math.round((variable / totalIncome) * 100) || 0;
+            const debtPct = Math.round((debt / totalIncome) * 100) || 0;
+
+            let alerts = [];
+            if (fixedPct > 60) alerts.push(`Fixed costs take up ${fixedPct}% of income (ideal is under 50%). High rent/childcare squeeze flexibility.`);
+            if (varPct > 35) alerts.push(`Variable spending is at ${varPct}%. Food, extras, and last-minute convenience costs may be leaking money.`);
+            if (debtPct > 20) alerts.push(`Debt payments take up ${debtPct}% of total income, creating significant cashflow pressure.`);
+            if (net < 0) alerts.push(`Critical: Monthly deficit of $${Math.abs(net)}. Outflows exceed income.`);
+
+            if (alerts.length === 0) alerts.push("Your expenses are well-balanced relative to income!");
+
+            let actions = [];
+            if (net < 0) {
+                actions.push("Call utility or debt providers to request hardship rates or payment deferrals.");
+                actions.push("Audit subscriptions and recurring monthly app charges immediately.");
+                actions.push("Switch grocery purchases to strict weekly meal-plan shopping lists.");
+            } else {
+                actions.push("Set up auto-transfer of your $ " + (savings || 50) + " savings on payday.");
+                actions.push("Review subscriptions or recurring expenses to squeeze out an extra $25 buffer.");
+                actions.push("Establish a 'rainy day' mini-fund reserved solely for kid emergencies.");
+            }
+
+            let win = net >= 0 
+                ? `You have a monthly surplus of $${net}! That represents security and control.`
+                : `You mapped your numbers clearly today. Facing the hard truth is step 1 to fixing it.`;
+
+            const resultsDiv = document.getElementById('results-money-map');
+            resultsDiv.innerHTML = `
+                <div class="result-box ${net >= 0 ? 'win' : 'alert'}">
+                    <h4>MONEY SNAPSHOT</h4>
+                    <p style="font-size: 1.2rem; font-weight:700;">
+                        Total Income: $${totalIncome} | Outflows: $${totalOutflow}
+                    </p>
+                    <p style="margin-top: 4px;">
+                        Net Status: <strong style="color:${net >= 0 ? '#2A9D8F' : '#E76F51'}">${net >= 0 ? 'Surplus' : 'Deficit'} of $${Math.abs(net)}</strong>
+                    </p>
+                </div>
+
+                <div class="result-box">
+                    <h4>WHERE THE MONEY GOES</h4>
+                    <p>• Fixed Expenses: <strong>${fixedPct}%</strong></p>
+                    <p>• Variable Expenses: <strong>${varPct}%</strong></p>
+                    <p>• Debt Payments: <strong>${debtPct}%</strong></p>
+                    <p>• Savings Goal: <strong>${Math.round((savings/totalIncome)*100) || 0}%</strong></p>
+                </div>
+
+                <div class="result-box alert">
+                    <h4>LEAKAGE ALERTS</h4>
+                    <ul style="padding-left: 20px;">
+                        ${alerts.map(a => `<li style="margin-bottom:4px;">${a}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="result-box">
+                    <h4>3 IMMEDIATE ACTIONS</h4>
+                    <ol style="padding-left: 20px;">
+                        ${actions.map(act => `<li style="margin-bottom:4px;">${act}</li>`).join('')}
+                    </ol>
+                </div>
+
+                <div class="result-box win">
+                    <h4>ONE WIN TO CELEBRATE</h4>
+                    <p>${win}</p>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+
+            saveToHistory('money-map', { income: totalIncome, totalOutflow, net });
+        });
+
+        function loadSampleMoneyMap() {
+            document.getElementById('mm-income').value = 3200;
+            document.getElementById('mm-support').value = 350;
+            document.getElementById('mm-fixed').value = 2300;
+            document.getElementById('mm-variable').value = 1100;
+            document.getElementById('mm-debt').value = 300;
+            document.getElementById('mm-savings').value = 50;
+        }
+
+
+        // --- TOOL 2: WEEKLY SCHEDULE SOLVER LOGIC ---
+        document.getElementById('form-schedule-solver').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let overloadedDays = [];
+            let heavyDays = [];
+            let energyGaps = [];
+
+            DAYS.forEach(day => {
+                const work = document.getElementById(`sch-work-${day}`).value.trim();
+                const care = document.getElementById(`sch-care-${day}`).value.trim();
+                const tasks = document.getElementById(`sch-tasks-${day}`).value.trim();
+                const energy = document.getElementById(`sch-energy-${day}`).value;
+
+                if (work && !care && (day !== 'Sat' && day !== 'Sun')) {
+                    energyGaps.push(`${day}: Work scheduled without clear childcare coverage.`);
+                }
+
+                if (work && tasks && energy === 'Low') {
+                    overloadedDays.push(day);
+                } else if (work || tasks) {
+                    heavyDays.push(day);
+                }
+            });
+
+            const resultsDiv = document.getElementById('results-schedule-solver');
+
+            let heatMapHtml = '<div class="schedule-grid">';
+            DAYS.forEach(day => {
+                const energy = document.getElementById(`sch-energy-${day}`).value;
+                let heatClass = 'heat-low';
+                if (energy === 'Low') heatClass = 'heat-high';
+                if (energy === 'Medium') heatClass = 'heat-med';
+
+                heatMapHtml += `
+                    <div class="day-column ${heatClass}">
+                        <h5>${day}</h5>
+                        <div>Energy: <strong>${energy}</strong></div>
+                    </div>
+                `;
+            });
+            heatMapHtml += '</div>';
+
+            let pinchPoints = energyGaps.length > 0 ? energyGaps : [
+                "Mid-week transition (Wednesday/Thursday): Work demands collide with evening household reset.",
+                "Sunday evening anxiety buildup due to unorganized school prep."
+            ];
+
+            resultsDiv.innerHTML = `
+                <div class="result-box">
+                    <h4>SCHEDULE HEAT MAP</h4>
+                    ${heatMapHtml}
+                </div>
+
+                <div class="result-box alert">
+                    <h4>THE PINCH POINTS</h4>
+                    <ul style="padding-left: 20px;">
+                        ${pinchPoints.map(p => `<li style="margin-bottom:4px;">${p}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="result-box">
+                    <h4>DELEGATION OPPORTUNITIES</h4>
+                    <p>• <strong>Kids' Chores:</strong> Delegate laundry sorting and school bag packing to kids starting tonight.</p>
+                    <p>• <strong>Batching:</strong> Combine grocery runs with existing kid pickup trips on ${heavyDays[0] || 'Tuesday'}.</p>
+                </div>
+
+                <div class="result-box win">
+                    <h4>ONE SELF-CARE SLOT</h4>
+                    <p>Carve out 30 uninterrupted minutes on <strong>${DAYS.find(d => document.getElementById(`sch-energy-${d}`).value === 'High') || 'Saturday'}</strong> during low-demand hours.</p>
+                </div>
+
+                <div class="result-box">
+                    <h4>WEEKEND PREP CHECKLIST (SUNDAY EVENING)</h4>
+                    <p>1. Lay out 5 days of clothing for kids and yourself.</p>
+                    <p>2. Pre-pack non-perishable lunch items and water bottles.</p>
+                    <p>3. Review school calendar and set phone reminders for key drop-off times.</p>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+
+            saveToHistory('schedule-solver', { overloadedCount: overloadedDays.length });
+        });
+
+        function loadSampleSchedule() {
+            DAYS.forEach(day => {
+                const workInput = document.getElementById(`sch-work-${day}`);
+                const careInput = document.getElementById(`sch-care-${day}`);
+                const tasksInput = document.getElementById(`sch-tasks-${day}`);
+                const energySelect = document.getElementById(`sch-energy-${day}`);
+
+                if (['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(day)) {
+                    workInput.value = '8:30 - 5:00';
+                    careInput.value = day === 'Wed' ? 'None after 3 PM' : 'After-school care';
+                    tasksInput.value = 'Cook dinner, laundry, homework';
+                    energySelect.value = day === 'Wed' || day === 'Thu' ? 'Low' : 'Medium';
+                } else {
+                    workInput.value = '';
+                    careInput.value = 'Solo parenting';
+                    tasksInput.value = 'Groceries, cleaning, park trip';
+                    energySelect.value = day === 'Sat' ? 'High' : 'Medium';
+                }
+            });
+        }
+
+
+        // --- TOOL 3: CO-PARENT BOUNDARY LOGIC ---
+        document.getElementById('form-coparent-boundary').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const issue = document.getElementById('cp-issue').value.trim();
+            const need = document.getElementById('cp-need').value.trim();
+            const style = document.getElementById('cp-style').value;
+            const urgent = document.querySelector('input[name="cp-urgent"]:checked').value;
+            const fear = document.getElementById('cp-fear').value.trim();
+
+            let script = `Hi,\n\nI am writing regarding ${issue.toLowerCase()}.\n\nMoving forward, I need ${need.toLowerCase()}.\n\nPlease confirm that this works so we can keep the schedule consistent for the kids.\n\nThanks.`;
+
+            if (style === 'Hostile' || style === 'Cold') {
+                script = `Hi,\n\nRegarding ${issue.toLowerCase()}: going forward, ${need.toLowerCase()}.\n\nThis ensures stability for the schedule. Thank you for your cooperation.`;
+            }
+
+            const resultsDiv = document.getElementById('results-coparent-boundary');
+            resultsDiv.innerHTML = `
+                <div class="result-box">
+                    <h4>YOUR POSITION</h4>
+                    <p>You need clarity on: <strong>${need}</strong> without getting drawn into personal arguments.</p>
+                </div>
+
+                <div class="result-box">
+                    <h4>THE BOUNDARY</h4>
+                    <p>"I communicate regarding logistics and child wellbeing only. Emotional or accusatory comments will be left unread."</p>
+                </div>
+
+                <div class="result-box win">
+                    <h4>MESSAGE SCRIPT 
+                        <button class="btn btn-copy" onclick="copyToClipboard(\`${script.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)"><i class="fa-solid fa-copy"></i> Copy Script</button>
+                    </h4>
+                    <div class="script-box">${script}</div>
+                </div>
+
+                <div class="result-box">
+                    <h4>TONE GUIDE</h4>
+                    <p>• Keep sentences short, informative, and free of emotional adjectives.</p>
+                    <p>• Avoid addressing past grievances or justifying your reasonable boundaries.</p>
+                </div>
+
+                <div class="result-box alert">
+                    <h4>IF THEY RESPOND NEGATIVELY</h4>
+                    <p>Do not respond immediately. Wait 2 hours. Reply only to actionable logistical points and ignore inflammatory statements entirely.</p>
+                </div>
+
+                <div class="result-box">
+                    <h4>IF THEY IGNORE IT</h4>
+                    <p>Send a neutral follow-up in ${urgent === 'Yes' ? '12 hours' : '48 hours'}: <em>"Following up on this so I can finalize plans for the kids."</em></p>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+
+            saveToHistory('coparent-boundary', { issue, need, style });
+        });
+
+        function loadSampleCoparent() {
+            document.getElementById('cp-issue').value = 'Ex drops off the kids 45 minutes late every Sunday evening without giving notice.';
+            document.getElementById('cp-need').value = 'Stick to the 6:00 PM drop-off time or text at least 1 hour in advance if delayed.';
+            document.getElementById('cp-style').value = 'Cold';
+            document.getElementById('cp-fear').value = 'Bedtimes keep getting pushed back and Monday mornings are chaotic for the kids.';
+        }
+
+
+        // --- TOOL 4: GUILT CHECK LOGIC ---
+        document.getElementById('form-guilt-check').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const feeling = document.getElementById('gc-feeling').value.trim();
+            const advice = document.getElementById('gc-advice').value.trim();
+            const doneWell = document.getElementById('gc-done-well').value.trim();
+
+            const targets = Array.from(document.querySelectorAll('input[name="gc-target"]:checked')).map(cb => cb.value);
+
+            const resultsDiv = document.getElementById('results-guilt-check');
+            resultsDiv.innerHTML = `
+                <div class="result-box win">
+                    <h4>REALITY CHECK</h4>
+                    <p><strong>What you told yourself to give another parent:</strong></p>
+                    <p style="font-style: italic; color: #2D3748; margin-top:4px;">"${advice}"</p>
+                    <p style="margin-top: 8px;"><em>Now offer that exact same grace to yourself. You deserve it.</em></p>
+                </div>
+
+                <div class="result-box">
+                    <h4>WHAT YOU ACTUALLY DID TODAY</h4>
+                    <p>• Kept your children safe, housed, and cared for on a single income and bandwidth.</p>
+                    ${doneWell ? `<p>• <strong>Win noted:</strong> ${doneWell}</p>` : ''}
+                </div>
+
+                <div class="result-box alert">
+                    <h4>THE GAP</h4>
+                    <p>You are comparing your full behind-the-scenes effort against an impossible standard of perfection (${targets.join(', ') || 'General'}).</p>
+                </div>
+
+                <div class="result-box">
+                    <h4>ONE GRACE FOR THIS WEEK</h4>
+                    <p>Give yourself explicit permission to let go of perfection around dinner menus or pristine house cleaning for the next 7 days.</p>
+                </div>
+
+                <div class="result-box win">
+                    <h4>ONE WIN TO CLAIM</h4>
+                    <p>You showed up today, managed a household alone, and cared enough about doing right by your family to pause and process this guilt.</p>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+
+            saveToHistory('guilt-check', { feeling, advice });
+        });
+
+        function loadSampleGuilt() {
+            document.getElementById('gc-feeling').value = 'I had to work late, missed my daughter\'s soccer practice, and ordered frozen pizza for dinner.';
+            document.getElementById('gc-advice').value = 'You are doing the work of two people alone. Missing one practice so you can keep food on the table is not failing—it is providing.';
+            document.getElementById('gc-done-well').value = 'Read two bedtime stories and hugged her tight before bed.';
+        }
+
+
+        // --- TOOL 5: SOLO TIME PLANNER LOGIC ---
+        document.getElementById('form-solo-planner').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const hours = parseFloat(document.getElementById('st-hours').value) || 0;
+            const childcare = document.getElementById('st-childcare').value.trim();
+            const budget = document.getElementById('st-budget').value;
+            const obstacle = document.getElementById('st-obstacle').value;
+
+            const recharges = Array.from(document.querySelectorAll('input[name="st-recharge"]:checked')).map(cb => cb.value);
+
+            let freeOptions = [
+                "30-minute solo walk in a nearby park with phone on Do Not Disturb.",
+                "At-home quiet hour with tea, noise-canceling headphones, or a chapter of a book.",
+                "A long uninterrupted bath after kids are asleep."
+            ];
+
+            let lowCostOptions = [
+                "Grab a favorite coffee/tea alone and sit uninterrupted at a café for 45 minutes ($5).",
+                "Visit a local library or plant shop for fresh scenery ($0-$10).",
+                "Pick up a specialized dessert or journal at a local store ($10)."
+            ];
+
+            const resultsDiv = document.getElementById('results-solo-planner');
+            resultsDiv.innerHTML = `
+                <div class="result-box ${hours < 2 ? 'alert' : 'win'}">
+                    <h4>SOLO TIME AUDIT</h4>
+                    <p>Last week's solo time: <strong>${hours} hours</strong>. (Recommended for single parents: minimum 2-4 hours weekly for recovery).</p>
+                    <p style="margin-top:4px;">Main obstacle identified: <strong>${obstacle}</strong>.</p>
+                </div>
+
+                <div class="result-box">
+                    <h4>3 FREE OPTIONS (${recharges.join(', ') || 'General'})</h4>
+                    <ul style="padding-left: 20px;">
+                        ${freeOptions.map(o => `<li style="margin-bottom:4px;">${o}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="result-box">
+                    <h4>3 LOW-COST OPTIONS (${budget})</h4>
+                    <ul style="padding-left: 20px;">
+                        ${lowCostOptions.map(o => `<li style="margin-bottom:4px;">${o}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="result-box win">
+                    <h4>THE GUILT ANTIDOTE</h4>
+                    <p>"Taking time to recharge is an investment in my patience and capacity. A rested parent is a more grounded parent."</p>
+                </div>
+
+                <div class="result-box">
+                    <h4>THIS WEEK'S PLAN</h4>
+                    <p>Schedule one <strong>45-minute block</strong> using available options (<em>${childcare}</em>). Treat this appointment with the same non-negotiable status as a doctor's visit.</p>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+
+            saveToHistory('solo-planner', { hours, budget, obstacle });
+        });
+
+        function loadSampleSolo() {
+            document.getElementById('st-hours').value = 0;
+            document.getElementById('st-childcare').value = 'School hours (8:30am - 3:00pm) or Grandma on Saturday morning';
+            document.getElementById('st-budget').value = 'Under $20';
+            document.getElementById('st-obstacle').value = 'Guilt';
+        }
+
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            buildScheduleGrid();
+            TOOLS.forEach(tool => renderHistory(tool));
+            updateDashboardStats();
+        });
+    </script>
+</body>
+</html>

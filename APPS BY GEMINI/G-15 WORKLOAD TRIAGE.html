@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkloadTriage — Workload Decision-Making Toolkit</title>
+    <!-- Google Fonts & Font Awesome CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --slate: #495057;
+            --slate-dark: #212529;
+            --slate-light: #6C757D;
+            --red: #E63946;
+            --red-hover: #D62828;
+            --red-light: #FFE5E8;
+            --bg-gradient: linear-gradient(135deg, #F8F9FA 0%, #FFF0F3 100%);
+            --sidebar-width: 250px;
+            --card-radius: 12px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--slate-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Layout Structure */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #FFFFFF;
+            border-right: 1px solid #E9ECEF;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #F1F3F5;
+        }
+
+        .sidebar-header i {
+            color: var(--red);
+            font-size: 1.5rem;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--slate-dark);
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--slate);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background: #F8F9FA;
+            color: var(--slate-dark);
+        }
+
+        .nav-item.active {
+            background: var(--slate);
+            color: #FFFFFF;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .nav-item.active i {
+            color: #FFFFFF;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            background: #FFFFFF;
+            padding: 12px 20px;
+            border-bottom: 1px solid #E9ECEF;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: var(--slate-dark);
+        }
+
+        .mobile-brand i { color: var(--red); }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--slate);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* Main Content Overlay */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Screen Management */
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* UI Cards & Elements */
+        .card {
+            background: #FFFFFF;
+            border-radius: var(--card-radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 24px;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .hero h2 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--slate-dark);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--slate-light);
+            max-width: 580px;
+            margin: 0 auto;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .dashboard-card {
+            background: #FFFFFF;
+            border-radius: var(--card-radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 1px solid #F1F3F5;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--red-light);
+        }
+
+        .dashboard-card .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: var(--red-light);
+            color: var(--red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+        }
+
+        .dashboard-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--slate-dark);
+        }
+
+        .dashboard-card p {
+            font-size: 0.875rem;
+            color: var(--slate-light);
+            line-height: 1.4;
+        }
+
+        /* Tool Headers */
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .tool-header-content h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--slate-dark);
+            margin-bottom: 4px;
+        }
+
+        .tool-header-content p.problem-statement {
+            color: var(--red);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Buttons & Forms */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            outline: none;
+        }
+
+        .btn-primary {
+            background: var(--red);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background: var(--red-hover);
+        }
+
+        .btn-secondary {
+            background: #F1F3F5;
+            color: var(--slate);
+        }
+
+        .btn-secondary:hover {
+            background: #E9ECEF;
+            color: var(--slate-dark);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #CED4DA;
+            color: var(--slate);
+        }
+
+        .btn-outline:hover {
+            background: #F8F9FA;
+            border-color: var(--slate-light);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--slate-dark);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #CED4DA;
+            font-size: 0.9rem;
+            color: var(--slate-dark);
+            transition: border-color 0.2s;
+            background: #FFFFFF;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.15);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .radio-label, .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            color: var(--slate);
+        }
+
+        .radio-label input, .checkbox-label input {
+            accent-color: var(--red);
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Dynamic Task Repeater Style */
+        .task-row {
+            background: #F8F9FA;
+            border: 1px solid #E9ECEF;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .task-row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .task-row-num {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--slate-light);
+            text-transform: uppercase;
+        }
+
+        .btn-remove-task {
+            color: var(--slate-light);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .btn-remove-task:hover { color: var(--red); }
+
+        .task-inputs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        /* Output Section Styling */
+        .output-container {
+            margin-top: 32px;
+            display: none;
+        }
+
+        .output-container.active { display: block; }
+
+        .output-header {
+            border-left: 4px solid var(--red);
+            padding-left: 12px;
+            margin-bottom: 20px;
+        }
+
+        .output-header h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--slate-dark);
+        }
+
+        .section-block {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--slate);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i { color: var(--red); }
+
+        /* Triage Matrix Grid */
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .matrix-quadrant {
+            background: #F8F9FA;
+            border-radius: 8px;
+            padding: 14px;
+            border-top: 3px solid #CED4DA;
+        }
+
+        .matrix-quadrant.do-first { border-color: var(--red); background: #FFF5F5; }
+        .matrix-quadrant.schedule { border-color: #4D908E; background: #F4F9F9; }
+        .matrix-quadrant.delegate { border-color: #F9C74F; background: #FFFDF5; }
+        .matrix-quadrant.drop { border-color: #90BE6D; background: #F5F9F5; }
+
+        .matrix-quadrant h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .matrix-quadrant ul {
+            list-style: none;
+            font-size: 0.85rem;
+        }
+
+        .matrix-quadrant li {
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px border #E9ECEF;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Script Box with Copy Button */
+        .script-box {
+            background: #212529;
+            color: #F8F9FA;
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+            font-family: monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            margin-top: 8px;
+        }
+
+        .script-copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255,255,255,0.15);
+            color: #FFF;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .script-copy-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Visual Meters & Indicators */
+        .meter-container {
+            height: 12px;
+            background: #E9ECEF;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .meter-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .meter-green { background: #43AA8B; }
+        .meter-yellow { background: #F9C74F; }
+        .meter-red { background: var(--red); }
+
+        /* Pie Chart Simulation */
+        .pie-chart-container {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .css-pie {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: conic-gradient(var(--red) 0% 25%, #4D908E 25% 50%, #F9C74F 50% 75%, #90BE6D 75% 100%);
+            box-shadow: var(--shadow-sm);
+            flex-shrink: 0;
+        }
+
+        .pie-legend {
+            list-style: none;
+            font-size: 0.85rem;
+            flex: 1;
+        }
+
+        .pie-legend li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .pie-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        /* History Drawer Accordion */
+        .history-section {
+            margin-top: 32px;
+            border-top: 1px solid #E9ECEF;
+            padding-top: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+
+        .history-header h4 {
+            font-size: 0.9rem;
+            color: var(--slate);
+            font-weight: 700;
+        }
+
+        .history-list {
+            display: none;
+            margin-top: 12px;
+            gap: 8px;
+            flex-direction: column;
+        }
+
+        .history-list.active { display: flex; }
+
+        .history-item {
+            background: #F8F9FA;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #E9ECEF;
+        }
+
+        .history-date { color: var(--slate-light); font-size: 0.75rem; }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--slate-dark);
+            color: #FFFFFF;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Footer */
+        footer {
+            background: #FFFFFF;
+            border-top: 1px solid #E9ECEF;
+            padding: 16px 24px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--slate-light);
+            line-height: 1.5;
+            margin-top: auto;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .main-content {
+                padding: 20px 16px;
+            }
+
+            .matrix-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h2 { font-size: 1.75rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="mobile-brand">
+            <i class="fa-solid fa-compass-drafting"></i>
+            <span>WorkloadTriage</span>
+        </div>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle Navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-compass-drafting"></i>
+                <h1>WorkloadTriage</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-screen="dashboard">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-item" data-screen="tool1">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Task Prioritizer</span>
+                </button>
+                <button class="nav-item" data-screen="tool2">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>Capacity Calculator</span>
+                </button>
+                <button class="nav-item" data-screen="tool3">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    <span>Pushback Scripting</span>
+                </button>
+                <button class="nav-item" data-screen="tool4">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>Time Audit</span>
+                </button>
+                <button class="nav-item" data-screen="tool5">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <span>Burnout Check</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="main-wrapper">
+            <main class="main-content">
+
+                <!-- DASHBOARD SCREEN -->
+                <section id="screen-dashboard" class="screen active">
+                    <div class="hero">
+                        <h2>Workload Triage</h2>
+                        <p>When everything is urgent, figure out what's actually important.</p>
+                    </div>
+
+                    <div class="grid-cards">
+                        <div class="dashboard-card" onclick="switchScreen('tool1')">
+                            <div class="icon-wrapper"><i class="fa-solid fa-list-check"></i></div>
+                            <h3>Task Prioritizer</h3>
+                            <p>Filter through dozens of urgent tasks to find true priority and hard drops.</p>
+                        </div>
+                        <div class="dashboard-card" onclick="switchScreen('tool2')">
+                            <div class="icon-wrapper"><i class="fa-solid fa-calculator"></i></div>
+                            <h3>Capacity Calculator</h3>
+                            <p>Map hours demanded against available time and energy realistically.</p>
+                        </div>
+                        <div class="dashboard-card" onclick="switchScreen('tool3')">
+                            <div class="icon-wrapper"><i class="fa-solid fa-comment-dots"></i></div>
+                            <h3>Pushback Script Builder</h3>
+                            <p>Say no or negotiate realistic deadlines without risking professional reputation.</p>
+                        </div>
+                        <div class="dashboard-card" onclick="switchScreen('tool4')">
+                            <div class="icon-wrapper"><i class="fa-solid fa-clock"></i></div>
+                            <h3>Time Audit</h3>
+                            <p>Expose hidden time leakage, unnecessary meetings, and low-value tasks.</p>
+                        </div>
+                        <div class="dashboard-card" onclick="switchScreen('tool5')">
+                            <div class="icon-wrapper"><i class="fa-solid fa-heart-pulse"></i></div>
+                            <h3>Burnout Check</h3>
+                            <p>Evaluate chronic overload and formulate concrete non-generic mitigation steps.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: TASK PRIORITIZER -->
+                <section id="screen-tool1" class="screen">
+                    <div class="tool-header">
+                        <div class="tool-header-content">
+                            <h2>Task Prioritizer</h2>
+                            <p class="problem-statement">"I have 47 things to do and they're all marked urgent."</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadSampleTool1()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool1" onsubmit="processTool1(event)">
+                            <div id="task-container">
+                                <!-- Dynamic Task Rows Inserted Here -->
+                            </div>
+
+                            <div style="display: flex; gap: 12px; margin-top: 16px;">
+                                <button type="button" class="btn btn-outline btn-sm" onclick="addTaskRow()">
+                                    <i class="fa-solid fa-plus"></i> Add Another Task
+                                </button>
+                                <button type="submit" class="btn btn-primary" style="margin-left: auto;">
+                                    Triage My Tasks
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool1" class="card output-container">
+                        <div class="output-header">
+                            <h3>Triage Analysis & Matrix</h3>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-border-all"></i> Triage Matrix</div>
+                            <div class="matrix-grid">
+                                <div class="matrix-quadrant do-first">
+                                    <h4>Do First <span>(High Impact/High Risk)</span></h4>
+                                    <ul id="triage-do-first"></ul>
+                                </div>
+                                <div class="matrix-quadrant schedule">
+                                    <h4>Schedule <span>(High Value/Strategic)</span></h4>
+                                    <ul id="triage-schedule"></ul>
+                                </div>
+                                <div class="matrix-quadrant delegate">
+                                    <h4>Delegate / Push <span>(Low Impact/High Demand)</span></h4>
+                                    <ul id="triage-delegate"></ul>
+                                </div>
+                                <div class="matrix-quadrant drop">
+                                    <h4>Drop / Deprioritize <span>(Noise)</span></h4>
+                                    <ul id="triage-drop"></ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-bullseye"></i> Hard Truth: Noisy Vs Critical</div>
+                            <p id="triage-hard-truth" style="font-size: 0.9rem; color: var(--slate); line-height: 1.5;"></p>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-bolt"></i> Quick Wins (&lt; 30 Mins)</div>
+                            <ul id="triage-quick-wins" style="font-size: 0.9rem; padding-left: 20px; color: var(--slate);"></ul>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-comment-slash"></i> What to Say to Your Boss</div>
+                            <div class="script-box">
+                                <button class="script-copy-btn" onclick="copyScript('script-triage')"><i class="fa-solid fa-copy"></i> Copy</button>
+                                <span id="script-triage"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History Drawer -->
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool1')">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Triage Records</h4>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-tool1"></i>
+                        </div>
+                        <div class="history-list" id="history-list-tool1"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: CAPACITY CALCULATOR -->
+                <section id="screen-tool2" class="screen">
+                    <div class="tool-header">
+                        <div class="tool-header-content">
+                            <h2>Capacity Calculator</h2>
+                            <p class="problem-statement">"How much can I actually handle this week?"</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadSampleTool2()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool2" onsubmit="processTool2(event)">
+                            <div class="task-inputs-grid">
+                                <div class="form-group">
+                                    <label>Contracted Hours / Week</label>
+                                    <input type="number" id="t2-contracted" class="form-control" required min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Hours in Meetings</label>
+                                    <input type="number" id="t2-meetings" class="form-control" required min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Hours for Admin / Email</label>
+                                    <input type="number" id="t2-admin" class="form-control" required min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Hours Deep Work Needed</label>
+                                    <input type="number" id="t2-deep" class="form-control" required min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Unexpected Work (Last Wk)</label>
+                                    <input type="number" id="t2-unexpected" class="form-control" required min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Current Energy Level</label>
+                                    <select id="t2-energy" class="form-control" required>
+                                        <option value="High">High (100% output capability)</option>
+                                        <option value="Medium">Medium (80% output capability)</option>
+                                        <option value="Low">Low (60% output capability)</option>
+                                        <option value="Depleted">Depleted (40% output capability)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">Calculate Capacity Reality</button>
+                        </form>
+                    </div>
+
+                    <div id="output-tool2" class="card output-container">
+                        <div class="output-header">
+                            <h3>Capacity Breakdown</h3>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-chart-simple"></i> Deficit Meter & Hours</div>
+                            <p id="t2-capacity-text" style="font-weight: 600; font-size: 1rem; margin-bottom: 8px;"></p>
+                            <div class="meter-container">
+                                <div id="t2-meter-bar" class="meter-bar"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-battery-quarter"></i> Energy Adjustment Factor</div>
+                            <p id="t2-energy-impact" style="font-size: 0.9rem; color: var(--slate); line-height: 1.5;"></p>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-scissors"></i> What Must Give</div>
+                            <p id="t2-recommendation" style="font-size: 0.9rem; color: var(--slate); line-height: 1.5;"></p>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-comments"></i> One Conversation Script</div>
+                            <div class="script-box">
+                                <button class="script-copy-btn" onclick="copyScript('script-capacity')"><i class="fa-solid fa-copy"></i> Copy</button>
+                                <span id="script-capacity"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool2')">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Capacity Runs</h4>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-tool2"></i>
+                        </div>
+                        <div class="history-list" id="history-list-tool2"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: PUSHBACK SCRIPT BUILDER -->
+                <section id="screen-tool3" class="screen">
+                    <div class="tool-header">
+                        <div class="tool-header-content">
+                            <h2>Pushback Script Builder</h2>
+                            <p class="problem-statement">"I need to say no or negotiate deadlines without seeming difficult."</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadSampleTool3()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool3" onsubmit="processTool3(event)">
+                            <div class="form-group">
+                                <label>What are you being asked to do?</label>
+                                <textarea id="t3-request" class="form-control" required></textarea>
+                            </div>
+                            <div class="task-inputs-grid">
+                                <div class="form-group">
+                                    <label>Requested Deadline</label>
+                                    <input type="text" id="t3-deadline" class="form-control" required placeholder="e.g. Monday morning">
+                                </div>
+                                <div class="form-group">
+                                    <label>Who is asking?</label>
+                                    <select id="t3-asker" class="form-control" required>
+                                        <option value="Direct manager">Direct Manager</option>
+                                        <option value="Senior leader">Senior Leader</option>
+                                        <option value="Peer">Peer / Colleague</option>
+                                        <option value="Client">Client / External</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>What else is currently on your plate?</label>
+                                <textarea id="t3-plate" class="form-control" required placeholder="Key existing commitments..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Is this request a pattern or one-time?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t3-pattern" value="Pattern" required> Pattern</label>
+                                    <label class="radio-label"><input type="radio" name="t3-pattern" value="One-time" checked> One-time</label>
+                                    <label class="radio-label"><input type="radio" name="t3-pattern" value="Not sure"> Not sure</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Generate Response Scripts</button>
+                        </form>
+                    </div>
+
+                    <div id="output-tool3" class="card output-container">
+                        <div class="output-header">
+                            <h3>Negotiation Options & Strategy</h3>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-envelope"></i> Option A: Direct Pushback</div>
+                            <div class="script-box">
+                                <button class="script-copy-btn" onclick="copyScript('script-pb-direct')"><i class="fa-solid fa-copy"></i> Copy</button>
+                                <span id="script-pb-direct"></span>
+                            </div>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-handshake"></i> Option B: Diplomatic Negotiation</div>
+                            <div class="script-box">
+                                <button class="script-copy-btn" onclick="copyScript('script-pb-diplo')"><i class="fa-solid fa-copy"></i> Copy</button>
+                                <span id="script-pb-diplo"></span>
+                            </div>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Option C: Deferred Timeline</div>
+                            <div class="script-box">
+                                <button class="script-copy-btn" onclick="copyScript('script-pb-defer')"><i class="fa-solid fa-copy"></i> Copy</button>
+                                <span id="script-pb-defer"></span>
+                            </div>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-lightbulb"></i> Strategic Advice</div>
+                            <p><strong>Timing Tactic:</strong> <span id="t3-tactics"></span></p>
+                            <p style="margin-top: 8px;"><strong>Alternative Offer:</strong> <span id="t3-alternative"></span></p>
+                            <p style="margin-top: 8px;"><strong>If They Insist:</strong> <span id="t3-insist"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool3')">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Script History</h4>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-tool3"></i>
+                        </div>
+                        <div class="history-list" id="history-list-tool3"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: TIME AUDIT -->
+                <section id="screen-tool4" class="screen">
+                    <div class="tool-header">
+                        <div class="tool-header-content">
+                            <h2>Time Audit</h2>
+                            <p class="problem-statement">"Where does my time actually go?"</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadSampleTool4()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool4" onsubmit="processTool4(event)">
+                            <p style="font-size: 0.85rem; color: var(--slate-light); margin-bottom: 12px;">Estimate hours spent last week across categories:</p>
+                            <div class="task-inputs-grid">
+                                <div class="form-group"><label>Core Responsibilities</label><input type="number" id="t4-core" class="form-control" min="0" required></div>
+                                <div class="form-group"><label>Meetings</label><input type="number" id="t4-meetings" class="form-control" min="0" required></div>
+                                <div class="form-group"><label>Email / Chat</label><input type="number" id="t4-email" class="form-control" min="0" required></div>
+                                <div class="form-group"><label>Helping Others</label><input type="number" id="t4-helping" class="form-control" min="0" required></div>
+                                <div class="form-group"><label>Rework / Fixing Errors</label><input type="number" id="t4-rework" class="form-control" min="0" required></div>
+                                <div class="form-group"><label>Admin / Reporting</label><input type="number" id="t4-admin" class="form-control" min="0" required></div>
+                                <div class="form-group"><label>Personal / Breaks</label><input type="number" id="t4-personal" class="form-control" min="0" required></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Which category felt most wasteful?</label>
+                                <select id="t4-wasteful" class="form-control" required>
+                                    <option value="Meetings">Meetings</option>
+                                    <option value="Email / Chat">Email / Chat</option>
+                                    <option value="Helping Others">Helping Others</option>
+                                    <option value="Rework / Fixing Errors">Rework / Fixing Errors</option>
+                                    <option value="Admin / Reporting">Admin / Reporting</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>What would you do with 5 extra hours?</label>
+                                <textarea id="t4-extra" class="form-control" required placeholder="e.g. Strategic planning, deep focus work, leave on time..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Audit My Time</button>
+                        </form>
+                    </div>
+
+                    <div id="output-tool4" class="card output-container">
+                        <div class="output-header">
+                            <h3>Time Breakdown & Audit</h3>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-chart-pie"></i> Visual Allocation</div>
+                            <div class="pie-chart-container">
+                                <div class="css-pie" id="t4-pie-chart"></div>
+                                <ul class="pie-legend" id="t4-pie-legend"></ul>
+                            </div>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-filter-circle-xmark"></i> Leakage Identified</div>
+                            <p id="t4-leakage" style="font-size: 0.9rem; color: var(--slate); line-height: 1.5;"></p>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-rotate-left"></i> Recovery Plan (Reclaim 3 Hours)</div>
+                            <ul id="t4-recovery" style="font-size: 0.9rem; padding-left: 20px; color: var(--slate);"></ul>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-calendar-xmark"></i> Meeting Audit Guidance</div>
+                            <p id="t4-meeting-audit" style="font-size: 0.9rem; color: var(--slate); line-height: 1.5;"></p>
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool4')">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Time Audit Records</h4>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-tool4"></i>
+                        </div>
+                        <div class="history-list" id="history-list-tool4"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: BURNOUT CHECK -->
+                <section id="screen-tool5" class="screen">
+                    <div class="tool-header">
+                        <div class="tool-header-content">
+                            <h2>Burnout Check</h2>
+                            <p class="problem-statement">"Am I just busy or am I burning out?"</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadSampleTool5()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool5" onsubmit="processTool5(event)">
+                            <div class="form-group">
+                                <label>How many weeks have you felt overloaded?</label>
+                                <select id="t5-duration" class="form-control" required>
+                                    <option value="1-2">1-2 weeks</option>
+                                    <option value="3-4">3-4 weeks</option>
+                                    <option value="2-3mo">2-3 months</option>
+                                    <option value="6mo+">6+ months</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Check all that apply:</label>
+                                <div class="checkbox-group" style="flex-direction: column; gap: 8px;">
+                                    <label class="checkbox-label"><input type="checkbox" class="t5-symptom" value="Exhausted despite sleep"> Exhausted despite sleep</label>
+                                    <label class="checkbox-label"><input type="checkbox" class="t5-symptom" value="Cynical about work"> Cynical / detached about work</label>
+                                    <label class="checkbox-label"><input type="checkbox" class="t5-symptom" value="Reduced performance"> Noticeable drop in performance / concentration</label>
+                                    <label class="checkbox-label"><input type="checkbox" class="t5-symptom" value="Detached from colleagues"> Detached from colleagues / isolating</label>
+                                    <label class="checkbox-label"><input type="checkbox" class="t5-symptom" value="Physical symptoms"> Physical symptoms (headaches, stomach issues, tension)</label>
+                                    <label class="checkbox-label"><input type="checkbox" class="t5-symptom" value="Can't enjoy weekends"> Unable to disconnect or enjoy weekends</label>
+                                    <label class="checkbox-label"><input type="checkbox" class="t5-symptom" value="Dreading Monday"> Severe Sunday dread</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Are you recovering on days off?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5-recovery" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t5-recovery" value="Somewhat" checked> Somewhat</label>
+                                    <label class="radio-label"><input type="radio" name="t5-recovery" value="No"> No</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Have you talked to anyone about this?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5-talked" value="Manager"> Manager</label>
+                                    <label class="radio-label"><input type="radio" name="t5-talked" value="Friend"> Friend</label>
+                                    <label class="radio-label"><input type="radio" name="t5-talked" value="Partner"> Partner</label>
+                                    <label class="radio-label"><input type="radio" name="t5-talked" value="Therapist"> Therapist</label>
+                                    <label class="radio-label"><input type="radio" name="t5-talked" value="No one" checked> No one</label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Evaluate Burnout Risk</button>
+                        </form>
+                    </div>
+
+                    <div id="output-tool5" class="card output-container">
+                        <div class="output-header">
+                            <h3>Assessment & Recommendations</h3>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-triangle-exclamation"></i> Risk Level</div>
+                            <h4 id="t5-risk-level" style="font-size: 1.4rem; font-weight: 800; margin-bottom: 6px;"></h4>
+                            <p id="t5-risk-desc" style="font-size: 0.9rem; color: var(--slate); line-height: 1.5;"></p>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-list-check"></i> Immediate Tactical Actions</div>
+                            <ul id="t5-actions" style="font-size: 0.9rem; padding-left: 20px; color: var(--slate);"></ul>
+                        </div>
+
+                        <div class="section-block">
+                            <div class="section-title"><i class="fa-solid fa-comments"></i> Manager Capacity Conversation Guide</div>
+                            <div class="script-box">
+                                <button class="script-copy-btn" onclick="copyScript('script-burnout')"><i class="fa-solid fa-copy"></i> Copy</button>
+                                <span id="script-burnout"></span>
+                            </div>
+                        </div>
+
+                        <div class="section-block" style="background: #FFF0F3; padding: 16px; border-radius: 8px;">
+                            <div class="section-title" style="color: var(--red);"><i class="fa-solid fa-user-doctor"></i> Professional Support Guidance</div>
+                            <p style="font-size: 0.85rem; color: var(--slate-dark); line-height: 1.4;">
+                                If physical symptoms, severe insomnia, or emotional numbness persist longer than 2 weeks, consult a physician or licensed mental health professional. Work strategies can mitigate structural load, but clinical exhaustion requires health intervention.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool5')">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Assessments</h4>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-tool5"></i>
+                        </div>
+                        <div class="history-list" id="history-list-tool5"></div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Global Footer -->
+            <footer>
+                For productivity and workload planning only. Not a substitute for discussing capacity with your manager. If you're experiencing burnout symptoms, consult a healthcare professional.
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast UI -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <!-- Logic Script -->
+    <script>
+        // Global Navigation & UI Management
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            addTaskRow(); // Init with one blank task row for Tool 1
+            loadAllHistories();
+        });
+
+        function initNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetScreen = item.getAttribute('data-screen');
+                    switchScreen(targetScreen);
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('mobile-open');
+                    }
+                });
+            });
+
+            hamburgerBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-open');
+            });
+        }
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            const targetScreen = document.getElementById(`screen-${screenId}`);
+            if (targetScreen) targetScreen.classList.add('active');
+
+            const targetNav = document.querySelector(`.nav-item[data-screen="${screenId}"]`);
+            if (targetNav) targetNav.classList.add('active');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function copyScript(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        // TOOL 1 LOGIC: TASK PRIORITIZER
+        let taskCount = 0;
+
+        function addTaskRow(data = null) {
+            if (taskCount >= 10) {
+                alert("Maximum limit of 10 tasks reached.");
+                return;
+            }
+            taskCount++;
+            const container = document.getElementById('task-container');
+            const row = document.createElement('div');
+            row.className = 'task-row';
+            row.id = `task-row-${taskCount}`;
+
+            row.innerHTML = `
+                <div class="task-row-header">
+                    <span class="task-row-num">Task #${taskCount}</span>
+                    <button type="button" class="btn-remove-task" onclick="removeTaskRow('${row.id}')"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control t-name" placeholder="Task Name" value="${data ? data.name : ''}" required>
+                </div>
+                <div class="task-inputs-grid">
+                    <div>
+                        <label style="font-size: 0.75rem;">Assigned By</label>
+                        <select class="form-control t-assigner">
+                            <option value="My boss's boss" ${data && data.assigner==="My boss's boss"?'selected':''}>My Boss's Boss</option>
+                            <option value="My boss" ${data && data.assigner==="My boss"?'selected':''}>My Boss</option>
+                            <option value="External client" ${data && data.assigner==="External client"?'selected':''}>External Client</option>
+                            <option value="A colleague" ${data && data.assigner==="A colleague"?'selected':''}>A Colleague</option>
+                            <option value="Me" ${data && data.assigner==="Me"?'selected':''}>Me</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem;">Consequence if Late</label>
+                        <select class="form-control t-consequence">
+                            <option value="Safety/legal issue" ${data && data.consequence==="Safety/legal issue"?'selected':''}>Safety/Legal Issue</option>
+                            <option value="Job risk" ${data && data.consequence==="Job risk"?'selected':''}>Job Risk</option>
+                            <option value="Serious problem" ${data && data.consequence==="Serious problem"?'selected':''}>Serious Problem</option>
+                            <option value="Mild inconvenience" ${data && data.consequence==="Mild inconvenience"?'selected':''}>Mild Inconvenience</option>
+                            <option value="None" ${data && data.consequence==="None"?'selected':''}>None</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem;">Time Needed</label>
+                        <select class="form-control t-time">
+                            <option value="<30min" ${data && data.time==="<30min"?'selected':''}>&lt; 30 Mins</option>
+                            <option value="30min-2hr" ${data && data.time==="30min-2hr"?'selected':''}>30 Min - 2 Hrs</option>
+                            <option value="Half day" ${data && data.time==="Half day"?'selected':''}>Half Day</option>
+                            <option value="Full day" ${data && data.time==="Full day"?'selected':''}>Full Day</option>
+                            <option value="Multi-day" ${data && data.time==="Multi-day"?'selected':''}>Multi-Day</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem;">Moves Key Goal?</label>
+                        <select class="form-control t-goal">
+                            <option value="Yes" ${data && data.goal==="Yes"?'selected':''}>Yes</option>
+                            <option value="Not sure" ${data && data.goal==="Not sure"?'selected':''}>Not Sure</option>
+                            <option value="No" ${data && data.goal==="No"?'selected':''}>No</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function removeTaskRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+                row.remove();
+                taskCount--;
+            }
+        }
+
+        function loadSampleTool1() {
+            document.getElementById('task-container').innerHTML = '';
+            taskCount = 0;
+            const samples = [
+                { name: "Fix checkout payment bug", assigner: "My boss's boss", consequence: "Safety/legal issue", time: "30min-2hr", goal: "Yes" },
+                { name: "Update slide deck for Q3 goals", assigner: "My boss", consequence: "Serious problem", time: "Half day", goal: "Yes" },
+                { name: "Answer peer query on process", assigner: "A colleague", consequence: "Mild inconvenience", time: "<30min", goal: "No" },
+                { name: "Format client proposal notes", assigner: "External client", consequence: "Job risk", time: "30min-2hr", goal: "Yes" },
+                { name: "Clean out shared folder archives", assigner: "Me", consequence: "None", time: "Full day", goal: "No" },
+                { name: "Submit weekly status report", assigner: "My boss", consequence: "Mild inconvenience", time: "<30min", goal: "No" },
+                { name: "Draft technical spec document", assigner: "My boss", consequence: "Serious problem", time: "Multi-day", goal: "Yes" }
+            ];
+            samples.forEach(s => addTaskRow(s));
+        }
+
+        function processTool1(e) {
+            e.preventDefault();
+            const rows = document.querySelectorAll('.task-row');
+            if (rows.length === 0) return;
+
+            const doFirst = [], schedule = [], delegate = [], drop = [], quickWins = [];
+
+            rows.forEach(r => {
+                const name = r.querySelector('.t-name').value;
+                const assigner = r.querySelector('.t-assigner').value;
+                const consequence = r.querySelector('.t-consequence').value;
+                const time = r.querySelector('.t-time').value;
+                const goal = r.querySelector('.t-goal').value;
+
+                const isHighRisk = consequence === "Job risk" || consequence === "Safety/legal issue";
+                const isHighGoal = goal === "Yes";
+                const isQuick = time === "<30min";
+
+                if (isQuick) quickWins.push(name);
+
+                if (isHighRisk && isHighGoal) {
+                    doFirst.push(name);
+                } else if (isHighGoal) {
+                    schedule.push(name);
+                } else if (isHighRisk || assigner === "My boss's boss") {
+                    delegate.push(name);
+                } else {
+                    drop.push(name);
+                }
+            });
+
+            // UI Render
+            renderList('triage-do-first', doFirst);
+            renderList('triage-schedule', schedule);
+            renderList('triage-delegate', delegate);
+            renderList('triage-drop', drop);
+            renderList('triage-quick-wins', quickWins);
+
+            document.getElementById('triage-hard-truth').innerText = 
+                `Out of ${rows.length} tasks, ${drop.length + delegate.length} are low-alignment noise. Focus immediate energy exclusively on ${doFirst.length} Critical Items.`;
+
+            document.getElementById('script-triage').innerText = 
+                `"Hi [Boss Name], I'm currently aligning my core bandwidth to ensure high-quality delivery on high-impact objectives: (${doFirst.join(', ') || 'Primary Goals'}). To achieve this on schedule, I am deferring or looking to delegate secondary items: (${drop.join(', ') || 'Non-critical items'}). Let me know if you view the strategic priorities differently."`;
+
+            document.getElementById('output-tool1').classList.add('active');
+            saveHistory('tool1', `${rows.length} Tasks Triaged (${doFirst.length} Do First)`);
+        }
+
+        function renderList(elemId, items) {
+            const el = document.getElementById(elemId);
+            el.innerHTML = items.length ? items.map(i => `<li><i class="fa-solid fa-angle-right"></i> ${i}</li>`).join('') : '<li style="color:#A0AEC0;">None</li>';
+        }
+
+        // TOOL 2 LOGIC: CAPACITY CALCULATOR
+        function loadSampleTool2() {
+            document.getElementById('t2-contracted').value = 40;
+            document.getElementById('t2-meetings').value = 18;
+            document.getElementById('t2-admin').value = 8;
+            document.getElementById('t2-deep').value = 15;
+            document.getElementById('t2-unexpected').value = 5;
+            document.getElementById('t2-energy').value = "Low";
+        }
+
+        function processTool2(e) {
+            e.preventDefault();
+            const contracted = parseFloat(document.getElementById('t2-contracted').value);
+            const meetings = parseFloat(document.getElementById('t2-meetings').value);
+            const admin = parseFloat(document.getElementById('t2-admin').value);
+            const deep = parseFloat(document.getElementById('t2-deep').value);
+            const unexpected = parseFloat(document.getElementById('t2-unexpected').value);
+            const energy = document.getElementById('t2-energy').value;
+
+            const totalDemanded = meetings + admin + deep + unexpected;
+            
+            // Energy multiplier
+            let energyMultiplier = 1.0;
+            if (energy === "Medium") energyMultiplier = 0.8;
+            if (energy === "Low") energyMultiplier = 0.6;
+            if (energy === "Depleted") energyMultiplier = 0.4;
+
+            const effectiveCapacity = contracted * energyMultiplier;
+            const deficit = totalDemanded - effectiveCapacity;
+
+            const textElem = document.getElementById('t2-capacity-text');
+            const meterBar = document.getElementById('t2-meter-bar');
+
+            if (deficit > 0) {
+                textElem.innerText = `CAPACITY OVERLOAD: ${totalDemanded} Hours Demanded vs ${effectiveCapacity.toFixed(1)} Effective Capacity Hours (${deficit.toFixed(1)}h Deficit)`;
+                textElem.style.color = "var(--red)";
+                meterBar.className = "meter-bar meter-red";
+                meterBar.style.width = "100%";
+            } else {
+                textElem.innerText = `CAPACITY BALANCED: ${totalDemanded} Hours Demanded vs ${effectiveCapacity.toFixed(1)} Effective Hours Available`;
+                textElem.style.color = "#43AA8B";
+                meterBar.className = "meter-bar meter-green";
+                meterBar.style.width = `${(totalDemanded / effectiveCapacity) * 100}%`;
+            }
+
+            document.getElementById('t2-energy-impact').innerText = 
+                `Current Energy (${energy}): Output capability factor is ${energyMultiplier * 100}%. Sustainable available working capacity drops from ${contracted}h to ${effectiveCapacity.toFixed(1)}h.`;
+
+            document.getElementById('t2-recommendation').innerText = 
+                meetings > 12 ? "Meetings consume excessive baseline capacity. Immediately decline/delegate 30% of recurring meetings." : "Reduce deep work commitments or request extended timelines for upcoming project milestones.";
+
+            document.getElementById('script-capacity').innerText = 
+                `"Hi [Boss Name], I completed a capacity audit for this week. Between scheduled meetings (${meetings}h) and routine administrative duties (${admin}h), I have ${Math.max(0, contracted - meetings - admin)}h remaining for focused execution. To execute (${deep}h of deep focus projects) reliably, I need to push non-critical tasks or reduce meeting density. Can we adjust deadlines for [Project Name]?"`;
+
+            document.getElementById('output-tool2').classList.add('active');
+            saveHistory('tool2', `Deficit: ${deficit.toFixed(1)}h (${energy} Energy)`);
+        }
+
+        // TOOL 3 LOGIC: PUSHBACK SCRIPT BUILDER
+        function loadSampleTool3() {
+            document.getElementById('t3-request').value = "Prepare complete market analysis deck and financial model.";
+            document.getElementById('t3-deadline').value = "Monday 9:00 AM";
+            document.getElementById('t3-asker').value = "Direct manager";
+            document.getElementById('t3-plate').value = "Finalizing Q3 client audit reports and onboarding two team members.";
+        }
+
+        function processTool3(e) {
+            e.preventDefault();
+            const request = document.getElementById('t3-request').value;
+            const deadline = document.getElementById('t3-deadline').value;
+            const asker = document.getElementById('t3-asker').value;
+            const plate = document.getElementById('t3-plate').value;
+
+            document.getElementById('script-pb-direct').innerText = 
+                `"Hi [Name], I received the request to ${request} by ${deadline}. Due to current commitments (${plate}), I cannot complete this without sacrificing quality on existing deadlines. I can deliver this by [Proposed Later Date] instead."`;
+
+            document.getElementById('script-pb-diplo').innerText = 
+                `"Hi [Name], happy to support ${request}. Currently, my main focus is on ${plate}. If this new task takes priority, which of the current deliverables should I pause to free up bandwidth?"`;
+
+            document.getElementById('script-pb-defer').innerText = 
+                `"Hi [Name], I can take on ${request}. Given current capacity, I can start on this starting [Date]. I will share an updated draft by [Later Date]."`;
+
+            document.getElementById('t3-tactics').innerText = asker === "Senior leader" ? "Loop in your direct manager immediately before responding to ensure alignment." : "Send response within 2 hours of request to set boundaries early.";
+            document.getElementById('t3-alternative').innerText = "Offer a phased approach: deliver an outline or draft initial structure by original deadline.";
+            document.getElementById('t3-insist').innerText = `"If this is non-negotiable for ${deadline}, I will need temporary assistance/reassignment for ${plate}."`;
+
+            document.getElementById('output-tool3').classList.add('active');
+            saveHistory('tool3', `Pushback to ${asker}: "${request.substring(0, 20)}..."`);
+        }
+
+        // TOOL 4 LOGIC: TIME AUDIT
+        function loadSampleTool4() {
+            document.getElementById('t4-core').value = 14;
+            document.getElementById('t4-meetings').value = 16;
+            document.getElementById('t4-email').value = 8;
+            document.getElementById('t4-helping').value = 6;
+            document.getElementById('t4-rework').value = 3;
+            document.getElementById('t4-admin').value = 5;
+            document.getElementById('t4-personal').value = 2;
+            document.getElementById('t4-wasteful').value = "Meetings";
+            document.getElementById('t4-extra').value = "Focus on strategic project planning and finish work on time.";
+        }
+
+        function processTool4(e) {
+            e.preventDefault();
+            const core = parseFloat(document.getElementById('t4-core').value) || 0;
+            const meetings = parseFloat(document.getElementById('t4-meetings').value) || 0;
+            const email = parseFloat(document.getElementById('t4-email').value) || 0;
+            const helping = parseFloat(document.getElementById('t4-helping').value) || 0;
+            const rework = parseFloat(document.getElementById('t4-rework').value) || 0;
+            const admin = parseFloat(document.getElementById('t4-admin').value) || 0;
+            const personal = parseFloat(document.getElementById('t4-personal').value) || 0;
+
+            const total = core + meetings + email + helping + rework + admin + personal;
+            if (total === 0) return;
+
+            const pCore = ((core/total)*100).toFixed(0);
+            const pMeetings = ((meetings/total)*100).toFixed(0);
+            const pEmail = ((email/total)*100).toFixed(0);
+            const pOther = (100 - pCore - pMeetings - pEmail).toFixed(0);
+
+            // CSS Pie
+            const pie = document.getElementById('t4-pie-chart');
+            pie.style.background = `conic-gradient(
+                #43AA8B 0% ${pCore}%,
+                #E63946 ${pCore}% ${parseInt(pCore)+parseInt(pMeetings)}%,
+                #F9C74F ${parseInt(pCore)+parseInt(pMeetings)}% ${parseInt(pCore)+parseInt(pMeetings)+parseInt(pEmail)}%,
+                #90BE6D ${parseInt(pCore)+parseInt(pMeetings)+parseInt(pEmail)}% 100%
+            )`;
+
+            const legend = document.getElementById('t4-pie-legend');
+            legend.innerHTML = `
+                <li><span><span class="pie-legend-dot" style="background:#43AA8B;"></span>Core Work</span> <strong>${pCore}% (${core}h)</strong></li>
+                <li><span><span class="pie-legend-dot" style="background:#E63946;"></span>Meetings</span> <strong>${pMeetings}% (${meetings}h)</strong></li>
+                <li><span><span class="pie-legend-dot" style="background:#F9C74F;"></span>Email/Chat</span> <strong>${pEmail}% (${email}h)</strong></li>
+                <li><span><span class="pie-legend-dot" style="background:#90BE6D;"></span>Other / Admin</span> <strong>${pOther}%</strong></li>
+            `;
+
+            document.getElementById('t4-leakage').innerText = 
+                `Total tracked: ${total} hours. Reactive time (Meetings + Email + Helping) accounts for ${(((meetings+email+helping)/total)*100).toFixed(0)}% of your weekly effort.`;
+
+            const recovery = document.getElementById('t4-recovery');
+            recovery.innerHTML = `
+                <li><strong>Batch Communication:</strong> Check email/chat at 3 set intervals rather than continuously (-1.5h).</li>
+                <li><strong>Decline Non-Essential Meetings:</strong> Audit recurring meetings with >6 participants (-1.5h).</li>
+            `;
+
+            document.getElementById('t4-meeting-audit').innerText = 
+                meetings > 12 ? "High meeting load detected. Automatically decline any meeting lacking a clear written agenda." : "Meeting load is manageable. Protect deep focus blocks.";
+
+            document.getElementById('output-tool4').classList.add('active');
+            saveHistory('tool4', `Audit: ${total} Total Hours tracked (${pMeetings}% Meetings)`);
+        }
+
+        // TOOL 5 LOGIC: BURNOUT CHECK
+        function loadSampleTool5() {
+            document.getElementById('t5-duration').value = "3-4";
+            const checkboxes = document.querySelectorAll('.t5-symptom');
+            checkboxes.forEach((cb, idx) => { cb.checked = idx < 5; });
+            document.querySelector('input[name="t5-recovery"][value="No"]').checked = true;
+            document.querySelector('input[name="t5-talked"][value="No one"]').checked = true;
+        }
+
+        function processTool5(e) {
+            e.preventDefault();
+            const duration = document.getElementById('t5-duration').value;
+            const checkedSymptoms = document.querySelectorAll('.t5-symptom:checked').length;
+            const recovery = document.querySelector('input[name="t5-recovery"]:checked').value;
+
+            let score = checkedSymptoms * 15;
+            if (duration === "2-3mo" || duration === "6mo+") score += 25;
+            if (recovery === "No") score += 20;
+
+            const riskElem = document.getElementById('t5-risk-level');
+            const descElem = document.getElementById('t5-risk-desc');
+
+            if (score >= 70) {
+                riskElem.innerText = "CRITICAL BURNOUT RISK";
+                riskElem.style.color = "var(--red)";
+                descElem.innerText = "Sustained high overload with insufficient recovery. Immediate workload intervention required.";
+            } else if (score >= 40) {
+                riskElem.innerText = "MODERATE / HIGH RISK";
+                riskElem.style.color = "#F9C74F";
+                descElem.innerText = "Significant overload patterns present. Proactive boundaries are necessary to prevent escalation.";
+            } else {
+                riskElem.innerText = "LOW RISK";
+                riskElem.style.color = "#43AA8B";
+                descElem.innerText = "Current strain levels appear manageable, but continue monitoring recovery quality.";
+            }
+
+            const actions = document.getElementById('t5-actions');
+            actions.innerHTML = `
+                <li><strong>Institute Hard Off-Switch:</strong> Set strict non-negotiable end-of-day boundary.</li>
+                <li><strong>Scale Scope Immediately:</strong> Identify top 2 items to drop or pause this week.</li>
+                <li><strong>Schedule Alignment Conversation:</strong> Initiate capacity talk with manager using provided guide.</li>
+            `;
+
+            document.getElementById('script-burnout').innerText = 
+                `"Hi [Manager Name], I want to proactively discuss my current workload capacity. Over the past ${duration} weeks, total demands have exceeded sustainable levels, impacting output. I've mapped out my primary commitments so we can prioritize what matters most and adjust timelines for secondary items."`;
+
+            document.getElementById('output-tool5').classList.add('active');
+            saveHistory('tool5', `Risk Assessment Score: ${score}/100 (${duration} duration)`);
+        }
+
+        // STORAGE & HISTORY MANAGEMENT
+        function saveHistory(toolId, summary) {
+            const key = `triage_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                summary: summary,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' })
+            };
+
+            history.unshift(newItem);
+            if (history.length > 30) history = history.slice(0, 30);
+
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistoryUI(toolId);
+        }
+
+        function loadAllHistories() {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(id => renderHistoryUI(id));
+        }
+
+        function renderHistoryUI(toolId) {
+            const key = `triage_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const listContainer = document.getElementById(`history-list-${toolId}`);
+            
+            if (!listContainer) return;
+
+            if (history.length === 0) {
+                listContainer.innerHTML = '<p style="font-size:0.8rem; color:var(--slate-light);">No previous runs recorded.</p>';
+                return;
+            }
+
+            listContainer.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <span>${item.summary}</span>
+                    <span class="history-date">${item.date}</span>
+                </div>
+            `).join('') + `<button class="btn btn-outline btn-sm" onclick="clearHistory('${toolId}')" style="margin-top:8px;">Clear History</button>`;
+        }
+
+        function clearHistory(toolId) {
+            localStorage.removeItem(`triage_history_${toolId}`);
+            renderHistoryUI(toolId);
+            showToast("History cleared");
+        }
+
+        function toggleHistory(toolId) {
+            const list = document.getElementById(`history-list-${toolId}`);
+            const arrow = document.getElementById(`history-arrow-${toolId}`);
+            list.classList.toggle('active');
+            if (arrow) {
+                arrow.classList.toggle('fa-chevron-up');
+                arrow.classList.toggle('fa-chevron-down');
+            }
+        }
+    </script>
+</body>
+</html>

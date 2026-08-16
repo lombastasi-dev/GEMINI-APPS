@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remote Boundary OS — Work from home without living at work</title>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --eggplant: #5E4B56;
+      --eggplant-light: #76616E;
+      --eggplant-dark: #453640;
+      --soft-gold: #D4A373;
+      --soft-gold-hover: #C59260;
+      --soft-gold-light: #FAEDCD;
+      --bg-gradient: linear-gradient(135deg, #F5F0F6 0%, #FDF6EC 100%);
+      --card-bg: #FFFFFF;
+      --text-main: #2D252A;
+      --text-muted: #6B6267;
+      --border-color: #E6DEE4;
+      --radius-xl: 1rem;
+      --shadow-sm: 0 2px 8px rgba(94, 75, 86, 0.06);
+      --shadow-md: 0 4px 16px rgba(94, 75, 86, 0.1);
+      --sidebar-width: 240px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* Mobile Header */
+    .mobile-header {
+      display: none;
+      background: var(--card-bg);
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .mobile-brand {
+      font-weight: 700;
+      color: var(--eggplant);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      color: var(--eggplant);
+      font-size: 1.35rem;
+      cursor: pointer;
+      padding: 0.25rem;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--card-bg);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+      transition: transform 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar-header {
+      padding: 1.5rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--eggplant);
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      background: var(--eggplant);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      line-height: 1.2;
+    }
+
+    .brand-subtitle {
+      font-size: 0.7rem;
+      color: var(--soft-gold);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-menu {
+      list-style: none;
+      padding: 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item button {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      padding: 0.75rem 1rem;
+      border-radius: 0.6rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item button:hover {
+      background: #F8F4F7;
+      color: var(--eggplant);
+    }
+
+    .nav-item button.active {
+      background: var(--eggplant);
+      color: white;
+      font-weight: 600;
+    }
+
+    .nav-item button i {
+      width: 20px;
+      text-align: center;
+    }
+
+    .nav-item button.active i {
+      color: var(--soft-gold);
+    }
+
+    /* Main Container */
+    .app-container {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .main-content {
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      flex-grow: 1;
+    }
+
+    .view-panel {
+      display: none;
+    }
+
+    .view-panel.active {
+      display: block;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card Component */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(230, 222, 228, 0.5);
+    }
+
+    /* Dashboard Layout */
+    .hero-section {
+      text-align: center;
+      padding: 2rem 1rem 2.5rem;
+    }
+
+    .hero-title {
+      color: var(--eggplant);
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-tagline {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: var(--soft-gold-light);
+      color: #8C5E2B;
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .tool-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--soft-gold);
+    }
+
+    .tool-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #F5F0F6;
+      color: var(--eggplant);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      margin-bottom: 1rem;
+    }
+
+    .tool-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--eggplant);
+      margin-bottom: 0.4rem;
+    }
+
+    .tool-card-desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Forms & UI Elements */
+    .tool-header {
+      margin-bottom: 1.75rem;
+    }
+
+    .tool-title {
+      font-size: 1.6rem;
+      color: var(--eggplant);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .tool-problem {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-style: italic;
+      background: rgba(212, 163, 115, 0.12);
+      padding: 0.6rem 1rem;
+      border-left: 3px solid var(--soft-gold);
+      border-radius: 0 8px 8px 0;
+      margin-top: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.35rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: var(--eggplant);
+      font-size: 0.925rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.6rem;
+      font-size: 0.925rem;
+      color: var(--text-main);
+      background-color: #FAF8FA;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--eggplant);
+      background-color: #FFF;
+      box-shadow: 0 0 0 3px rgba(94, 75, 86, 0.1);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .options-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .checkbox-label, .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      cursor: pointer;
+      user-select: none;
+      padding: 0.35rem 0;
+    }
+
+    .checkbox-label input, .radio-label input {
+      accent-color: var(--eggplant);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.35rem;
+      border-radius: 0.6rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--eggplant);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--eggplant-light);
+    }
+
+    .btn-secondary {
+      background: var(--soft-gold);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: var(--soft-gold-hover);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .btn-outline:hover {
+      background: #F5F0F6;
+      color: var(--eggplant);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    /* Output Section */
+    .results-container {
+      margin-top: 2rem;
+      display: none;
+    }
+
+    .results-container.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .result-section {
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .result-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .result-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--eggplant);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .result-content {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    .result-content ul, .result-content ol {
+      padding-left: 1.25rem;
+      margin-top: 0.35rem;
+    }
+
+    .result-content li {
+      margin-bottom: 0.4rem;
+    }
+
+    .code-box {
+      background: #F8F5F8;
+      border: 1px solid var(--border-color);
+      border-radius: 0.6rem;
+      padding: 1rem;
+      position: relative;
+      font-family: monospace;
+      font-size: 0.875rem;
+      color: #332B30;
+      margin-top: 0.5rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: white;
+      border: 1px solid var(--border-color);
+      color: var(--eggplant);
+      padding: 0.25rem 0.6rem;
+      border-radius: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--soft-gold);
+      color: var(--soft-gold-hover);
+    }
+
+    /* History Accordion */
+    .history-section {
+      margin-top: 2.5rem;
+      border-top: 2px dashed var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .history-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--eggplant);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .history-toggle-icon {
+      transition: transform 0.2s ease;
+    }
+
+    .history-header.open .history-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .history-content {
+      display: none;
+      margin-top: 1rem;
+    }
+
+    .history-content.open {
+      display: block;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .history-item {
+      background: #FAF8FA;
+      border: 1px solid var(--border-color);
+      border-radius: 0.6rem;
+      padding: 0.85rem;
+      font-size: 0.85rem;
+    }
+
+    .history-item-date {
+      color: var(--soft-gold-hover);
+      font-weight: 600;
+      font-size: 0.75rem;
+      margin-bottom: 0.35rem;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--eggplant);
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.6rem;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast i {
+      color: var(--soft-gold);
+    }
+
+    /* Footer Disclaimer */
+    .footer-disclaimer {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      font-size: 0.775rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.4);
+      margin-top: auto;
+      line-height: 1.45;
+    }
+
+    /* Mobile Responsive Overrides */
+    @media (max-width: 768px) {
+      .mobile-header {
+        display: flex;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        box-shadow: none;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+        box-shadow: var(--shadow-md);
+      }
+
+      .app-container {
+        margin-left: 0;
+      }
+
+      .main-content {
+        padding: 1.25rem 1rem;
+      }
+
+      .hero-title {
+        font-size: 1.75rem;
+      }
+
+      .hero-tagline {
+        font-size: 1rem;
+      }
+
+      .tools-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <div class="mobile-brand">
+      <i class="fa-solid fa-shield-halved" style="color: var(--soft-gold);"></i>
+      <span>Remote Boundary OS</span>
+    </div>
+    <button class="hamburger-btn" id="mobile-toggle" aria-label="Toggle menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="#" class="brand" onclick="navigateTo('dashboard'); return false;">
+        <div class="brand-icon">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <div class="brand-title">Remote Boundary</div>
+          <div class="brand-subtitle">Operating System</div>
+        </div>
+      </a>
+    </div>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <button id="nav-dashboard" class="active" onclick="navigateTo('dashboard')">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button id="nav-tool1" onclick="navigateTo('tool1')">
+          <i class="fa-solid fa-laptop-code"></i>
+          <span>Shutdown Ritual</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button id="nav-tool2" onclick="navigateTo('tool2')">
+          <i class="fa-solid fa-clock"></i>
+          <span>Availability</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button id="nav-tool3" onclick="navigateTo('tool3')">
+          <i class="fa-solid fa-house-user"></i>
+          <span>Space Designer</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button id="nav-tool4" onclick="navigateTo('tool4')">
+          <i class="fa-solid fa-bell-slash"></i>
+          <span>Notification Tamer</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button id="nav-tool5" onclick="navigateTo('tool5')">
+          <i class="fa-solid fa-heart-pulse"></i>
+          <span>Reconnection</span>
+        </button>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Container -->
+  <div class="app-container">
+    <main class="main-content">
+
+      <!-- DASHBOARD VIEW -->
+      <section id="view-dashboard" class="view-panel active">
+        <div class="hero-section">
+          <span class="hero-badge"><i class="fa-solid fa-compass"></i> Practical Remote Boundaries</span>
+          <h1 class="hero-title">Remote Boundary OS</h1>
+          <p class="hero-tagline">Work from home without living at work.</p>
+        </div>
+
+        <div class="tools-grid">
+          <div class="tool-card" onclick="navigateTo('tool1')">
+            <div class="tool-card-icon"><i class="fa-solid fa-laptop-code"></i></div>
+            <div class="tool-card-title">Shutdown Ritual Builder</div>
+            <div class="tool-card-desc">Design a firm psychological and digital end-of-day sequence to stop thinking about work at night.</div>
+          </div>
+
+          <div class="tool-card" onclick="navigateTo('tool2')">
+            <div class="tool-card-icon"><i class="fa-solid fa-clock"></i></div>
+            <div class="tool-card-title">Availability Communicator</div>
+            <div class="tool-card-desc">Generate professional, firm scripts to establish core working hours and reset client/team expectations.</div>
+          </div>
+
+          <div class="tool-card" onclick="navigateTo('tool3')">
+            <div class="tool-card-icon"><i class="fa-solid fa-house-user"></i></div>
+            <div class="tool-card-title">Space Designer</div>
+            <div class="tool-card-desc">Create spatial micro-zones and sensory cues when your living table and working table are the exact same place.</div>
+          </div>
+
+          <div class="tool-card" onclick="navigateTo('tool4')">
+            <div class="tool-card-icon"><i class="fa-solid fa-bell-slash"></i></div>
+            <div class="tool-card-title">Notification Tamer</div>
+            <div class="tool-card-desc">Systematically remove work apps from personal devices, setup urgency filters, and batch notifications.</div>
+          </div>
+
+          <div class="tool-card" onclick="navigateTo('tool5')">
+            <div class="tool-card-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="tool-card-title">Reconnection Planner</div>
+            <div class="tool-card-desc">Reclaim lost quality time with family or yourself, establish non-negotiable blocks, and rebuild presence.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOOL 1: SHUTDOWN RITUAL BUILDER -->
+      <section id="view-tool1" class="view-panel">
+        <div class="tool-header">
+          <h2 class="tool-title"><i class="fa-solid fa-laptop-code" style="color: var(--soft-gold);"></i> Shutdown Ritual Builder</h2>
+          <div class="tool-problem">"I close my laptop but I'm still thinking about work at 10pm."</div>
+        </div>
+
+        <div class="card">
+          <form id="form-tool1" onsubmit="generateTool1(event)">
+            <div class="form-group">
+              <label class="form-label" for="t1-time">What time do you want work to end?</label>
+              <input type="time" id="t1-time" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">What currently keeps you working late?</label>
+              <div class="options-group">
+                <label class="checkbox-label"><input type="checkbox" name="t1-reasons" value="Actual workload"> Actual workload overhang</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-reasons" value="Habit"> Muscle memory / Habit</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-reasons" value="Boss expectations"> Implicit boss / team expectations</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-reasons" value="Guilt"> Guilt about not doing "one more thing"</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-reasons" value="Nothing else to do"> Nothing compelling to transition to</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-reasons" value="Time zone issues"> Multi-time zone message chaos</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Do you check email after hours?</label>
+              <div class="options-group">
+                <label class="radio-label"><input type="radio" name="t1-email" value="Constantly" required> Constantly throughout the evening</label>
+                <label class="radio-label"><input type="radio" name="t1-email" value="Sometimes"> Sometimes (a few quick peeks)</label>
+                <label class="radio-label"><input type="radio" name="t1-email" value="Rarely"> Rarely</label>
+                <label class="radio-label"><input type="radio" name="t1-email" value="Never"> Never once the lid closes</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="t1-signal">What would signal 'work is done' to your brain?</label>
+              <select id="t1-signal" class="form-control" required>
+                <option value="">-- Select a primary signal --</option>
+                <option value="Physical action">Physical action (closing laptop, packing desk, changing clothes)</option>
+                <option value="Digital action">Digital action (closing all tabs, setting Slack status, turning off Wi-Fi)</option>
+                <option value="Verbal cue">Verbal cue (saying 'Day is done' out loud, playing a specific song)</option>
+                <option value="Environment change">Environment change (dimming lights, stepping outside, switching room)</option>
+              </select>
+            </div>
+
+            <div class="button-group">
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Build My Shutdown Protocol</button>
+              <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="results-tool1" class="results-container card">
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-list-check"></i> Your Custom Shutdown Sequence</div>
+            <div class="result-content" id="t1-out-sequence"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-hourglass-end"></i> The Last 10 Minutes Agenda</div>
+            <div class="result-content" id="t1-out-last10"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-sliders"></i> Digital Boundaries Script</div>
+            <div class="result-content" id="t1-out-digital"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-cube"></i> The Physical Cue</div>
+            <div class="result-content" id="t1-out-physical"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-life-ring"></i> If You Slip: Recovery Protocol</div>
+            <div class="result-content" id="t1-out-slip"></div>
+          </div>
+        </div>
+
+        <!-- History -->
+        <div class="history-section card">
+          <div class="history-header" onclick="toggleHistory('tool1')">
+            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Sequences</div>
+            <i class="fa-solid fa-chevron-down history-toggle-icon" id="hist-icon-tool1"></i>
+          </div>
+          <div class="history-content" id="hist-content-tool1">
+            <div class="history-list" id="hist-list-tool1"></div>
+            <div class="button-group" style="margin-top: 1rem;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="clearHistory('tool1')"><i class="fa-solid fa-trash"></i> Clear History</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOOL 2: AVAILABILITY COMMUNICATOR -->
+      <section id="view-tool2" class="view-panel">
+        <div class="tool-header">
+          <h2 class="tool-title"><i class="fa-solid fa-clock" style="color: var(--soft-gold);"></i> Availability Communicator</h2>
+          <div class="tool-problem">"People expect me to respond instantly at all hours."</div>
+        </div>
+
+        <div class="card">
+          <form id="form-tool2" onsubmit="generateTool2(event)">
+            <div class="form-group">
+              <label class="form-label" for="t2-hours">Your core working hours:</label>
+              <input type="text" id="t2-hours" class="form-control" placeholder="e.g., 9am-5pm EST or 8:30am-4:30pm PST" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">When do unwanted messages actually come in?</label>
+              <div class="options-group">
+                <label class="checkbox-label"><input type="checkbox" name="t2-when" value="Before 8am"> Early morning (Before 8am)</label>
+                <label class="checkbox-label"><input type="checkbox" name="t2-when" value="Lunch"> During dedicated lunch break</label>
+                <label class="checkbox-label"><input type="checkbox" name="t2-when" value="After 6pm"> Evenings (After 6pm)</label>
+                <label class="checkbox-label"><input type="checkbox" name="t2-when" value="Weekends"> Weekends (Saturdays/Sundays)</label>
+                <label class="checkbox-label"><input type="checkbox" name="t2-when" value="All evenly distributed"> Constant trickle 24/7</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="t2-violator">Who violates your hours most?</label>
+              <select id="t2-violator" class="form-control" required>
+                <option value="">-- Select primary source --</option>
+                <option value="Boss">Direct Manager / Boss</option>
+                <option value="Team">Immediate Peers / Team members</option>
+                <option value="Clients">External Clients / Customers</option>
+                <option value="Cross-time-zone colleagues">Cross-time-zone colleagues</option>
+                <option value="Everyone equally">Everyone equally</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Have you stated your hours clearly?</label>
+              <div class="options-group">
+                <label class="radio-label"><input type="radio" name="t2-stated" value="Yes" required> Yes, written explicitly</label>
+                <label class="radio-label"><input type="radio" name="t2-stated" value="Vaguely"> Vaguely / Mentioned in passing</label>
+                <label class="radio-label"><input type="radio" name="t2-stated" value="No"> No, just assumed they would know</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="t2-comfort">Your response-time comfort zone:</label>
+              <select id="t2-comfort" class="form-control" required>
+                <option value="">-- Select response comfort --</option>
+                <option value="Within 1hr during work">Within 1 hour during working hours</option>
+                <option value="Within 4hr">Within 4 hours (2 batch checks daily)</option>
+                <option value="Same day">Same day response before shutdown</option>
+                <option value="Next business day">Next business day for non-urgent matters</option>
+              </select>
+            </div>
+
+            <div class="button-group">
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Draft Communication Scripts</button>
+              <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="results-tool2" class="results-container card">
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-signature"></i> Official Hours Statement (Status / Auto-Reply)</div>
+            <div id="t2-out-statement"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-comments"></i> Expectation Reset Script</div>
+            <div id="t2-out-reset"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-filter"></i> Urgency Filter Framework</div>
+            <div class="result-content" id="t2-out-filter"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-umbrella-beach"></i> The Weekend Protection Rule</div>
+            <div class="result-content" id="t2-out-weekend"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-rotate-right"></i> Non-Passive-Aggressive Follow-up Strategy</div>
+            <div class="result-content" id="t2-out-ignore"></div>
+          </div>
+        </div>
+
+        <!-- History -->
+        <div class="history-section card">
+          <div class="history-header" onclick="toggleHistory('tool2')">
+            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Communication Drafts</div>
+            <i class="fa-solid fa-chevron-down history-toggle-icon" id="hist-icon-tool2"></i>
+          </div>
+          <div class="history-content" id="hist-content-tool2">
+            <div class="history-list" id="hist-list-tool2"></div>
+            <div class="button-group" style="margin-top: 1rem;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="clearHistory('tool2')"><i class="fa-solid fa-trash"></i> Clear History</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOOL 3: SPACE DESIGNER -->
+      <section id="view-tool3" class="view-panel">
+        <div class="tool-header">
+          <h2 class="tool-title"><i class="fa-solid fa-house-user" style="color: var(--soft-gold);"></i> Space Designer</h2>
+          <div class="tool-problem">"My kitchen table is my office and my office is my kitchen table."</div>
+        </div>
+
+        <div class="card">
+          <form id="form-tool3" onsubmit="generateTool3(event)">
+            <div class="form-group">
+              <label class="form-label" for="t3-where">Where do you currently work?</label>
+              <select id="t3-where" class="form-control" required>
+                <option value="">-- Select primary workspace --</option>
+                <option value="Dedicated office">Dedicated spare room / home office</option>
+                <option value="Bedroom corner">Bedroom desk or corner</option>
+                <option value="Kitchen/living room">Kitchen island or living room dining table</option>
+                <option value="Coffee shops">Coffee shops / Shared public spaces</option>
+                <option value="Multiple places">Floating around multiple places daily</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Do you live with others?</label>
+              <div class="options-group">
+                <label class="radio-label"><input type="radio" name="t3-others" value="Alone" required> Alone</label>
+                <label class="radio-label"><input type="radio" name="t3-others" value="Partner"> Partner / Spouse</label>
+                <label class="radio-label"><input type="radio" name="t3-others" value="Family"> Partner + Kids / Family</label>
+                <label class="radio-label"><input type="radio" name="t3-others" value="Roommates"> Roommates</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="t3-distraction">Biggest spatial distraction:</label>
+              <select id="t3-distraction" class="form-control" required>
+                <option value="">-- Select biggest hurdle --</option>
+                <option value="Noise">Acoustic noise & conversation audio</option>
+                <option value="People walking by">Foot traffic & visual interruptions</option>
+                <option value="Clutter">Household chores & clutter in line of sight</option>
+                <option value="Bed/couch temptation">Temptation of bed or cozy couch nearby</option>
+                <option value="No natural light">Dim room / poor lighting / depressing atmosphere</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Can you physically alter your setup?</label>
+              <div class="options-group">
+                <label class="radio-label"><input type="radio" name="t3-change" value="Yes, fully" required> Yes, fully (can move furniture/buy gear)</label>
+                <label class="radio-label"><input type="radio" name="t3-change" value="Somewhat"> Somewhat (small tweaks, light budget)</label>
+                <label class="radio-label"><input type="radio" name="t3-change" value="Not at all"> Not at all (shared micro-apartment / fixed layout)</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="t3-feel">What would make you feel 'at work'?</label>
+              <textarea id="t3-feel" class="form-control" placeholder="e.g., Monitor setup, silence, a clear desk surface, wearing real shoes..."></textarea>
+            </div>
+
+            <div class="button-group">
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-compass-drafting"></i> Design My Spatial Boundary</button>
+              <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="results-tool3" class="results-container card">
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-map-location-dot"></i> Zone Map & Micro-Boundaries</div>
+            <div class="result-content" id="t3-out-zone"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-tag"></i> Low-Budget Fixes (&lt;$50 Big Impact)</div>
+            <div class="result-content" id="t3-out-budget"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-users"></i> Household Coexistence Rules</div>
+            <div class="result-content" id="t3-out-household"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-shoe-prints"></i> The Commute Substitute Ritual</div>
+            <div class="result-content" id="t3-out-commute"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-brain"></i> Psychological Framing Techniques</div>
+            <div class="result-content" id="t3-out-psych"></div>
+          </div>
+        </div>
+
+        <!-- History -->
+        <div class="history-section card">
+          <div class="history-header" onclick="toggleHistory('tool3')">
+            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Spatial Plans</div>
+            <i class="fa-solid fa-chevron-down history-toggle-icon" id="hist-icon-tool3"></i>
+          </div>
+          <div class="history-content" id="hist-content-tool3">
+            <div class="history-list" id="hist-list-tool3"></div>
+            <div class="button-group" style="margin-top: 1rem;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="clearHistory('tool3')"><i class="fa-solid fa-trash"></i> Clear History</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOOL 4: NOTIFICATION TAMER -->
+      <section id="view-tool4" class="view-panel">
+        <div class="tool-header">
+          <h2 class="tool-title"><i class="fa-solid fa-bell-slash" style="color: var(--soft-gold);"></i> Notification Tamer</h2>
+          <div class="tool-problem">"Slack, email, and Teams are destroying my focus and my evenings."</div>
+        </div>
+
+        <div class="card">
+          <form id="form-tool4" onsubmit="generateTool4(event)">
+            <div class="form-group">
+              <label class="form-label" for="t4-apps">How many work apps push notifications to your phone?</label>
+              <input type="number" id="t4-apps" class="form-control" min="0" max="20" placeholder="e.g., 3 or 5" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Do you have work email / chat on your personal phone?</label>
+              <div class="options-group">
+                <label class="radio-label"><input type="radio" name="t4-phone-mail" value="Yes" required> Yes, active notifications</label>
+                <label class="radio-label"><input type="radio" name="t4-phone-mail" value="Yes but muted"> Yes, but notifications are muted</label>
+                <label class="radio-label"><input type="radio" name="t4-phone-mail" value="No"> No, purely work computer only</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="t4-checks">How often do you check work notifications per hour?</label>
+              <select id="t4-checks" class="form-control" required>
+                <option value="">-- Select checking frequency --</option>
+                <option value="1-2">1 to 2 times per hour</option>
+                <option value="3-5">3 to 5 times per hour</option>
+                <option value="6-10">6 to 10 times (Every 5-10 mins)</option>
+                <option value="Constantly">Constantly (Reactive reflex / Always open)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="t4-anxiety">Which channel/app causes the most anxiety?</label>
+              <select id="t4-anxiety" class="form-control" required>
+                <option value="">-- Select highest stress channel --</option>
+                <option value="Email">Email (Outlook / Gmail)</option>
+                <option value="Slack/Teams">Slack / Microsoft Teams / Chat</option>
+                <option value="Text">Direct SMS / WhatsApp / iMessage</option>
+                <option value="Calendar">Calendar reminders & popups</option>
+                <option value="All equally">All equally overwhelming</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Have you tried tightening notification settings before?</label>
+              <div class="options-group">
+                <label class="radio-label"><input type="radio" name="t4-past" value="Yes, helped" required> Yes, worked for a while</label>
+                <label class="radio-label"><input type="radio" name="t4-past" value="Yes, didn't stick"> Yes, but gave up / didn't stick</label>
+                <label class="radio-label"><input type="radio" name="t4-past" value="No"> No, haven't touched default settings</label>
+              </div>
+            </div>
+
+            <div class="button-group">
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-screwdriver-wrench"></i> Tame My Notifications</button>
+              <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="results-tool4" class="results-container card">
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-prescription"></i> App-by-App Notification Prescription</div>
+            <div class="result-content" id="t4-out-prescription"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-mobile-retro"></i> Phone Separation Protocol</div>
+            <div class="result-content" id="t4-out-surgery"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-calendar-check"></i> Asynchronous Batching Schedule</div>
+            <div class="result-content" id="t4-out-batch"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-phone-volume"></i> The Emergency Bypass Channel</div>
+            <div class="result-content" id="t4-out-emergency"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-shield-cat"></i> Accountability: Making It Stick Past Day 3</div>
+            <div class="result-content" id="t4-out-stick"></div>
+          </div>
+        </div>
+
+        <!-- History -->
+        <div class="history-section card">
+          <div class="history-header" onclick="toggleHistory('tool4')">
+            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Taming Prescriptions</div>
+            <i class="fa-solid fa-chevron-down history-toggle-icon" id="hist-icon-tool4"></i>
+          </div>
+          <div class="history-content" id="hist-content-tool4">
+            <div class="history-list" id="hist-list-tool4"></div>
+            <div class="button-group" style="margin-top: 1rem;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="clearHistory('tool4')"><i class="fa-solid fa-trash"></i> Clear History</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOOL 5: RECONNECTION PLANNER -->
+      <section id="view-tool5" class="view-panel">
+        <div class="tool-header">
+          <h2 class="tool-title"><i class="fa-solid fa-heart-pulse" style="color: var(--soft-gold);"></i> Reconnection Planner</h2>
+          <div class="tool-problem">"I haven't had a real conversation with my family in weeks."</div>
+        </div>
+
+        <div class="card">
+          <form id="form-tool5" onsubmit="generateTool5(event)">
+            <div class="form-group">
+              <label class="form-label" for="t5-with">Who do you live with?</label>
+              <input type="text" id="t5-with" class="form-control" placeholder="e.g., Partner & 1 toddler, Roommates, Solo..." required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="t5-lasttime">When did you last have uninterrupted quality time with them?</label>
+              <select id="t5-lasttime" class="form-control" required>
+                <option value="">-- Select timeframe --</option>
+                <option value="Today">Today during off-hours</option>
+                <option value="This week">Earlier this week</option>
+                <option value="Last week">Last week</option>
+                <option value="Can't remember">I honestly can't remember</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">What regularly gets sacrificed for work?</label>
+              <div class="options-group">
+                <label class="checkbox-label"><input type="checkbox" name="t5-sacrifices" value="Dinner"> Family dinner / Meals together</label>
+                <label class="checkbox-label"><input type="checkbox" name="t5-sacrifices" value="Bedtime routine"> Kids' bedtime routine</label>
+                <label class="checkbox-label"><input type="checkbox" name="t5-sacrifices" value="Weekends"> Weekend activities / Outings</label>
+                <label class="checkbox-label"><input type="checkbox" name="t5-sacrifices" value="Hobbies"> Personal hobbies / Reading</label>
+                <label class="checkbox-label"><input type="checkbox" name="t5-sacrifices" value="Exercise"> Physical exercise / Movement</label>
+                <label class="checkbox-label"><input type="checkbox" name="t5-sacrifices" value="Sleep"> Sleep & winding down</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="t5-extra">What would you do with 2 extra uninterrupted hours per day?</label>
+              <textarea id="t5-extra" class="form-control" placeholder="e.g., Cook dinner without phone, play board games, exercise, take a walk..." required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Do they complain or make comments about your work hours?</label>
+              <div class="options-group">
+                <label class="radio-label"><input type="radio" name="t5-complain" value="Often" required> Often / High tension</label>
+                <label class="radio-label"><input type="radio" name="t5-complain" value="Sometimes"> Sometimes in passing</label>
+                <label class="radio-label"><input type="radio" name="t5-complain" value="No"> No, they are understanding</label>
+                <label class="radio-label"><input type="radio" name="t5-complain" value="They gave up"> They gave up asking</label>
+              </div>
+            </div>
+
+            <div class="button-group">
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-heart"></i> Build Reconnection Strategy</button>
+              <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="results-tool5" class="results-container card">
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-scale-unbalanced"></i> Sacrifice Audit: Reality Check</div>
+            <div class="result-content" id="t5-out-audit"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-lock"></i> Protected Sanctuary Blocks</div>
+            <div class="result-content" id="t5-out-blocks"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-arrows-spin"></i> Mindset Shift Transition Ritual</div>
+            <div class="result-content" id="t5-out-transition"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-handshake"></i> Recommitment Conversation Script</div>
+            <div id="t5-out-starter"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-title"><i class="fa-solid fa-bullseye"></i> Today's Immediate Win</div>
+            <div class="result-content" id="t5-out-win"></div>
+          </div>
+        </div>
+
+        <!-- History -->
+        <div class="history-section card">
+          <div class="history-header" onclick="toggleHistory('tool5')">
+            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Reconnection Plans</div>
+            <i class="fa-solid fa-chevron-down history-toggle-icon" id="hist-icon-tool5"></i>
+          </div>
+          <div class="history-content" id="hist-content-tool5">
+            <div class="history-list" id="hist-list-tool5"></div>
+            <div class="button-group" style="margin-top: 1rem;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="clearHistory('tool5')"><i class="fa-solid fa-trash"></i> Clear History</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="footer-disclaimer">
+      For work-life boundary planning only. Not therapeutic or medical advice. If work is significantly impacting your mental health, consult a professional.
+    </footer>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toast-msg">Copied!</span>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       NAVIGATION & UI CONTROLS
+       ========================================================================== */
+    function navigateTo(toolId) {
+      // Hide all views
+      document.querySelectorAll('.view-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+
+      // Deactivate all nav buttons
+      document.querySelectorAll('.nav-menu button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // Show selected panel
+      const targetPanel = document.getElementById(`view-${toolId}`);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+
+      // Activate nav button
+      const targetNav = document.getElementById(`nav-${toolId}`);
+      if (targetNav) {
+        targetNav.classList.add('active');
+      }
+
+      // Close mobile drawer if open
+      document.getElementById('sidebar').classList.remove('open');
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Render history if opening a tool
+      if (toolId !== 'dashboard') {
+        renderHistory(toolId);
+      }
+    }
+
+    // Mobile Hamburger Navigation
+    document.getElementById('mobile-toggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+
+    // Toast Notification helper
+    function showToast(message = "Copied!") {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    // Copy text to clipboard helper
+    function copyToClipboard(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      const textToCopy = el.innerText || el.textContent;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast("Copied to clipboard!");
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+    }
+
+    // History Accordion Toggle
+    function toggleHistory(toolId) {
+      const content = document.getElementById(`hist-content-${toolId}`);
+      const icon = document.getElementById(`hist-icon-${toolId}`);
+      const header = icon.parentElement;
+
+      content.classList.toggle('open');
+      header.classList.toggle('open');
+    }
+
+    /* ==========================================================================
+       LOCAL STORAGE HISTORY MANAGEMENT
+       ========================================================================== */
+    function saveToHistory(toolId, summaryTitle, detailHtml) {
+      const storageKey = `remote_history_${toolId}`;
+      let historyData = JSON.parse(localStorage.getItem(storageKey) || "[]");
+
+      const newItem = {
+        id: Date.now(),
+        date: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        title: summaryTitle,
+        content: detailHtml
+      };
+
+      // Unshift to top & maintain max 30 items
+      historyData.unshift(newItem);
+      if (historyData.length > 30) {
+        historyData = historyData.slice(0, 30);
+      }
+
+      localStorage.setItem(storageKey, JSON.stringify(historyData));
+      renderHistory(toolId);
+    }
+
+    function renderHistory(toolId) {
+      const storageKey = `remote_history_${toolId}`;
+      const historyData = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      const listEl = document.getElementById(`hist-list-${toolId}`);
+
+      if (!listEl) return;
+
+      if (historyData.length === 0) {
+        listEl.innerHTML = `<p style="color: var(--text-muted); font-style: italic;">No saved scenarios yet.</p>`;
+        return;
+      }
+
+      listEl.innerHTML = historyData.map(item => `
+        <div class="history-item">
+          <div class="history-item-date"><i class="fa-regular fa-calendar"></i> ${item.date}</div>
+          <div style="font-weight: 600; color: var(--eggplant); margin-bottom: 0.25rem;">${item.title}</div>
+          <div style="font-size: 0.825rem; color: var(--text-muted);">${item.content}</div>
+        </div>
+      `).join('');
+    }
+
+    function clearHistory(toolId) {
+      if (confirm("Are you sure you want to clear saved history for this tool?")) {
+        localStorage.removeItem(`remote_history_${toolId}`);
+        renderHistory(toolId);
+        showToast("History cleared");
+      }
+    }
+
+    /* ==========================================================================
+       TOOL 1 LOGIC & SCENARIOS
+       ========================================================================== */
+    function loadSampleTool1() {
+      document.getElementById('t1-time').value = "18:00";
+      
+      const checkboxes = document.querySelectorAll('input[name="t1-reasons"]');
+      checkboxes.forEach(cb => {
+        cb.checked = (cb.value === "Habit" || cb.value === "Guilt");
+      });
+
+      const radios = document.querySelectorAll('input[name="t1-email"]');
+      radios.forEach(r => {
+        r.checked = (r.value === "Sometimes");
+      });
+
+      document.getElementById('t1-signal').value = "Physical action";
+    }
+
+    function generateTool1(event) {
+      event.preventDefault();
+      
+      const targetTime = document.getElementById('t1-time').value;
+      const selectedReasons = Array.from(document.querySelectorAll('input[name="t1-reasons"]:checked')).map(c => c.value);
+      const emailHabit = document.querySelector('input[name="t1-email"]:checked')?.value || "Sometimes";
+      const signalType = document.getElementById('t1-signal').value;
+
+      // 1. Sequence
+      let sequenceHtml = `<ol>
+        <li><strong>Hard Stop Signal (${targetTime}):</strong> Trigger alarm named "Work Shut Down". Immediately stop typing.</li>
+        <li><strong>Open Loop Capture:</strong> Spend 3 minutes writing every unfinished thought on a physical notepad.</li>
+        <li><strong>Desktop Clean Sweep:</strong> Close all operational browser tabs. Leave exactly zero work documents open.</li>
+      `;
+      if (signalType === "Physical action") {
+        sequenceHtml += `<li><strong>Physical Action:</strong> Close laptop lid firmly, place it inside a drawer or bag out of line-of-sight.</li>`;
+      } else if (signalType === "Digital action") {
+        sequenceHtml += `<li><strong>Digital Action:</strong> Sign out of communication channels and toggle status to 'Offline'.</li>`;
+      } else if (signalType === "Verbal cue") {
+        sequenceHtml += `<li><strong>Verbal Cue:</strong> Say aloud: "The work day is officially over. Tomorrow is another day."</li>`;
+      } else {
+        sequenceHtml += `<li><strong>Environment Change:</strong> Immediately step out of the room, change into evening home clothes.</li>`;
+      }
+      sequenceHtml += `</ol>`;
+
+      // 2. Last 10 minutes
+      let last10Html = `<ul>
+        <li><strong>Min 10-7:</strong> Review calendar for tomorrow. Confirm top 2 non-negotiable tasks.</li>
+        <li><strong>Min 6-4:</strong> Send final status update to team if blocked: "Signing off for today, pick up at ${targetTime} tomorrow."</li>
+        <li><strong>Min 3-0:</strong> Run your chosen primary boundary signal (${signalType}).</li>
+      </ul>`;
+
+      // 3. Digital boundaries
+      let digitalScript = `AUTOMATED SLACK/TEAMS STATUS SCRIPT:\n"Off the clock until tomorrow 9:00 AM. For true P0 emergencies, call phone."\n\nEMAIL OUT-OF-OFFICE:\n"Thank you for your message. I am currently away from my desk until tomorrow morning and will respond upon my return."`;
+      let digitalHtml = `<p>Set your status or auto-reply script automatically at ${targetTime}:</p>
+        <div class="code-box" id="code-t1-digital">${digitalScript}<button class="copy-btn" onclick="copyToClipboard('code-t1-digital')"><i class="fa-regular fa-copy"></i> Copy</button></div>`;
+
+      // 4. Physical Cue
+      let physicalHtml = `<p>Since your brain relies on <strong>${signalType}</strong>, implement this physical rule:</p>
+        <p style="margin-top: 0.5rem; color: var(--eggplant); font-weight: 600;">"The Micro-Transition Rule:"</p>
+        <p>Wrap your laptop charger around your laptop when closed, or place a dark cloth over your desktop monitor. Out of sight, out of cognitive mind.</p>`;
+
+      // 5. Slip recovery
+      let slipHtml = `<p>If you find yourself checking messages at 10pm due to <em>${selectedReasons.join(', ') || 'habitual impulse'}</em>:</p>
+        <ul>
+          <li><strong>Do NOT reply immediately:</strong> Draft the reply in your notes app instead of the chat client.</li>
+          <li><strong>The 10-Second Pause:</strong> Ask: "Will this business explode if I address it at 8:30 AM tomorrow?" (Answer: 99.9% No).</li>
+          <li><strong>Physical Reset:</strong> Put the phone in another room or turn on Airplane mode for 30 minutes.</li>
+        </ul>`;
+
+      // Render outputs
+      document.getElementById('t1-out-sequence').innerHTML = sequenceHtml;
+      document.getElementById('t1-out-last10').innerHTML = last10Html;
+      document.getElementById('t1-out-digital').innerHTML = digitalHtml;
+      document.getElementById('t1-out-physical').innerHTML = physicalHtml;
+      document.getElementById('t1-out-slip').innerHTML = slipHtml;
+
+      document.getElementById('results-tool1').classList.add('active');
+
+      // Save to localStorage
+      saveToHistory('tool1', `Target End: ${targetTime} (${signalType})`, `Triggers: ${selectedReasons.join(', ') || 'None selected'}. Email check habit: ${emailHabit}.`);
+    }
+
+    /* ==========================================================================
+       TOOL 2 LOGIC & SCENARIOS
+       ========================================================================== */
+    function loadSampleTool2() {
+      document.getElementById('t2-hours').value = "9:00 AM - 5:00 PM EST";
+      
+      const checkboxes = document.querySelectorAll('input[name="t2-when"]');
+      checkboxes.forEach(cb => {
+        cb.checked = (cb.value === "After 6pm" || cb.value === "Weekends");
+      });
+
+      document.getElementById('t2-violator').value = "Boss";
+
+      const radios = document.querySelectorAll('input[name="t2-stated"]');
+      radios.forEach(r => {
+        r.checked = (r.value === "Vaguely");
+      });
+
+      document.getElementById('t2-comfort').value = "Same day";
+    }
+
+    function generateTool2(event) {
+      event.preventDefault();
+
+      const hours = document.getElementById('t2-hours').value;
+      const violator = document.getElementById('t2-violator').value;
+      const comfort = document.getElementById('t2-comfort').value;
+      const whenIn = Array.from(document.querySelectorAll('input[name="t2-when"]:checked')).map(c => c.value);
+
+      // Statement
+      const hoursText = `Working Hours: ${hours}\nI review and respond to communications during my working hours (${hours}). Messages received outside these hours will be answered during the next operational block.`;
+      const statementHtml = `
+        <div class="code-box" id="code-t2-stmt">${hoursText}<button class="copy-btn" onclick="copyToClipboard('code-t2-stmt')"><i class="fa-regular fa-copy"></i> Copy</button></div>`;
+
+      // Expectation Reset
+      let resetScript = `Hi ${violator === 'Boss' ? '[Manager Name]' : '[Team/Client]'},
+
+I'm adjusting my workflow to increase deep focus and deliver higher quality work. Going forward, my core active working hours are ${hours}. 
+
+I will be actively checking and responding to messages (${comfort.toLowerCase()}). If there is a genuine P0 production emergency outside these hours, please call my phone directly. Otherwise, I will tackle it first thing during my morning block.
+
+Thanks for supporting this focus shift!`;
+
+      const resetHtml = `
+        <p>Send this firm, professional expectation reset email/message to your <strong>${violator}</strong>:</p>
+        <div class="code-box" id="code-t2-reset">${resetScript}<button class="copy-btn" onclick="copyToClipboard('code-t2-reset')"><i class="fa-regular fa-copy"></i> Copy</button></div>`;
+
+      // Urgency Filter
+      const filterHtml = `
+        <ul>
+          <li><strong style="color: #c0392b;">P0 (Real Emergency):</strong> Server outage, legal breach, revenue loss in progress. <em>Action: Direct phone call.</em></li>
+          <li><strong style="color: #d35400;">P1 (High Priority):</strong> Needs resolution today before end of business. <em>Action: Flagged Slack ping during working hours.</em></li>
+          <li><strong style="color: #27ae60;">P2 (Routine):</strong> Thoughts, questions, feedback requests. <em>Action: Asynchronous email / batch processing during working hours.</em></li>
+        </ul>`;
+
+      // Weekend Rule
+      const weekendHtml = `
+        <p>Since messages frequently leak into <strong>${whenIn.join(' & ') || 'off-hours'}</strong>:</p>
+        <blockquote style="background:#FAF5FA; border-left: 3px solid var(--eggplant); padding:0.6rem 1rem; margin-top:0.5rem; font-style:italic;">
+        "I do not monitor work channels on weekends or outside ${hours}. Preserving weekends allows me to return on Monday with full problem-solving capacity."
+        </blockquote>`;
+
+      // Ignore strategy
+      const ignoreHtml = `
+        <p>When someone (like your <strong>${violator}</strong>) continues to ping you off-hours:</p>
+        <ol>
+          <li><strong>Do NOT reply immediately on Sunday/evening:</strong> Replying teaches them that off-hours pings work.</li>
+          <li><strong>Schedule Send:</strong> Write your reply immediately if you must, but set "Schedule Send" for 8:30 AM Monday.</li>
+          <li><strong>Gently re-anchor in the morning:</strong> "Got your ping from last night. Here is the update..." (This subtly reinforces that execution happens during work hours).</li>
+        </ol>`;
+
+      document.getElementById('t2-out-statement').innerHTML = statementHtml;
+      document.getElementById('t2-out-reset').innerHTML = resetHtml;
+      document.getElementById('t2-out-filter').innerHTML = filterHtml;
+      document.getElementById('t2-out-weekend').innerHTML = weekendHtml;
+      document.getElementById('t2-out-ignore').innerHTML = ignoreHtml;
+
+      document.getElementById('results-tool2').classList.add('active');
+
+      saveToHistory('tool2', `Hours: ${hours} (${violator})`, `Main offender: ${violator}. Messages in: ${whenIn.join(', ') || 'N/A'}. Comfort: ${comfort}.`);
+    }
+
+    /* ==========================================================================
+       TOOL 3 LOGIC & SCENARIOS
+       ========================================================================== */
+    function loadSampleTool3() {
+      document.getElementById('t3-where').value = "Kitchen/living room";
+      
+      const radiosOthers = document.querySelectorAll('input[name="t3-others"]');
+      radiosOthers.forEach(r => {
+        r.checked = (r.value === "Family");
+      });
+
+      document.getElementById('t3-distraction').value = "Noise";
+
+      const radiosChange = document.querySelectorAll('input[name="t3-change"]');
+      radiosChange.forEach(r => {
+        r.checked = (r.value === "Somewhat");
+      });
+
+      document.getElementById('t3-feel').value = "Having dedicated desk clutter-free, noise canceling headphones, clear signal when I am in deep focus.";
+    }
+
+    function generateTool3(event) {
+      event.preventDefault();
+
+      const where = document.getElementById('t3-where').value;
+      const others = document.querySelector('input[name="t3-others"]:checked')?.value || "Alone";
+      const distraction = document.getElementById('t3-distraction').value;
+      const canChange = document.querySelector('input[name="t3-change"]:checked')?.value || "Somewhat";
+      const feelReq = document.getElementById('t3-feel').value;
+
+      // Zone map
+      let zoneHtml = `<p>Working from <strong>${where}</strong> with <strong>${others}</strong> around requires sharp spatial distinction:</p>
+        <ul>
+          <li><strong>The Work Micro-Zone:</strong> Dedicated side of table or desk mat. Work laptop ONLY stays on this side.</li>
+          <li><strong>The Living Zone:</strong> Other side of table or secondary room. Never place work laptop on the eating surface without a physical placemat divider.</li>
+          <li><strong>End of Day Reset:</strong> Pack laptop into a sleeve at end of day and store out of view.</li>
+        </ul>`;
+
+      // Low-budget fixes
+      let budgetHtml = `<ul>
+        <li><strong>Folding Visual Screen / Room Divider ($25-$40):</strong> Block sightlines to household clutter and bed.</li>
+        <li><strong>Desk Mat & Headphone Hook ($15):</strong> Unrolls during work time; rolled up during living time.</li>
+        <li><strong>Focus Lighting Lamp ($20):</strong> Desk lamp stays ON during work, turned OFF at shutdown.</li>
+      </ul>`;
+
+      // Household rules
+      let houseScript = `HOUSETALK SCRIPT FOR ${others.toUpperCase()}:
+
+"Hey! Since my workspace is in the ${where}, when I have my headphones ON (or red mug out), it means I am in deep focus or on a call. Please treat it like a closed office door! When headphones are OFF, feel free to chat."`;
+      
+      let houseHtml = `<p>Communicating workspace boundaries to <strong>${others}</strong>:</p>
+        <div class="code-box" id="code-t3-house">${houseScript}<button class="copy-btn" onclick="copyToClipboard('code-t3-house')"><i class="fa-regular fa-copy"></i> Copy</button></div>`;
+
+      // Commute substitute
+      let commuteHtml = `<ol>
+        <li><strong>Morning Commute Substitute (5 mins):</strong> Walk around the block or step outside before sitting at ${where}.</li>
+        <li><strong>Evening Commute Substitute (5 mins):</strong> Put away work laptop, put on shoes, walk 5 minutes in opposite direction, return home as "Living Person".</li>
+      </ol>`;
+
+      // Psych boundary
+      let psychHtml = `<p>Handling distraction (<strong>${distraction}</strong>):</p>
+        <ul>
+          <li><strong>Work Shoes Rule:</strong> Never work in bare feet or slippers. Put on structured shoes during work; take them off at shutdown.</li>
+          <li><strong>Separate User Profiles:</strong> Use a separate browser profile or user desktop for work and personal browsing.</li>
+        </ul>`;
+
+      document.getElementById('t3-out-zone').innerHTML = zoneHtml;
+      document.getElementById('t3-out-budget').innerHTML = budgetHtml;
+      document.getElementById('t3-out-household').innerHTML = houseHtml;
+      document.getElementById('t3-out-commute').innerHTML = commuteHtml;
+      document.getElementById('t3-out-psych').innerHTML = psychHtml;
+
+      document.getElementById('results-tool3').classList.add('active');
+
+      saveToHistory('tool3', `Setup: ${where} (${others})`, `Main issue: ${distraction}. Setup flexibility: ${canChange}.`);
+    }
+
+    /* ==========================================================================
+       TOOL 4 LOGIC & SCENARIOS
+       ========================================================================== */
+    function loadSampleTool4() {
+      document.getElementById('t4-apps').value = "4";
+
+      const radiosMail = document.querySelectorAll('input[name="t4-phone-mail"]');
+      radiosMail.forEach(r => {
+        r.checked = (r.value === "Yes");
+      });
+
+      document.getElementById('t4-checks').value = "6-10";
+      document.getElementById('t4-anxiety').value = "Slack/Teams";
+
+      const radiosPast = document.querySelectorAll('input[name="t4-past"]');
+      radiosPast.forEach(r => {
+        r.checked = (r.value === "Yes, didn't stick");
+      });
+    }
+
+    function generateTool4(event) {
+      event.preventDefault();
+
+      const numApps = document.getElementById('t4-apps').value;
+      const phoneMail = document.querySelector('input[name="t4-phone-mail"]:checked')?.value || "Yes";
+      const checks = document.getElementById('t4-checks').value;
+      const anxietyApp = document.getElementById('t4-anxiety').value;
+
+      // Prescription
+      let prescriptionHtml = `<p>You have <strong>${numApps} notifications</strong> enabled and check <strong>${checks} times/hr</strong>. Your worst anxiety driver is <strong>${anxietyApp}</strong>.</p>
+        <ul>
+          <li><strong>${anxietyApp}:</strong> Disable ALL mobile push notifications immediately. Remove icon badges.</li>
+          <li><strong>Email:</strong> Turn off desktop banner popups and audio chimes. Keep inbox closed by default.</li>
+          <li><strong>Calendar:</strong> Set alerts to 5 minutes prior only (eliminate 15-min and 1-hour pre-alerts).</li>
+        </ul>`;
+
+      // Surgery
+      let surgeryHtml = `<p>Step-by-step phone surgery protocol:</p>
+        <ol>
+          <li><strong>Move Work Apps:</strong> Place ${anxietyApp} and email apps into a folder on page 3 of your home screen (not dock).</li>
+          <li><strong>Scheduled Focus Mode:</strong> Configure iOS Focus / Android Do Not Disturb to automatically hide work apps after 5:30 PM.</li>
+          <li><strong>Remove Badges:</strong> Settings -&gt; Notifications -&gt; Turn off "Badge App Icon" for all work tools.</li>
+        </ol>`;
+
+      // Batch schedule
+      let batchHtml = `<p>Shift from continuous reactive scanning to strategic batching:</p>
+        <ul>
+          <li><strong>9:00 AM - 9:30 AM:</strong> Batch Check 1 (Triage overnight messages)</li>
+          <li><strong>1:00 PM - 1:30 PM:</strong> Batch Check 2 (Post-lunch update sweep)</li>
+          <li><strong>4:30 PM - 5:00 PM:</strong> Batch Check 3 (Final day wrap-up & status updates)</li>
+        </ul>`;
+
+      // Emergency path
+      let emergencyHtml = `<p>How real emergencies reach you without everything disturbing you:</p>
+        <p>Inform key teammates: <em>"I work in focused deep-work blocks with pings muted. If a server is down or client emergency occurs, call my cell directly."</em> (Result: 99% of non-emergencies won't make the phone call).</p>`;
+
+      // Accountability
+      let stickHtml = `<p>Past attempt status: <em>Didn't stick</em>. Here is how to make it permanent past Day 3:</p>
+        <ul>
+          <li><strong>Screen Time Lock:</strong> Set app time limits on ${anxietyApp} after 6 PM and have a family member or partner set the passcode lock.</li>
+          <li><strong>Grayscale Mode:</strong> Turn your phone display to Grayscale during evenings to neutralize dopamine triggers.</li>
+        </ul>`;
+
+      document.getElementById('t4-out-prescription').innerHTML = prescriptionHtml;
+      document.getElementById('t4-out-surgery').innerHTML = surgeryHtml;
+      document.getElementById('t4-out-batch').innerHTML = batchHtml;
+      document.getElementById('t4-out-emergency').innerHTML = emergencyHtml;
+      document.getElementById('t4-out-stick').innerHTML = stickHtml;
+
+      document.getElementById('results-tool4').classList.add('active');
+
+      saveToHistory('tool4', `${numApps} apps on phone (${anxietyApp})`, `Check rate: ${checks}/hr. Personal phone mail: ${phoneMail}.`);
+    }
+
+    /* ==========================================================================
+       TOOL 5 LOGIC & SCENARIOS
+       ========================================================================== */
+    function loadSampleTool5() {
+      document.getElementById('t5-with').value = "Partner & 1 Child (Age 5)";
+      document.getElementById('t5-lasttime').value = "Last week";
+
+      const checkboxes = document.querySelectorAll('input[name="t5-sacrifices"]');
+      checkboxes.forEach(cb => {
+        cb.checked = (cb.value === "Dinner" || cb.value === "Bedtime routine" || cb.value === "Weekends");
+      });
+
+      document.getElementById('t5-extra').value = "Play board games with my child, cook a calm dinner with my partner, and read books without looking at Slack.";
+
+      const radiosComplain = document.querySelectorAll('input[name="t5-complain"]');
+      radiosComplain.forEach(r => {
+        r.checked = (r.value === "Sometimes");
+      });
+    }
+
+    function generateTool5(event) {
+      event.preventDefault();
+
+      const livingWith = document.getElementById('t5-with').value;
+      const lastTime = document.getElementById('t5-lasttime').value;
+      const sacrifices = Array.from(document.querySelectorAll('input[name="t5-sacrifices"]:checked')).map(c => c.value);
+      const extraTime = document.getElementById('t5-extra').value;
+      const complaints = document.querySelector('input[name="t5-complain"]:checked')?.value || "Sometimes";
+
+      // Audit
+      let auditHtml = `<p>Living with: <strong>${livingWith}</strong>. Last quality time: <strong>${lastTime}</strong>.</p>
+        <p style="margin-top: 0.5rem; color: #c0392b; font-weight: 600;">Currently Being Sacrificed:</p>
+        <ul>
+          ${sacrifices.map(s => `<li><strong>${s}:</strong> High friction area impacting relationship quality.</li>`).join('')}
+        </ul>`;
+
+      // Protected Blocks
+      let blocksHtml = `<p>Establish 3 Sacred Non-Negotiable Blocks this week:</p>
+        <ul>
+          <li><strong>Block 1: Dinner & Unplugged (6:30 PM - 7:30 PM):</strong> Zero phones at table. Phone parked in charging station in hallway.</li>
+          <li><strong>Block 2: Bedtime / Evening Connection (8:00 PM - 9:00 PM):</strong> Dedicated focused presence for ${livingWith}.</li>
+          <li><strong>Block 3: Weekend Morning Sanctuary:</strong> Saturday morning completely work-free.</li>
+        </ul>`;
+
+      // Transition
+      let transitionHtml = `<ol>
+        <li><strong>Physical Wash:</strong> Wash hands and face with cold water at end of workday to signal clearing work stress.</li>
+        <li><strong>Phone Separation:</strong> Leave phone in a "parking zone" away from living room.</li>
+        <li><strong>Mental Check-in Question:</strong> Before entering the room, ask yourself: <em>"Am I entering as an exhausted employee or as a present partner/parent?"</em></li>
+      </ol>`;
+
+      // Recommitment script
+      let recommitScript = `Hey ${livingWith.split(' ')[0] || 'there'},
+
+I've realized lately that work has been bleeding into our personal life, especially around ${sacrifices.join(' and ') || 'our time together'}. You deserve my full presence, not just my leftover energy.
+
+I'm taking active steps to fix this. Starting today, I'm locking in an absolute shutdown at the end of the workday. I want us to spend uninterrupted time doing what matters—like ${extraTime}.
+
+Thanks for being patient with me while I get this boundary locked down.`;
+
+      let starterHtml = `<p>Copy this script to open an honest recommitment conversation:</p>
+        <div class="code-box" id="code-t5-recommit">${recommitScript}<button class="copy-btn" onclick="copyToClipboard('code-t5-recommit')"><i class="fa-regular fa-copy"></i> Copy</button></div>`;
+
+      // One small win
+      let winHtml = `<p style="font-weight: 600; color: var(--eggplant); font-size: 1rem;">Today's Action:</p>
+        <p>Tonight during ${sacrifices[0] || 'dinner'}, put your phone in another room or turn it completely OFF for 60 consecutive minutes. Do not mention work once.</p>`;
+
+      document.getElementById('t5-out-audit').innerHTML = auditHtml;
+      document.getElementById('t5-out-blocks').innerHTML = blocksHtml;
+      document.getElementById('t5-out-transition').innerHTML = transitionHtml;
+      document.getElementById('t5-out-starter').innerHTML = starterHtml;
+      document.getElementById('t5-out-win').innerHTML = winHtml;
+
+      document.getElementById('results-tool5').classList.add('active');
+
+      saveToHistory('tool5', `Reconnection for ${livingWith}`, `Sacrifices: ${sacrifices.join(', ') || 'None'}. Last quality time: ${lastTime}. Feedback level: ${complaints}.`);
+    }
+
+    /* Initialize Default View */
+    document.addEventListener('DOMContentLoaded', () => {
+      navigateTo('dashboard');
+    });
+  </script>
+</body>
+</html>

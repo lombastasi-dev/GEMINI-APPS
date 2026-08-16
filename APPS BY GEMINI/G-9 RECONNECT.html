@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconnect — Relationship Toolkit</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #C77DAD;
+            --primary-dark: #B06395;
+            --primary-light: #F3E5EE;
+            --secondary: #8FB8DE;
+            --secondary-dark: #6FA2D0;
+            --secondary-light: #EBF3FA;
+            --bg-gradient: linear-gradient(135deg, #FDF2F8 0%, #F0F9FF 100%);
+            --text-dark: #334155;
+            --text-muted: #64748B;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Layout Structure */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background-color: var(--secondary-light);
+            color: var(--secondary-dark);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styling */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .mobile-header {
+            display: none;
+            background: var(--card-bg);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .mobile-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .content-container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 32px 20px;
+            flex: 1;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            background: rgba(255,255,255,0.5);
+            margin-top: auto;
+        }
+
+        /* Cards & General UI */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            margin-bottom: 24px;
+        }
+
+        .tool-header {
+            margin-bottom: 24px;
+        }
+
+        .tool-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .tool-title i {
+            color: var(--primary);
+        }
+
+        .tool-subtitle {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .problem-statement {
+            background-color: var(--secondary-light);
+            border-left: 4px solid var(--secondary);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 24px;
+            font-style: italic;
+            color: #334155;
+            font-size: 14px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .form-group .description {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-dark);
+            background-color: #FAFAFA;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #FFF;
+            box-shadow: 0 0 0 3px rgba(199, 125, 173, 0.15);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Sliders */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary);
+        }
+
+        .slider-value {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--primary-dark);
+            min-width: 28px;
+            text-align: right;
+        }
+
+        /* Radio Group */
+        .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .radio-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .radio-card:hover {
+            border-color: var(--secondary);
+            background-color: var(--secondary-light);
+        }
+
+        .radio-card input {
+            accent-color: var(--primary);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-light);
+            color: var(--secondary-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #DCEAF5;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background: #F8FAFC;
+            color: var(--text-dark);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-hero {
+            text-align: center;
+            padding: 32px 16px;
+            margin-bottom: 12px;
+        }
+
+        .dashboard-hero h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+        }
+
+        .dashboard-hero p {
+            font-size: 18px;
+            color: var(--text-muted);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            border-color: var(--primary);
+        }
+
+        .tool-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .tool-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .tool-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Output Displays */
+        .output-container {
+            margin-top: 32px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .output-header {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-box {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .output-box h4 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .output-box p, .output-box ul {
+            font-size: 14px;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .output-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .output-box li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .output-box li::before {
+            content: "•";
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 18px;
+            position: absolute;
+            left: 0;
+            top: -2px;
+        }
+
+        /* Radar Bar Visualizer */
+        .bar-visualizer {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .bar-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .bar-track {
+            height: 10px;
+            background: #E2E8F0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 5px;
+            transition: width 0.6s ease;
+        }
+
+        /* Script Boxes with Copy Buttons */
+        .script-box {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            position: relative;
+            font-style: italic;
+            margin-top: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--text-dark);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        /* History Section */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .history-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .history-item {
+            background: #FAFAFA;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .history-item-date {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.4);
+                z-index: 95;
+            }
+
+            .overlay.open {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <h1>Reconnect</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item active" onclick="switchTab('dashboard')">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li class="nav-item" onclick="switchTab('thermometer')">
+                    <i class="fa-solid fa-temperature-half"></i>
+                    <span>Thermometer</span>
+                </li>
+                <li class="nav-item" onclick="switchTab('daily-bridge')">
+                    <i class="fa-solid fa-bridge"></i>
+                    <span>Daily Bridge</span>
+                </li>
+                <li class="nav-item" onclick="switchTab('conversation')">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>Conversation Restart</span>
+                </li>
+                <li class="nav-item" onclick="switchTab('physical')">
+                    <i class="fa-solid fa-hand-holding-heart"></i>
+                    <span>Physical Touch</span>
+                </li>
+                <li class="nav-item" onclick="switchTab('purpose')">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Shared Purpose</span>
+                </li>
+            </ul>
+        </aside>
+
+        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Mobile Header -->
+            <div class="mobile-header">
+                <div class="brand">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <span>Reconnect</span>
+                </div>
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-container">
+
+                <!-- DASHBOARD -->
+                <div id="view-dashboard" class="view">
+                    <div class="dashboard-hero">
+                        <h2>Reconnect</h2>
+                        <p>Close the distance before it becomes a habit.</p>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="tool-card" onclick="switchTab('thermometer')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-temperature-half"></i></div>
+                            <h3>Connection Thermometer</h3>
+                            <p>Assess where you stand across 6 core relationship dimensions.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTab('daily-bridge')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-bridge"></i></div>
+                            <h3>Daily Bridge</h3>
+                            <p>Design tiny 2-minute daily rituals to rebuild warmth.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTab('conversation')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-comments"></i></div>
+                            <h3>Conversation Restart</h3>
+                            <p>Move beyond logistics and schedules with guided prompts.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTab('physical')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                            <h3>Physical Reconnection</h3>
+                            <p>Reintroduce safe, low-pressure non-sexual touch.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTab('purpose')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-compass"></i></div>
+                            <h3>Shared Purpose</h3>
+                            <p>Rediscover common ground and create new rituals together.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 1: CONNECTION THERMOMETER -->
+                <div id="view-thermometer" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-title">
+                                <i class="fa-solid fa-temperature-half"></i>
+                                Connection Thermometer
+                            </div>
+                            <div class="tool-subtitle">Identify where warmth has slipped and locate your strongest starting point.</div>
+                        </div>
+
+                        <div class="problem-statement">
+                            "We live together but I feel alone. Where did we disconnect?"
+                        </div>
+
+                        <form id="form-thermometer" onsubmit="processThermometer(event)">
+                            <div class="form-group">
+                                <label>Emotional Intimacy (1-10)</label>
+                                <div class="description">We share feelings and vulnerabilities beyond daily logistics.</div>
+                                <div class="slider-container">
+                                    <input type="range" id="thermo-1" min="1" max="10" value="5" oninput="updateSliderVal(this)">
+                                    <span class="slider-value">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Physical Affection (1-10)</label>
+                                <div class="description">Non-sexual touch, hugs, holding hands, sitting close.</div>
+                                <div class="slider-container">
+                                    <input type="range" id="thermo-2" min="1" max="10" value="5" oninput="updateSliderVal(this)">
+                                    <span class="slider-value">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Intellectual Connection (1-10)</label>
+                                <div class="description">We talk about ideas, interests, and news, not just chores.</div>
+                                <div class="slider-container">
+                                    <input type="range" id="thermo-3" min="1" max="10" value="5" oninput="updateSliderVal(this)">
+                                    <span class="slider-value">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Shared Fun (1-10)</label>
+                                <div class="description">We laugh, play, and enjoy leisure time together.</div>
+                                <div class="slider-container">
+                                    <input type="range" id="thermo-4" min="1" max="10" value="5" oninput="updateSliderVal(this)">
+                                    <span class="slider-value">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Support & Teamwork (1-10)</label>
+                                <div class="description">We feel like a unified team facing the world together.</div>
+                                <div class="slider-container">
+                                    <input type="range" id="thermo-5" min="1" max="10" value="5" oninput="updateSliderVal(this)">
+                                    <span class="slider-value">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Attraction & Spark (1-10)</label>
+                                <div class="description">I still feel drawn to them and value our romantic bond.</div>
+                                <div class="slider-container">
+                                    <input type="range" id="thermo-6" min="1" max="10" value="5" oninput="updateSliderVal(this)">
+                                    <span class="slider-value">5</span>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-simple"></i> Analyze Connection</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleThermometer()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="output-thermometer" class="output-container">
+                            <div class="output-header">Connection Assessment</div>
+                            
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-chart-column"></i> Connection Map</h4>
+                                <div class="bar-visualizer" id="thermo-bars"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-shield-heart"></i> Strongest Dimension</h4>
+                                <p id="thermo-strongest"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-triangle-exclamation"></i> Primary Area of Friction</h4>
+                                <p id="thermo-weakest"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-diagram-project"></i> The Disconnect Pattern</h4>
+                                <p id="thermo-pattern"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-seedling"></i> One Small Start</h4>
+                                <p id="thermo-action"></p>
+                            </div>
+                        </div>
+
+                        <!-- History Section -->
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('thermometer')">
+                                <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Assessments</span>
+                                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('thermometer')">Clear</button>
+                            </div>
+                            <div id="history-thermometer" class="history-list" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 2: DAILY BRIDGE -->
+                <div id="view-daily-bridge" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-title">
+                                <i class="fa-solid fa-bridge"></i>
+                                Daily Bridge
+                            </div>
+                            <div class="tool-subtitle">Design tiny, consistent 2-minute connection touchpoints into daily routines.</div>
+                        </div>
+
+                        <div class="problem-statement">
+                            "We don't have time for big gestures. What small thing actually works?"
+                        </div>
+
+                        <form id="form-daily-bridge" onsubmit="processDailyBridge(event)">
+                            <div class="form-group">
+                                <label>Current morning routine:</label>
+                                <textarea id="bridge-morning" placeholder="e.g., Rush to get ready, grab coffee, leave separately..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Current evening routine:</label>
+                                <textarea id="bridge-evening" placeholder="e.g., Eat dinner in front of TV, scroll on phones, go to sleep..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What made you feel close in the early days?</label>
+                                <textarea id="bridge-early" placeholder="e.g., Long conversations over coffee, laughing together, sending texts..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What is one 2-minute action that would make YOU feel seen?</label>
+                                <textarea id="bridge-seen" placeholder="e.g., Asking how my day was and genuinely listening for 2 mins..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What is one 2-minute action you could do for THEM?</label>
+                                <textarea id="bridge-them" placeholder="e.g., Making their morning coffee, giving a genuine hug..."></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-hammer"></i> Build Daily Bridge</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleBridge()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="output-daily-bridge" class="output-container">
+                            <div class="output-header">Your Micro-Connection Strategy</div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-mug-hot"></i> The Bridge Habit</h4>
+                                <p id="bridge-habit-out"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-gift"></i> The Daily Deposits</h4>
+                                <ul id="bridge-deposits-out"></ul>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-ban"></i> Main Barrier Identified</h4>
+                                <p id="bridge-barrier-out"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-calendar-week"></i> 7-Day Micro-Connection Plan</h4>
+                                <ul id="bridge-plan-out"></ul>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-heart-crack"></i> Guidance: If They Don't Reciprocate Right Away</h4>
+                                <p>Keep giving without scorekeeping for one week. Micro-connections build emotional safety gradually. Trust is re-established through non-transactional consistency, not immediate returns.</p>
+                            </div>
+                        </div>
+
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('daily-bridge')">
+                                <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Saved Bridge Plans</span>
+                                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('daily-bridge')">Clear</button>
+                            </div>
+                            <div id="history-daily-bridge" class="history-list" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 3: CONVERSATION RESTART -->
+                <div id="view-conversation" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-title">
+                                <i class="fa-solid fa-comments"></i>
+                                Conversation Restart
+                            </div>
+                            <div class="tool-subtitle">Shift from administrative "roommate talk" to meaningful connection.</div>
+                        </div>
+
+                        <div class="problem-statement">
+                            "We only talk about groceries and schedules."
+                        </div>
+
+                        <form id="form-conversation" onsubmit="processConversation(event)">
+                            <div class="form-group">
+                                <label>Last meaningful conversation topic:</label>
+                                <textarea id="conv-last-topic" placeholder="e.g., Our future goals, a deep personal fear, childhood memories..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>How long ago was that?</label>
+                                <select id="conv-timeframe">
+                                    <option value="<1 week">Less than 1 week ago</option>
+                                    <option value="1-4 weeks">1 to 4 weeks ago</option>
+                                    <option value="1-3 months">1 to 3 months ago</option>
+                                    <option value="3-6 months">3 to 6 months ago</option>
+                                    <option value="6+ months">6+ months ago</option>
+                                    <option value="Can't remember">Can't remember</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What do you wish they would ask you about?</label>
+                                <textarea id="conv-wish-ask" placeholder="e.g., How I'm really feeling about my career transition..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What are you curious about in their life right now?</label>
+                                <textarea id="conv-curious" placeholder="e.g., What they daydream about lately, or how they cope with stress..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Fear about deeper conversation:</label>
+                                <select id="conv-fear">
+                                    <option value="They won't care">They won't care or pay attention</option>
+                                    <option value="It'll turn into a fight">It'll turn into an argument or fight</option>
+                                    <option value="I don't know how">I don't know how to initiate without sounding weird</option>
+                                    <option value="It feels forced">It feels forced or artificial</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-comment-dots"></i> Generate Prompts</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleConversation()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="output-conversation" class="output-container">
+                            <div class="output-header">Conversation Playbook</div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-hourglass-half"></i> The Conversation Gap</h4>
+                                <p id="conv-gap-out"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-lightbulb"></i> 3 Tailored Conversation Starters</h4>
+                                <div id="conv-starters-out"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-ear-listen"></i> The Active Listening Prompt</h4>
+                                <p><strong>Rule of 80/20:</strong> Listen 80% of the time. When they finish speaking, validate before responding: <em>"That makes sense why you'd feel that way."</em> Do not offer solutions unless asked.</p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-stairs"></i> Topic Progression Plan</h4>
+                                <ul id="conv-progression-out"></ul>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-face-smile-beam"></i> If It Feels Awkward Script</h4>
+                                <div class="script-box">
+                                    "I know it feels a bit out of the blue to ask this, but I realized we've mostly been talking about logistics lately and I miss really hearing what's on your mind."
+                                    <button class="copy-btn" onclick="copyText(this)">Copy</button>
+                                </div>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-door-open"></i> Graceful Exit Script (If They Shut Down)</h4>
+                                <div class="script-box">
+                                    "No pressure at all to answer right now! Just wanted to share what I was thinking about. We can catch up on it whenever."
+                                    <button class="copy-btn" onclick="copyText(this)">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('conversation')">
+                                <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Conversation History</span>
+                                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('conversation')">Clear</button>
+                            </div>
+                            <div id="history-conversation" class="history-list" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 4: PHYSICAL RECONNECTION -->
+                <div id="view-physical" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-title">
+                                <i class="fa-solid fa-hand-holding-heart"></i>
+                                Physical Reconnection
+                            </div>
+                            <div class="tool-subtitle">Reintroduce warm, non-sexual physical affection at a comfortable pace.</div>
+                        </div>
+
+                        <div class="problem-statement">
+                            "We've stopped touching each other entirely."
+                        </div>
+
+                        <form id="form-physical" onsubmit="processPhysical(event)">
+                            <div class="form-group">
+                                <label>Current physical contact frequency:</label>
+                                <select id="phys-freq">
+                                    <option value="Multiple times daily">Multiple times daily</option>
+                                    <option value="Daily">Daily</option>
+                                    <option value="Few times a week">A few times a week</option>
+                                    <option value="Rarely">Rarely</option>
+                                    <option value="Never">Never</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Who usually initiates touch?</label>
+                                <div class="radio-group">
+                                    <label class="radio-card"><input type="radio" name="phys-init" value="Partner A" checked> Partner A</label>
+                                    <label class="radio-card"><input type="radio" name="phys-init" value="Partner B"> Partner B</label>
+                                    <label class="radio-card"><input type="radio" name="phys-init" value="Neither"> Neither</label>
+                                    <label class="radio-card"><input type="radio" name="phys-init" value="Used to be mutual"> Used to be mutual</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What non-sexual touch do you miss most?</label>
+                                <select id="phys-miss">
+                                    <option value="Holding hands">Holding hands</option>
+                                    <option value="Long hugs">Long, warm hugs</option>
+                                    <option value="Sitting close">Sitting close on the couch</option>
+                                    <option value="Back/shoulder rubs">Casual back or shoulder rubs</option>
+                                    <option value="Sleeping cuddled">Sleeping cuddled together</option>
+                                    <option value="Casual gentle touch">Casual touch passing by</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What makes touch feel unsafe or unwelcome? (Optional)</label>
+                                <textarea id="phys-barriers" placeholder="e.g., Feeling like touch always has to lead to sex, or feeling distant emotionally..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Partner A Comfort Level with Initiating (1-10)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="phys-comfort-a" min="1" max="10" value="4" oninput="updateSliderVal(this)">
+                                    <span class="slider-value">4</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Partner B Comfort Level with Initiating (1-10)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="phys-comfort-b" min="1" max="10" value="4" oninput="updateSliderVal(this)">
+                                    <span class="slider-value">4</span>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-heart"></i> Generate Reentry Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSamplePhysical()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="output-physical" class="output-container">
+                            <div class="output-header">Physical Reconnection Plan</div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-circle-info"></i> The Touch Gap</h4>
+                                <p id="phys-gap-out"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-shield-halved"></i> The Safety Check</h4>
+                                <p id="phys-safety-out"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-stairs"></i> Escalating Touch Reentry Plan</h4>
+                                <ul id="phys-reentry-out"></ul>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-scale-balanced"></i> Initiation Rebalance Strategy</h4>
+                                <p id="phys-rebalance-out"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-clock"></i> The 5-Minute Rule</h4>
+                                <p>Commit to 5 minutes of low-pressure, continuous physical presence daily (e.g., sitting side-by-side on the couch holding hands while watching a show or having tea) with zero expectations beyond closeness.</p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-comment-medical"></i> Script: Separating Affection from Expectation</h4>
+                                <div class="script-box">
+                                    "I love hugging you and holding your hand, and I want us to have that warmth without you ever feeling like there's any pressure or expectation attached. Just closeness."
+                                    <button class="copy-btn" onclick="copyText(this)">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('physical')">
+                                <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Touch Plans</span>
+                                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('physical')">Clear</button>
+                            </div>
+                            <div id="history-physical" class="history-list" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 5: SHARED PURPOSE -->
+                <div id="view-purpose" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-title">
+                                <i class="fa-solid fa-compass"></i>
+                                Shared Purpose
+                            </div>
+                            <div class="tool-subtitle">Rebuild shared identity, joint rituals, and mutual curiosity.</div>
+                        </div>
+
+                        <div class="problem-statement">
+                            "We don't have anything that feels like 'us' anymore."
+                        </div>
+
+                        <form id="form-purpose" onsubmit="processPurpose(event)">
+                            <div class="form-group">
+                                <label>Shared hobbies or interests when you met:</label>
+                                <textarea id="purp-past" placeholder="e.g., Hiking, cooking together, watching comedy shows, traveling..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Current shared activities:</label>
+                                <textarea id="purp-current" placeholder="e.g., Watching news, eating dinner occasionally, chores..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>One thing Partner A cares deeply about right now:</label>
+                                <textarea id="purp-a-care" placeholder="e.g., Gardening, fitness, career growth..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>One thing Partner B cares deeply about right now:</label>
+                                <textarea id="purp-b-care" placeholder="e.g., Photography, reading, home organization..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Dream or goal you once shared:</label>
+                                <textarea id="purp-dream" placeholder="e.g., Buying a cabin, learning a language, traveling to Japan..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Willingness to try something new together (1-10)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="purp-willingness" min="1" max="10" value="6" oninput="updateSliderVal(this)">
+                                    <span class="slider-value">6</span>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-lightbulb"></i> Discover Common Ground</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSamplePurpose()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="output-purpose" class="output-container">
+                            <div class="output-header">Shared Purpose Blueprint</div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-venn-diagram"></i> The Overlap</h4>
+                                <p id="purp-overlap-out"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-user-group"></i> Individual Worlds</h4>
+                                <p id="purp-worlds-out"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-rocket"></i> The Bridge Activity</h4>
+                                <p id="purp-bridge-out"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-bullseye"></i> The Shared Goal</h4>
+                                <p id="purp-goal-out"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-rotate"></i> The "Us" Ritual</h4>
+                                <p id="purp-ritual-out"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-magnifying-glass"></i> Protocol: If No Overlap Appears to Exist</h4>
+                                <p>Start with genuine curiosity rather than forced activity. Ask to shadow each other in your respective interests for 30 minutes without needing to enjoy the activity itself—just to appreciate your partner's passion.</p>
+                            </div>
+                        </div>
+
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('purpose')">
+                                <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                                <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('purpose')">Clear</button>
+                            </div>
+                            <div id="history-purpose" class="history-list" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                For entertainment and reflection purposes only. Not therapy or professional advice.
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">Copied to clipboard!</div>
+
+    <script>
+        // --- Navigation Logic ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.view').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            const targetView = document.getElementById(`view-${tabId}`);
+            if (targetView) targetView.style.display = 'block';
+
+            const navs = document.querySelectorAll('.nav-item');
+            const map = {
+                'dashboard': 0,
+                'thermometer': 1,
+                'daily-bridge': 2,
+                'conversation': 3,
+                'physical': 4,
+                'purpose': 5
+            };
+            if (map[tabId] !== undefined && navs[map[tabId]]) {
+                navs[map[tabId]].classList.add('active');
+            }
+
+            // Close mobile menu if open
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('open');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('open');
+        }
+
+        function updateSliderVal(slider) {
+            slider.nextElementSibling.innerText = slider.value;
+        }
+
+        function copyText(button) {
+            const container = button.parentElement;
+            const text = container.innerText.replace('Copy', '').trim();
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2000);
+        }
+
+        // --- LocalStorage Helpers ---
+        function saveToHistory(toolId, data) {
+            const key = `reconnect_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            history.unshift({
+                timestamp: new Date().toLocaleString(),
+                data: data
+            });
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = `reconnect_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const container = document.getElementById(`history-${toolId}`);
+            if (!container) return;
+
+            if (history.length === 0) {
+                container.innerHTML = '<div class="history-item">No saved history yet.</div>';
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="history-item-date">${item.timestamp}</div>
+                    <div>${item.data.summary || 'Saved result'}</div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistory(toolId) {
+            const el = document.getElementById(`history-${toolId}`);
+            if (el.style.display === 'none') {
+                renderHistory(toolId);
+                el.style.display = 'flex';
+            } else {
+                el.style.display = 'none';
+            }
+        }
+
+        function clearHistory(toolId) {
+            const key = `reconnect_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast('History cleared');
+        }
+
+        // --- TOOL 1: CONNECTION THERMOMETER ---
+        function loadSampleThermometer() {
+            document.getElementById('thermo-1').value = 3;
+            document.getElementById('thermo-2').value = 2;
+            document.getElementById('thermo-3').value = 4;
+            document.getElementById('thermo-4').value = 2;
+            document.getElementById('thermo-5').value = 8; // High logistics/support
+            document.getElementById('thermo-6').value = 3;
+            
+            document.querySelectorAll('#form-thermometer input[type="range"]').forEach(updateSliderVal);
+        }
+
+        function processThermometer(e) {
+            e.preventDefault();
+            const scores = [
+                { name: 'Emotional Intimacy', val: parseInt(document.getElementById('thermo-1').value) },
+                { name: 'Physical Affection', val: parseInt(document.getElementById('thermo-2').value) },
+                { name: 'Intellectual Connection', val: parseInt(document.getElementById('thermo-3').value) },
+                { name: 'Shared Fun', val: parseInt(document.getElementById('thermo-4').value) },
+                { name: 'Support & Teamwork', val: parseInt(document.getElementById('thermo-5').value) },
+                { name: 'Attraction & Spark', val: parseInt(document.getElementById('thermo-6').value) }
+            ];
+
+            // Render bars
+            const barsContainer = document.getElementById('thermo-bars');
+            barsContainer.innerHTML = scores.map(s => `
+                <div class="bar-item">
+                    <div class="bar-label">
+                        <span>${s.name}</span>
+                        <span>${s.val}/10</span>
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: ${s.val * 10}%;"></div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Sort scores
+            const sorted = [...scores].sort((a,b) => a.val - b.val);
+            const lowest = sorted[0];
+            const highest = sorted[sorted.length - 1];
+
+            document.getElementById('thermo-strongest').innerHTML = `<strong>${highest.name} (${highest.val}/10)</strong>: This is your relationship anchor. Use this solid baseline as a safe foundation to extend into weaker areas.`;
+            document.getElementById('thermo-weakest').innerHTML = `<strong>${lowest.name} (${lowest.val}/10)</strong>: This area requires gentle attention first. Small adjustments here will yield noticeable improvements.`;
+
+            // Pattern Determination
+            let pattern = "";
+            const avg = scores.reduce((a,b) => a + b.val, 0) / 6;
+
+            if (scores.find(s => s.name === 'Support & Teamwork').val >= 6 && avg < 5) {
+                pattern = "<strong>Roommate Syndrome / Logistics-Only Mode:</strong> You execute life smoothly together as operational partners, but the romantic and emotional essence has been shelved.";
+            } else if (scores.find(s => s.name === 'Emotional Intimacy').val <= 3) {
+                pattern = "<strong>Emotional Withdrawal:</strong> Defensive walls have replaced vulnerability. Conversation feels safe only when kept superficial.";
+            } else if (avg < 4) {
+                pattern = "<strong>Parallel Lives:</strong> You inhabit the same physical space while living largely independent internal and daily lives.";
+            } else {
+                pattern = "<strong>Gentle Drift:</strong> No acute crisis, but a gradual loss of intentional connection over time.";
+            }
+            document.getElementById('thermo-pattern').innerHTML = pattern;
+
+            // Small Start
+            const startMap = {
+                'Emotional Intimacy': "Share one small personal vulnerability or reflection during dinner, without expecting anything in return.",
+                'Physical Affection': "Give a warm, 6-second hug before leaving or upon returning home today.",
+                'Intellectual Connection': "Send an article or talk topic that interested you today with the note: 'Thought of you when I saw this.'",
+                'Shared Fun': "Send a silly meme or share a quick funny memory from early in your relationship.",
+                'Support & Teamwork': "Ask a simple supportive question: 'What is one thing on your plate today I can help take off?'",
+                'Attraction & Spark': "Offer a genuine, specific compliment focused on their character or appearance."
+            };
+            document.getElementById('thermo-action').innerHTML = startMap[lowest.name];
+
+            document.getElementById('output-thermometer').style.display = 'block';
+
+            saveToHistory('thermometer', {
+                summary: `Strongest: ${highest.name} (${highest.val}), Weakest: ${lowest.name} (${lowest.val})`
+            });
+        }
+
+        // --- TOOL 2: DAILY BRIDGE ---
+        function loadSampleBridge() {
+            document.getElementById('bridge-morning').value = "Rush to get ready, grab coffee in travel mugs, leave in separate cars while checking work emails.";
+            document.getElementById('bridge-evening').value = "Eat dinner while watching TV shows, scroll social media separately in bed until sleeping.";
+            document.getElementById('bridge-early').value = "Sitting on the porch drinking tea and talking about our dreams without distractions.";
+            document.getElementById('bridge-seen').value = "Asking how I am feeling and making eye contact while I answer for two minutes.";
+            document.getElementById('bridge-them').value = "Making their favorite morning tea and leaving a short warm note.";
+        }
+
+        function processDailyBridge(e) {
+            e.preventDefault();
+            const morning = document.getElementById('bridge-morning').value || "Morning routine";
+            const evening = document.getElementById('bridge-evening').value || "Evening routine";
+            const seen = document.getElementById('bridge-seen').value || "A brief listening moment";
+            const them = document.getElementById('bridge-them').value || "A small thoughtful gesture";
+
+            document.getElementById('bridge-habit-out').innerHTML = `Anchor a 2-minute connection ritual right at transition points: <strong>Morning departure or Evening arrival</strong>. Pause all device usage during this window.`;
+            
+            document.getElementById('bridge-deposits-out').innerHTML = `
+                <li><strong>For You:</strong> Request: "${seen}"</li>
+                <li><strong>For Them:</strong> Action: "${them}"</li>
+            `;
+
+            document.getElementById('bridge-barrier-out').innerHTML = `Over-reliance on passive co-presence (e.g., sitting near each other while absorbed in screens or TV) creating the illusion of connection without engagement.`;
+
+            document.getElementById('bridge-plan-out').innerHTML = `
+                <li><strong>Day 1:</strong> Perform the 2-minute giving action quietly.</li>
+                <li><strong>Day 2:</strong> Hold a 6-second hug during morning departure.</li>
+                <li><strong>Day 3:</strong> Send one mid-day text expressing appreciation (no logistics).</li>
+                <li><strong>Day 4:</strong> Ask 1 open question during dinner with screens off.</li>
+                <li><strong>Day 5:</strong> Offer a warm greeting at the door upon arriving home.</li>
+                <li><strong>Day 6:</strong> Spend 5 minutes sitting together on the couch before bedtime.</li>
+                <li><strong>Day 7:</strong> Reflect on how the week felt without pressure or evaluation.</li>
+            `;
+
+            document.getElementById('output-daily-bridge').style.display = 'block';
+
+            saveToHistory('daily-bridge', {
+                summary: `Daily Bridge: ${them.substring(0, 30)}...`
+            });
+        }
+
+        // --- TOOL 3: CONVERSATION RESTART ---
+        function loadSampleConversation() {
+            document.getElementById('conv-last-topic').value = "Discussing our vacation plans or career goals";
+            document.getElementById('conv-timeframe').value = "3-6 months";
+            document.getElementById('conv-wish-ask').value = "How I'm handling the stress of my current project and if I'm happy";
+            document.getElementById('conv-curious').value = "What exciting ideas or personal goals they are thinking about lately";
+            document.getElementById('conv-fear').value = "It feels forced";
+        }
+
+        function processConversation(e) {
+            e.preventDefault();
+            const timeframe = document.getElementById('conv-timeframe').value;
+            const wishAsk = document.getElementById('conv-wish-ask').value || "what's on your mind";
+            const curious = document.getElementById('conv-curious').value || "what you're enjoying lately";
+
+            document.getElementById('conv-gap-out').innerHTML = `It has been <strong>${timeframe}</strong> since your last deep conversation. This shows a transition into functional maintenance mode. Rebuilding dialogue requires curiosity over momentum.`;
+
+            document.getElementById('conv-starters-out').innerHTML = `
+                <div class="script-box">
+                    "I was thinking today about ${curious.substring(0, 40)}... What's been on your mind about that lately?"
+                    <button class="copy-btn" onclick="copyText(this)">Copy</button>
+                </div>
+                <div class="script-box">
+                    "If you had a completely free weekend with zero responsibilities, what's one thing you'd love to do?"
+                    <button class="copy-btn" onclick="copyText(this)">Copy</button>
+                </div>
+                <div class="script-box">
+                    "What's something small that made you smile or feel good this past week?"
+                    <button class="copy-btn" onclick="copyText(this)">Copy</button>
+                </div>
+            `;
+
+            document.getElementById('conv-progression-out').innerHTML = `
+                <li><strong>Day 1 (Light):</strong> Share a curious or humorous thought from your day; ask about theirs.</li>
+                <li><strong>Day 2 (Medium):</strong> Ask about a current interest or project they care about.</li>
+                <li><strong>Day 3 (Deep):</strong> Gently introduce a topic regarding personal feelings or future hopes.</li>
+            `;
+
+            document.getElementById('output-conversation').style.display = 'block';
+
+            saveToHistory('conversation', {
+                summary: `Gap: ${timeframe}. Curiosities generated.`
+            });
+        }
+
+        // --- TOOL 4: PHYSICAL RECONNECTION ---
+        function loadSamplePhysical() {
+            document.getElementById('phys-freq').value = "Rarely";
+            document.querySelectorAll('input[name="phys-init"]')[2].checked = true; // Neither
+            document.getElementById('phys-miss').value = "Holding hands";
+            document.getElementById('phys-barriers').value = "Worry that any physical touch will be misconstrued as an invitation for sex when I just want emotional warmth.";
+            document.getElementById('phys-comfort-a').value = 3;
+            document.getElementById('phys-comfort-b').value = 3;
+            document.querySelectorAll('#form-physical input[type="range"]').forEach(updateSliderVal);
+        }
+
+        function processPhysical(e) {
+            e.preventDefault();
+            const freq = document.getElementById('phys-freq').value;
+            const miss = document.getElementById('phys-miss').value;
+            const barriers = document.getElementById('phys-barriers').value;
+
+            document.getElementById('phys-gap-out').innerHTML = `Touch frequency is currently <strong>${freq.toLowerCase()}</strong>. Missing <strong>${miss.toLowerCase()}</strong> highlights a longing for gentle non-demanding physical connection.`;
+
+            if (barriers.trim().length > 0) {
+                document.getElementById('phys-safety-out').innerHTML = `<strong>Barrier noted:</strong> "${barriers}". Explicitly separate non-sexual warmth from sexual expectations to establish safety before increasing physical contact.`;
+            } else {
+                document.getElementById('phys-safety-out').innerHTML = `Safety check clear. Focus on low-pressure consistency.`;
+            }
+
+            document.getElementById('phys-reentry-out').innerHTML = `
+                <li><strong>Step 1 (Small):</strong> Brief shoulder touch or warm hand-on-arm gesture while saying good morning or thank you.</li>
+                <li><strong>Step 2 (Medium):</strong> Holding hands for 2 minutes while sitting together or walking.</li>
+                <li><strong>Step 3 (Bigger):</strong> Extended 20-second hug or leaning against each other comfortably on the couch.</li>
+            `;
+
+            document.getElementById('phys-rebalance-out').innerHTML = `Since initiation has stalled, practice micro-initiations (brief 3-second touches) to rebuild natural comfort without heavy emphasis on who initiates.`;
+
+            document.getElementById('output-physical').style.display = 'block';
+
+            saveToHistory('physical', {
+                summary: `Frequency: ${freq}, Target: ${miss}`
+            });
+        }
+
+        // --- TOOL 5: SHARED PURPOSE ---
+        function loadSamplePurpose() {
+            document.getElementById('purp-past').value = "Hiking national parks, cooking elaborate pasta dinners, going to indie concerts.";
+            document.getElementById('purp-current').value = "Watching streaming TV, grocery shopping on weekends.";
+            document.getElementById('purp-a-care').value = "Indoor plant care and urban gardening.";
+            document.getElementById('purp-b-care').value = "Baking sourdough and trying new recipes.";
+            document.getElementById('purp-dream').value = "Taking a road trip along the coast and staying in quiet cabins.";
+            document.getElementById('purp-willingness').value = 7;
+            document.querySelectorAll('#form-purpose input[type="range"]').forEach(updateSliderVal);
+        }
+
+        function processPurpose(e) {
+            e.preventDefault();
+            const past = document.getElementById('purp-past').value || "Past hobbies";
+            const careA = document.getElementById('purp-a-care').value || "Partner A's interest";
+            const careB = document.getElementById('purp-b-care').value || "Partner B's interest";
+            const dream = document.getElementById('purp-dream').value || "Shared dream";
+
+            document.getElementById('purp-overlap-out').innerHTML = `You have rich common roots in <strong>${past.substring(0, 60)}...</strong>. Reconnecting with existing memories is often easier than building entirely new pursuits from scratch.`;
+
+            document.getElementById('purp-worlds-out').innerHTML = `Currently, key individual focus areas include <strong>${careA}</strong> and <strong>${careB}</strong>. Bridging these separate worlds creates shared experiences.`;
+
+            document.getElementById('purp-bridge-out').innerHTML = `Combine your interests into a hybrid micro-activity: Pair <strong>${careA}</strong> and <strong>${careB}</strong> during a joint 45-minute weekend session.`;
+
+            document.getElementById('purp-goal-out').innerHTML = `Revive a simple piece of your shared dream: <strong>"${dream}"</strong> by planning a minor initial step together this month (e.g., researching a destination or mapping a route).`;
+
+            document.getElementById('purp-ritual-out').innerHTML = `Establish a recurring 'Us' tradition: Pick one evening a week for a 30-minute phone-free tea or coffee ritual dedicated to shared planning and conversation.`;
+
+            document.getElementById('output-purpose').style.display = 'block';
+
+            saveToHistory('purpose', {
+                summary: `Shared Goal: ${dream.substring(0, 30)}...`
+            });
+        }
+
+        // Initialize view on load
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab('dashboard');
+        });
+    </script>
+</body>
+</html>

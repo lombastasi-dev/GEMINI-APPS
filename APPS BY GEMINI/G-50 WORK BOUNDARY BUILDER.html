@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Work Boundary Builder</title>
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* CSS Variables & Theme Reset */
+    :root {
+      --coral: #E07A5F;
+      --coral-hover: #d0694e;
+      --teal: #264653;
+      --teal-light: #2a9d8f;
+      --bg-gradient: linear-gradient(135deg, #FEFAE0 0%, #E8F5F0 100%);
+      --card-bg: #FFFFFF;
+      --text-main: #2D3748;
+      --text-muted: #718096;
+      --border-color: #E2E8F0;
+      --sidebar-width: 260px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Layout Structure */
+    #app {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* Sidebar Navigation */
+    sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--card-bg);
+      border-right: 1px solid var(--border-color);
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header i {
+      font-size: 1.5rem;
+      color: var(--coral);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--teal);
+      line-height: 1.2;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .nav-item button:hover {
+      background-color: #F7FAFC;
+      color: var(--teal);
+    }
+
+    .nav-item button.active {
+      background-color: #FDF2F0;
+      color: var(--coral);
+      font-weight: 600;
+    }
+
+    .nav-item button i {
+      width: 20px;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    /* Mobile Header & Hamburger */
+    .mobile-header {
+      display: none;
+      background-color: var(--card-bg);
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .hamburger {
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      color: var(--teal);
+      cursor: pointer;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 95;
+    }
+
+    /* Main Content Area */
+    main {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 32px 20px 60px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: calc(100% - var(--sidebar-width));
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+    }
+
+    /* UI Cards & Elements */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid #EDF2F7;
+    }
+
+    .hero-card {
+      background: linear-gradient(135deg, var(--teal) 0%, #1d3557 100%);
+      color: white;
+      text-align: center;
+      padding: 40px 24px;
+    }
+
+    .hero-card h2 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .hero-card p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .dash-card {
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .dash-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background-color: #FDF2F0;
+      color: var(--coral);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+    }
+
+    .dash-card h3 {
+      font-size: 1.1rem;
+      color: var(--teal);
+      margin-bottom: 8px;
+    }
+
+    .dash-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Header Component for Tools */
+    .tool-header {
+      margin-bottom: 24px;
+    }
+
+    .tool-header h2 {
+      font-size: 1.75rem;
+      color: var(--teal);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .problem-banner {
+      background-color: #FEFCBF;
+      border-left: 4px solid #D69E2E;
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      color: #744210;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Form Components */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--teal);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      background-color: #FAFAFA;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--teal-light);
+      background-color: #FFFFFF;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .radio-group, .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .radio-label, .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background: #F7FAFC;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      transition: background 0.2s ease;
+    }
+
+    .radio-label:hover, .checkbox-label:hover {
+      background: #EDF2F7;
+    }
+
+    /* Action Buttons */
+    .action-bar {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--coral);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--coral-hover);
+    }
+
+    .btn-secondary {
+      background-color: #EDF2F7;
+      color: var(--teal);
+    }
+
+    .btn-secondary:hover {
+      background-color: #E2E8F0;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+
+    /* Output Results Sections */
+    .results-container {
+      margin-top: 32px;
+    }
+
+    .results-header {
+      font-size: 1.3rem;
+      color: var(--teal);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--teal-light);
+    }
+
+    .result-block {
+      background-color: #F8FAFC;
+      border-left: 4px solid var(--teal-light);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 20px;
+    }
+
+    .result-block h4 {
+      color: var(--teal);
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .script-box {
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      margin-top: 8px;
+      position: relative;
+    }
+
+    /* Audit Item Table/List styling */
+    .audit-item-row {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    /* Accordion / History */
+    .history-section {
+      margin-top: 40px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 24px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .history-item {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: white;
+      overflow: hidden;
+    }
+
+    .history-title {
+      padding: 12px 16px;
+      background: #F7FAFC;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-content {
+      padding: 16px;
+      display: none;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      padding: 20px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: auto;
+      width: 100%;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: var(--teal);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 200;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Data Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 0.9rem;
+    }
+
+    .data-table th, .data-table td {
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    .data-table th {
+      background-color: #F7FAFC;
+      color: var(--teal);
+    }
+
+    /* Mobile Responsive Overrides */
+    @media (max-width: 768px) {
+      sidebar {
+        transform: translateX(-100%);
+      }
+
+      sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay.open {
+        display: block;
+      }
+
+      .mobile-header {
+        display: flex;
+      }
+
+      main {
+        margin-left: 0;
+        width: 100%;
+        padding: 16px 12px 40px 12px;
+      }
+
+      .audit-item-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .hero-card h2 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-shield-halved" style="color: var(--coral); font-size: 1.2rem;"></i>
+      <span style="font-weight: 700; color: var(--teal);">Boundary Builder</span>
+    </div>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle Navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div id="app">
+    <!-- Sidebar Navigation -->
+    <sidebar id="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-shield-halved"></i>
+        <h1>Work Boundary<br>Builder</h1>
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <button class="nav-btn active" data-tool="dashboard">
+            <i class="fa-solid fa-house"></i> Dashboard
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-tool="audit">
+            <i class="fa-solid fa-clipboard-check"></i> Request Audit
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-tool="no">
+            <i class="fa-solid fa-ban"></i> The Graceful No
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-tool="capacity">
+            <i class="fa-solid fa-gauge-high"></i> Capacity Communicator
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-tool="reset">
+            <i class="fa-solid fa-hand-holding-hand"></i> Help Habit Reset
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-tool="recovery">
+            <i class="fa-solid fa-arrow-rotate-left"></i> Recovery Plan
+          </button>
+        </li>
+      </ul>
+    </sidebar>
+
+    <!-- Main Content Container -->
+    <main>
+      <div class="container" id="mainContainer">
+        <!-- Views will be dynamically injected here -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    For professional boundary-building only. Not legal or HR advice. For harassment or rights violations, consult appropriate authorities.
+  </footer>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toastMsg">Copied to clipboard!</span>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       Global Application State & Helper Utilities
+       ========================================================================== */
+    const STORAGE_KEY_PREFIX = 'boundary_history_';
+
+    // Helper: Show Toast
+    function showToast(message = "Copied to clipboard!") {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    // Helper: Copy to Clipboard
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast();
+      }).catch(err => {
+        console.error('Copy failed', err);
+      });
+    }
+
+    // Storage Utilities
+    function saveHistory(toolId, data) {
+      const key = STORAGE_KEY_PREFIX + toolId;
+      let history = getHistory(toolId);
+      history.unshift({ timestamp: new Date().toLocaleString(), data: data });
+      if (history.length > 30) history = history.slice(0, 30);
+      localStorage.setItem(key, JSON.stringify(history));
+    }
+
+    function getHistory(toolId) {
+      const key = STORAGE_KEY_PREFIX + toolId;
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : [];
+    }
+
+    function clearHistory(toolId) {
+      const key = STORAGE_KEY_PREFIX + toolId;
+      localStorage.removeItem(key);
+      renderTool(toolId);
+      showToast("History cleared");
+    }
+
+    /* ==========================================================================
+       View Rendering Logic
+       ========================================================================== */
+    const container = document.getElementById('mainContainer');
+
+    function navigateTo(toolId) {
+      // Update sidebar state
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tool === toolId);
+      });
+      // Close mobile sidebar if open
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+      
+      // Render Content
+      if (toolId === 'dashboard') {
+        renderDashboard();
+      } else {
+        renderTool(toolId);
+      }
+      window.scrollTo(0, 0);
+    }
+
+    /* --------------------------------------------------------------------------
+       DASHBOARD VIEW
+       -------------------------------------------------------------------------- */
+    function renderDashboard() {
+      container.innerHTML = `
+        <div class="card hero-card">
+          <h2>Work Boundary Builder</h2>
+          <p>"Being reliable is a strength. Being exploited is a choice you can undo."</p>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card dash-card" onclick="navigateTo('audit')">
+            <div class="dash-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+            <h3>Request Audit</h3>
+            <p>Tally time spent on non-essential tasks and uncover your over-commitment patterns.</p>
+          </div>
+
+          <div class="card dash-card" onclick="navigateTo('no')">
+            <div class="dash-icon"><i class="fa-solid fa-ban"></i></div>
+            <h3>The Graceful No</h3>
+            <p>Craft clear, guilt-free responses that protect your time without burning bridges.</p>
+          </div>
+
+          <div class="card dash-card" onclick="navigateTo('capacity')">
+            <div class="dash-icon"><i class="fa-solid fa-gauge-high"></i></div>
+            <h3>Capacity Communicator</h3>
+            <p>Communicate workload visually and force strategic trade-offs objectively.</p>
+          </div>
+
+          <div class="card dash-card" onclick="navigateTo('reset')">
+            <div class="dash-icon"><i class="fa-solid fa-hand-holding-hand"></i></div>
+            <h3>Help Habit Reset</h3>
+            <p>Break the knee-jerk impulse to volunteer and fix problems that aren't yours.</p>
+          </div>
+
+          <div class="card dash-card" onclick="navigateTo('recovery')">
+            <div class="dash-icon"><i class="fa-solid fa-arrow-rotate-left"></i></div>
+            <h3>Recovery Plan</h3>
+            <p>A step-by-step roadmap to reset team expectations when you've over-given for years.</p>
+          </div>
+        </div>
+      `;
+    }
+
+    /* --------------------------------------------------------------------------
+       TOOL RENDER ROUTER
+       -------------------------------------------------------------------------- */
+    function renderTool(toolId) {
+      switch(toolId) {
+        case 'audit': renderAuditTool(); break;
+        case 'no': renderNoTool(); break;
+        case 'capacity': renderCapacityTool(); break;
+        case 'reset': renderResetTool(); break;
+        case 'recovery': renderRecoveryTool(); break;
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       TOOL 1: REQUEST AUDIT
+       -------------------------------------------------------------------------- */
+    function renderAuditTool() {
+      container.innerHTML = `
+        <div class="tool-header">
+          <h2><i class="fa-solid fa-clipboard-check" style="color:var(--coral)"></i> Request Audit</h2>
+          <div class="problem-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span><strong>Problem:</strong> "I say yes to everything and I don't even realize how much I've taken on."</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="auditForm">
+            <div class="form-group">
+              <label for="auditRawText">List every request you've accepted in the past 7 days (one per line):</label>
+              <textarea id="auditRawText" rows="5" placeholder="e.g., Reviewed Sarah's deck&#10;Organized team lunch&#10;Covered client call for Mark"></textarea>
+            </div>
+
+            <div id="auditItemsContainer"></div>
+
+            <div class="action-bar">
+              <button type="button" class="btn btn-secondary" id="auditParseBtn">
+                <i class="fa-solid fa-list-check"></i> Process List Items
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="loadSampleAudit()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-chart-pie"></i> Analyze Audit
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div id="auditOutput"></div>
+        ${renderHistoryAccordion('audit')}
+      `;
+
+      document.getElementById('auditParseBtn').addEventListener('click', parseAuditLines);
+      document.getElementById('auditForm').addEventListener('submit', processAuditForm);
+    }
+
+    function parseAuditLines() {
+      const text = document.getElementById('auditRawText').value.trim();
+      const container = document.getElementById('auditItemsContainer');
+      container.innerHTML = '';
+
+      if (!text) return;
+
+      const lines = text.split('\n').filter(l => l.trim() !== '');
+      lines.forEach((line, index) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'audit-item-row';
+        itemEl.innerHTML = `
+          <div>
+            <strong>${line}</strong>
+            <input type="hidden" name="item_title_${index}" value="${line}">
+          </div>
+          <div>
+            <select name="item_who_${index}">
+              <option value="Boss">My Boss</option>
+              <option value="Peer" selected>A Peer</option>
+              <option value="Junior">A Junior</option>
+              <option value="Department">Another Dept</option>
+              <option value="Client">Client</option>
+            </select>
+          </div>
+          <div>
+            <select name="item_resp_${index}">
+              <option value="Yes">Yes (Mine)</option>
+              <option value="Partially">Partially</option>
+              <option value="No" selected>No (Not Mine)</option>
+              <option value="Unclear">Unclear</option>
+            </select>
+          </div>
+          <div>
+            <select name="item_time_${index}">
+              <option value="0.25">&lt; 15 min</option>
+              <option value="0.75">15-60 min</option>
+              <option value="2" selected>1-3 hrs</option>
+              <option value="4">Half day</option>
+              <option value="8">Full day</option>
+            </select>
+          </div>
+        `;
+        container.appendChild(itemEl);
+      });
+    }
+
+    function loadSampleAudit() {
+      const sampleText = "Reviewed Sarah's quarterly deck\nOrganized cross-team happy hour\nCovered Mark's client check-in\nHelp Alex debug spreadsheet formulas\nDrafted meeting notes for department\nUpdated project tracker for peer\nResponded to ad-hoc vendor inquiry\nFormatted presentation for leadership";
+      document.getElementById('auditRawText').value = sampleText;
+      parseAuditLines();
+    }
+
+    function processAuditForm(e) {
+      e.preventDefault();
+      const container = document.getElementById('auditItemsContainer');
+      const rows = container.querySelectorAll('.audit-item-row');
+
+      if (rows.length === 0) {
+        parseAuditLines();
+      }
+
+      const activeRows = container.querySelectorAll('.audit-item-row');
+      if (activeRows.length === 0) return;
+
+      let totalHours = 0;
+      let notMyRespCount = 0;
+      let peerCount = 0;
+      const whoMap = {};
+
+      activeRows.forEach((row, i) => {
+        const who = row.querySelector(`[name="item_who_${i}"]`).value;
+        const resp = row.querySelector(`[name="item_resp_${i}"]`).value;
+        const time = parseFloat(row.querySelector(`[name="item_time_${i}"]`).value);
+
+        totalHours += time;
+        if (resp === 'No' || resp === 'Partially') notMyRespCount++;
+        if (who === 'Peer') peerCount++;
+        whoMap[who] = (whoMap[who] || 0) + 1;
+      });
+
+      // Sort offenders
+      let topOffender = Object.keys(whoMap).reduce((a, b) => whoMap[a] > whoMap[b] ? a : b, 'Peers');
+
+      const outputData = {
+        totalHours,
+        notMyRespCount,
+        topOffender,
+        totalItems: activeRows.length
+      };
+
+      saveHistory('audit', outputData);
+
+      const outputEl = document.getElementById('auditOutput');
+      outputEl.className = 'results-container';
+      outputEl.innerHTML = `
+        <h3 class="results-header">Audit Analysis</h3>
+        
+        <div class="result-block">
+          <h4>THE TALLY <i class="fa-solid fa-clock"></i></h4>
+          <p>You gave away approximately <strong>${totalHours} hours</strong> this past week to non-core requests.</p>
+        </div>
+
+        <div class="result-block">
+          <h4>THE RESPONSIBILITY MAP <i class="fa-solid fa-map"></i></h4>
+          <p>Out of ${activeRows.length} tasks analyzed, <strong>${notMyRespCount} were not your core responsibility</strong>. You are absorbing extra bandwidth that belongs to other roles.</p>
+        </div>
+
+        <div class="result-block">
+          <h4>THE REPEAT OFFENDERS <i class="fa-solid fa-users"></i></h4>
+          <p>Primary driver of requests: <strong>${topOffender}</strong>. Peers and cross-functional partners often treat reliable team members as informal support desks when boundaries aren't explicit.</p>
+        </div>
+
+        <div class="result-block">
+          <h4>THE COST <i class="fa-solid fa-triangle-exclamation"></i></h4>
+          <p>Spending ${totalHours} hours on external tasks sacrifices your ability to focus on high-impact priorities, extends your working hours into personal time, and accelerates burnout.</p>
+        </div>
+
+        <div class="result-block">
+          <h4>THE PATTERN <i class="fa-solid fa-brain"></i></h4>
+          <p>Why you keep saying yes: Reflexive helpfulness and a temporary relief from guilt. You may fear being viewed as "not a team player," but over-functioning for others eventually causes resentment.</p>
+        </div>
+      `;
+    }
+
+    /* --------------------------------------------------------------------------
+       TOOL 2: THE GRACEFUL NO
+       -------------------------------------------------------------------------- */
+    function renderNoTool() {
+      container.innerHTML = `
+        <div class="tool-header">
+          <h2><i class="fa-solid fa-ban" style="color:var(--coral)"></i> The Graceful No</h2>
+          <div class="problem-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span><strong>Problem:</strong> "I need to say no without burning bridges or seeming unhelpful."</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="noForm">
+            <div class="form-group">
+              <label for="noTask">What are you being asked to do?</label>
+              <textarea id="noTask" placeholder="e.g., Help design the presentation slides for Thursday's team pitch"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="noWho">Who is asking?</label>
+              <select id="noWho">
+                <option value="Boss">Boss</option>
+                <option value="Peer" selected>Peer</option>
+                <option value="Junior">Junior</option>
+                <option value="Client">Client</option>
+                <option value="Cross-functional partner">Cross-functional partner</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="noReason">Your real reason for saying no:</label>
+              <select id="noReason">
+                <option value="at capacity" selected>At capacity with primary duties</option>
+                <option value="not my role">Not aligned with my role</option>
+                <option value="no time">Insufficient timeline</option>
+                <option value="lacking skills">Lacking specific domain skill</option>
+                <option value="protecting priorities">Protecting critical project deadlines</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Your relationship with them:</label>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="noRel" value="Strong"> Strong</label>
+                <label class="radio-label"><input type="radio" name="noRel" value="Neutral" checked> Neutral</label>
+                <label class="radio-label"><input type="radio" name="noRel" value="Strained"> Strained</label>
+                <label class="radio-label"><input type="radio" name="noRel" value="Power"> They have power over me</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Do you want to offer an alternative?</label>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="noAlt" value="Yes"> Yes</label>
+                <label class="radio-label"><input type="radio" name="noAlt" value="No"> No</label>
+                <label class="radio-label"><input type="radio" name="noAlt" value="Maybe" checked> Maybe</label>
+              </div>
+            </div>
+
+            <div class="action-bar">
+              <button type="button" class="btn btn-secondary" onclick="loadSampleNo()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-comment-dots"></i> Generate Responses
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div id="noOutput"></div>
+        ${renderHistoryAccordion('no')}
+      `;
+
+      document.getElementById('noForm').addEventListener('submit', processNoForm);
+    }
+
+    function loadSampleNo() {
+      document.getElementById('noTask').value = "Help design and structure presentation slides for the client pitch on Friday.";
+      document.getElementById('noWho').value = "Peer";
+      document.getElementById('noReason').value = "at capacity";
+      document.querySelector('input[name="noRel"][value="Neutral"]').checked = true;
+      document.querySelector('input[name="noAlt"][value="Maybe"]').checked = true;
+    }
+
+    function processNoForm(e) {
+      e.preventDefault();
+      const task = document.getElementById('noTask').value || "this task";
+      const who = document.getElementById('noWho').value;
+      const reason = document.getElementById('noReason').value;
+      const alt = document.querySelector('input[name="noAlt"]:checked').value;
+
+      const responses = {
+        brief: `Thanks for thinking of me for ${task}. Unfortunately, I'm completely focused on core deliverables right now and won't be able to take this on.`,
+        contextual: `I appreciate you reaching out regarding ${task}. Because my current bandwidth is committed to hitting our upcoming deadlines, I don't have the capacity to give this the attention it needs.`,
+        alternative: alt === 'No' 
+          ? `I can't assist with ${task} directly due to existing priorities, but I recommend checking our shared resource documentation or reaching out to the broader team.`
+          : `I can't take on ${task} directly due to current commitments, but I'm happy to review a quick draft for 10 minutes on Thursday if that helps.`,
+        delayed: `I'm fully booked through the end of this week. If this can wait until next Tuesday, I can take a look then, but if you need immediate turn-around, you will need to proceed without me.`
+      };
+
+      saveHistory('no', { task, who, responses });
+
+      const outputEl = document.getElementById('noOutput');
+      outputEl.className = 'results-container';
+      outputEl.innerHTML = `
+        <h3 class="results-header">Generated Boundary Responses</h3>
+        
+        <div class="result-block">
+          <h4>1. BRIEF & DIRECT</h4>
+          <div class="script-box" id="script1">${responses.brief}</div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="copyToClipboard(document.getElementById('script1').innerText)">
+            <i class="fa-solid fa-copy"></i> Copy
+          </button>
+        </div>
+
+        <div class="result-block">
+          <h4>2. CONTEXTUAL & PROFESSIONAL</h4>
+          <div class="script-box" id="script2">${responses.contextual}</div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="copyToClipboard(document.getElementById('script2').innerText)">
+            <i class="fa-solid fa-copy"></i> Copy
+          </button>
+        </div>
+
+        <div class="result-block">
+          <h4>3. ALTERNATIVE / BOUNDED OFFER</h4>
+          <div class="script-box" id="script3">${responses.alternative}</div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="copyToClipboard(document.getElementById('script3').innerText)">
+            <i class="fa-solid fa-copy"></i> Copy
+          </button>
+        </div>
+
+        <div class="result-block">
+          <h4>4. DELAYED / CONDITIONAL</h4>
+          <div class="script-box" id="script4">${responses.delayed}</div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="copyToClipboard(document.getElementById('script4').innerText)">
+            <i class="fa-solid fa-copy"></i> Copy
+          </button>
+        </div>
+
+        <div class="result-block">
+          <h4>THE TONE CHECK <i class="fa-solid fa-sliders"></i></h4>
+          <p>Keep your response neutral and declarative. Avoid over-apologizing (e.g., replace "I'm so so sorry" with "Thanks for understanding"). You are communicating facts about schedule availability, not making a moral statement.</p>
+        </div>
+
+        <div class="result-block">
+          <h4>IF THEY PUSH BACK <i class="fa-solid fa-shield"></i></h4>
+          <p><strong>Use the Broken Record Script:</strong> "I understand it's urgent, but my current capacity remains full. I simply won't be able to deliver quality work on this right now."</p>
+        </div>
+
+        <div class="result-block">
+          <h4>IF THEY GUILT YOU <i class="fa-solid fa-heart-crack"></i></h4>
+          <p><strong>De-escalation response:</strong> "I value working with you, but saying yes when I don't have time would result in rushed work. I'd rather be transparent than let you down."</p>
+        </div>
+      `;
+    }
+
+    /* --------------------------------------------------------------------------
+       TOOL 3: CAPACITY COMMUNICATOR
+       -------------------------------------------------------------------------- */
+    function renderCapacityTool() {
+      container.innerHTML = `
+        <div class="tool-header">
+          <h2><i class="fa-solid fa-gauge-high" style="color:var(--coral)"></i> Capacity Communicator</h2>
+          <div class="problem-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span><strong>Problem:</strong> "I need my boss and team to know I'm full without sounding like I'm complaining."</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="capacityForm">
+            <div class="form-group">
+              <label for="capProjects">Your current active projects (one per line):</label>
+              <textarea id="capProjects" placeholder="e.g., Q3 Financial Audit&#10;System Migration Testing&#10;Weekly Client Reporting"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label for="capHoursCommitted">Hours committed/wk:</label>
+                <input type="number" id="capHoursCommitted" value="40">
+              </div>
+              <div class="form-group">
+                <label for="capHoursAvail">Hours available for new work:</label>
+                <input type="number" id="capHoursAvail" value="0">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="capPref">How does your boss prefer updates?</label>
+              <select id="capPref">
+                <option value="Email">Email</option>
+                <option value="Chat">Chat (Slack/Teams)</option>
+                <option value="1:1s" selected>In 1:1 Meetings</option>
+                <option value="Visual dashboard">Visual dashboard</option>
+                <option value="They don't ask">They don't ask</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="capLast">When was the last time you said you were at capacity?</label>
+              <select id="capLast">
+                <option value="Recently">Recently</option>
+                <option value="Months ago">Months ago</option>
+                <option value="Never" selected>Never</option>
+              </select>
+            </div>
+
+            <div class="action-bar">
+              <button type="button" class="btn btn-secondary" onclick="loadSampleCapacity()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-paper-plane"></i> Build Communication Plan
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div id="capacityOutput"></div>
+        ${renderHistoryAccordion('capacity')}
+      `;
+
+      document.getElementById('capacityForm').addEventListener('submit', processCapacityForm);
+    }
+
+    function loadSampleCapacity() {
+      document.getElementById('capProjects').value = "Client Onboarding Redesign (15h)\nQ3 Regulatory Audit (15h)\nLegacy System Migration (12h)\nTeam Operations Support (5h)";
+      document.getElementById('capHoursCommitted').value = 47;
+      document.getElementById('capHoursAvail').value = -7;
+      document.getElementById('capPref').value = "1:1s";
+      document.getElementById('capLast').value = "Never";
+    }
+
+    function processCapacityForm(e) {
+      e.preventDefault();
+      const rawProjects = document.getElementById('capProjects').value.trim();
+      const committed = document.getElementById('capHoursCommitted').value;
+      const avail = document.getElementById('capHoursAvail').value;
+      const pref = document.getElementById('capPref').value;
+
+      const projectList = rawProjects ? rawProjects.split('\n').filter(p => p.trim()) : ["Core Duties"];
+
+      let projectRows = projectList.map(p => `<tr><td>${p}</td><td>Active</td></tr>`).join('');
+
+      const emailText = `Hi [Name],\n\nI'm reaching out to share a quick update on my current project bandwidth for the upcoming week.\n\nCurrently Committed Hours: ${committed} hrs/wk\nAvailable Capacity: ${avail} hrs/wk\n\nActive Priorities:\n${projectList.map(p => `• ${p}`).join('\n')}\n\nTo ensure we maintain quality on these core items, I am currently at full capacity and unable to take on additional tasks without shifting existing timelines. Let's discuss priorities during our next sync.`;
+
+      saveHistory('capacity', { committed, avail, projectCount: projectList.length });
+
+      const outputEl = document.getElementById('capacityOutput');
+      outputEl.className = 'results-container';
+      outputEl.innerHTML = `
+        <h3 class="results-header">Capacity Communication Kit</h3>
+        
+        <div class="result-block">
+          <h4>THE CAPACITY EMAIL / MESSAGE</h4>
+          <div class="script-box" id="capEmailBox">${emailText}</div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="copyToClipboard(document.getElementById('capEmailBox').innerText)">
+            <i class="fa-solid fa-copy"></i> Copy Message
+          </button>
+        </div>
+
+        <div class="result-block">
+          <h4>THE 1:1 SCRIPT <i class="fa-solid fa-comments"></i></h4>
+          <p>"I want to ensure I'm focusing my energy on our highest-value priorities. Right now, I'm fully allocated at ${committed} hours on my main projects. If new requests come in, I'll need your help deciding which current project to deprioritize."</p>
+        </div>
+
+        <div class="result-block">
+          <h4>THE VISUAL AID (TRADE-OFF TABLE) <i class="fa-solid fa-table"></i></h4>
+          <table class="data-table">
+            <thead>
+              <tr><th>Project / Task</th><th>Status / Commitment</th></tr>
+            </thead>
+            <tbody>
+              ${projectRows}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="result-block">
+          <h4>THE PRIORITIZATION ASK <i class="fa-solid fa-list-ol"></i></h4>
+          <p>When new work is handed to you, frame it as a forced trade-off: <em>"I can gladly take on [New Task]. Which of these existing projects should I pause to make room for it?"</em></p>
+        </div>
+
+        <div class="result-block">
+          <h4>IF IGNORED <i class="fa-solid fa-triangle-exclamation"></i></h4>
+          <p>If management adds tasks without adjusting load, send a written confirmation: <em>"Per our conversation, I will shift focus to [New Task]. As a result, [Old Task] will be moved to next sprint."</em></p>
+        </div>
+      `;
+    }
+
+    /* --------------------------------------------------------------------------
+       TOOL 4: THE HELP HABIT RESET
+       -------------------------------------------------------------------------- */
+    function renderResetTool() {
+      container.innerHTML = `
+        <div class="tool-header">
+          <h2><i class="fa-solid fa-hand-holding-hand" style="color:var(--coral)"></i> Help Habit Reset</h2>
+          <div class="problem-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span><strong>Problem:</strong> "I volunteer to help even when nobody asked. I can't stop myself."</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="resetForm">
+            <div class="form-group">
+              <label>What triggers your urge to help? (Check all that apply):</label>
+              <div class="checkbox-group">
+                <label class="checkbox-label"><input type="checkbox" name="resetTrigger" value="stressed"> Someone looks stressed</label>
+                <label class="checkbox-label"><input type="checkbox" name="resetTrigger" value="mistake"> I see a mistake happening</label>
+                <label class="checkbox-label"><input type="checkbox" name="resetTrigger" value="bored"> I'm bored</label>
+                <label class="checkbox-label"><input type="checkbox" name="resetTrigger" value="liked"> I want to be liked</label>
+                <label class="checkbox-label"><input type="checkbox" name="resetTrigger" value="guilty"> I feel guilty</label>
+                <label class="checkbox-label"><input type="checkbox" name="resetTrigger" value="habit"> Habit / Reflex</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="resetAfter">What happens after you help?</label>
+              <select id="resetAfter">
+                <option value="good">I feel good temporarily</option>
+                <option value="resentful" selected>I feel resentful later</option>
+                <option value="nothing">Nothing changes</option>
+                <option value="more">I get handed even more requests</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="resetAvoid">What are you avoiding by helping others?</label>
+              <textarea id="resetAvoid" placeholder="e.g., Working on my own difficult long-term project, facing ambiguous tasks"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="resetWouldHappen">What would happen if you didn't volunteer this time?</label>
+              <textarea id="resetWouldHappen" placeholder="e.g., Someone else would step up, or the deadline might shift slightly"></textarea>
+            </div>
+
+            <div class="action-bar">
+              <button type="button" class="btn btn-secondary" onclick="loadSampleReset()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-rotate-left"></i> Analyze & Reset
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div id="resetOutput"></div>
+        ${renderHistoryAccordion('reset')}
+      `;
+
+      document.getElementById('resetForm').addEventListener('submit', processResetForm);
+    }
+
+    function loadSampleReset() {
+      const checkboxes = document.querySelectorAll('input[name="resetTrigger"]');
+      checkboxes.forEach(cb => {
+        cb.checked = (cb.value === 'stressed' || cb.value === 'liked');
+      });
+      document.getElementById('resetAfter').value = "resentful";
+      document.getElementById('resetAvoid').value = "My own complex strategy proposal that requires deep focus.";
+      document.getElementById('resetWouldHappen').value = "The team might struggle briefly, but ultimately someone else would figure it out.";
+    }
+
+    function processResetForm(e) {
+      e.preventDefault();
+      const triggers = Array.from(document.querySelectorAll('input[name="resetTrigger"]:checked')).map(cb => cb.value);
+      const after = document.getElementById('resetAfter').value;
+      const avoid = document.getElementById('resetAvoid').value || "your own core work";
+
+      saveHistory('reset', { triggersCount: triggers.length, after });
+
+      const outputEl = document.getElementById('resetOutput');
+      outputEl.className = 'results-container';
+      outputEl.innerHTML = `
+        <h3 class="results-header">Habit Reset Action Plan</h3>
+        
+        <div class="result-block">
+          <h4>THE PAUSE BUTTON <i class="fa-solid fa-pause"></i></h4>
+          <p>Ask yourself these 3 questions BEFORE opening your mouth to volunteer:</p>
+          <ul style="margin-left: 20px; margin-top: 8px;">
+            <li>1. Was I explicitly asked to do this?</li>
+            <li>2. Is this my responsibility to fix?</li>
+            <li>3. Will helping cause me to neglect my own priorities?</li>
+          </ul>
+        </div>
+
+        <div class="result-block">
+          <h4>THE 24-HOUR RULE <i class="fa-solid fa-hourglass-half"></i></h4>
+          <p>Enforce a mandatory waiting period. When you feel the urge to step in, force yourself to wait at least 24 hours (or 1 hour in fast-paced meetings) before offering assistance. Allow others space to solve problems.</p>
+        </div>
+
+        <div class="result-block">
+          <h4>THE DELEGATION & RESCUE CHECK <i class="fa-solid fa-hand-holding"></i></h4>
+          <p>Rescuing colleagues deprives them of learning opportunities and creates codependency. Stepping back allows team members to build competence.</p>
+        </div>
+
+        <div class="result-block">
+          <h4>THE SELF-CHECK <i class="fa-solid fa-bullseye"></i></h4>
+          <p>You may be using external helping to avoid: <strong>${avoid}</strong>. Refocus that energy into your highest strategic priorities.</p>
+        </div>
+
+        <div class="result-block">
+          <h4>THE REFRAME <i class="fa-solid fa-lightbulb"></i></h4>
+          <p><strong>"Helping less can help more."</strong> By holding back, you allow team processes to strengthen, encourage self-reliance, and protect your long-term output.</p>
+        </div>
+      `;
+    }
+
+    /* --------------------------------------------------------------------------
+       TOOL 5: RECOVERY PLAN
+       -------------------------------------------------------------------------- */
+    function renderRecoveryTool() {
+      container.innerHTML = `
+        <div class="tool-header">
+          <h2><i class="fa-solid fa-arrow-rotate-left" style="color:var(--coral)"></i> Recovery Plan</h2>
+          <div class="problem-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span><strong>Problem:</strong> "I've been over-giving for so long that people expect it. I need to reset expectations."</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="recoveryForm">
+            <div class="form-group">
+              <label for="recDuration">How long have you been the "go-to" person?</label>
+              <select id="recDuration">
+                <option value="<1mo">&lt; 1 month</option>
+                <option value="1-6mo">1 - 6 months</option>
+                <option value="6mo-1yr">6 months - 1 year</option>
+                <option value="1yr+" selected>1 year +</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="recWho">Who has the most unrealistic expectations?</label>
+              <textarea id="recWho" placeholder="e.g., My direct manager and the marketing team peers"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="recWorst">What's the worst that could happen if you pull back?</label>
+              <textarea id="recWorst" placeholder="e.g., They might think I'm slowing down or becoming less committed"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Are you willing to let some people be disappointed?</label>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="recDisappoint" value="Yes"> Yes</label>
+                <label class="radio-label"><input type="radio" name="recDisappoint" value="No"> No</label>
+                <label class="radio-label"><input type="radio" name="recDisappoint" value="For a little while" checked> For a little while</label>
+              </div>
+            </div>
+
+            <div class="action-bar">
+              <button type="button" class="btn btn-secondary" onclick="loadSampleRecovery()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-route"></i> Generate Recovery Plan
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div id="recoveryOutput"></div>
+        ${renderHistoryAccordion('recovery')}
+      `;
+
+      document.getElementById('recoveryForm').addEventListener('submit', processRecoveryForm);
+    }
+
+    function loadSampleRecovery() {
+      document.getElementById('recDuration').value = "1yr+";
+      document.getElementById('recWho').value = "My direct manager and immediate peer group";
+      document.getElementById('recWorst').value = "People might be annoyed or assume I'm slacking off.";
+      document.querySelector('input[name="recDisappoint"][value="For a little while"]').checked = true;
+    }
+
+    function processRecoveryForm(e) {
+      e.preventDefault();
+      const duration = document.getElementById('recDuration').value;
+      const who = document.getElementById('recWho').value || "your team";
+
+      const resetScript = `Hi team,\n\nTo ensure I am effectively driving our key operational deliverables this quarter, I am streamlining my daily focus and commitments.\n\nGoing forward, I will no longer be managing ad-hoc requests directly. Please route all new tasks through our formal project queue.\n\nThank you for supporting this shift so we can maintain high quality on core goals!`;
+
+      saveHistory('recovery', { duration, who });
+
+      const outputEl = document.getElementById('recoveryOutput');
+      outputEl.className = 'results-container';
+      outputEl.innerHTML = `
+        <h3 class="results-header">4-Week Boundary Reset Roadmap</h3>
+        
+        <div class="result-block">
+          <h4>THE RESET TIMELINE <i class="fa-solid fa-calendar-days"></i></h4>
+          <ul style="list-style:none; padding-left:0; line-height: 1.8;">
+            <li><strong>Week 1: Audit & Audit Silence.</strong> Stop volunteering for new unassigned tasks. Complete current open items.</li>
+            <li><strong>Week 2: Signal the Shift.</strong> Communicate capacity limits to manager and key stakeholders.</li>
+            <li><strong>Week 3: Enforce Boundaries.</strong> Decline ad-hoc requests using "Graceful No" scripts. Redirect people to proper processes.</li>
+            <li><strong>Week 4: Establish the New Normal.</strong> Maintain consistent standards. Focus output on high-impact core work.</li>
+          </ul>
+        </div>
+
+        <div class="result-block">
+          <h4>THE TEAM RESET CONVERSATION / SCRIPT</h4>
+          <div class="script-box" id="recScriptBox">${resetScript}</div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="copyToClipboard(document.getElementById('recScriptBox').innerText)">
+            <i class="fa-solid fa-copy"></i> Copy Team Script
+          </button>
+        </div>
+
+        <div class="result-block">
+          <h4>THE BOSS CONVERSATION <i class="fa-solid fa-user-tie"></i></h4>
+          <p>"To give my core projects the strategic focus they require, I need to step back from informal support tasks. I want to align with you on making sure my bandwidth stays focused on high-ROI outcomes."</p>
+        </div>
+
+        <div class="result-block">
+          <h4>THE CONSEQUENCE ACCEPTANCE <i class="fa-solid fa-shield-heart"></i></h4>
+          <p>When you shift expectations after over-giving for ${duration}, short-term discomfort is normal. Temporary disappointment from others is a sign that boundaries are working, not that you are failing.</p>
+        </div>
+
+        <div class="result-block">
+          <h4>THE NEW IDENTITY <i class="fa-solid fa-award"></i></h4>
+          <p>Reframe your value proposition: Transition from being <em>"the person who does everything for everyone"</em> to <em>"the reliable professional who delivers exceptional results on key objectives."</em></p>
+        </div>
+      `;
+    }
+
+    /* ==========================================================================
+       History Accordion Component Renderer
+       ========================================================================== */
+    function renderHistoryAccordion(toolId) {
+      const history = getHistory(toolId);
+      if (history.length === 0) return '';
+
+      const itemsHtml = history.map((item, index) => `
+        <div class="history-item">
+          <div class="history-title" onclick="toggleHistoryItem('${toolId}', ${index})">
+            <span><i class="fa-regular fa-clock"></i> ${item.timestamp}</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="history-content" id="hist_${toolId}_${index}">
+            <pre style="white-space:pre-wrap; font-family:inherit;">${JSON.stringify(item.data, null, 2)}</pre>
+          </div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="history-section">
+          <div class="history-header">
+            <h4 style="color:var(--teal); font-size:1rem;"><i class="fa-solid fa-box-archive"></i> History Log</h4>
+            <button class="btn btn-secondary btn-sm" onclick="clearHistory('${toolId}')">
+              <i class="fa-solid fa-trash"></i> Clear History
+            </button>
+          </div>
+          ${itemsHtml}
+        </div>
+      `;
+    }
+
+    function toggleHistoryItem(toolId, index) {
+      const el = document.getElementById(`hist_${toolId}_${index}`);
+      if (el) {
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+      }
+    }
+
+    /* ==========================================================================
+       Initialization & Global Event Listeners
+       ========================================================================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      // Navigation handling
+      document.addEventListener('click', (e) => {
+        const navBtn = e.target.closest('.nav-btn');
+        if (navBtn) {
+          const toolId = navBtn.dataset.tool;
+          navigateTo(toolId);
+        }
+      });
+
+      // Mobile Hamburger Toggle
+      const hamburgerBtn = document.getElementById('hamburgerBtn');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+      hamburgerBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('open');
+      });
+
+      sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('open');
+      });
+
+      // Render default initial view
+      navigateTo('dashboard');
+    });
+  </script>
+</body>
+</html>

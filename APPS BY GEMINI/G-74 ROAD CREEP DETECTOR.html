@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoleCreepDetector — Career Scope Protection Toolkit</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* CSS RESET & VARIABLES */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --burnt-orange: #BC6C25;
+      --deep-forest: #2D6A4F;
+      --bg-gradient: linear-gradient(135deg, #FAEDCD 0%, #F1F8F5 100%);
+      --card-bg: #FFFFFF;
+      --text-main: #2B2D42;
+      --text-muted: #6C757D;
+      --border-color: #E9ECEF;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+      --radius-xl: 1rem;
+      --radius-md: 0.5rem;
+      --sidebar-width: 240px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* LAYOUT STRUCTURE */
+    .app-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* SIDEBAR STYLES */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--card-bg);
+      box-shadow: var(--shadow-sm);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-header i {
+      font-size: 1.5rem;
+      color: var(--burnt-orange);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--deep-forest);
+      line-height: 1.2;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item button {
+      width: 100%;
+      text-align: left;
+      padding: 0.85rem 1.5rem;
+      background: transparent;
+      border: none;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      transition: all 0.2s ease;
+      border-left: 4px solid transparent;
+    }
+
+    .nav-item button:hover {
+      background-color: #F8F9FA;
+      color: var(--burnt-orange);
+    }
+
+    .nav-item button.active {
+      background-color: #FDF7F2;
+      color: var(--burnt-orange);
+      border-left-color: var(--burnt-orange);
+      font-weight: 600;
+    }
+
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+    }
+
+    /* MOBILE HAMBURGER */
+    .mobile-header {
+      display: none;
+      background-color: var(--card-bg);
+      padding: 1rem 1.5rem;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--deep-forest);
+      cursor: pointer;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 95;
+    }
+
+    /* MAIN CONTENT AREA */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .content-wrapper {
+      width: 100%;
+      max-width: 800px;
+    }
+
+    /* FOOTER STYLES */
+    .app-footer {
+      margin-top: 3rem;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(0,0,0,0.05);
+      width: 100%;
+    }
+
+    /* UI CARDS & FORMS */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .hero-card {
+      background: linear-gradient(135deg, var(--deep-forest) 0%, #1B4332 100%);
+      color: #FFFFFF;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .hero-card h2 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-card p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 400;
+    }
+
+    .grid-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .dash-card {
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--burnt-orange);
+    }
+
+    .dash-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .dash-card-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #FDF7F2;
+      color: var(--burnt-orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .dash-card h3 {
+      font-size: 1.05rem;
+      color: var(--deep-forest);
+    }
+
+    .dash-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* FORM ELEMENTS */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background-color: #FAFAFA;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--burnt-orange);
+      background-color: #FFFFFF;
+    }
+
+    textarea.form-control {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.25rem;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      font-weight: 400;
+      cursor: pointer;
+    }
+
+    /* BUTTONS */
+    .btn-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.25rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--burnt-orange);
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+      background-color: #A35A1E;
+    }
+
+    .btn-secondary {
+      background-color: #E9ECEF;
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background-color: #DEE2E6;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--burnt-orange);
+      color: var(--burnt-orange);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    /* OUTPUT COMPONENTS */
+    .output-section {
+      margin-top: 2rem;
+      display: none;
+    }
+
+    .output-card {
+      border-left: 4px solid var(--burnt-orange);
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .output-header h3 {
+      font-size: 1.1rem;
+      color: var(--deep-forest);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .script-box {
+      background-color: #F8F9FA;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .comparison-table th, .comparison-table td {
+      border: 1px solid var(--border-color);
+      padding: 0.75rem;
+      text-align: left;
+    }
+
+    .comparison-table th {
+      background-color: #F8F9FA;
+      color: var(--deep-forest);
+      font-weight: 600;
+    }
+
+    /* ACCORDION / HISTORY */
+    .history-section {
+      margin-top: 2rem;
+    }
+
+    .accordion-item {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+    }
+
+    .accordion-header {
+      padding: 0.75rem 1rem;
+      background-color: #F8F9FA;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .accordion-body {
+      padding: 1rem;
+      display: none;
+      font-size: 0.85rem;
+      background-color: #FFFFFF;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--deep-forest);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      font-size: 0.9rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .mobile-header {
+        display: flex;
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 1.25rem 1rem;
+      }
+
+      .overlay.active {
+        display: block;
+      }
+
+      .hero-card h2 {
+        font-size: 1.75rem;
+      }
+
+      .btn-row {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MOBILE HEADER -->
+  <header class="mobile-header">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <i class="fa-solid fa-shield-halved" style="color: var(--burnt-orange); font-size: 1.2rem;"></i>
+      <span style="font-weight: 700; color: var(--deep-forest);">RoleCreepDetector</span>
+    </div>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="app-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-shield-halved"></i>
+        <h1>Role Creep<br>Detector</h1>
+      </div>
+      <nav style="flex: 1;">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <button class="nav-btn active" data-tool="dashboard">
+              <i class="fa-solid fa-chart-pie"></i> Dashboard
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-btn" data-tool="scope-audit">
+              <i class="fa-solid fa-magnifying-glass-chart"></i> 1. Scope Audit
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-btn" data-tool="evidence-file">
+              <i class="fa-solid fa-folder-open"></i> 2. Evidence File
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-btn" data-tool="comp-calc">
+              <i class="fa-solid fa-calculator"></i> 3. Comp Calculator
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-btn" data-tool="conversation">
+              <i class="fa-solid fa-comments"></i> 4. Conversation
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-btn" data-tool="boundary-reset">
+              <i class="fa-solid fa-hand-stop"></i> 5. Boundary Reset
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <div class="content-wrapper">
+
+        <!-- SCREEN: DASHBOARD -->
+        <section id="screen-dashboard" class="screen-view">
+          <div class="card hero-card">
+            <h2>Role Creep Detector</h2>
+            <p>You didn't get promoted. Your job did.</p>
+          </div>
+
+          <div class="grid-dashboard">
+            <div class="card dash-card" data-target="scope-audit">
+              <div>
+                <div class="dash-card-header">
+                  <div class="dash-card-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                  <h3>Scope Audit</h3>
+                </div>
+                <p>Quantify the gap between what you were hired for and what you actually execute today.</p>
+              </div>
+            </div>
+
+            <div class="card dash-card" data-target="evidence-file">
+              <div>
+                <div class="dash-card-header">
+                  <div class="dash-card-icon"><i class="fa-solid fa-folder-open"></i></div>
+                  <h3>Evidence File</h3>
+                </div>
+                <p>Build an undeniable paper trail and impact statement documenting expanded duties.</p>
+              </div>
+            </div>
+
+            <div class="card dash-card" data-target="comp-calc">
+              <div>
+                <div class="dash-card-header">
+                  <div class="dash-card-icon"><i class="fa-solid fa-calculator"></i></div>
+                  <h3>Compensation Calculator</h3>
+                </div>
+                <p>Calculate your underpayment and benchmark market rates for your real combined role.</p>
+              </div>
+            </div>
+
+            <div class="card dash-card" data-target="conversation">
+              <div>
+                <div class="dash-card-header">
+                  <div class="dash-card-icon"><i class="fa-solid fa-comments"></i></div>
+                  <h3>The Conversation</h3>
+                </div>
+                <p>Get data-driven negotiation scripts tailored specifically to your manager's style.</p>
+              </div>
+            </div>
+
+            <div class="card dash-card" data-target="boundary-reset">
+              <div>
+                <div class="dash-card-header">
+                  <div class="dash-card-icon"><i class="fa-solid fa-hand-stop"></i></div>
+                  <h3>Boundary Reset</h3>
+                </div>
+                <p>Protect your capacity with professional pushback language and selective trade-offs.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SCREEN: TOOL 1 - THE SCOPE AUDIT -->
+        <section id="screen-scope-audit" class="screen-view" style="display: none;">
+          <div class="card">
+            <h2 style="color: var(--deep-forest); margin-bottom: 0.5rem;">Tool 1: The Scope Audit</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+              <strong>Problem solved:</strong> "I don't even realize how much extra I've taken on."
+            </p>
+
+            <form id="form-scope-audit">
+              <div class="form-group">
+                <label for="sa-orig">Your original job description (or what you were hired to do):</label>
+                <textarea id="sa-orig" class="form-control" placeholder="e.g. Graphic Designer: Create visual assets, maintain brand guidelines..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="sa-curr">What you actually do now:</label>
+                <textarea id="sa-curr" class="form-control" placeholder="e.g. Graphic design, website maintenance, social media strategy, vendor management..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="sa-added">Tasks added in the last 6 months:</label>
+                <textarea id="sa-added" class="form-control" placeholder="e.g. Managing web updates, running paid ad campaigns, onboarding interns..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="sa-who">Who gave you each new task?</label>
+                <textarea id="sa-who" class="form-control" placeholder="e.g. Direct manager assigned social ads; web maintenance just fell on me after Alex left..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="sa-whose">Which tasks used to belong to someone else?</label>
+                <textarea id="sa-whose" class="form-control" placeholder="e.g. Vendor coordination was Marketing Manager's job; web maintenance belonged to Web Developer..."></textarea>
+              </div>
+
+              <div class="btn-row">
+                <button type="button" class="btn btn-primary" onclick="analyzeScopeAudit()">Analyze Scope Expansion</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleScopeAudit()">Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- OUTPUT SCOPE AUDIT -->
+          <div id="output-scope-audit" class="output-section">
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-sitemap"></i> The Creep Map</h3>
+              </div>
+              <div id="sa-creep-map"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-clock"></i> The Hours Calculator</h3>
+              </div>
+              <div id="sa-hours-calc"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-layer-group"></i> The Responsibility Ladder</h3>
+              </div>
+              <div id="sa-ladder"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-ghost"></i> The Orphan Tasks</h3>
+              </div>
+              <div id="sa-orphan"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-scale-balanced"></i> The Reality Check</h3>
+              </div>
+              <div id="sa-reality"></div>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="history-section card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+              <h3 style="font-size: 1rem; color: var(--deep-forest);">Audit History</h3>
+              <button class="btn btn-outline btn-sm" onclick="clearToolHistory('scope-audit')">Clear History</button>
+            </div>
+            <div id="history-scope-audit"></div>
+          </div>
+        </section>
+
+        <!-- SCREEN: TOOL 2 - THE EVIDENCE FILE -->
+        <section id="screen-evidence-file" class="screen-view" style="display: none;">
+          <div class="card">
+            <h2 style="color: var(--deep-forest); margin-bottom: 0.5rem;">Tool 2: The Evidence File</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+              <strong>Problem solved:</strong> "I need proof that my role has expanded before I can ask for anything."
+            </p>
+
+            <form id="form-evidence-file">
+              <div class="form-group">
+                <label for="ef-start">When did each new responsibility start?</label>
+                <textarea id="ef-start" class="form-control" placeholder="e.g. Website ops started in March; vendor comms added in May; intern supervision in June..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Do you have emails or messages assigning this work?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="ef-emails" value="Yes" checked> Yes</label>
+                  <label class="radio-label"><input type="radio" name="ef-emails" value="Some"> Some</label>
+                  <label class="radio-label"><input type="radio" name="ef-emails" value="No"> No</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Has anyone acknowledged the expansion?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="ef-ack" value="Yes"> Yes (written)</label>
+                  <label class="radio-label"><input type="radio" name="ef-ack" value="Hinted" checked> Hinted in passing</label>
+                  <label class="radio-label"><input type="radio" name="ef-ack" value="No"> No acknowledgement</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="ef-results">What results have you delivered in the expanded role?</label>
+                <textarea id="ef-results" class="form-control" placeholder="e.g. Redesigned web landing pages leading to +20% conversion; streamlined vendor contracts saving $5k..."></textarea>
+              </div>
+
+              <div class="btn-row">
+                <button type="button" class="btn btn-primary" onclick="analyzeEvidenceFile()">Generate Evidence Dossier</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleEvidenceFile()">Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- OUTPUT EVIDENCE FILE -->
+          <div id="output-evidence-file" class="output-section">
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-timeline"></i> The Timeline</h3>
+              </div>
+              <div id="ef-timeline"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-list-check"></i> The Paper Trail Checklist</h3>
+              </div>
+              <div id="ef-checklist"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-chart-line"></i> The Impact Statement</h3>
+              </div>
+              <div id="ef-impact"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-building-user"></i> External Market Replacement Cost</h3>
+              </div>
+              <div id="ef-cost"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-file-lines"></i> The One-Pager Template</h3>
+                <button class="btn btn-outline btn-sm" onclick="copyScript('ef-onepager-text')"><i class="fa-regular fa-copy"></i> Copy</button>
+              </div>
+              <div id="ef-onepager-text" class="script-box"></div>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="history-section card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+              <h3 style="font-size: 1rem; color: var(--deep-forest);">Dossier History</h3>
+              <button class="btn btn-outline btn-sm" onclick="clearToolHistory('evidence-file')">Clear History</button>
+            </div>
+            <div id="history-evidence-file"></div>
+          </div>
+        </section>
+
+        <!-- SCREEN: TOOL 3 - THE COMPENSATION CALCULATOR -->
+        <section id="screen-comp-calc" class="screen-view" style="display: none;">
+          <div class="card">
+            <h2 style="color: var(--deep-forest); margin-bottom: 0.5rem;">Tool 3: The Compensation Calculator</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+              <strong>Problem solved:</strong> "If I'm doing a bigger job, what should I actually be paid?"
+            </p>
+
+            <form id="form-comp-calc">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                  <label for="cc-salary">Your current salary ($):</label>
+                  <input type="number" id="cc-salary" class="form-control" placeholder="e.g. 58000">
+                </div>
+                <div class="form-group">
+                  <label for="cc-orig-rate">Original role market rate ($):</label>
+                  <input type="number" id="cc-orig-rate" class="form-control" placeholder="e.g. 55000">
+                </div>
+                <div class="form-group">
+                  <label for="cc-comb-rate">Combined role market rate ($):</label>
+                  <input type="number" id="cc-comb-rate" class="form-control" placeholder="e.g. 78000">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="cc-title">Title you believe fits your current work:</label>
+                <input type="text" id="cc-title" class="form-control" placeholder="e.g. Digital Marketing Manager / Senior Designer">
+              </div>
+
+              <div class="form-group">
+                <label for="cc-tenure">Time in expanded role:</label>
+                <select id="cc-tenure" class="form-control">
+                  <option value="<3mo">Less than 3 months</option>
+                  <option value="3-6mo" selected>3 to 6 months</option>
+                  <option value="6mo-1yr">6 months to 1 year</option>
+                  <option value="1yr+">1 year+</option>
+                </select>
+              </div>
+
+              <div class="btn-row">
+                <button type="button" class="btn btn-primary" onclick="analyzeCompCalc()">Calculate Valuation</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleCompCalc()">Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- OUTPUT COMP CALC -->
+          <div id="output-comp-calc" class="output-section">
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-sack-dollar"></i> The Gap & Value Deficit</h3>
+              </div>
+              <div id="cc-gap"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-arrow-trend-up"></i> The Title Premium</h3>
+              </div>
+              <div id="cc-title-premium"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-bullseye"></i> The Negotiation Range</h3>
+              </div>
+              <div id="cc-range"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-gift"></i> The Non-Money Asks</h3>
+              </div>
+              <div id="cc-non-money"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-briefcase"></i> The Business Case Framing</h3>
+              </div>
+              <div id="cc-business-case"></div>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="history-section card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+              <h3 style="font-size: 1rem; color: var(--deep-forest);">Calculation History</h3>
+              <button class="btn btn-outline btn-sm" onclick="clearToolHistory('comp-calc')">Clear History</button>
+            </div>
+            <div id="history-comp-calc"></div>
+          </div>
+        </section>
+
+        <!-- SCREEN: TOOL 4 - THE CONVERSATION -->
+        <section id="screen-conversation" class="screen-view" style="display: none;">
+          <div class="card">
+            <h2 style="color: var(--deep-forest); margin-bottom: 0.5rem;">Tool 4: The Conversation</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+              <strong>Problem solved:</strong> "I need to tell my boss my role has grown without sounding like I'm complaining."
+            </p>
+
+            <form id="form-conversation">
+              <div class="form-group">
+                <label>Your boss's management style:</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="cv-style" value="Data-driven" checked> Data-driven</label>
+                  <label class="radio-label"><input type="radio" name="cv-style" value="Relationship-driven"> Relationship-driven</label>
+                  <label class="radio-label"><input type="radio" name="cv-style" value="Avoidant"> Avoidant / Busy</label>
+                  <label class="radio-label"><input type="radio" name="cv-style" value="Appreciative"> Appreciative / Expressive</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="cv-financials">Company financial situation:</label>
+                <select id="cv-financials" class="form-control">
+                  <option value="Growing">Growing / High performance</option>
+                  <option value="Stable" selected>Stable / Steady budget</option>
+                  <option value="Tight">Tight budget / Hiring freeze</option>
+                  <option value="Unknown">Unknown</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Your relationship strength:</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="cv-rel" value="Strong"> Strong</label>
+                  <label class="radio-label"><input type="radio" name="cv-rel" value="Neutral" checked> Neutral</label>
+                  <label class="radio-label"><input type="radio" name="cv-rel" value="Strained"> Strained</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Your primary goal:</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="cv-goal" value="Raise"> Pay Raise</label>
+                  <label class="radio-label"><input type="radio" name="cv-goal" value="Title change"> Title Change</label>
+                  <label class="radio-label"><input type="radio" name="cv-goal" value="Reduced scope"> Reduced Scope</label>
+                  <label class="radio-label"><input type="radio" name="cv-goal" value="Recognition"> Formal Recognition</label>
+                  <label class="radio-label"><input type="radio" name="cv-goal" value="All" checked> All of the above</label>
+                </div>
+              </div>
+
+              <div class="btn-row">
+                <button type="button" class="btn btn-primary" onclick="analyzeConversation()">Generate Dialogue Strategy</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleConversation()">Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- OUTPUT CONVERSATION -->
+          <div id="output-conversation" class="output-section">
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-comment-dots"></i> The Opening Script</h3>
+                <button class="btn btn-outline btn-sm" onclick="copyScript('cv-script-opening')"><i class="fa-regular fa-copy"></i> Copy</button>
+              </div>
+              <div id="cv-script-opening" class="script-box"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-sliders"></i> Strategic Reframing</h3>
+              </div>
+              <div id="cv-framing"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-handshake"></i> The Structured Proposal</h3>
+              </div>
+              <div id="cv-proposal"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-circle-check"></i> Scenario A: If They Agree</h3>
+              </div>
+              <div id="cv-if-agree"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-turn-down"></i> Scenario B: If They Deflect</h3>
+              </div>
+              <div id="cv-if-deflect"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-shield-cat"></i> Scenario C: If They Refuse</h3>
+              </div>
+              <div id="cv-if-refuse"></div>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="history-section card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+              <h3 style="font-size: 1rem; color: var(--deep-forest);">Conversation Strategy History</h3>
+              <button class="btn btn-outline btn-sm" onclick="clearToolHistory('conversation')">Clear History</button>
+            </div>
+            <div id="history-conversation"></div>
+          </div>
+        </section>
+
+        <!-- SCREEN: TOOL 5 - THE BOUNDARY RESET -->
+        <section id="screen-boundary-reset" class="screen-view" style="display: none;">
+          <div class="card">
+            <h2 style="color: var(--deep-forest); margin-bottom: 0.5rem;">Tool 5: The Boundary Reset</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+              <strong>Problem solved:</strong> "They won't pay me more or promote me, but they keep adding work."
+            </p>
+
+            <form id="form-boundary-reset">
+              <div class="form-group">
+                <label>Have you asked for compensation or title realignment?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="br-asked" value="Denied" checked> Yes and denied</label>
+                  <label class="radio-label"><input type="radio" name="br-asked" value="Promised"> Yes and promised later</label>
+                  <label class="radio-label"><input type="radio" name="br-asked" value="Not yet"> Not yet</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="br-capacity">How much more extra work can you take on?</label>
+                <select id="br-capacity" class="form-control">
+                  <option value="None" selected>None (At absolute capacity)</option>
+                  <option value="A little">A little (Only if high-visibility)</option>
+                  <option value="Maintain">Willing to maintain current load only</option>
+                  <option value="Reduce">Actively looking to reduce scope</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="br-pushback-risk">What happens or what do you fear if you push back?</label>
+                <textarea id="br-pushback-risk" class="form-control" placeholder="e.g. Afraid of being seen as uncooperative, missing out on future bonuses, or manager reacting defensively..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Are you willing to let low-priority tasks drop selectively?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="br-drop" value="Yes"> Yes</label>
+                  <label class="radio-label"><input type="radio" name="br-drop" value="No"> No</label>
+                  <label class="radio-label"><input type="radio" name="br-drop" value="Selectively" checked> Selectively with notice</label>
+                </div>
+              </div>
+
+              <div class="btn-row">
+                <button type="button" class="btn btn-primary" onclick="analyzeBoundaryReset()">Generate Reset Plan</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleBoundaryReset()">Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- OUTPUT BOUNDARY RESET -->
+          <div id="output-boundary-reset" class="output-section">
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-snowflake"></i> The Scope Freeze Protocol</h3>
+              </div>
+              <div id="br-freeze"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-comment-slash"></i> Professional Pushback Scripts</h3>
+                <button class="btn btn-outline btn-sm" onclick="copyScript('br-pushback-script')"><i class="fa-regular fa-copy"></i> Copy</button>
+              </div>
+              <div id="br-pushback-script" class="script-box"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-arrows-split-up-and-left"></i> The Trade-Off Table</h3>
+              </div>
+              <div id="br-tradeoff"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-user-ninja"></i> The Quiet Search Strategy</h3>
+              </div>
+              <div id="br-quiet-search"></div>
+            </div>
+
+            <div class="card output-card">
+              <div class="output-header">
+                <h3><i class="fa-solid fa-door-open"></i> The Exit Timeline</h3>
+              </div>
+              <div id="br-exit-timeline"></div>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="history-section card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+              <h3 style="font-size: 1rem; color: var(--deep-forest);">Boundary Reset History</h3>
+              <button class="btn btn-outline btn-sm" onclick="clearToolHistory('boundary-reset')">Clear History</button>
+            </div>
+            <div id="history-boundary-reset"></div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- APP FOOTER -->
+      <footer class="app-footer">
+        For career scope management only. Not legal, HR, or financial advice. For contractual disputes, consult an employment attorney.
+      </footer>
+    </main>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast">Copied to clipboard!</div>
+
+  <script>
+    /* UTILITY FUNCTIONS */
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg || 'Copied to clipboard!';
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    function copyScript(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      const text = el.innerText || el.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard!');
+      }).catch(err => {
+        console.error('Copy failed', err);
+      });
+    }
+
+    /* NAVIGATION & UI LOGIC */
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const screens = document.querySelectorAll('.screen-view');
+    const dashCards = document.querySelectorAll('.dash-card');
+    const sidebar = document.getElementById('sidebar');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const overlay = document.getElementById('overlay');
+
+    function switchTab(toolId) {
+      screens.forEach(s => s.style.display = 'none');
+      navButtons.forEach(b => b.classList.remove('active'));
+
+      const targetScreen = document.getElementById(`screen-${toolId}`);
+      if (targetScreen) targetScreen.style.display = 'block';
+
+      const targetBtn = document.querySelector(`.nav-btn[data-tool="${toolId}"]`);
+      if (targetBtn) targetBtn.classList.add('active');
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Close mobile drawer
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+
+      // Render history for the active tool
+      renderHistory(toolId);
+    }
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tool = btn.getAttribute('data-tool');
+        switchTab(tool);
+      });
+    });
+
+    dashCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const target = card.getAttribute('data-target');
+        switchTab(target);
+      });
+    });
+
+    hamburgerBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    });
+
+    /* LOCAL STORAGE HISTORY ENGINE */
+    function saveToHistory(toolId, inputSummary, outputData) {
+      const key = `creep_history_${toolId}`;
+      let history = JSON.parse(localStorage.getItem(key) || '[]');
+      
+      const newItem = {
+        id: Date.now(),
+        timestamp: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        summary: inputSummary,
+        data: outputData
+      };
+
+      history.unshift(newItem);
+      if (history.length > 30) history = history.slice(0, 30);
+
+      localStorage.setItem(key, JSON.stringify(history));
+      renderHistory(toolId);
+    }
+
+    function renderHistory(toolId) {
+      const container = document.getElementById(`history-${toolId}`);
+      if (!container) return;
+
+      const key = `creep_history_${toolId}`;
+      const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+      if (history.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No previous analyses saved.</p>';
+        return;
+      }
+
+      let html = '';
+      history.forEach((item, index) => {
+        html += `
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion('${toolId}-${index}')">
+              <span><i class="fa-regular fa-clock"></i> ${item.timestamp} — ${item.summary}</span>
+              <i class="fa-solid fa-chevron-down"></i>
+            </div>
+            <div class="accordion-body" id="acc-${toolId}-${index}">
+              ${item.data}
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function toggleAccordion(id) {
+      const body = document.getElementById(`acc-${id}`);
+      if (body) {
+        body.style.display = body.style.display === 'block' ? 'none' : 'block';
+      }
+    }
+
+    function clearToolHistory(toolId) {
+      const key = `creep_history_${toolId}`;
+      localStorage.removeItem(key);
+      renderHistory(toolId);
+      showToast('History cleared');
+    }
+
+
+    /* TOOL 1 — SCOPE AUDIT LOGIC */
+    function loadSampleScopeAudit() {
+      document.getElementById('sa-orig').value = 'Graphic Designer: Create visuals, maintain brand assets, design marketing collateral.';
+      document.getElementById('sa-curr').value = 'Graphic Designer + Website Manager + Social Media Strategist + Vendor Liaison + Intern Trainer.';
+      document.getElementById('sa-added').value = 'Website updates, social campaign analytics, agency vendor coordination, intern onboarding & daily review.';
+      document.getElementById('sa-who').value = 'Direct manager assigned social ads; website management and vendor comms just happened after last team member left.';
+      document.getElementById('sa-whose').value = 'Vendor coordination belonged to Marketing Manager; web maintenance belonged to Web Developer.';
+    }
+
+    function analyzeScopeAudit() {
+      const orig = document.getElementById('sa-orig').value || 'Standard core role';
+      const curr = document.getElementById('sa-curr').value || 'Expanded multi-role execution';
+      const added = document.getElementById('sa-added').value || 'Various tactical additions';
+      const who = document.getElementById('sa-who').value || 'Managers and default assignment';
+      const whose = document.getElementById('sa-whose').value || 'Vacant or former team roles';
+
+      const creepMapHtml = `
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Contracted Core Scope</th>
+              <th>Actual Operating Scope</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${orig}</td>
+              <td><strong>${curr}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      const hoursCalcHtml = `
+        <p style="margin-bottom:0.5rem;">Estimated extra load: <strong>10 – 15 hours/week</strong> above base job description.</p>
+        <p style="font-size:0.85rem; color:var(--text-muted);">Tasks such as <em>${added}</em> absorb approximately 25-35% of total weekly capacity that was not factored into your hiring workload.</p>
+      `;
+
+      const ladderHtml = `
+        <ul style="padding-left:1.2rem; font-size:0.9rem;">
+          <li><strong>Execution Level (Base):</strong> Core design and brand asset creation.</li>
+          <li><strong>Operational Creep (Medium):</strong> ${added}</li>
+          <li><strong>Strategic & Managerial Creep (High):</strong> Vendor management, direct training/supervision, and website governance.</li>
+        </ul>
+      `;
+
+      const orphanHtml = `
+        <p style="font-size:0.9rem;"><strong>Unassigned / Inherited Tasks:</strong> ${whose}</p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.4rem;">These responsibilities were absorbed organically without formal headcount allocation or budget re-assignment.</p>
+      `;
+
+      const realityHtml = `
+        <p style="font-size:0.9rem; margin-bottom:0.5rem;"><strong>Assessment: Operational Scope Exploitation</strong></p>
+        <p style="font-size:0.85rem;">You are currently performing the functional output of <strong>1.5 to 2 FTEs (Full-Time Equivalents)</strong>. This expansion represents uncompensated structural leverage for the organization.</p>
+      `;
+
+      document.getElementById('sa-creep-map').innerHTML = creepMapHtml;
+      document.getElementById('sa-hours-calc').innerHTML = hoursCalcHtml;
+      document.getElementById('sa-ladder').innerHTML = ladderHtml;
+      document.getElementById('sa-orphan').innerHTML = orphanHtml;
+      document.getElementById('sa-reality').innerHTML = realityHtml;
+
+      document.getElementById('output-scope-audit').style.display = 'block';
+
+      const fullOutputString = creepMapHtml + hoursCalcHtml + ladderHtml + orphanHtml + realityHtml;
+      saveToHistory('scope-audit', 'Audit: ' + curr.substring(0, 30) + '...', fullOutputString);
+    }
+
+
+    /* TOOL 2 — EVIDENCE FILE LOGIC */
+    function loadSampleEvidenceFile() {
+      document.getElementById('ef-start').value = 'Expanded tasks initiated 4 months ago during Q2 team restructure.';
+      document.querySelectorAll('input[name="ef-emails"]')[1].checked = true; // Some
+      document.querySelectorAll('input[name="ef-ack"]')[1].checked = true; // Hinted
+      document.getElementById('ef-results').value = 'Increased total team output by 30%, reduced external agency turnaround by 2 days, onboarded 2 interns seamlessly.';
+    }
+
+    function analyzeEvidenceFile() {
+      const start = document.getElementById('ef-start').value || 'Recent months';
+      const emails = document.querySelector('input[name="ef-emails"]:checked').value;
+      const ack = document.querySelector('input[name="ef-ack"]:checked').value;
+      const results = document.getElementById('ef-results').value || 'Maintained department continuity and deliverables.';
+
+      const timelineHtml = `<p style="font-size:0.9rem;"><strong>Expansion Timeline:</strong> ${start}</p>`;
+
+      const checklistHtml = `
+        <ul style="padding-left:1.2rem; font-size:0.875rem;">
+          <li>[${emails === 'Yes' || emails === 'Some' ? 'X' : ' '}] Direct assignment emails or Slack/Teams threads.</li>
+          <li>[${ack === 'Yes' ? 'X' : ' '}] Written praise or verbal recognition in 1-on-1s.</li>
+          <li>[ ] Project logs, GitHub commits, or CMS publishing histories showing primary ownership.</li>
+          <li>[ ] External vendor communications listing you as primary lead.</li>
+        </ul>
+      `;
+
+      const impactHtml = `
+        <p style="font-size:0.9rem; margin-bottom:0.5rem;"><strong>Quantified Contributions:</strong></p>
+        <p style="font-size:0.85rem; color:var(--text-main);">${results}</p>
+      `;
+
+      const costHtml = `
+        <p style="font-size:0.9rem;">Estimated External Contract/Replacement Cost: <strong>$25,000 – $40,000 / year</strong></p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">Hiring an external contractor or dedicated headcount to fulfill these extra duties would require dedicated agency fees or salary overhead.</p>
+      `;
+
+      const onePagerText = 
+`EXECUTIVE SCOPE EXPANSION SUMMARY
+
+1. OVERVIEW
+Over the past 4-6 months, my core operational focus has expanded beyond my original contracted role to absorb key deliverables in website management, vendor coordination, and team training.
+
+2. KEY ADDED RESPONSIBILITIES
+- Primary management of web maintenance & social campaign assets
+- Operational vendor coordination & intern onboarding/training
+- Expansion start timeline: ${start}
+
+3. MEASURABLE IMPACT & DELIVERABLES
+- ${results}
+
+4. BUSINESS VALUE
+By taking on these responsibilities internally, I have maintained continuity and saved the team estimated external contractor costs while increasing department velocity.`;
+
+      document.getElementById('ef-timeline').innerHTML = timelineHtml;
+      document.getElementById('ef-checklist').innerHTML = checklistHtml;
+      document.getElementById('ef-impact').innerHTML = impactHtml;
+      document.getElementById('ef-cost').innerHTML = costHtml;
+      document.getElementById('ef-onepager-text').textContent = onePagerText;
+
+      document.getElementById('output-evidence-file').style.display = 'block';
+
+      const fullOutputString = timelineHtml + checklistHtml + impactHtml + costHtml + `<pre>${onePagerText}</pre>`;
+      saveToHistory('evidence-file', 'Dossier: Expansion ' + start.substring(0, 25) + '...', fullOutputString);
+    }
+
+
+    /* TOOL 3 — COMPENSATION CALCULATOR LOGIC */
+    function loadSampleCompCalc() {
+      document.getElementById('cc-salary').value = 58000;
+      document.getElementById('cc-orig-rate').value = 55000;
+      document.getElementById('cc-comb-rate').value = 78000;
+      document.getElementById('cc-title').value = 'Digital Marketing Manager';
+      document.getElementById('cc-tenure').value = '3-6mo';
+    }
+
+    function analyzeCompCalc() {
+      const salary = parseFloat(document.getElementById('cc-salary').value) || 58000;
+      const origRate = parseFloat(document.getElementById('cc-orig-rate').value) || 55000;
+      const combRate = parseFloat(document.getElementById('cc-comb-rate').value) || 78000;
+      const title = document.getElementById('cc-title').value || 'Senior Specialist / Manager';
+
+      const gap = combRate - salary;
+      const gapPercent = ((gap / salary) * 100).toFixed(1);
+
+      const gapHtml = `
+        <p style="font-size:1.1rem; font-weight:700; color:var(--burnt-orange);">Annual Compensation Gap: $${gap.toLocaleString()} (${gapPercent}%)</p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">You are currently executing at a $${combRate.toLocaleString()} market benchmark level while compensated at $${salary.toLocaleString()}.</p>
+      `;
+
+      const titlePremiumHtml = `
+        <p style="font-size:0.9rem;">Target Market Title: <strong>${title}</strong></p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">Updating your official title alone aligns your resume with market benchmarks and increases external recruitment valuation by 20-35%.</p>
+      `;
+
+      const targetMin = salary + (gap * 0.6);
+      const targetMax = combRate;
+
+      const rangeHtml = `
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Target Level</th>
+              <th>Salary Ask</th>
+              <th>Strategic Framing</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Conservative (+${((gap*0.6)/salary*100).toFixed(0)}%)</td>
+              <td>$${Math.round(targetMin).toLocaleString()}</td>
+              <td>Mid-point alignment, preserving team budget ease.</td>
+            </tr>
+            <tr>
+              <td>Full Market Correction</td>
+              <td>$${Math.round(targetMax).toLocaleString()}</td>
+              <td>Full market rate for external replacement value.</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      const nonMoneyHtml = `
+        <ul style="padding-left:1.2rem; font-size:0.875rem;">
+          <li><strong>Official Title Change:</strong> Formal reclassification to ${title}.</li>
+          <li><strong>Direct Reports / Budget Authority:</strong> Formalize management oversight.</li>
+          <li><strong>Flexible Work / Remote Days:</strong> Stipulate autonomous scheduling flexibility.</li>
+          <li><strong>Professional Development:</strong> Dedicated annual learning budget ($1,500 - $3,000).</li>
+        </ul>
+      `;
+
+      const businessCaseHtml = `
+        <p style="font-size:0.875rem;">"Adjusting compensation to <strong>$${Math.round(targetMin).toLocaleString()}</strong> reflects the expanded scope already operationalized today. Retaining this institutional knowledge internally avoids recruitment latency and onboarding risks."</p>
+      `;
+
+      document.getElementById('cc-gap').innerHTML = gapHtml;
+      document.getElementById('cc-title-premium').innerHTML = titlePremiumHtml;
+      document.getElementById('cc-range').innerHTML = rangeHtml;
+      document.getElementById('cc-non-money').innerHTML = nonMoneyHtml;
+      document.getElementById('cc-business-case').innerHTML = businessCaseHtml;
+
+      document.getElementById('output-comp-calc').style.display = 'block';
+
+      const fullOutputString = gapHtml + titlePremiumHtml + rangeHtml + nonMoneyHtml + businessCaseHtml;
+      saveToHistory('comp-calc', `Valuation: Gap $${gap.toLocaleString()} for ${title}`, fullOutputString);
+    }
+
+
+    /* TOOL 4 — CONVERSATION LOGIC */
+    function loadSampleConversation() {
+      document.querySelectorAll('input[name="cv-style"]')[0].checked = true; // Data-driven
+      document.getElementById('cv-financials').value = 'Stable';
+      document.querySelectorAll('input[name="cv-rel"]')[1].checked = true; // Neutral
+      document.querySelectorAll('input[name="cv-goal"]')[4].checked = true; // All
+    }
+
+    function analyzeConversation() {
+      const style = document.querySelector('input[name="cv-style"]:checked').value;
+      const fin = document.getElementById('cv-financials').value;
+      const goal = document.querySelector('input[name="cv-goal"]:checked').value;
+
+      let openingText = "";
+      if (style === "Data-driven") {
+        openingText = `"Thanks for making time. I've prepared a brief overview of how my core scope and key metrics have evolved over the last 6 months. I’d like to review the business outcomes delivered and discuss aligning my title and compensation with my actual operational responsibilities."`;
+      } else if (style === "Relationship-driven") {
+        openingText = `"I really appreciate your ongoing mentorship and guidance. Over the past several months, I've loved taking on expanded ownership across our key initiatives. I'd like to chat about formalizing this expanded role so my title and scope are clear for the team."`;
+      } else {
+        openingText = `"I wanted to put 15 minutes on your calendar to review my current workload distribution. My scope has grown significantly over the past 6 months, and I want to ensure our priorities and compensation alignment are set up for sustainable success."`;
+      }
+
+      const framingHtml = `
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th style="color: #D90429;">Avoid (Victim Energy)</th>
+              <th style="color: var(--deep-forest);">Adopt (Business Alignment)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>"I'm doing two jobs and it isn't fair."</td>
+              <td>"My role has evolved structurally to support key business growth."</td>
+            </tr>
+            <tr>
+              <td>"Nobody asked me before adding this extra work."</td>
+              <td>"I stepped up to absorb these high-priority deliverables to maintain business continuity."</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      const proposalHtml = `
+        <p style="font-size:0.9rem;"><strong>Core Ask:</strong> Formal alignment to target title & compensation scale based on company financial state (<strong>${fin}</strong>).</p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">Present your One-Pager Evidence summary directly following the opening script.</p>
+      `;
+
+      const ifAgreeHtml = `<p style="font-size:0.875rem;">"Thank you for recognizing these contributions. Let's document this in writing and set a concrete timeline for HR approval (e.g., end of month / next pay period)."</p>`;
+      const ifDeflectHtml = `<p style="font-size:0.875rem;">"I understand budget timing can be tight. What specific operational milestones or review dates can we lock in today to revisit this formal alignment?"</p>`;
+      const ifRefuseHtml = `<p style="font-size:0.875rem;">"I appreciate your transparency regarding constraints. Since compensation adjustment isn't feasible today, let's review which secondary deliverables can be reprioritized or reassigned to protect primary output."</p>`;
+
+      document.getElementById('cv-script-opening').textContent = openingText;
+      document.getElementById('cv-framing').innerHTML = framingHtml;
+      document.getElementById('cv-proposal').innerHTML = proposalHtml;
+      document.getElementById('cv-if-agree').innerHTML = ifAgreeHtml;
+      document.getElementById('cv-if-deflect').innerHTML = ifDeflectHtml;
+      document.getElementById('cv-if-refuse').innerHTML = ifRefuseHtml;
+
+      document.getElementById('output-conversation').style.display = 'block';
+
+      const fullOutputString = `<pre>${openingText}</pre>` + framingHtml + proposalHtml + ifAgreeHtml + ifDeflectHtml + ifRefuseHtml;
+      saveToHistory('conversation', `Script: Style=${style}, Goal=${goal}`, fullOutputString);
+    }
+
+
+    /* TOOL 5 — BOUNDARY RESET LOGIC */
+    function loadSampleBoundaryReset() {
+      document.querySelectorAll('input[name="br-asked"]')[0].checked = true; // Denied
+      document.getElementById('br-capacity').value = 'None';
+      document.getElementById('br-pushback-risk').value = 'Afraid of seeming uncooperative, missing out on team bonuses, or creating friction with management.';
+      document.querySelectorAll('input[name="br-drop"]')[2].checked = true; // Selectively
+    }
+
+    function analyzeBoundaryReset() {
+      const asked = document.querySelector('input[name="br-asked"]:checked').value;
+      const capacity = document.getElementById('br-capacity').value;
+
+      const freezeHtml = `
+        <p style="font-size:0.9rem;"><strong>Scope Freeze Activated:</strong> Policy level: <em>STRICT</em></p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">Because your previous realignment request was [${asked}], no new responsibility should be accepted without a explicit 1:1 trade-off removal of an existing task.</p>
+      `;
+
+      const pushbackScriptText = 
+`"I want to ensure I maintain top quality on my core priorities (Deliverable A & B). To take on this new task, which current deliverable should we deprioritize or reassign to accommodate the bandwidth?"`;
+
+      const tradeoffHtml = `
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Maintain (Core Focus)</th>
+              <th>Release / Deprioritize</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>High-visibility core contract responsibilities</td>
+              <td>Uncompensated ad-hoc administrative requests</td>
+            </tr>
+            <tr>
+              <td>Strategic revenue/impact deliverables</td>
+              <td>Informal intern training or non-essential vendor check-ins</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      const quietSearchHtml = `
+        <ul style="padding-left:1.2rem; font-size:0.875rem;">
+          <li>Update LinkedIn profile and resume using the expanded market titles identified in Tool 3.</li>
+          <li>Set up private recruiters' alerts for market-rate roles.</li>
+          <li>Keep current expanded duties strictly operational without volunteering for new unbilled pilots.</li>
+        </ul>
+      `;
+
+      const exitTimelineHtml = `
+        <p style="font-size:0.9rem;">Target Career Realignment Horizon: <strong>60 – 90 Days</strong></p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">If internal realignment remains stagnant after 60 days of scope freeze, capture your market value externally.</p>
+      `;
+
+      document.getElementById('br-freeze').innerHTML = freezeHtml;
+      document.getElementById('br-pushback-script').textContent = pushbackScriptText;
+      document.getElementById('br-tradeoff').innerHTML = tradeoffHtml;
+      document.getElementById('br-quiet-search').innerHTML = quietSearchHtml;
+      document.getElementById('br-exit-timeline').innerHTML = exitTimelineHtml;
+
+      document.getElementById('output-boundary-reset').style.display = 'block';
+
+      const fullOutputString = freezeHtml + `<pre>${pushbackScriptText}</pre>` + tradeoffHtml + quietSearchHtml + exitTimelineHtml;
+      saveToHistory('boundary-reset', `Boundary Plan: Capacity=${capacity}`, fullOutputString);
+    }
+
+    // INITIALIZATION
+    document.addEventListener('DOMContentLoaded', () => {
+      renderHistory('scope-audit');
+      renderHistory('evidence-file');
+      renderHistory('comp-calc');
+      renderHistory('conversation');
+      renderHistory('boundary-reset');
+    });
+  </script>
+</body>
+</html>

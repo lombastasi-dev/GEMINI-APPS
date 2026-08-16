@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeadlineDefender — Boundary & Negotiation Toolkit</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ==========================================================================
+           1. CORE STYLES & RESET
+           ========================================================================== */
+        :root {
+            --charcoal: #343A40;
+            --charcoal-light: #495057;
+            --teal: #08D9D6;
+            --teal-dark: #00B3B0;
+            --teal-light: #E0FCFC;
+            --bg-gradient: linear-gradient(135deg, #F8F9FA 0%, #E0FCFC 100%);
+            --white: #FFFFFF;
+            --gray-50: #F8F9FA;
+            --gray-100: #F1F3F5;
+            --gray-200: #E9ECEF;
+            --gray-300: #DEE2E6;
+            --gray-600: #6C757D;
+            --gray-800: #343A40;
+            --danger: #FF2E63;
+            --warning: #FF9F43;
+            --sidebar-width: 260px;
+            --radius-xl: 1rem;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--charcoal);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ==========================================================================
+           2. LAYOUT & SIDEBAR
+           ========================================================================== */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--white);
+            border-right: 1px solid var(--gray-200);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--teal-dark);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.125rem;
+            font-weight: 800;
+            color: var(--charcoal);
+            letter-spacing: -0.025em;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.75rem 1rem;
+            color: var(--gray-600);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.925rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .nav-item:hover {
+            background: var(--gray-100);
+            color: var(--charcoal);
+        }
+
+        .nav-item.active {
+            background: var(--charcoal);
+            color: var(--teal);
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem 1.5rem 4rem;
+            max-width: 900px;
+            width: 100%;
+            margin-right: auto;
+        }
+
+        /* Mobile Header & Overlay */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 1.25rem;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--charcoal);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 95;
+            backdrop-filter: blur(2px);
+        }
+
+        /* ==========================================================================
+           3. UI COMPONENTS & CARDS
+           ========================================================================== */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .view-panel {
+            display: none;
+        }
+
+        .view-panel.active {
+            display: block;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tool-header {
+            margin-bottom: 1.75rem;
+        }
+
+        .tool-header h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--charcoal);
+            letter-spacing: -0.03em;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .tool-header .problem-statement {
+            margin-top: 0.5rem;
+            background: var(--teal-light);
+            color: var(--charcoal);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            border-left: 4px solid var(--teal-dark);
+            font-weight: 500;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            color: var(--charcoal);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--charcoal);
+            background: var(--white);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--teal-dark);
+            box-shadow: 0 0 0 3px rgba(8, 217, 214, 0.2);
+        }
+
+        textarea.form-control {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .radio-label, .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.925rem;
+            cursor: pointer;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+        }
+
+        .radio-label:hover, .checkbox-label:hover {
+            background: var(--gray-50);
+        }
+
+        .radio-label input:checked + span, .checkbox-label input:checked + span {
+            font-weight: 600;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.925rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: var(--charcoal);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: #1a1e21;
+        }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--charcoal);
+            border: 1px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-200);
+        }
+
+        .btn-copy {
+            background: var(--teal-light);
+            color: var(--charcoal);
+            border: 1px solid var(--teal-dark);
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: 0.375rem;
+        }
+
+        .btn-copy:hover {
+            background: var(--teal);
+        }
+
+        /* Output Modules */
+        .output-container {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+        }
+
+        .output-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--charcoal);
+        }
+
+        .output-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .script-box {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.925rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            position: relative;
+            white-space: pre-line;
+        }
+
+        /* Specific Table Styling */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        table.data-table th, table.data-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        table.data-table th {
+            background: var(--gray-100);
+            font-weight: 600;
+            color: var(--charcoal);
+        }
+
+        /* Tabs inside outputs */
+        .script-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid var(--gray-200);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            cursor: pointer;
+            border-radius: 0.375rem;
+        }
+
+        .tab-btn.active {
+            background: var(--charcoal);
+            color: var(--teal);
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 3rem;
+            border-top: 1px solid var(--gray-300);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-header h4 {
+            font-size: 1rem;
+            color: var(--charcoal);
+            font-weight: 700;
+        }
+
+        .history-item {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:hover {
+            border-color: var(--teal-dark);
+            background: var(--gray-50);
+        }
+
+        /* ==========================================================================
+           4. DASHBOARD SPECIFIC
+           ========================================================================== */
+        .hero {
+            background: var(--charcoal);
+            color: var(--white);
+            padding: 2.5rem 2rem;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(8, 217, 214, 0.15);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero h2 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--teal);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.03em;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--gray-200);
+            max-width: 600px;
+            font-weight: 400;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .dash-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--teal);
+        }
+
+        .dash-card .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            background: var(--teal-light);
+            color: var(--charcoal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 0.4rem;
+        }
+
+        .dash-card p {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+            line-height: 1.4;
+        }
+
+        /* ==========================================================================
+           5. FOOTER & TOAST
+           ========================================================================== */
+        footer.app-footer {
+            margin-top: auto;
+            padding: 1.5rem 0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            border-top: 1px solid var(--gray-200);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--charcoal);
+            color: var(--teal);
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* ==========================================================================
+           6. RESPONSIVE BREAKPOINTS
+           ========================================================================== */
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: flex;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding-top: 5rem;
+            }
+
+            .hero h2 {
+                font-size: 1.75rem;
+            }
+
+            .hero p {
+                font-size: 0.95rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+            <i class="fa-solid fa-shield-halved" style="color:var(--teal-dark); font-size:1.2rem;"></i>
+            <span style="font-weight:800; font-size:1rem; color:var(--charcoal)">DeadlineDefender</span>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h1>DeadlineDefender</h1>
+            </div>
+            <ul class="nav-list">
+                <li><a class="nav-item active" data-target="dashboard"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                <li><a class="nav-item" data-target="tool1"><i class="fa-solid fa-hand-stop"></i> Deadline Negotiator</a></li>
+                <li><a class="nav-item" data-target="tool2"><i class="fa-solid fa-expand"></i> Scope Protector</a></li>
+                <li><a class="nav-item" data-target="tool3"><i class="fa-solid fa-clock"></i> The Handoff Script</a></li>
+                <li><a class="nav-item" data-target="tool4"><i class="fa-solid fa-calculator"></i> Buffer Calculator</a></li>
+                <li><a class="nav-item" data-target="tool5"><i class="fa-solid fa-magnifying-glass-chart"></i> Pattern Detector</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+
+            <!-- DASHBOARD PANEL -->
+            <section id="dashboard" class="view-panel active">
+                <div class="hero">
+                    <h2>Deadline Defender</h2>
+                    <p>"Emergency work is sometimes real. Chronic emergencies are a choice."</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dash-card" onclick="switchTab('tool1')">
+                        <div>
+                            <div class="icon-wrapper"><i class="fa-solid fa-hand-stop"></i></div>
+                            <h3>Deadline Negotiator</h3>
+                            <p>Handed something due tomorrow with a full plate? Negotiate trade-offs firmly.</p>
+                        </div>
+                    </div>
+                    <div class="dash-card" onclick="switchTab('tool2')">
+                        <div>
+                            <div class="icon-wrapper"><i class="fa-solid fa-expand"></i></div>
+                            <h3>Scope Protector</h3>
+                            <p>Deadline fixed but requirements keep ballooning? Protect minimum viable output.</p>
+                        </div>
+                    </div>
+                    <div class="dash-card" onclick="switchTab('tool3')">
+                        <div>
+                            <div class="icon-wrapper"><i class="fa-solid fa-clock"></i></div>
+                            <h3>The Handoff Script</h3>
+                            <p>Work dumping at 5 PM? Establish professional off-hours response boundaries.</p>
+                        </div>
+                    </div>
+                    <div class="dash-card" onclick="switchTab('tool4')">
+                        <div>
+                            <div class="icon-wrapper"><i class="fa-solid fa-calculator"></i></div>
+                            <h3>Buffer Calculator</h3>
+                            <p>Stop overpromising. Calculate realistic delivery cushions that protect your sanity.</p>
+                        </div>
+                    </div>
+                    <div class="dash-card" onclick="switchTab('tool5')">
+                        <div>
+                            <div class="icon-wrapper"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                            <h3>Pattern Detector</h3>
+                            <p>Is it a genuine crisis or poor systemic planning? Identify and address patterns.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 1: DEADLINE NEGOTIATOR -->
+            <section id="tool1" class="view-panel">
+                <div class="tool-header">
+                    <h2><i class="fa-solid fa-hand-stop" style="color:var(--teal-dark)"></i> Deadline Negotiator</h2>
+                    <div class="problem-statement">
+                        <strong>Problem:</strong> "I just got handed something 'due tomorrow' and I already have a full plate."
+                    </div>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool1">
+                        <div class="form-group">
+                            <label class="form-label">What was asked?</label>
+                            <textarea class="form-control" id="t1-task" placeholder="e.g., Complete full quarterly financial audit report"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Original deadline given:</label>
+                            <input type="text" class="form-control" id="t1-deadline" placeholder="e.g., Tomorrow at 9 AM">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Your actual available hours before deadline:</label>
+                            <input type="number" class="form-control" id="t1-hours" placeholder="e.g., 3">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Time needed to complete:</label>
+                            <select class="form-control" id="t1-needed">
+                                <option value="2hr">&lt;2hr</option>
+                                <option value="Half day">Half day</option>
+                                <option value="Full day" selected>Full day</option>
+                                <option value="2-3 days">2-3 days</option>
+                                <option value="Week+">Week+</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Who is asking?</label>
+                            <select class="form-control" id="t1-who">
+                                <option value="Direct manager">Direct manager</option>
+                                <option value="Senior leader">Senior leader</option>
+                                <option value="Peer">Peer</option>
+                                <option value="Client">Client</option>
+                                <option value="Boss's boss">Boss's boss</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Is this truly time-sensitive?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t1-urgency" value="External deadline"> <span>Yes, external deadline</span></label>
+                                <label class="radio-label"><input type="radio" name="t1-urgency" value="Internal deadline"> <span>Yes, internal deadline</span></label>
+                                <label class="radio-label"><input type="radio" name="t1-urgency" value="Feels urgent" checked> <span>Feels urgent but isn't</span></label>
+                                <label class="radio-label"><input type="radio" name="t1-urgency" value="No idea"> <span>No idea</span></label>
+                            </div>
+                        </div>
+                        <div class="btn-row">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gears"></i> Generate Strategy</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool1" class="output-container">
+                    <div class="output-card">
+                        <h3>THE RESPONSE <span style="font-size:0.8rem; font-weight:normal; color:var(--gray-600)">Select tone below</span></h3>
+                        <div class="script-tabs">
+                            <button class="tab-btn active" onclick="switchScriptTab('t1', 'direct')">Direct</button>
+                            <button class="tab-btn" onclick="switchScriptTab('t1', 'diplomatic')">Diplomatic</button>
+                            <button class="tab-btn" onclick="switchScriptTab('t1', 'alternative')">Alternative Solution</button>
+                        </div>
+                        <div id="t1-script-direct" class="script-box"></div>
+                        <div id="t1-script-diplomatic" class="script-box" style="display:none"></div>
+                        <div id="t1-script-alternative" class="script-box" style="display:none"></div>
+                        <button class="btn btn-copy" onclick="copyCurrentScript('t1')"><i class="fa-regular fa-copy"></i> Copy Active Script</button>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>THE TRADE-OFF TABLE</h3>
+                        <p style="font-size:0.85rem; color:var(--gray-600); margin-bottom:0.5rem">What slips or suffers if you accept this request without moving existing priorities:</p>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Current Priority</th>
+                                        <th>Impact if New Task Accepted</th>
+                                        <th>Action Required</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="t1-tradeoff-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>NEGOTIATION ANCHOR</h3>
+                        <div class="script-box" id="t1-anchor"></div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>IF THEY INSIST</h3>
+                        <div class="script-box" id="t1-insist"></div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>IF THEY'RE REASONABLE</h3>
+                        <div class="script-box" id="t1-reasonable"></div>
+                        <button class="btn btn-copy" onclick="copyText('t1-reasonable')"><i class="fa-regular fa-copy"></i> Copy Confirmation</button>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="history-section">
+                    <div class="history-header">
+                        <h4><i class="fa-solid fa-history"></i> History (Tool 1)</h4>
+                        <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem" onclick="clearHistory('tool1')">Clear</button>
+                    </div>
+                    <div id="history-tool1"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 2: SCOPE PROTECTOR -->
+            <section id="tool2" class="view-panel">
+                <div class="tool-header">
+                    <h2><i class="fa-solid fa-expand" style="color:var(--teal-dark)"></i> Scope Protector</h2>
+                    <div class="problem-statement">
+                        <strong>Problem:</strong> "The deadline didn't move but the requirements keep growing."
+                    </div>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool2">
+                        <div class="form-group">
+                            <label class="form-label">Original scope:</label>
+                            <textarea class="form-control" id="t2-orig-scope" placeholder="e.g., 10-slide deck summarizing Q3 figures"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">What got added?</label>
+                            <textarea class="form-control" id="t2-added-scope" placeholder="e.g., Add competitor analysis and 3 custom video embeds"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Original deadline:</label>
+                            <input type="text" class="form-control" id="t2-deadline" placeholder="e.g., Friday 5 PM">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Can the deadline move?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t2-move" value="Yes"> <span>Yes</span></label>
+                                <label class="radio-label"><input type="radio" name="t2-move" value="Maybe"> <span>Maybe</span></label>
+                                <label class="radio-label"><input type="radio" name="t2-move" value="No" checked> <span>No</span></label>
+                                <label class="radio-label"><input type="radio" name="t2-move" value="Not sure"> <span>Not sure</span></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Have you pointed out scope creep before?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t2-pointed" value="Worked"> <span>Yes and it worked</span></label>
+                                <label class="radio-label"><input type="radio" name="t2-pointed" value="Ignored"> <span>Yes and ignored</span></label>
+                                <label class="radio-label"><input type="radio" name="t2-pointed" value="No" checked> <span>No</span></label>
+                            </div>
+                        </div>
+                        <div class="btn-row">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gears"></i> Analyze Scope Expansion</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool2" class="output-container">
+                    <div class="output-card">
+                        <h3>SCOPE COMPARISON</h3>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Original Baseline</th>
+                                        <th>Added Requirements</th>
+                                        <th>Estimated Impact</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="t2-comp-orig"></td>
+                                        <td id="t2-comp-added"></td>
+                                        <td id="t2-comp-impact"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>THE SCOPE CREEP SCRIPT</h3>
+                        <div class="script-box" id="t2-script"></div>
+                        <button class="btn btn-copy" onclick="copyText('t2-script')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>THE MINIMUM VIABLE VERSION</h3>
+                        <div class="script-box" id="t2-mvp"></div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>IF DEADLINE IS FIXED</h3>
+                        <div class="script-box" id="t2-negotiate-cut"></div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>DOCUMENTATION TEMPLATE</h3>
+                        <div class="script-box" id="t2-doc-template"></div>
+                        <button class="btn btn-copy" onclick="copyText('t2-doc-template')"><i class="fa-regular fa-copy"></i> Copy Template</button>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h4><i class="fa-solid fa-history"></i> History (Tool 2)</h4>
+                        <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem" onclick="clearHistory('tool2')">Clear</button>
+                    </div>
+                    <div id="history-tool2"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 3: THE HANDOFF SCRIPT -->
+            <section id="tool3" class="view-panel">
+                <div class="tool-header">
+                    <h2><i class="fa-solid fa-clock" style="color:var(--teal-dark)"></i> The Handoff Script</h2>
+                    <div class="problem-statement">
+                        <strong>Problem:</strong> "Work appears on my desk at 5pm and I'm expected to have it done by morning."
+                    </div>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool3">
+                        <div class="form-group">
+                            <label class="form-label">What time did the request arrive?</label>
+                            <input type="text" class="form-control" id="t3-arrive" placeholder="e.g., 4:45 PM">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">What time was it needed?</label>
+                            <input type="text" class="form-control" id="t3-needed" placeholder="e.g., 9:00 AM tomorrow">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">How often does this happen?</label>
+                            <select class="form-control" id="t3-freq">
+                                <option value="Daily">Daily</option>
+                                <option value="Weekly" selected>Weekly</option>
+                                <option value="Monthly">Monthly</option>
+                                <option value="Randomly">Randomly</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Does it come from the same person?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t3-same" value="Yes" checked> <span>Yes</span></label>
+                                <label class="radio-label"><input type="radio" name="t3-same" value="Different people"> <span>Different people</span></label>
+                                <label class="radio-label"><input type="radio" name="t3-same" value="Rotates"> <span>Rotates</span></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Your after-hours availability:</label>
+                            <select class="form-control" id="t3-avail">
+                                <option value="Off at 5" selected>I'm off at 5</option>
+                                <option value="Work late sometimes">I work late sometimes</option>
+                                <option value="Always on">I'm always on</option>
+                                <option value="Caregiving obligations">I have caregiving obligations</option>
+                            </select>
+                        </div>
+                        <div class="btn-row">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gears"></i> Build Boundary Plan</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool3" class="output-container">
+                    <div class="output-card">
+                        <h3>THE BOUNDARY STATEMENT</h3>
+                        <div class="script-box" id="t3-boundary"></div>
+                        <button class="btn btn-copy" onclick="copyText('t3-boundary')"><i class="fa-regular fa-copy"></i> Copy Boundary Statement</button>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>THE EXPECTATION RESET</h3>
+                        <div class="script-box" id="t3-reset"></div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>THE EARLY WARNING SYSTEM</h3>
+                        <div class="script-box" id="t3-warning"></div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>IF IT'S TRULY URGENT</h3>
+                        <div class="script-box" id="t3-urgent"></div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>THE PLANNING CONVERSATION</h3>
+                        <div class="script-box" id="t3-planning"></div>
+                        <button class="btn btn-copy" onclick="copyText('t3-planning')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h4><i class="fa-solid fa-history"></i> History (Tool 3)</h4>
+                        <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem" onclick="clearHistory('tool3')">Clear</button>
+                    </div>
+                    <div id="history-tool3"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 4: BUFFER CALCULATOR -->
+            <section id="tool4" class="view-panel">
+                <div class="tool-header">
+                    <h2><i class="fa-solid fa-calculator" style="color:var(--teal-dark)"></i> Buffer Calculator</h2>
+                    <div class="problem-statement">
+                        <strong>Problem:</strong> "I keep promising deadlines I can't meet because I don't build in reality."
+                    </div>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool4">
+                        <div class="form-group">
+                            <label class="form-label">Task type:</label>
+                            <select class="form-control" id="t4-type">
+                                <option value="Creative" selected>Creative</option>
+                                <option value="Analytical">Analytical</option>
+                                <option value="Administrative">Administrative</option>
+                                <option value="Collaborative">Collaborative</option>
+                                <option value="Technical">Technical</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Your optimistic estimate (e.g., 2 days, 4 hours):</label>
+                            <input type="text" class="form-control" id="t4-estimate" placeholder="e.g., 2 days">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">What usually goes wrong?</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label"><input type="checkbox" name="t4-wrong" value="Dependencies delayed"> <span>Dependencies delayed</span></label>
+                                <label class="checkbox-label"><input type="checkbox" name="t4-wrong" value="Scope changes"> <span>Scope changes</span></label>
+                                <label class="checkbox-label"><input type="checkbox" name="t4-wrong" value="Interruptions" checked> <span>Interruptions</span></label>
+                                <label class="checkbox-label"><input type="checkbox" name="t4-wrong" value="I underestimate"> <span>I underestimate work depth</span></label>
+                                <label class="checkbox-label"><input type="checkbox" name="t4-wrong" value="Reviews take forever" checked> <span>Reviews take forever</span></label>
+                                <label class="checkbox-label"><input type="checkbox" name="t4-wrong" value="Technical blockers"> <span>Technical blockers</span></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Your historical accuracy:</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t4-acc" value="1.0"> <span>Usually right</span></label>
+                                <label class="radio-label"><input type="radio" name="t4-acc" value="1.2"> <span>Usually 20% off</span></label>
+                                <label class="radio-label"><input type="radio" name="t4-acc" value="1.5" checked> <span>Usually 50% off</span></label>
+                                <label class="radio-label"><input type="radio" name="t4-acc" value="2.0"> <span>Usually double</span></label>
+                            </div>
+                        </div>
+                        <div class="btn-row">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Calculate Realistic Buffer</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool4" class="output-container">
+                    <div class="output-card">
+                        <h3>REALISTIC ESTIMATE</h3>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: var(--teal-dark); margin-bottom: 0.5rem;" id="t4-calc-result"></div>
+                        <p style="font-size:0.9rem; color:var(--gray-600)" id="t4-calc-breakdown"></p>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>THE PROMISE</h3>
+                        <div class="script-box" id="t4-promise"></div>
+                        <button class="btn btn-copy" onclick="copyText('t4-promise')"><i class="fa-regular fa-copy"></i> Copy Promise Script</button>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>INTERNAL vs EXTERNAL DEADLINE</h3>
+                        <div class="script-box" id="t4-internal-external"></div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>CONTINGENCY PLAN</h3>
+                        <div class="script-box" id="t4-contingency"></div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>ACCURACY TRACKER</h3>
+                        <p style="font-size:0.85rem; color:var(--gray-600); margin-bottom:0.5rem">Save this entry structure to your personal notes to refine future multipliers:</p>
+                        <div class="script-box" id="t4-tracker-template"></div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h4><i class="fa-solid fa-history"></i> History (Tool 4)</h4>
+                        <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem" onclick="clearHistory('tool4')">Clear</button>
+                    </div>
+                    <div id="history-tool4"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 5: PATTERN DETECTOR -->
+            <section id="tool5" class="view-panel">
+                <div class="tool-header">
+                    <h2><i class="fa-solid fa-magnifying-glass-chart" style="color:var(--teal-dark)"></i> Pattern Detector</h2>
+                    <div class="problem-statement">
+                        <strong>Problem:</strong> "Is this a real crisis or just poor planning?"
+                    </div>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool5">
+                        <div class="form-group">
+                            <label class="form-label">Last-minute requests in the past month:</label>
+                            <select class="form-control" id="t5-count">
+                                <option value="1-2">1-2</option>
+                                <option value="3-5">3-5</option>
+                                <option value="6-10" selected>6-10</option>
+                                <option value="10+">10+</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">How many were actual emergencies?</label>
+                            <select class="form-control" id="t5-real">
+                                <option value="All">All</option>
+                                <option value="Most">Most</option>
+                                <option value="Some" selected>Some</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Do others get the same treatment?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t5-others" value="Yes, everyone"> <span>Yes, everyone</span></label>
+                                <label class="radio-label"><input type="radio" name="t5-others" value="Just me"> <span>Just me</span></label>
+                                <label class="radio-label"><input type="radio" name="t5-others" value="Just a few of us" checked> <span>Just a few of us</span></label>
+                                <label class="radio-label"><input type="radio" name="t5-others" value="Not sure"> <span>Not sure</span></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">What happens if you say no?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t5-no" value="They find another way"> <span>They find another way</span></label>
+                                <label class="radio-label"><input type="radio" name="t5-no" value="They panic"> <span>They panic</span></label>
+                                <label class="radio-label"><input type="radio" name="t5-no" value="They guilt you" checked> <span>They guilt you</span></label>
+                                <label class="radio-label"><input type="radio" name="t5-no" value="They escalate"> <span>They escalate</span></label>
+                                <label class="radio-label"><input type="radio" name="t5-no" value="Never tried"> <span>Never tried</span></label>
+                            </div>
+                        </div>
+                        <div class="btn-row">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-pie"></i> Diagnose Pattern</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool5" class="output-container">
+                    <div class="output-card">
+                        <h3>PATTERN LABEL</h3>
+                        <div style="font-size:1.3rem; font-weight:800; color:var(--teal-dark);" id="t5-label"></div>
+                        <p style="font-size:0.9rem; color:var(--gray-600); margin-top:0.3rem" id="t5-label-desc"></p>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>THE SYSTEM vs YOU</h3>
+                        <div class="script-box" id="t5-system-you"></div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>COLLECTIVE ACTION</h3>
+                        <div class="script-box" id="t5-collective"></div>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>MANAGER CONVERSATION</h3>
+                        <div class="script-box" id="t5-manager-script"></div>
+                        <button class="btn btn-copy" onclick="copyText('t5-manager-script')"><i class="fa-regular fa-copy"></i> Copy Talk Track</button>
+                    </div>
+
+                    <div class="output-card">
+                        <h3>YOUR BOTTOM LINE</h3>
+                        <div class="script-box" id="t5-bottom-line"></div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h4><i class="fa-solid fa-history"></i> History (Tool 5)</h4>
+                        <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem" onclick="clearHistory('tool5')">Clear</button>
+                    </div>
+                    <div id="history-tool5"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Global Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Copied!</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        For professional boundary-building only. Not legal or HR advice. For harassment or rights violations, consult appropriate authorities.
+    </footer>
+
+    <!-- ==========================================================================
+       JAVASCRIPT LOGIC
+       ========================================================================== -->
+    <script>
+        // --- NAVIGATION & UI TABS ---
+        function switchTab(targetId) {
+            document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
+            const activePanel = document.getElementById(targetId);
+            if (activePanel) activePanel.classList.add('active');
+
+            const activeNav = document.querySelector(`.nav-item[data-target="${targetId}"]`);
+            if (activeNav) activeNav.classList.add('active');
+
+            // Close mobile menu if open
+            closeMobileMenu();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const target = e.currentTarget.getAttribute('data-target');
+                switchTab(target);
+            });
+        });
+
+        // Mobile Sidebar Controls
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function openMobileMenu() {
+            sidebar.classList.add('mobile-open');
+            sidebarOverlay.classList.add('active');
+        }
+
+        function closeMobileMenu() {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('active');
+        }
+
+        hamburgerBtn.addEventListener('click', openMobileMenu);
+        sidebarOverlay.addEventListener('click', closeMobileMenu);
+
+        // Toast Helper
+        function showToast(msg = "Copied!") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Copy Text Helper
+        function copyText(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const text = el.innerText || el.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        // --- LOCAL STORAGE HISTORY ENGINE ---
+        function getHistory(toolId) {
+            try {
+                return JSON.parse(localStorage.getItem(`deadline_history_${toolId}`)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveHistory(toolId, item) {
+            let history = getHistory(toolId);
+            history.unshift(item); // top
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(`deadline_history_${toolId}`, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function clearHistory(toolId) {
+            localStorage.removeItem(`deadline_history_${toolId}`);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function renderHistory(toolId) {
+            const container = document.getElementById(`history-${toolId}`);
+            if (!container) return;
+            const history = getHistory(toolId);
+
+            if (history.length === 0) {
+                container.innerHTML = `<p style="font-size:0.85rem; color:var(--gray-600);">No history saved yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = history.map((item, index) => `
+                <div class="history-item" onclick="loadHistoryItem('${toolId}', ${index})">
+                    <div>
+                        <strong>${escapeHtml(item.summary)}</strong>
+                        <div style="font-size:0.75rem; color:var(--gray-600)">${item.timestamp}</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color:var(--gray-600); font-size:0.8rem;"></i>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Initialize history views on load
+        ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistory);
+
+
+        // ==========================================================================
+        // TOOL 1 LOGIC — DEADLINE NEGOTIATOR
+        // ==========================================================================
+        function loadSampleTool1() {
+            document.getElementById('t1-task').value = "Quarterly Financial Audit & Variance Report";
+            document.getElementById('t1-deadline').value = "Tomorrow at 9:00 AM";
+            document.getElementById('t1-hours').value = "3";
+            document.getElementById('t1-needed').value = "Full day";
+            document.getElementById('t1-who').value = "Direct manager";
+            document.querySelector('input[name="t1-urgency"][value="Feels urgent"]').checked = true;
+        }
+
+        function switchScriptTab(toolPrefix, tabName) {
+            const tabs = ['direct', 'diplomatic', 'alternative'];
+            tabs.forEach(t => {
+                const box = document.getElementById(`${toolPrefix}-script-${t}`);
+                if (box) box.style.display = (t === tabName) ? 'block' : 'none';
+            });
+            event.target.parentElement.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function copyCurrentScript(toolPrefix) {
+            const tabs = ['direct', 'diplomatic', 'alternative'];
+            for (let t of tabs) {
+                const box = document.getElementById(`${toolPrefix}-script-${t}`);
+                if (box && box.style.display !== 'none') {
+                    copyText(`${toolPrefix}-script-${t}`);
+                    return;
+                }
+            }
+        }
+
+        document.getElementById('form-tool1').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const task = document.getElementById('t1-task').value || "Requested project";
+            const deadline = document.getElementById('t1-deadline').value || "the deadline";
+            const hours = document.getElementById('t1-hours').value || "limited";
+            const needed = document.getElementById('t1-needed').value;
+            const who = document.getElementById('t1-who').value;
+            const urgency = document.querySelector('input[name="t1-urgency"]:checked').value;
+
+            // Scripts
+            const directScript = `I received the request for "${task}" needed by ${deadline}. Given that I have only ${hours} available hour(s) before then, and this work requires approximately a ${needed}, I cannot complete the full scope by the requested time without compromising quality or dropping higher-priority tasks. Let's decide which current project to pause, or adjust this deadline.`;
+
+            const diplomaticScript = `Thanks for passing along "${task}". I want to ensure this gets the thorough attention it needs. Looking at my current commitments, I have about ${hours} hour(s) of open bandwidth before ${deadline}, but proper execution will take a ${needed}. Could we review my current stack to see what can be pushed back, or target a realistic delivery date?`;
+
+            const altScript = `Regarding "${task}" for ${deadline}: because I only have ${hours} hour(s) available, I won't be able to deliver the complete report in time. However, I can provide an initial high-level outline/draft by ${deadline}, and deliver the finalized version once I have the required ${needed} of focused focus time.`;
+
+            document.getElementById('t1-script-direct').innerText = directScript;
+            document.getElementById('t1-script-diplomatic').innerText = diplomaticScript;
+            document.getElementById('t1-script-alternative').innerText = altScript;
+
+            // Tradeoff Table
+            const tradeoffBody = document.getElementById('t1-tradeoff-body');
+            tradeoffBody.innerHTML = `
+                <tr>
+                    <td>Primary Core Workflow / Existing Project</td>
+                    <td>Pushed back by at least ${needed}. Quality risk high.</td>
+                    <td>Needs explicit managerial deprioritization.</td>
+                </tr>
+                <tr>
+                    <td>Scheduled Stakeholder / Client Reviews</td>
+                    <td>Rescheduling friction or missed commitments.</td>
+                    <td>Inform stakeholders of delay.</td>
+                </tr>
+            `;
+
+            // Anchor, Insist, Reasonable
+            document.getElementById('t1-anchor').innerText = `Propose an anchor based on true effort: "To deliver ${task} accurately, I need a ${needed} of dedicated time. Based on my schedule, I can start this on [Day] and deliver by [New Realistic Date/Time]."`;
+
+            document.getElementById('t1-insist').innerText = `If ${who} insists this takes immediate precedence: "Understood. I will shift focus to ${task} immediately. As a result, [Current Project A] and [Current Project B] will be put on hold and delayed by [X days]. I'll log this reprioritization and proceed."`;
+
+            document.getElementById('t1-reasonable').innerText = `Thanks for understanding the bandwidth constraints! Confirming our agreement: I will pause [Other Task] for now and deliver "${task}" by [Agreed New Date].`;
+
+            document.getElementById('output-tool1').classList.add('active');
+
+            saveHistory('tool1', {
+                summary: `${task} (${deadline})`,
+                timestamp: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            });
+        });
+
+        function loadHistoryItem(toolId, index) {
+            const item = getHistory(toolId)[index];
+            if (!item) return;
+            showToast(`Loaded item from ${item.timestamp}`);
+        }
+
+
+        // ==========================================================================
+        // TOOL 2 LOGIC — SCOPE PROTECTOR
+        // ==========================================================================
+        function loadSampleTool2() {
+            document.getElementById('t2-orig-scope').value = "10-slide presentation deck summarizing Q3 results for team review.";
+            document.getElementById('t2-added-scope').value = "Add comprehensive competitor analysis, financial forecast models, and 3 embedded video walk-throughs.";
+            document.getElementById('t2-deadline').value = "Friday at 5:00 PM";
+            document.querySelectorAll('input[name="t2-move"]')[2].checked = true; // No
+            document.querySelectorAll('input[name="t2-pointed"]')[2].checked = true; // No
+        }
+
+        document.getElementById('form-tool2').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const orig = document.getElementById('t2-orig-scope').value || "Original task";
+            const added = document.getElementById('t2-added-scope').value || "Added requirements";
+            const deadline = document.getElementById('t2-deadline').value || "the deadline";
+            const move = document.querySelector('input[name="t2-move"]:checked').value;
+
+            document.getElementById('t2-comp-orig').innerText = orig;
+            document.getElementById('t2-comp-added').innerText = added;
+            document.getElementById('t2-comp-impact').innerText = "Requires ~50-100% additional effort beyond original allocation.";
+
+            document.getElementById('t2-script').innerText = `I want to highlight that the recent addition of (${added}) expands the original scope (${orig}). Since our deadline is fixed for ${deadline}, keeping this delivery date means we must maintain the original scope or drop non-essential elements. Adding these new requirements without adjusting time will compromise the core quality.`;
+
+            document.getElementById('t2-mvp').innerText = `MINIMUM VIABLE DELIVERABLE FOR ${deadline}:\n- Core baseline: ${orig}\n- Note added additions (${added}) as Phase 2 follow-ups to be completed in a subsequent sprint/deliverable.`;
+
+            document.getElementById('t2-negotiate-cut').innerText = `Since deadline (${deadline}) cannot move: "To accommodate adding '${added}', we will need to remove [Feature/Section X] or simplify [Section Y] to make the delivery timeline feasible."`;
+
+            document.getElementById('t2-doc-template').innerText = `CHANGE LOG RECORD:\nDate: ${new Date().toLocaleDateString()}\nProject: ${orig.substring(0, 30)}...\nOriginal Scope: ${orig}\nNew Additions Requested: ${added}\nImpact on Timeline: Deadline fixed (${deadline}). Scope trimmed or Phase 2 agreed.`;
+
+            document.getElementById('output-tool2').classList.add('active');
+
+            saveHistory('tool2', {
+                summary: `Scope expansion on: ${orig.substring(0, 25)}...`,
+                timestamp: new Date().toLocaleDateString()
+            });
+        });
+
+
+        // ==========================================================================
+        // TOOL 3 LOGIC — THE HANDOFF SCRIPT
+        // ==========================================================================
+        function loadSampleTool3() {
+            document.getElementById('t3-arrive').value = "4:45 PM";
+            document.getElementById('t3-needed').value = "9:00 AM tomorrow";
+            document.getElementById('t3-freq').value = "Weekly";
+            document.querySelectorAll('input[name="t3-same"]')[0].checked = true; // Yes
+            document.getElementById('t3-avail').value = "Off at 5";
+        }
+
+        document.getElementById('form-tool3').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const arrive = document.getElementById('t3-arrive').value || "late afternoon";
+            const needed = document.getElementById('t3-needed').value || "early morning";
+            const freq = document.getElementById('t3-freq').value;
+            const avail = document.getElementById('t3-avail').value;
+
+            document.getElementById('t3-boundary').innerText = `I received this request at ${arrive}. Because my workday concludes at 5:00 PM (${avail}), I will process and begin this task first thing tomorrow morning. You can expect an update/completion by [Time Tomorrow, e.g., 12:00 PM].`;
+
+            document.getElementById('t3-reset').innerText = `GOING FORWARD:\nTo guarantee thorough execution, requests arriving after 4:00 PM require a minimum 24-hour turnaround window starting the next business morning. Overnight turnarounds cannot be sustained.`;
+
+            document.getElementById('t3-warning').innerText = `EARLY WARNING SYSTEM QUESTIONS TO ASK SENDER:\n1. "When will the inputs for this project be ready for me?"\n2. "If inputs arrive after 4 PM, should we target a Day 2 morning delivery?"`;
+
+            document.getElementById('t3-urgent').innerText = `DETERMINING REAL EMERGENCY VS POOR PLANNING:\n- Is there an external client/legal penalty occurring overnight? (Real Emergency)\n- Is this simply because someone held the file all day? (Poor Planning)\nIf true emergency: "I will make a rare exception to review this tonight. Tomorrow let's establish how to prevent late handoffs."`;
+
+            document.getElementById('t3-planning').innerText = `PATTERN CONVERSATION SCRIPT:\n"I've noticed that late handoffs around ${arrive} have become a ${freq} pattern. Since my schedule (${avail}) doesn't permit regular evening work, I'd like to align on a workflow standard so work arrives with enough lead time for normal hours."`;
+
+            document.getElementById('output-tool3').classList.add('active');
+
+            saveHistory('tool3', {
+                summary: `Handoff at ${arrive} needed by ${needed}`,
+                timestamp: new Date().toLocaleDateString()
+            });
+        });
+
+
+        // ==========================================================================
+        // TOOL 4 LOGIC — BUFFER CALCULATOR
+        // ==========================================================================
+        function loadSampleTool4() {
+            document.getElementById('t4-type').value = "Creative";
+            document.getElementById('t4-estimate').value = "2 days";
+            const cbs = document.querySelectorAll('input[name="t4-wrong"]');
+            cbs[2].checked = true; // Interruptions
+            cbs[4].checked = true; // Reviews
+            document.querySelectorAll('input[name="t4-acc"]')[2].checked = true; // 1.5 multiplier
+        }
+
+        document.getElementById('form-tool4').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const type = document.getElementById('t4-type').value;
+            const est = document.getElementById('t4-estimate').value || "1 unit";
+            const acc = parseFloat(document.querySelector('input[name="t4-acc"]:checked').value);
+
+            // Count checked obstacles
+            const checkedCount = document.querySelectorAll('input[name="t4-wrong"]:checked').length;
+            let obstacleMultiplier = 1 + (checkedCount * 0.15);
+
+            // Type multiplier
+            let typeMult = 1.2;
+            if (type === 'Technical' || type === 'Creative') typeMult = 1.35;
+            if (type === 'Administrative') typeMult = 1.1;
+
+            let finalMultiplier = (acc * obstacleMultiplier * (typeMult - 0.2)).toFixed(2);
+
+            document.getElementById('t4-calc-result').innerText = `Recommended Buffer Multiplier: ${finalMultiplier}x Optimistic Estimate`;
+            document.getElementById('t4-calc-breakdown').innerText = `Base estimate (${est}) adjusted for ${type} complexity (+${Math.round((typeMult-1)*100)}%), ${checkedCount} risk friction factors (+${Math.round((obstacleMultiplier-1)*100)}%), and historical accuracy bias.`;
+
+            document.getElementById('t4-promise').innerText = `"Based on complexity and dependency requirements, I can commit to delivering this within [Calculated Time, e.g., ${finalMultiplier} x ${est}]. This allows proper QA and review buffer."`;
+
+            document.getElementById('t4-internal-external').innerText = `INTERNAL TARGET: ${est} (Aim for this internally)\nEXTERNAL COMMITMENT: ${finalMultiplier}x ${est} (Communicate this to stakeholders)\nThis creates a built-in safety cushion for unexpected blockers without appearing slow.`;
+
+            document.getElementById('t4-contingency').innerText = `IF BLOCKERS OCCUR:\nNotify stakeholders when 50% of the buffer time is consumed: "We encountered [Blocker]. Utilizing our built-in contingency buffer; delivery remains on track for the promised external date."`;
+
+            document.getElementById('t4-tracker-template').innerText = `TASK ESTIMATE LOG:\nTask: [Name]\nOptimistic Estimate: ${est}\nActual Time Taken: [Log actual]\nVariance Ratio: [Actual / Optimistic]`;
+
+            document.getElementById('output-tool4').classList.add('active');
+
+            saveHistory('tool4', {
+                summary: `${type} task: ${est} -> ${finalMultiplier}x buffer`,
+                timestamp: new Date().toLocaleDateString()
+            });
+        });
+
+
+        // ==========================================================================
+        // TOOL 5 LOGIC — PATTERN DETECTOR
+        // ==========================================================================
+        function loadSampleTool5() {
+            document.getElementById('t5-count').value = "6-10";
+            document.getElementById('t5-real').value = "Some";
+            document.querySelectorAll('input[name="t5-others"]')[2].checked = true; // Just a few of us
+            document.querySelectorAll('input[name="t5-no"]')[2].checked = true; // They guilt you
+        }
+
+        document.getElementById('form-tool5').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const count = document.getElementById('t5-count').value;
+            const real = document.getElementById('t5-real').value;
+            const others = document.querySelector('input[name="t5-others"]:checked').value;
+            const responseNo = document.querySelector('input[name="t5-no"]:checked').value;
+
+            let label = "";
+            let desc = "";
+
+            if (count === "6-10" || count === "10+") {
+                if (others === "Just me" || others === "Just a few of us") {
+                    label = "Targeted Exploitation & Path of Least Resistance";
+                    desc = "You and a select few are being defaulted to because you reliably accommodate last-minute chaotic requests.";
+                } else {
+                    label = "Cultural Chaos & Poor Planning";
+                    desc = "The organization operates in operational reactive firefighting mode as a substitute for planning.";
+                }
+            } else {
+                label = "Resource Shortage / Isolated Bottlenecks";
+                desc = "Occasional urgency spikes driven by genuine capacity limitations rather than malicious design.";
+            }
+
+            document.getElementById('t5-label').innerText = label;
+            document.getElementById('t5-label-desc').innerText = desc;
+
+            document.getElementById('t5-system-you').innerText = `SYSTEM DIAGNOSIS:\nThis pattern is NOT about your work ethic; it is about boundary erosion. When you absorb systemic planning failures without friction, the system has zero incentive to fix its planning.`;
+
+            document.getElementById('t5-collective').innerText = `COLLECTIVE ACTION RECOMMENDATION:\nSince '${others}' face similar treatment, coordinate consistent response standards across peers. If one person holds firm while others absorb, boundary setting is harder. Unify standards on handoff windows.`;
+
+            document.getElementById('t5-manager-script').innerText = `TALK TRACK FOR MANAGER:\n"I analyzed our workflow over the past month and noticed we had ${count} last-minute requests. Only '${real}' were actual external emergencies. This reactive cycle disrupts core planned deliverables. I'd like to implement a intake process so we protect team bandwidth."`;
+
+            document.getElementById('t5-bottom-line').innerText = `YOUR PERSONAL BOUNDARY BOTTOM LINE:\nMax emergency exceptions allowed per month: 1 to 2.\nResponse when guilted ('${responseNo}'): "I understand this is urgent for the team, but absorbing late requests compromises existing deliverables. Let's look at what we drop."`;
+
+            document.getElementById('output-tool5').classList.add('active');
+
+            saveHistory('tool5', {
+                summary: `Pattern: ${label}`,
+                timestamp: new Date().toLocaleDateString()
+            });
+        });
+
+    </script>
+</body>
+</html>

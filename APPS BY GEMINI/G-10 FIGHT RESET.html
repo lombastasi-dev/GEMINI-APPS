@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FightReset — De-escalation Toolkit for Couples</title>
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ==========================================================================
+           1. RESET & SYSTEM VARIABLES
+           ========================================================================== */
+        :root {
+            --coral-primary: #E76F51;
+            --coral-hover: #D85D3F;
+            --coral-light: #FDF0ED;
+            --teal-primary: #2A9D8F;
+            --teal-hover: #228075;
+            --teal-light: #EAF6F5;
+            --bg-gradient: linear-gradient(135deg, #FEF1F0 0%, #F0FDFA 100%);
+            --text-main: #2D3748;
+            --text-muted: #718096;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --sidebar-width: 260px;
+            --radius-xl: 1rem;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition-fast: 0.2s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ==========================================================================
+           2. LAYOUT & SIDEBAR NAVIGATION
+           ========================================================================== */
+        #app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        #sidebar {
+            width: var(--sidebar-width);
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: transform var(--transition-fast);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--coral-primary);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 1rem 0.75rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .nav-link:hover {
+            background-color: #F7FAFC;
+            color: var(--text-main);
+        }
+
+        .nav-link.active {
+            background-color: var(--coral-light);
+            color: var(--coral-primary);
+            font-weight: 600;
+        }
+
+        /* Mobile Header & Overlay */
+        .mobile-bar {
+            display: none;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.25rem;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .mobile-toggle {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        /* Main Content Wrapper */
+        #main-wrapper {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .content-area {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            flex: 1;
+        }
+
+        /* ==========================================================================
+           3. UI CARDS & UTILITIES
+           ========================================================================== */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-banner {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, rgba(231,111,81,0.08) 0%, rgba(42,157,143,0.08) 100%);
+            border: 1px solid rgba(231,111,81,0.15);
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+        }
+
+        .hero-banner h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-banner p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--coral-primary);
+        }
+
+        .dash-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            background: var(--coral-light);
+            color: var(--coral-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .dash-card:nth-child(even) .dash-icon {
+            background: var(--teal-light);
+            color: var(--teal-primary);
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.35rem;
+            color: var(--text-main);
+        }
+
+        .dash-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Tool Headers */
+        .tool-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-header h2 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+        }
+
+        .problem-statement {
+            background: #FFF9F5;
+            border-left: 4px solid var(--coral-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin-top: 0.5rem;
+            font-size: 0.925rem;
+            color: #C05621;
+            font-weight: 500;
+        }
+
+        /* ==========================================================================
+           4. FORMS & INPUT CONTROLS
+           ========================================================================== */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.375rem;
+            color: var(--text-main);
+        }
+
+        textarea, select, input[type="text"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 0.95rem;
+            background: #FAFAFA;
+            color: var(--text-main);
+            transition: border-color var(--transition-fast), background-color var(--transition-fast);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        textarea:focus, select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--teal-primary);
+            background: #FFFFFF;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .radio-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.875rem;
+            background: #F7FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            user-select: none;
+        }
+
+        .radio-label:hover {
+            background: #EDF2F7;
+        }
+
+        .radio-label input[type="radio"] {
+            accent-color: var(--teal-primary);
+        }
+
+        /* Buttons */
+        .btn-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.925rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-primary {
+            background: var(--coral-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--coral-hover);
+        }
+
+        .btn-secondary {
+            background: var(--teal-light);
+            color: var(--teal-primary);
+            border: 1px solid rgba(42,157,143,0.3);
+        }
+
+        .btn-secondary:hover {
+            background: #D8F0ED;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background: #F7FAFC;
+            color: var(--text-main);
+        }
+
+        .btn-sm {
+            padding: 0.35rem 0.65rem;
+            font-size: 0.8rem;
+        }
+
+        /* ==========================================================================
+           5. OUTPUT ANALYSIS & SCRIPTS
+           ========================================================================== */
+        .analysis-output {
+            display: none;
+            margin-top: 1.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .output-card {
+            background: #FAFAFA;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+
+        .output-card.highlight {
+            background: var(--teal-light);
+            border-color: rgba(42,157,143,0.3);
+        }
+
+        .output-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--teal-primary);
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .output-card.highlight .output-label {
+            color: var(--teal-hover);
+        }
+
+        .output-value {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .script-box {
+            position: relative;
+            background: #2D3748;
+            color: #EDF2F7;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            padding-right: 3.5rem;
+            font-family: monospace, sans-serif;
+            font-size: 0.95rem;
+            margin: 0.75rem 0;
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            padding: 0.4rem 0.6rem;
+            border-radius: 0.35rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background var(--transition-fast);
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Toast Alert */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--text-main);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ==========================================================================
+           6. HISTORY ACCORDION
+           ========================================================================== */
+        .history-section {
+            margin-top: 2rem;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .history-item {
+            background: #FAFAFA;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .history-item-header {
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .history-item-header:hover {
+            background: #F0F4F8;
+        }
+
+        .history-item-body {
+            display: none;
+            padding: 1rem;
+            background: #FFFFFF;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .history-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ==========================================================================
+           7. FOOTER
+           ========================================================================== */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.6);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: auto;
+            line-height: 1.4;
+        }
+
+        /* ==========================================================================
+           8. RESPONSIVE BREAKPOINTS
+           ========================================================================== */
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+            }
+
+            #sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+
+            #main-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .mobile-bar {
+                display: flex;
+            }
+
+            .content-area {
+                padding: 1.25rem 1rem;
+            }
+
+            .hero-banner h2 {
+                font-size: 1.5rem;
+            }
+
+            .btn-row {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- Mobile Header Bar -->
+        <div class="mobile-bar">
+            <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: var(--coral-primary);">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <span>Fight Reset</span>
+            </div>
+            <button class="mobile-toggle" id="mobileMenuBtn" aria-label="Toggle Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <h1>Fight Reset</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a class="nav-link active" data-tool="dashboard">
+                        <i class="fa-solid fa-house"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-tool="trigger-tracker">
+                        <i class="fa-solid fa-bolt"></i> Trigger Tracker
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-tool="pause-button">
+                        <i class="fa-solid fa-circle-pause"></i> Pause Button
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-tool="fight-translator">
+                        <i class="fa-solid fa-language"></i> Fight Translator
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-tool="repair-kit">
+                        <i class="fa-solid fa-kit-medical"></i> Repair Kit
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-tool="pattern-interrupt">
+                        <i class="fa-solid fa-shield-halved"></i> Pattern Interrupt
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Overlay backdrop for mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Main Content Area -->
+        <div id="main-wrapper">
+            <main class="content-area">
+
+                <!-- 0. DASHBOARD TOOL -->
+                <div id="dashboard" class="tool-view">
+                    <div class="hero-banner">
+                        <h2>Fight Reset</h2>
+                        <p>Stop the spiral before it starts. Practical de-escalation tools for real relationships.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dash-card" onclick="switchTool('trigger-tracker')">
+                            <div class="dash-icon"><i class="fa-solid fa-bolt"></i></div>
+                            <h3>Trigger Tracker</h3>
+                            <p>Identify surface arguments vs. deep emotional triggers.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchTool('pause-button')">
+                            <div class="dash-icon"><i class="fa-solid fa-circle-pause"></i></div>
+                            <h3>Pause Button</h3>
+                            <p>Get physiological warning signs and an emergency brake script.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchTool('fight-translator')">
+                            <div class="dash-icon"><i class="fa-solid fa-language"></i></div>
+                            <h3>Fight Translator</h3>
+                            <p>Decode what you're actually fighting about under the hood.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchTool('repair-kit')">
+                            <div class="dash-icon"><i class="fa-solid fa-kit-medical"></i></div>
+                            <h3>Repair Kit</h3>
+                            <p>Move past stalemates with structured apology templates.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchTool('pattern-interrupt')">
+                            <div class="dash-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h3>Pattern Interrupt</h3>
+                            <p>Commit to small habits that prevent recurring fights.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. TRIGGER TRACKER -->
+                <div id="trigger-tracker" class="tool-view" style="display: none;">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-bolt" style="color:var(--coral-primary);"></i> Trigger Tracker</h2>
+                        <div class="problem-statement">
+                            "We keep fighting about the same type of thing but we can't name it."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-trigger">
+                            <div class="form-group">
+                                <label>Most recent fight was about:</label>
+                                <textarea id="tt-fight" placeholder="e.g., Leaving dishes in the sink, being late, phone screen time..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>What they said that set you off:</label>
+                                <textarea id="tt-they-said" placeholder="e.g., 'You never help around here...'"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>What you said that set them off:</label>
+                                <textarea id="tt-you-said" placeholder="e.g., 'Well you always forget to...'"></textarea>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div class="form-group">
+                                    <label>Where were you?</label>
+                                    <select id="tt-location">
+                                        <option value="Home">Home</option>
+                                        <option value="Car">Car</option>
+                                        <option value="Public">Public</option>
+                                        <option value="Phone">Phone</option>
+                                        <option value="Text">Text</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Time of day:</label>
+                                    <select id="tt-time">
+                                        <option value="Morning">Morning</option>
+                                        <option value="Midday">Midday</option>
+                                        <option value="Evening">Evening</option>
+                                        <option value="Late night">Late night</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Your physical state:</label>
+                                    <select id="tt-state">
+                                        <option value="Tired">Tired</option>
+                                        <option value="Hungry">Hungry</option>
+                                        <option value="Stressed">Stressed</option>
+                                        <option value="Calm">Calm</option>
+                                        <option value="Already annoyed">Already annoyed</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="btn-row">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTrigger()">Analyze Fight</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTrigger()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <!-- Output Section -->
+                        <div id="output-trigger" class="analysis-output">
+                            <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border-color);">
+                            <div class="analysis-grid">
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-layer-group"></i> Surface Topic</div>
+                                    <div class="output-value" id="res-tt-surface"></div>
+                                </div>
+                                <div class="output-card highlight">
+                                    <div class="output-label"><i class="fa-solid fa-arrows-spin"></i> Pattern Type</div>
+                                    <div class="output-value" id="res-tt-pattern"></div>
+                                </div>
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-bullseye"></i> Your Trigger</div>
+                                    <div class="output-value" id="res-tt-your-trigger"></div>
+                                </div>
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-crosshairs"></i> Their Likely Trigger</div>
+                                    <div class="output-value" id="res-tt-their-trigger"></div>
+                                </div>
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-triangle-exclamation"></i> Contextual Risk</div>
+                                    <div class="output-value" id="res-tt-risk"></div>
+                                </div>
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-bell"></i> Early Warning Sign</div>
+                                    <div class="output-value" id="res-tt-warning"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-title">
+                            <span><i class="fa-solid fa-clock-rotate-left"></i> Previous Trigger Logs</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('trigger-tracker')">Clear</button>
+                        </div>
+                        <div class="history-list" id="history-trigger-tracker"></div>
+                    </div>
+                </div>
+
+                <!-- 2. PAUSE BUTTON -->
+                <div id="pause-button" class="tool-view" style="display: none;">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-circle-pause" style="color:var(--teal-primary);"></i> Pause Button</h2>
+                        <div class="problem-statement">
+                            "Once we start, we can't stop. We need an emergency brake."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-pause">
+                            <div class="form-group">
+                                <label>How do you know you're getting flooded?</label>
+                                <select id="pb-flooded">
+                                    <option value="Heart races">Heart races</option>
+                                    <option value="Loud voice">Loud voice</option>
+                                    <option value="Shut down">Shut down / Tunnel vision</option>
+                                    <option value="Want to leave">Want to leave room</option>
+                                    <option value="Feel hot">Feel hot / Muscle tension</option>
+                                    <option value="Can't think">Can't think clearly</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What do you usually do when flooded?</label>
+                                <select id="pb-action">
+                                    <option value="Yell">Yell / Raise voice</option>
+                                    <option value="Withdraw">Withdraw / Cold shoulder</option>
+                                    <option value="Cry">Cry / Become overwhelmed</option>
+                                    <option value="Bring up past">Bring up past grievances</option>
+                                    <option value="Keep pushing">Keep pushing to solve it NOW</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Has either of you ever walked away successfully?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="pb-walk" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="pb-walk" value="No" checked> No</label>
+                                    <label class="radio-label"><input type="radio" name="pb-walk" value="Tried but it made it worse"> Tried but made it worse</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What would a 20-minute break look like for you?</label>
+                                <textarea id="pb-break-plan" placeholder="e.g., Take a walk outside, listen to music with headphones, cool down in bedroom without phone..."></textarea>
+                            </div>
+
+                            <div class="btn-row">
+                                <button type="button" class="btn btn-primary" onclick="generatePauseScript()">Create Break Strategy</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSamplePause()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <!-- Output Section -->
+                        <div id="output-pause" class="analysis-output">
+                            <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border-color);">
+                            
+                            <div class="output-card highlight" style="margin-bottom: 1rem;">
+                                <div class="output-label"><i class="fa-solid fa-heart-pulse"></i> Your Flood Sign</div>
+                                <div class="output-value" id="res-pb-sign"></div>
+                            </div>
+
+                            <label class="form-group label" style="font-weight:700;">The Pause Phrase (Say verbatim):</label>
+                            <div class="script-box">
+                                <span id="res-pb-phrase"></span>
+                                <button class="copy-btn" onclick="copyScript('res-pb-phrase')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+
+                            <div class="analysis-grid" style="margin-top: 1rem;">
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-door-open"></i> The Exit Plan</div>
+                                    <div class="output-value" id="res-pb-exit"></div>
+                                </div>
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-rotate-left"></i> The Return Plan</div>
+                                    <div class="output-value" id="res-pb-return"></div>
+                                </div>
+                            </div>
+
+                            <label class="form-group label" style="font-weight:700; margin-top: 1rem;">If They Won't Let You Leave (Safety Script):</label>
+                            <div class="script-box">
+                                <span id="res-pb-safety"></span>
+                                <button class="copy-btn" onclick="copyScript('res-pb-safety')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+
+                            <label class="form-group label" style="font-weight:700;">If You're The Pursuer ("Let Them Land" Script):</label>
+                            <div class="script-box">
+                                <span id="res-pb-pursuer"></span>
+                                <button class="copy-btn" onclick="copyScript('res-pb-pursuer')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-title">
+                            <span><i class="fa-solid fa-clock-rotate-left"></i> Pause History</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('pause-button')">Clear</button>
+                        </div>
+                        <div class="history-list" id="history-pause-button"></div>
+                    </div>
+                </div>
+
+                <!-- 3. FIGHT TRANSLATOR -->
+                <div id="fight-translator" class="tool-view" style="display: none;">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-language" style="color:var(--coral-primary);"></i> Fight Translator</h2>
+                        <div class="problem-statement">
+                            "What are we actually fighting about? It's never the dishes."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-translator">
+                            <div class="form-group">
+                                <label>The last fight started with:</label>
+                                <textarea id="ft-topic" placeholder="e.g., Arriving 30 minutes late without texting..."></textarea>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                                <div class="form-group">
+                                    <label>What did YOU need in that moment?</label>
+                                    <select id="ft-your-need">
+                                        <option value="Respect">Respect</option>
+                                        <option value="Help">Help / Support</option>
+                                        <option value="Appreciation">Appreciation</option>
+                                        <option value="Attention">Attention / Connection</option>
+                                        <option value="Autonomy">Autonomy / Space</option>
+                                        <option value="Reassurance">Reassurance</option>
+                                        <option value="Fairness">Fairness / Equity</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>What do you think THEY needed?</label>
+                                    <select id="ft-their-need">
+                                        <option value="Respect">Respect</option>
+                                        <option value="Help">Help / Support</option>
+                                        <option value="Appreciation">Appreciation</option>
+                                        <option value="Attention">Attention / Connection</option>
+                                        <option value="Autonomy">Autonomy / Space</option>
+                                        <option value="Reassurance">Reassurance</option>
+                                        <option value="Fairness">Fairness / Equity</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                                <div class="form-group">
+                                    <label>What did you feel beneath anger?</label>
+                                    <select id="ft-your-feel">
+                                        <option value="Hurt">Hurt</option>
+                                        <option value="Fear">Fear</option>
+                                        <option value="Shame">Shame</option>
+                                        <option value="Loneliness">Loneliness</option>
+                                        <option value="Rejection">Rejection</option>
+                                        <option value="Invisible">Invisible / Unimportant</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>What did they seem to feel?</label>
+                                    <select id="ft-their-feel">
+                                        <option value="Hurt">Hurt</option>
+                                        <option value="Fear">Fear</option>
+                                        <option value="Shame">Shame / Defective</option>
+                                        <option value="Loneliness">Loneliness</option>
+                                        <option value="Rejection">Rejection</option>
+                                        <option value="Invisible">Invisible / Unappreciated</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="btn-row">
+                                <button type="button" class="btn btn-primary" onclick="translateFight()">Translate Deep Meaning</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTranslator()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <!-- Output Section -->
+                        <div id="output-translator" class="analysis-output">
+                            <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                            <div class="output-card highlight" style="margin-bottom: 1rem;">
+                                <div class="output-label"><i class="fa-solid fa-code-compare"></i> The Fight Translation</div>
+                                <div class="output-value" id="res-ft-translation" style="font-size: 1.05rem;"></div>
+                            </div>
+
+                            <div class="analysis-grid">
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-heart"></i> The Emotional Layer</div>
+                                    <div class="output-value" id="res-ft-emotion"></div>
+                                </div>
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-puzzle-piece"></i> The Need Mismatch</div>
+                                    <div class="output-value" id="res-ft-mismatch"></div>
+                                </div>
+                                <div class="output-card" style="grid-column: 1 / -1;">
+                                    <div class="output-label"><i class="fa-solid fa-crystal-ball"></i> The Repeat Predictor</div>
+                                    <div class="output-value" id="res-ft-predictor"></div>
+                                </div>
+                            </div>
+
+                            <label class="form-group label" style="font-weight:700; margin-top: 1rem;">One Need To Name Aloud Script:</label>
+                            <div class="script-box">
+                                <span id="res-ft-script-need"></span>
+                                <button class="copy-btn" onclick="copyScript('res-ft-script-need')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+
+                            <label class="form-group label" style="font-weight:700;">Validation Script (For Partner):</label>
+                            <div class="script-box">
+                                <span id="res-ft-script-val"></span>
+                                <button class="copy-btn" onclick="copyScript('res-ft-script-val')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-title">
+                            <span><i class="fa-solid fa-clock-rotate-left"></i> Translation History</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('fight-translator')">Clear</button>
+                        </div>
+                        <div class="history-list" id="history-fight-translator"></div>
+                    </div>
+                </div>
+
+                <!-- 4. REPAIR KIT -->
+                <div id="repair-kit" class="tool-view" style="display: none;">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-kit-medical" style="color:var(--teal-primary);"></i> Repair Kit</h2>
+                        <div class="problem-statement">
+                            "We don't know how to make up. The fight just fades into silence."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-repair">
+                            <div class="form-group">
+                                <label>Who usually apologizes first?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="rk-apologizer" value="Partner A" checked> You</label>
+                                    <label class="radio-label"><input type="radio" name="rk-apologizer" value="Partner B"> Them</label>
+                                    <label class="radio-label"><input type="radio" name="rk-apologizer" value="Neither"> Neither</label>
+                                    <label class="radio-label"><input type="radio" name="rk-apologizer" value="Whoever was 'wrong'"> Whoever was 'wrong'</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What makes an apology feel real to you?</label>
+                                <select id="rk-meaningful">
+                                    <option value="They name what they did">They name specifically what they did</option>
+                                    <option value="They say how it affected me">They acknowledge how it affected me</option>
+                                    <option value="They commit to change">They offer a concrete commit to change</option>
+                                    <option value="Just hearing 'I'm sorry'">Just hearing "I'm sorry" sincerely</option>
+                                    <option value="Physical comfort">Physical comfort & affection</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What repair attempts have worked before?</label>
+                                <textarea id="rk-past-repairs" placeholder="e.g., Bringing a cup of tea, sending a silly meme, saying 'can we start over?'..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Current status of last fight:</label>
+                                <select id="rk-status">
+                                    <option value="Just happened">Just happened (High tension)</option>
+                                    <option value="Hours ago">Hours ago (Cooling down)</option>
+                                    <option value="Days ago">Days ago (Cold distance)</option>
+                                    <option value="We never resolved it">We never resolved it (Swept under rug)</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-row">
+                                <button type="button" class="btn btn-primary" onclick="buildRepairKit()">Generate Repair Script</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleRepair()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <!-- Output Section -->
+                        <div id="output-repair" class="analysis-output">
+                            <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                            <div class="output-card highlight" style="margin-bottom: 1rem;">
+                                <div class="output-label"><i class="fa-solid fa-comments"></i> Your Repair Language</div>
+                                <div class="output-value" id="res-rk-language"></div>
+                            </div>
+
+                            <label class="form-group label" style="font-weight:700;">The Apology Template:</label>
+                            <div class="script-box">
+                                <span id="res-rk-apology"></span>
+                                <button class="copy-btn" onclick="copyScript('res-rk-apology')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+
+                            <label class="form-group label" style="font-weight:700;">The Acceptance Response:</label>
+                            <div class="script-box">
+                                <span id="res-rk-acceptance"></span>
+                                <button class="copy-btn" onclick="copyScript('res-rk-acceptance')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+
+                            <div class="analysis-grid" style="margin-top: 1rem;">
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-handshake"></i> If You Were Both Wrong</div>
+                                    <div class="output-value" id="res-rk-mutual"></div>
+                                </div>
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-shield"></i> If They Won't Apologize</div>
+                                    <div class="output-value" id="res-rk-no-apology"></div>
+                                </div>
+                                <div class="output-card" style="grid-column: 1 / -1;">
+                                    <div class="output-label"><i class="fa-solid fa-heart-circle-check"></i> Recommended Repair Ritual</div>
+                                    <div class="output-value" id="res-rk-ritual"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-title">
+                            <span><i class="fa-solid fa-clock-rotate-left"></i> Repair History</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('repair-kit')">Clear</button>
+                        </div>
+                        <div class="history-list" id="history-repair-kit"></div>
+                    </div>
+                </div>
+
+                <!-- 5. PATTERN INTERRUPT -->
+                <div id="pattern-interrupt" class="tool-view" style="display: none;">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-shield-halved" style="color:var(--coral-primary);"></i> Pattern Interrupt</h2>
+                        <div class="problem-statement">
+                            "How do we prevent the same fight next week?"
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-pattern">
+                            <div class="form-group">
+                                <label>Fight frequency:</label>
+                                <select id="pi-frequency">
+                                    <option value="Daily">Daily</option>
+                                    <option value="Few times a week">Few times a week</option>
+                                    <option value="Weekly">Weekly</option>
+                                    <option value="Monthly">Monthly</option>
+                                    <option value="Only during stress">Only during external stress</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Common setup loop:</label>
+                                <select id="pi-setup">
+                                    <option value="One criticizes, other defends">One criticizes, other defends</option>
+                                    <option value="Both escalate">Both escalate & match anger</option>
+                                    <option value="One shuts down">One demands, other shuts down</option>
+                                    <option value="Cold war">Passive aggression / Cold war</option>
+                                    <option value="Rapid fire">Rapid fire interrupting</option>
+                                </select>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                                <div class="form-group">
+                                    <label>Partner A Commitment:</label>
+                                    <select id="pi-commit-a">
+                                        <option value="Pause before criticizing">Pause before criticizing</option>
+                                        <option value="Ask instead of assume">Ask instead of assuming motive</option>
+                                        <option value="Use softer start-up">Use softer start-up ("I feel...")</option>
+                                        <option value="Check stress level first">Check stress levels before heavy topics</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Partner B Commitment:</label>
+                                    <select id="pi-commit-b">
+                                        <option value="Pause before criticizing">Pause before criticizing</option>
+                                        <option value="Ask instead of assume">Ask instead of assuming motive</option>
+                                        <option value="Use softer start-up">Use softer start-up ("I feel...")</option>
+                                        <option value="Check stress level first">Check stress levels before heavy topics</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Reward for a calm week:</label>
+                                <textarea id="pi-reward" placeholder="e.g., Takeout dinner from favorite spot, movie night with no chores..."></textarea>
+                            </div>
+
+                            <div class="btn-row">
+                                <button type="button" class="btn btn-primary" onclick="generateInterruptPlan()">Design Prevention Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSamplePattern()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <!-- Output Section -->
+                        <div id="output-pattern" class="analysis-output">
+                            <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border-color);">
+
+                            <div class="output-card highlight" style="margin-bottom: 1rem;">
+                                <div class="output-label"><i class="fa-solid fa-infinity"></i> Identified Pattern Loop</div>
+                                <div class="output-value" id="res-pi-name" style="font-size:1.05rem;"></div>
+                            </div>
+
+                            <div class="analysis-grid">
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-user-check"></i> Partner A Commitment</div>
+                                    <div class="output-value" id="res-pi-plan-a"></div>
+                                </div>
+                                <div class="output-card">
+                                    <div class="output-label"><i class="fa-solid fa-user-check"></i> Partner B Commitment</div>
+                                    <div class="output-value" id="res-pi-plan-b"></div>
+                                </div>
+                            </div>
+
+                            <label class="form-group label" style="font-weight:700; margin-top: 1rem;">The Soft Start-Up Template:</label>
+                            <div class="script-box">
+                                <span id="res-pi-soft-start"></span>
+                                <button class="copy-btn" onclick="copyScript('res-pi-soft-start')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+
+                            <label class="form-group label" style="font-weight:700;">Weekly Prevention Check (5-min Sunday Reset):</label>
+                            <div class="script-box">
+                                <span id="res-pi-checkin"></span>
+                                <button class="copy-btn" onclick="copyScript('res-pi-checkin')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+
+                            <div class="output-card" style="margin-top: 1rem;">
+                                <div class="output-label"><i class="fa-solid fa-trophy"></i> Celebration Plan</div>
+                                <div class="output-value" id="res-pi-celebration"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-title">
+                            <span><i class="fa-solid fa-clock-rotate-left"></i> Plan History</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('pattern-interrupt')">Clear</button>
+                        </div>
+                        <div class="history-list" id="history-pattern-interrupt"></div>
+                    </div>
+                </div>
+
+            </main>
+
+            <!-- Global Footer -->
+            <footer>
+                For entertainment and reflection purposes only. Not therapy or professional advice. If fights become physical or emotionally abusive, seek professional help immediately.
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"><i class="fa-solid fa-check-circle"></i> Copied to clipboard!</div>
+
+    <!-- ==========================================================================
+       9. JAVASCRIPT LOGIC
+       ========================================================================== -->
+    <script>
+        /* --- Navigation & Mobile Drawer --- */
+        const navLinks = document.querySelectorAll('.nav-link');
+        const toolViews = document.querySelectorAll('.tool-view');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+
+        function switchTool(toolId) {
+            toolViews.forEach(view => view.style.display = 'none');
+            navLinks.forEach(link => link.classList.remove('active'));
+
+            const targetView = document.getElementById(toolId);
+            if (targetView) targetView.style.display = 'block';
+
+            const activeLink = document.querySelector(`.nav-link[data-tool="${toolId}"]`);
+            if (activeLink) activeLink.classList.add('active');
+
+            // Close mobile menu if open
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            renderHistory(toolId);
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const toolId = link.getAttribute('data-tool');
+                switchTool(toolId);
+            });
+        });
+
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('active');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        /* --- Toast System --- */
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `<i class="fa-solid fa-check-circle"></i> ${message}`;
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2000);
+        }
+
+        function copyScript(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        /* --- LocalStorage Management --- */
+        function saveToHistory(toolId, summary, fullData) {
+            const key = `fightreset_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                summary: summary,
+                data: fullData
+            };
+
+            history.unshift(newItem);
+            if (history.length > 30) history = history.slice(0, 30); // Max 30 items
+            
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function clearToolHistory(toolId) {
+            const key = `fightreset_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function renderHistory(toolId) {
+            if (toolId === 'dashboard') return;
+            const container = document.getElementById(`history-${toolId}`);
+            if (!container) return;
+
+            const key = `fightreset_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+            if (history.length === 0) {
+                container.innerHTML = `<div style="font-size:0.85rem; color:var(--text-muted); font-style:italic;">No saved entries yet.</div>`;
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="history-item-header" onclick="toggleHistoryItem(${item.id})">
+                        <span><strong>${item.summary}</strong></span>
+                        <span class="history-date">${item.timestamp} <i class="fa-solid fa-chevron-down" style="margin-left:0.3rem;"></i></span>
+                    </div>
+                    <div class="history-item-body" id="history-body-${item.id}">
+                        ${item.data}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistoryItem(id) {
+            const el = document.getElementById(`history-body-${id}`);
+            if (el) {
+                el.style.display = el.style.display === 'block' ? 'none' : 'block';
+            }
+        }
+
+
+        /* ==========================================================================
+           TOOL 1: TRIGGER TRACKER LOGIC
+           ========================================================================== */
+        function loadSampleTrigger() {
+            document.getElementById('tt-fight').value = "Leaving sink full of dishes overnight";
+            document.getElementById('tt-they-said').value = "You never take responsibility around this house.";
+            document.getElementById('tt-you-said').value = "I worked 10 hours today, stop nagging me!";
+            document.getElementById('tt-location').value = "Home";
+            document.getElementById('tt-time').value = "Late night";
+            document.getElementById('tt-state').value = "Tired";
+        }
+
+        function analyzeTrigger() {
+            const fight = document.getElementById('tt-fight').value.trim();
+            const theySaid = document.getElementById('tt-they-said').value.trim();
+            const youSaid = document.getElementById('tt-you-said').value.trim();
+            const location = document.getElementById('tt-location').value;
+            const time = document.getElementById('tt-time').value;
+            const state = document.getElementById('tt-state').value;
+
+            if (!fight) {
+                alert("Please describe what the fight was about.");
+                return;
+            }
+
+            // Pattern Determination Algorithm
+            let pattern = "Criticism / Defensiveness";
+            if (theySaid.toLowerCase().includes("always") || theySaid.toLowerCase().includes("never")) {
+                pattern = "Global Criticism & Escalation";
+            } else if (youSaid.toLowerCase().includes("nag") || youSaid.toLowerCase().includes("busy")) {
+                pattern = "Defensiveness & Counter-attack";
+            } else if (state === "Tired" || time === "Late night") {
+                pattern = "Flooding & Low-Resilience Friction";
+            }
+
+            const surface = fight;
+            const yourTrigger = `Hearing generalized statements ("${theySaid.slice(0, 30)}...") while feeling ${state.toLowerCase()}.`;
+            const theirTrigger = `Perceiving dismissal or lack of support when bringing up domestic standards.`;
+            const risk = `High risk environment: ${location} during ${time.toLowerCase()} hours while ${state.toLowerCase()}.`;
+            const warning = `Watch for sharp tone or terms like "always/never" within the first 30 seconds.`;
+
+            document.getElementById('res-tt-surface').innerText = surface;
+            document.getElementById('res-tt-pattern').innerText = pattern;
+            document.getElementById('res-tt-your-trigger').innerText = yourTrigger;
+            document.getElementById('res-tt-their-trigger').innerText = theirTrigger;
+            document.getElementById('res-tt-risk').innerText = risk;
+            document.getElementById('res-tt-warning').innerText = warning;
+
+            document.getElementById('output-trigger').style.display = 'block';
+
+            // Save history
+            const historyHtml = `
+                <p><strong>Surface Topic:</strong> ${surface}</p>
+                <p><strong>Pattern:</strong> ${pattern}</p>
+                <p><strong>Risk:</strong> ${risk}</p>
+            `;
+            saveToHistory('trigger-tracker', `Fight about: ${surface.slice(0,25)}...`, historyHtml);
+        }
+
+
+        /* ==========================================================================
+           TOOL 2: PAUSE BUTTON LOGIC
+           ========================================================================== */
+        function loadSamplePause() {
+            document.getElementById('pb-flooded').value = "Heart races";
+            document.getElementById('pb-action').value = "Yell";
+            document.querySelector('input[name="pb-walk"][value="Tried but it made it worse"]').checked = true;
+            document.getElementById('pb-break-plan').value = "Walk around the block listening to a podcast for 20 minutes without looking at my phone.";
+        }
+
+        function generatePauseScript() {
+            const flooded = document.getElementById('pb-flooded').value;
+            const action = document.getElementById('pb-action').value;
+            const breakPlan = document.getElementById('pb-break-plan').value.trim() || "Sit in quiet space for 20 minutes";
+
+            const sign = `Your body alerts you with: ${flooded}. When this happens, your brain enters fight-or-flight mode.`;
+            const phrase = `"I am feeling flooded right now and my heart is racing. I want to hear you, but I need 20 minutes to calm down. I will be back at [Time] so we can talk."`;
+            const exit = `Step out calmly. Action: ${breakPlan}. Do NOT ruminate or re-play the fight in your head.`;
+            const returnPlan = `Set an alarm for 20 minutes. Re-enter room, offer a soft touch or gentle eye contact, and ask: "Are we ready to talk softly, or do we need another 10 minutes?"`;
+            const safety = `"I am not abandoning this conversation or ignoring you. I am stepping away for 20 minutes so I don't say something hurtful. I promise to return."`;
+            const pursuer = `"I see you need a break. I feel anxious pausing, but I respect our reset rule. I will wait until [Time] and take a breath."`;
+
+            document.getElementById('res-pb-sign').innerText = sign;
+            document.getElementById('res-pb-phrase').innerText = phrase;
+            document.getElementById('res-pb-exit').innerText = exit;
+            document.getElementById('res-pb-return').innerText = returnPlan;
+            document.getElementById('res-pb-safety').innerText = safety;
+            document.getElementById('res-pb-pursuer').innerText = pursuer;
+
+            document.getElementById('output-pause').style.display = 'block';
+
+            const historyHtml = `
+                <p><strong>Flood Sign:</strong> ${flooded}</p>
+                <p><strong>Pause Phrase:</strong> ${phrase}</p>
+            `;
+            saveToHistory('pause-button', `Pause Plan (${flooded})`, historyHtml);
+        }
+
+
+        /* ==========================================================================
+           TOOL 3: FIGHT TRANSLATOR LOGIC
+           ========================================================================== */
+        function loadSampleTranslator() {
+            document.getElementById('ft-topic').value = "Arriving 30 minutes late to dinner without calling";
+            document.getElementById('ft-your-need').value = "Respect";
+            document.getElementById('ft-their-need').value = "Autonomy";
+            document.getElementById('ft-your-feel').value = "Invisible";
+            document.getElementById('ft-their-feel').value = "Shame";
+        }
+
+        function translateFight() {
+            const topic = document.getElementById('ft-topic').value.trim();
+            const yourNeed = document.getElementById('ft-your-need').value;
+            const theirNeed = document.getElementById('ft-their-need').value;
+            const yourFeel = document.getElementById('ft-your-feel').value;
+            const theirFeel = document.getElementById('ft-their-feel').value;
+
+            if (!topic) {
+                alert("Please enter the fight topic.");
+                return;
+            }
+
+            const translation = `You fought about "${topic}", but Partner A was seeking ${yourNeed.toUpperCase()} and Partner B was seeking ${theirNeed.toUpperCase()}.`;
+            const emotion = `Partner A felt deeply ${yourFeel} under the anger, while Partner B felt ${theirFeel}.`;
+            const mismatch = `When ${yourNeed} collides with ${theirNeed}, standard logistics become an emotional battlefield.`;
+            const predictor = `This same fight will recur whenever schedule changes, domestic duties, or time management feel unbalanced.`;
+
+            const scriptNeed = `"When ${topic} happened, I felt ${yourFeel}. What I really needed in that moment was ${yourNeed.toLowerCase()}."`;
+            const scriptVal = `"What I hear you saying is that you felt ${theirFeel} and were needing ${theirNeed.toLowerCase()}. That makes sense to me."`;
+
+            document.getElementById('res-ft-translation').innerText = translation;
+            document.getElementById('res-ft-emotion').innerText = emotion;
+            document.getElementById('res-ft-mismatch').innerText = mismatch;
+            document.getElementById('res-ft-predictor').innerText = predictor;
+            document.getElementById('res-ft-script-need').innerText = scriptNeed;
+            document.getElementById('res-ft-script-val').innerText = scriptVal;
+
+            document.getElementById('output-translator').style.display = 'block';
+
+            const historyHtml = `
+                <p><strong>Topic:</strong> ${topic}</p>
+                <p><strong>Need Collision:</strong> ${yourNeed} vs ${theirNeed}</p>
+            `;
+            saveToHistory('fight-translator', `Translation: ${yourNeed} / ${theirNeed}`, historyHtml);
+        }
+
+
+        /* ==========================================================================
+           TOOL 4: REPAIR KIT LOGIC
+           ========================================================================== */
+        function loadSampleRepair() {
+            document.querySelector('input[name="rk-apologizer"][value="Neither"]').checked = true;
+            document.getElementById('rk-meaningful').value = "They name what they did";
+            document.getElementById('rk-past-repairs').value = "Making a cup of coffee without asking.";
+            document.getElementById('rk-status').value = "Days ago";
+        }
+
+        function buildRepairKit() {
+            const apologizer = document.querySelector('input[name="rk-apologizer"]:checked').value;
+            const meaningful = document.getElementById('rk-meaningful').value;
+            const pastRepairs = document.getElementById('rk-past-repairs').value.trim() || "Small quiet check-in";
+            const status = document.getElementById('rk-status').value;
+
+            const language = `Your relationship needs: ${meaningful}. Simple empty "sorry"s won't clear the air.`;
+            const apology = `"I want to apologize for my part in our recent fight. Specifically, I owner my harsh tone when I said that. I see how it made you feel dismissed, and I am working on keeping my voice calm."`;
+            const acceptance = `"Thank you for acknowledging that. It really helps me move past it. I appreciate you bringing it up."`;
+            const mutual = `"We both said things we shouldn't have. Can we agree to hit the reset button on this topic?"`;
+            const noApology = `Focus on expressing your own state without demanding a reciprocal apology immediately: "I'm offering this apology to take ownership of my half, no strings attached."`;
+            const ritual = `Try this past working gesture: "${pastRepairs}" followed by 30 seconds of silent embrace or hand-holding.`;
+
+            document.getElementById('res-rk-language').innerText = language;
+            document.getElementById('res-rk-apology').innerText = apology;
+            document.getElementById('res-rk-acceptance').innerText = acceptance;
+            document.getElementById('res-rk-mutual').innerText = mutual;
+            document.getElementById('res-rk-no-apology').innerText = noApology;
+            document.getElementById('res-rk-ritual').innerText = ritual;
+
+            document.getElementById('output-repair').style.display = 'block';
+
+            const historyHtml = `
+                <p><strong>Status:</strong> ${status}</p>
+                <p><strong>Apology Template:</strong> ${apology}</p>
+            `;
+            saveToHistory('repair-kit', `Repair Script (${status})`, historyHtml);
+        }
+
+
+        /* ==========================================================================
+           TOOL 5: PATTERN INTERRUPT LOGIC
+           ========================================================================== */
+        function loadSamplePattern() {
+            document.getElementById('pi-frequency').value = "Few times a week";
+            document.getElementById('pi-setup').value = "One criticizes, other defends";
+            document.getElementById('pi-commit-a').value = "Use softer start-up";
+            document.getElementById('pi-commit-b').value = "Ask instead of assume";
+            document.getElementById('pi-reward').value = "Sunday morning coffee & pastry date.";
+        }
+
+        function generateInterruptPlan() {
+            const frequency = document.getElementById('pi-frequency').value;
+            const setup = document.getElementById('pi-setup').value;
+            const commitA = document.getElementById('pi-commit-a').value;
+            const commitB = document.getElementById('pi-commit-b').value;
+            const reward = document.getElementById('pi-reward').value.trim() || "A relaxed weekend evening";
+
+            const name = `The ${setup} Loop (Occurring ${frequency.toLowerCase()})`;
+            const planA = `Partner A commits to: ${commitA}. Action rule: Pause 3 seconds before opening dialogue on sensitive issues.`;
+            const planB = `Partner B commits to: ${commitB}. Action rule: Take a deep breath and ask one clarifying question before responding.`;
+            
+            const softStart = `"I feel [Emotion] about [Specific Situation], and I need [Positive Request]. Can we talk about this now?"`;
+            const checkin = `"5-Min Sunday Reset: 1) What went well for us this week? 2) Is there any small tension we need to clear before Monday?"`;
+            const celebration = `If you successfully de-escalate or prevent a fight this week, enjoy your reward: "${reward}".`;
+
+            document.getElementById('res-pi-name').innerText = name;
+            document.getElementById('res-pi-plan-a').innerText = planA;
+            document.getElementById('res-pi-plan-b').innerText = planB;
+            document.getElementById('res-pi-soft-start').innerText = softStart;
+            document.getElementById('res-pi-checkin').innerText = checkin;
+            document.getElementById('res-pi-celebration').innerText = celebration;
+
+            document.getElementById('output-pattern').style.display = 'block';
+
+            const historyHtml = `
+                <p><strong>Loop:</strong> ${name}</p>
+                <p><strong>Reward:</strong> ${reward}</p>
+            `;
+            saveToHistory('pattern-interrupt', `Plan: ${setup}`, historyHtml);
+        }
+
+        // Initialize default history rendering on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistory('dashboard');
+        });
+    </script>
+</body>
+</html>

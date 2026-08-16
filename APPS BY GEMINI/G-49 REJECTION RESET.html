@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RejectionReset — Romantic Recovery Toolkit</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --plum: #6D597A;
+            --plum-dark: #52415d;
+            --plum-light: #f3f0f5;
+            --gold: #E9C46A;
+            --gold-hover: #dcb350;
+            --bg-gradient-start: #F8F5F2;
+            --bg-gradient-end: #FFF8E6;
+            --text-main: #2D3142;
+            --text-muted: #6C757D;
+            --card-bg: #FFFFFF;
+            --border-color: #E9ECEF;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --radius-xl: 1rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--plum);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--plum);
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1rem;
+            color: var(--text-main);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background: var(--plum-light);
+            color: var(--plum);
+        }
+
+        .nav-item.active {
+            background: var(--plum);
+            color: white;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Mobile Header & Hamburger */
+        .mobile-header {
+            display: none;
+            background: var(--card-bg);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            color: var(--plum);
+            font-size: 1.1rem;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 95;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 800px;
+            flex: 1;
+        }
+
+        .view-panel {
+            display: none;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        /* Dashboard View */
+        .hero-banner {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding: 2.5rem 1.5rem;
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .hero-banner h2 {
+            font-size: 2.25rem;
+            color: var(--plum);
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .hero-banner p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--plum);
+        }
+
+        .dash-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--plum-light);
+            color: var(--plum);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .dash-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Form & Cards Styling */
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .tool-header {
+            margin-bottom: 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .tool-header h2 {
+            font-size: 1.6rem;
+            color: var(--plum);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tool-header .problem-statement {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #FAFAFA;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--plum);
+            background-color: #FFF;
+        }
+
+        textarea.form-control {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--plum);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--plum-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--gold);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--gold-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background-color: #F1F3F5;
+            color: var(--text-main);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.825rem;
+        }
+
+        /* Range Slider Styling */
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .range-container input[type="range"] {
+            flex: 1;
+            accent-color: var(--plum);
+        }
+
+        .range-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--plum);
+            min-width: 30px;
+        }
+
+        /* Output Results Display */
+        .output-container {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+        }
+
+        .output-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .output-title {
+            font-size: 1.3rem;
+            color: var(--plum);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--plum-light);
+            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .result-section {
+            margin-bottom: 1.5rem;
+            background: #FAFAFA;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--plum);
+        }
+
+        .result-section.highlight {
+            border-left-color: var(--gold);
+            background: #FFFDF5;
+        }
+
+        .result-section h4 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--plum);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .result-section p, .result-section ul {
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .result-section ul {
+            padding-left: 1.25rem;
+        }
+
+        .script-box {
+            background: #FFF;
+            border: 1px dashed var(--plum);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: inherit;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 2.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .history-header h3 {
+            font-size: 1.1rem;
+            color: var(--plum);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .history-summary {
+            padding: 0.85rem 1rem;
+            background: #FAFAFA;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .history-summary:hover {
+            background: #F1F3F5;
+        }
+
+        .history-details {
+            padding: 1rem;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .history-item.open .history-details {
+            display: block;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--text-main);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Universal Footer */
+        .app-footer {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: var(--radius-xl);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 850px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem 1rem;
+            }
+
+            .hero-banner h2 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="mobile-brand">
+            <i class="fa-solid fa-heart-crack"></i>
+            <span>RejectionReset</span>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Overlay for mobile drawer -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Fixed Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-heart-crack"></i>
+                <h1>RejectionReset</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a class="nav-item active" data-view="dashboard"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+                <li><a class="nav-item" data-view="autopsy"><i class="fa-solid fa-magnifying-glass-chart"></i> Rejection Autopsy</a></li>
+                <li><a class="nav-item" data-view="shame"><i class="fa-solid fa-shield-halved"></i> Shame Interrupt</a></li>
+                <li><a class="nav-item" data-view="rumination"><i class="fa-solid fa-ban"></i> Rumination Stop</a></li>
+                <li><a class="nav-item" data-view="identity"><i class="fa-solid fa-anchor"></i> Identity Repair</a></li>
+                <li><a class="nav-item" data-view="reentry"><i class="fa-solid fa-compass"></i> Reentry Decision</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <div class="content-container">
+
+                <!-- VIEW: DASHBOARD -->
+                <section id="view-dashboard" class="view-panel active">
+                    <div class="hero-banner">
+                        <h2>Rejection Reset</h2>
+                        <p>Rejection is information, not a verdict on your worth.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dash-card" onclick="switchView('autopsy')">
+                            <div class="dash-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                            <h3>Rejection Autopsy</h3>
+                            <p>Deconstruct what happened and shift from self-blame to neutral reality.</p>
+                        </div>
+                        <div class="dash-card" onclick="switchView('shame')">
+                            <div class="dash-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h3>Shame Interrupt</h3>
+                            <p>Disarm the feeling that everyone is judging you and ground your body.</p>
+                        </div>
+                        <div class="dash-card" onclick="switchView('rumination')">
+                            <div class="dash-icon"><i class="fa-solid fa-ban"></i></div>
+                            <h3>Rumination Stop</h3>
+                            <p>Break checking loops, quantify time costs, and protect your sleep.</p>
+                        </div>
+                        <div class="dash-card" onclick="switchView('identity')">
+                            <div class="dash-icon"><i class="fa-solid fa-anchor"></i></div>
+                            <h3>Identity Repair</h3>
+                            <p>Separate romantic rejection from your core value and non-dating strengths.</p>
+                        </div>
+                        <div class="dash-card" onclick="switchView('reentry')">
+                            <div class="dash-icon"><i class="fa-solid fa-compass"></i></div>
+                            <h3>Reentry Decision</h3>
+                            <p>Assess emotional readiness objectively before stepping back out there.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: REJECTION AUTOPSY -->
+                <section id="view-autopsy" class="view-panel">
+                    <div class="tool-card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-magnifying-glass-chart"></i> Rejection Autopsy</h2>
+                            <p class="problem-statement">"I keep replaying what I did wrong and what they think of me."</p>
+                        </div>
+                        <form id="form-autopsy">
+                            <div class="form-group">
+                                <label for="a-happened">What happened:</label>
+                                <textarea id="a-happened" class="form-control" placeholder="Describe the situation briefly..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="a-delivery">How they rejected you:</label>
+                                <select id="a-delivery" class="form-control">
+                                    <option value="Ghosted">Ghosted</option>
+                                    <option value="Slow fade">Slow fade</option>
+                                    <option value="Direct conversation">Direct conversation</option>
+                                    <option value="Text">Text</option>
+                                    <option value="Through a friend">Through a friend</option>
+                                    <option value="Stood up">Stood up</option>
+                                    <option value="Chose someone else">Chose someone else</option>
+                                    <option value="Said 'not ready'">Said "not ready"</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="a-reaction">Your immediate reaction:</label>
+                                <select id="a-reaction" class="form-control">
+                                    <option value="Shame">Shame</option>
+                                    <option value="Anger">Anger</option>
+                                    <option value="Numb">Numb</option>
+                                    <option value="Confusion">Confusion</option>
+                                    <option value="Relief mixed with hurt">Relief mixed with hurt</option>
+                                    <option value="Desperate to win them back">Desperate to win them back</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="a-didwrong">What you think you did wrong:</label>
+                                <textarea id="a-didwrong" class="form-control" placeholder="What mistakes do you keep replaying?"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="a-wrongwithme">What you think is wrong with you:</label>
+                                <textarea id="a-wrongwithme" class="form-control" placeholder="What core insecurity came up?"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="a-time">Time since rejection:</label>
+                                <select id="a-time" class="form-control">
+                                    <option value="<1 week">&lt;1 week</option>
+                                    <option value="1-2 weeks">1-2 weeks</option>
+                                    <option value="2-4 weeks">2-4 weeks</option>
+                                    <option value="1-2 months">1-2 months</option>
+                                    <option value="2+ months">2+ months</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gears"></i> Analyze Situation</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleAutopsy()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-autopsy" class="output-container">
+                        <div class="output-card">
+                            <div class="output-title">
+                                <span>Autopsy Results</span>
+                                <button class="btn btn-outline btn-sm" onclick="copySection('autopsy-results-text')"><i class="fa-regular fa-copy"></i> Copy Summary</button>
+                            </div>
+                            <div id="autopsy-results-text">
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-cube"></i> The Rejection Type</h4>
+                                    <p id="out-a-type"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-tornado"></i> The Shame Spiral</h4>
+                                    <p id="out-a-shame"></p>
+                                </div>
+                                <div class="result-section highlight">
+                                    <h4><i class="fa-solid fa-scale-balanced"></i> The Reality Check</h4>
+                                    <p id="out-a-reality"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-arrows-rotate"></i> The Narrative Shift</h4>
+                                    <p id="out-a-narrative"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-hand"></i> The Self-Blame Interrupt</h4>
+                                    <p id="out-a-interrupt"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-envelope-open-text"></i> The Unsent Closure Letter Prompt</h4>
+                                    <p id="out-a-closure"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-section" id="history-autopsy-container">
+                        <div class="history-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> History</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('autopsy')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="history-autopsy-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: SHAME INTERRUPT -->
+                <section id="view-shame" class="view-panel">
+                    <div class="tool-card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-shield-halved"></i> Shame Interrupt</h2>
+                            <p class="problem-statement">"I feel like everyone can see that I wasn't chosen."</p>
+                        </div>
+                        <form id="form-shame">
+                            <div class="form-group">
+                                <label for="s-thoughts">Shame thoughts:</label>
+                                <textarea id="s-thoughts" class="form-control" placeholder="What humiliating thoughts are repeating?"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="s-knows">Who knows about the rejection:</label>
+                                <select id="s-knows" class="form-control">
+                                    <option value="No one">No one</option>
+                                    <option value="Close friends">Close friends</option>
+                                    <option value="Everyone">Everyone</option>
+                                    <option value="Social media">Social media</option>
+                                    <option value="I told people we were dating">I told people we were dating</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="s-imagines">What you imagine they're thinking:</label>
+                                <textarea id="s-imagines" class="form-control" placeholder="What are other people judging you for?"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="s-response">Your typical shame response:</label>
+                                <select id="s-response" class="form-control">
+                                    <option value="Hide">Hide</option>
+                                    <option value="Overcompensate">Overcompensate</option>
+                                    <option value="Seek reassurance">Seek reassurance</option>
+                                    <option value="Isolate">Isolate</option>
+                                    <option value="Pretend it didn't happen">Pretend it didn't happen</option>
+                                    <option value="Post obsessively on social media">Post obsessively on social media</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="s-body">Body feeling:</label>
+                                <select id="s-body" class="form-control">
+                                    <option value="Heavy">Heavy</option>
+                                    <option value="Small">Small</option>
+                                    <option value="Hot">Hot</option>
+                                    <option value="Tight">Tight</option>
+                                    <option value="Numb">Numb</option>
+                                    <option value="Want to disappear">Want to disappear</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-bolt"></i> Interrupt Shame</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleShame()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-shame" class="output-container">
+                        <div class="output-card">
+                            <div class="output-title">
+                                <span>Shame Interrupt Plan</span>
+                                <button class="btn btn-outline btn-sm" onclick="copySection('shame-results-text')"><i class="fa-regular fa-copy"></i> Copy Plan</button>
+                            </div>
+                            <div id="shame-results-text">
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-ghost"></i> The Shame Narrative</h4>
+                                    <p id="out-s-narrative"></p>
+                                </div>
+                                <div class="result-section highlight">
+                                    <h4><i class="fa-solid fa-eye"></i> The Actual Reality</h4>
+                                    <p id="out-s-reality"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-door-open"></i> The Exposure Antidote</h4>
+                                    <p id="out-s-antidote"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-comment-dots"></i> The Self-Compassion Script</h4>
+                                    <div class="script-box">
+                                        <p id="out-s-script"></p>
+                                    </div>
+                                    <button class="btn btn-outline btn-sm" style="margin-top: 0.5rem;" onclick="copyText('out-s-script')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-child-reaching"></i> The Physical Reset</h4>
+                                    <p id="out-s-physical"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-users"></i> The Social Rebuild</h4>
+                                    <p id="out-s-social"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-section" id="history-shame-container">
+                        <div class="history-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> History</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('shame')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="history-shame-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: RUMINATION STOP -->
+                <section id="view-rumination" class="view-panel">
+                    <div class="tool-card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-ban"></i> Rumination Stop</h2>
+                            <p class="problem-statement">"I can't stop checking their social media and imagining what they're doing."</p>
+                        </div>
+                        <form id="form-rumination">
+                            <div class="form-group">
+                                <label for="r-freq">Checking frequency:</label>
+                                <select id="r-freq" class="form-control">
+                                    <option value="Hourly">Hourly</option>
+                                    <option value="Few times daily">Few times daily</option>
+                                    <option value="Daily">Daily</option>
+                                    <option value="Few times weekly">Few times weekly</option>
+                                    <option value="Stopped">Stopped</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="r-what">What you check:</label>
+                                <select id="r-what" class="form-control">
+                                    <option value="Their posts">Their posts</option>
+                                    <option value="Who liked them">Who liked them</option>
+                                    <option value="Who they're following">Who they're following</option>
+                                    <option value="Their Spotify">Their Spotify</option>
+                                    <option value="Location">Location</option>
+                                    <option value="Stories">Stories</option>
+                                    <option value="Everything">Everything</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="r-loops">Mental loops:</label>
+                                <select id="r-loops" class="form-control">
+                                    <option value="What if I had...">What if I had...</option>
+                                    <option value="Who are they with now">Who are they with now</option>
+                                    <option value="Did they ever like me">Did they ever like me</option>
+                                    <option value="What are they saying about me">What are they saying about me</option>
+                                    <option value="Why wasn't I enough">Why wasn't I enough</option>
+                                    <option value="All of the above">All of the above</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="r-sleep">Sleep impact:</label>
+                                <select id="r-sleep" class="form-control">
+                                    <option value="None">None</option>
+                                    <option value="Harder to fall asleep">Harder to fall asleep</option>
+                                    <option value="Wake up thinking about them">Wake up thinking about them</option>
+                                    <option value="Dreams">Dreams</option>
+                                    <option value="Avoiding bed">Avoiding bed</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="r-work">Work impact:</label>
+                                <select id="r-work" class="form-control">
+                                    <option value="None">None</option>
+                                    <option value="Distracted">Distracted</option>
+                                    <option value="Can't focus">Can't focus</option>
+                                    <option value="Calling in sick">Calling in sick</option>
+                                    <option value="Performing fine">Performing fine</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-stopwatch"></i> Stop The Loop</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleRumination()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-rumination" class="output-container">
+                        <div class="output-card">
+                            <div class="output-title">
+                                <span>Rumination Break Plan</span>
+                                <button class="btn btn-outline btn-sm" onclick="copySection('rumination-results-text')"><i class="fa-regular fa-copy"></i> Copy Plan</button>
+                            </div>
+                            <div id="rumination-results-text">
+                                <div class="result-section highlight">
+                                    <h4><i class="fa-solid fa-calculator"></i> The Rumination Cost</h4>
+                                    <p id="out-r-cost"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-lock"></i> The Block Protocol</h4>
+                                    <p id="out-r-block"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-brain"></i> The Thought Stop Technique</h4>
+                                    <p id="out-r-thought"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-hourglass-half"></i> The 20-Minute Worry Rule</h4>
+                                    <p id="out-r-rule"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-bed"></i> The Sleep Protection Ritual</h4>
+                                    <p id="out-r-sleep"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-user-group"></i> The Accountability Buddy Setup</h4>
+                                    <p id="out-r-buddy"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-section" id="history-rumination-container">
+                        <div class="history-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> History</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('rumination')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="history-rumination-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: IDENTITY REPAIR -->
+                <section id="view-identity" class="view-panel">
+                    <div class="tool-card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-anchor"></i> Identity Repair</h2>
+                            <p class="problem-statement">"I feel like this rejection proved something bad about me."</p>
+                        </div>
+                        <form id="form-identity">
+                            <div class="form-group">
+                                <label for="i-proves">What rejection "proves" about you:</label>
+                                <textarea id="i-proves" class="form-control" placeholder="e.g., I'm too needy, I'm unlovable..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="i-evidence">Evidence against that belief:</label>
+                                <textarea id="i-evidence" class="form-control" placeholder="Facts that contradict this negative narrative..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="i-past">Past rejections that felt similar:</label>
+                                <textarea id="i-past" class="form-control" placeholder="Where have you felt this specific hurt before?"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="i-values">Your core values:</label>
+                                <textarea id="i-values" class="form-control" placeholder="What matters to you in life? (e.g., integrity, creativity, loyalty)"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="i-goodat">One thing you're good at unrelated to dating:</label>
+                                <textarea id="i-goodat" class="form-control" placeholder="A skill, hobby, or domain where you excel..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="i-valuesyou">One person who values you:</label>
+                                <textarea id="i-valuesyou" class="form-control" placeholder="Who sees your real worth consistently?"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wrench"></i> Rebuild Identity</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleIdentity()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-identity" class="output-container">
+                        <div class="output-card">
+                            <div class="output-title">
+                                <span>Identity Restoration Blueprint</span>
+                                <button class="btn btn-outline btn-sm" onclick="copySection('identity-results-text')"><i class="fa-regular fa-copy"></i> Copy Blueprint</button>
+                            </div>
+                            <div id="identity-results-text">
+                                <div class="result-section highlight">
+                                    <h4><i class="fa-solid fa-gavel"></i> The False Verdict</h4>
+                                    <p id="out-i-verdict"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-anchor"></i> The Identity Anchor</h4>
+                                    <p id="out-i-anchor"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-timeline"></i> The Pattern History</h4>
+                                    <p id="out-i-pattern"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-trophy"></i> The Action Challenge</h4>
+                                    <p id="out-i-challenge"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-gem"></i> The Strengths Reminder</h4>
+                                    <p id="out-i-strengths"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-filter"></i> The Future Filter</h4>
+                                    <p id="out-i-filter"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-section" id="history-identity-container">
+                        <div class="history-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> History</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('identity')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="history-identity-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: REENTRY DECISION -->
+                <section id="view-reentry" class="view-panel">
+                    <div class="tool-card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-compass"></i> Reentry Decision</h2>
+                            <p class="problem-statement">"I don't know if I should take a break from dating or get back out there."</p>
+                        </div>
+                        <form id="form-reentry">
+                            <div class="form-group">
+                                <label for="e-desire">Current dating desire:</label>
+                                <select id="e-desire" class="form-control">
+                                    <option value="Eager to move on">Eager to move on</option>
+                                    <option value="Cautiously open">Cautiously open</option>
+                                    <option value="Only if they approach">Only if they approach</option>
+                                    <option value="Not ready">Not ready</option>
+                                    <option value="Never again">Never again</option>
+                                    <option value="Revenge dating">Revenge dating</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="e-readiness">Emotional readiness (1 = raw, 10 = fully centered):</label>
+                                <div class="range-container">
+                                    <input type="range" id="e-readiness" class="form-control" min="1" max="10" value="4" oninput="document.getElementById('readiness-val').innerText = this.value">
+                                    <span class="range-value" id="readiness-val">4</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="e-fear">Fear about dating again:</label>
+                                <textarea id="e-fear" class="form-control" placeholder="What's the worst outcome you're afraid of repeating?"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="e-makesready">What would make you feel ready:</label>
+                                <textarea id="e-makesready" class="form-control" placeholder="What sign or feeling are you waiting for?"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="e-support">Support system:</label>
+                                <select id="e-support" class="form-control">
+                                    <option value="Strong">Strong</option>
+                                    <option value="Moderate">Moderate</option>
+                                    <option value="Weak">Weak</option>
+                                    <option value="Isolated">Isolated</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-map-signs"></i> Evaluate Readiness</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleReentry()"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-reentry" class="output-container">
+                        <div class="output-card">
+                            <div class="output-title">
+                                <span>Reentry Assessment</span>
+                                <button class="btn btn-outline btn-sm" onclick="copySection('reentry-results-text')"><i class="fa-regular fa-copy"></i> Copy Assessment</button>
+                            </div>
+                            <div id="reentry-results-text">
+                                <div class="result-section highlight">
+                                    <h4><i class="fa-solid fa-flag"></i> The Reentry Verdict</h4>
+                                    <p id="out-e-verdict"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-pause"></i> The Wait Plan</h4>
+                                    <p id="out-e-wait"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-vial"></i> The Gentle Experiment</h4>
+                                    <p id="out-e-experiment"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-shield-cat"></i> The Fear Antidote</h4>
+                                    <p id="out-e-fear"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-handshake-angle"></i> The Support Plan</h4>
+                                    <p id="out-e-support"></p>
+                                </div>
+                                <div class="result-section">
+                                    <h4><i class="fa-solid fa-bullseye"></i> The Growth Redirect</h4>
+                                    <p id="out-e-redirect"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-section" id="history-reentry-container">
+                        <div class="history-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> History</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('reentry')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="history-reentry-list"></div>
+                    </div>
+                </section>
+
+                <!-- UNIVERSAL FOOTER -->
+                <footer class="app-footer">
+                    For entertainment and reflection purposes only. Not therapy or professional advice. If rejection has triggered severe depression or self-harm thoughts, seek professional support immediately.
+                </footer>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="toast-message">Copied!</span>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // DOM Elements & Setup
+        const views = document.querySelectorAll('.view-panel');
+        const navItems = document.querySelectorAll('.nav-item');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const toast = document.getElementById('toast');
+
+        // Navigation Engine
+        function switchView(viewId) {
+            views.forEach(v => v.classList.remove('active'));
+            navItems.forEach(n => n.classList.remove('active'));
+
+            const targetView = document.getElementById(`view-${viewId}`);
+            const targetNav = document.querySelector(`.nav-item[data-view="${viewId}"]`);
+
+            if (targetView) targetView.classList.add('active');
+            if (targetNav) targetNav.classList.add('active');
+
+            // Close mobile menu
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('mobile-open');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            renderHistory(viewId);
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const view = item.getAttribute('data-view');
+                switchView(view);
+            });
+        });
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('mobile-open');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('mobile-open');
+        });
+
+        // Toast Helper
+        function showToast(msg = "Copied!") {
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Copy Helper
+        function copyText(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            navigator.clipboard.writeText(el.innerText).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        function copySection(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            // Format output as plain text
+            const sections = container.querySelectorAll('.result-section');
+            let textOutput = "";
+            sections.forEach(sec => {
+                const title = sec.querySelector('h4')?.innerText || "";
+                const content = sec.querySelector('p')?.innerText || sec.querySelector('.script-box')?.innerText || "";
+                textOutput += `${title}\n${content}\n\n`;
+            });
+
+            navigator.clipboard.writeText(textOutput.trim()).then(() => {
+                showToast("Summary copied!");
+            });
+        }
+
+        // LocalStorage History Helpers
+        function saveToHistory(toolId, inputSummary, data) {
+            const key = `rejectionreset_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                summary: inputSummary,
+                payload: data
+            };
+
+            history.unshift(newItem);
+            if (history.length > 30) history = history.slice(0, 30); // Max 30 items
+            
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const listEl = document.getElementById(`history-${toolId}-list`);
+            if (!listEl) return;
+
+            const key = `rejectionreset_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+            if (history.length === 0) {
+                listEl.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">No history recorded yet.</p>';
+                return;
+            }
+
+            listEl.innerHTML = history.map(item => `
+                <div class="history-item" id="hist-${item.id}">
+                    <div class="history-summary" onclick="toggleHistoryItem(${item.id})">
+                        <span>${escapeHtml(item.summary)}</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">${item.timestamp} <i class="fa-solid fa-chevron-down"></i></span>
+                    </div>
+                    <div class="history-details">
+                        ${generateHistoryHTML(toolId, item.payload)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistoryItem(id) {
+            const el = document.getElementById(`hist-${id}`);
+            if (el) el.classList.toggle('open');
+        }
+
+        function clearHistory(toolId) {
+            const key = `rejectionreset_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        // Generate static HTML for history item content
+        function generateHistoryHTML(toolId, data) {
+            let html = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+            for (const [key, val] of Object.entries(data)) {
+                html += `<div><strong>${key}:</strong> ${escapeHtml(val)}</div>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        // TOOL 1: AUTOPSY LOGIC
+        function loadSampleAutopsy() {
+            document.getElementById('a-happened').value = "We had been dating for 6 weeks, texting daily and going on great weekend dates.";
+            document.getElementById('a-delivery').value = 'Said "not ready"';
+            document.getElementById('a-reaction').value = "Shame";
+            document.getElementById('a-didwrong').value = "I was too eager and texted back too quickly. I showed too much interest.";
+            document.getElementById('a-wrongwithme').value = "I am fundamentally unlovable and awkward.";
+            document.getElementById('a-time').value = "2-4 weeks";
+        }
+
+        document.getElementById('form-autopsy').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const happened = document.getElementById('a-happened').value || "No detailed context provided.";
+            const delivery = document.getElementById('a-delivery').value;
+            const reaction = document.getElementById('a-reaction').value;
+            const didwrong = document.getElementById('a-didwrong').value || "thinking you did something wrong";
+            const wrongwithme = document.getElementById('a-wrongwithme').value || "feeling inadequate";
+            const time = document.getElementById('a-time').value;
+
+            // Template Logic
+            let typeText = "";
+            switch(delivery) {
+                case "Ghosted":
+                    typeText = "Ghosting reflects the other person's inability to handle uncomfortable conversations or emotional conflict. It is a sign of their communication limits, not a score on your value.";
+                    break;
+                case 'Said "not ready"':
+                    typeText = "The 'not ready' explanation often points to internal timing, unresolved past dynamics, or a realization of mismatch. It is about their bandwidth, not your worth.";
+                    break;
+                case "Slow fade":
+                    typeText = "A slow fade is an passive attempt to let things drift. It highlights conflict-avoidance on their end rather than direct honesty.";
+                    break;
+                default:
+                    typeText = `A direct response like "${delivery}" gives clarity, even if it hurts. It signifies a boundary or preference mismatch rather than a personal defect on your part.`;
+            }
+
+            const shameText = `You are focusing heavily on: "${didwrong}" and feeling "${wrongwithme}". It is completely natural to seek control by blaming yourself, but self-blame creates a false sense that you could have forced a different outcome.`;
+
+            const realityText = `Romantic chemistry requires mutual alignment across timing, values, attachment styles, and personal readiness. Even if you acted perfectly, a fundamental mismatch in their readiness or capacity cannot be fixed by changing yourself.`;
+
+            const narrativeText = `Old narrative: "I was rejected because I was ${didwrong}." \n\nNew narrative: "We were not a match in timing, needs, or compatibility. Expressing warmth or interest was a courageous act, not a flaw."`;
+
+            const interruptText = `You took a emotional risk. Rejection hurts because you cared, not because you failed. Stop punishing yourself for being human and vulnerable.`;
+
+            const closureText = `Write a letter expressing everything you wished happened and everything you felt about being ${delivery.toLowerCase()}. Do NOT send it. Focus on what YOU needed in that moment.`;
+
+            // Render
+            document.getElementById('out-a-type').innerText = typeText;
+            document.getElementById('out-a-shame').innerText = shameText;
+            document.getElementById('out-a-reality').innerText = realityText;
+            document.getElementById('out-a-narrative').innerText = narrativeText;
+            document.getElementById('out-a-interrupt').innerText = interruptText;
+            document.getElementById('out-a-closure').innerText = closureText;
+
+            document.getElementById('output-autopsy').classList.add('active');
+            document.getElementById('output-autopsy').scrollIntoView({ behavior: 'smooth' });
+
+            // Save History
+            saveToHistory('autopsy', `Delivery: ${delivery} | Reaction: ${reaction}`, {
+                "Type Analysis": typeText,
+                "Narrative Shift": narrativeText,
+                "Reality Check": realityText
+            });
+        });
+
+        // TOOL 2: SHAME INTERRUPT LOGIC
+        function loadSampleShame() {
+            document.getElementById('s-thoughts').value = "I'm embarrassing and I look like a fool for liking them so much.";
+            document.getElementById('s-knows').value = "Close friends";
+            document.getElementById('s-imagines').value = "They pity me and talk about how needy I am behind my back.";
+            document.getElementById('s-response').value = "Isolate";
+            document.getElementById('s-body').value = "Small";
+        }
+
+        document.getElementById('form-shame').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const thoughts = document.getElementById('s-thoughts').value || "I am embarrassing.";
+            const knows = document.getElementById('s-knows').value;
+            const imagines = document.getElementById('s-imagines').value || "They judge me.";
+            const response = document.getElementById('s-response').value;
+            const body = document.getElementById('s-body').value;
+
+            const narrativeText = `Your shame is telling you that because ${knows.toLowerCase()} know(s), you are being exposed, judged, or pitied.`;
+
+            const realityText = `In reality, most people are absorbed in their own lives, insecurities, and struggles. When friends know about a rejection, their primary response is usually empathy or indifference to the drama—not harsh judgment. Nobody is maintaining a scoreboard of your romantic updates.`;
+
+            const antidoteText = `Because your default impulse is to ${response.toLowerCase()}, the antidote is deliberate, gentle re-entry. Send one neutral text to a friend today without mentioning the rejection, breaking the isolation spell.`;
+
+            const scriptText = `"It is okay that I put myself out there. Wanting connection is not embarrassing; it is human. I do not need everyone to choose me to know I am worthy."`;
+
+            let physicalText = "";
+            switch(body) {
+                case "Heavy":
+                case "Small":
+                case "Want to disappear":
+                    physicalText = "Postural reset: Stand up, stretch your arms wide above your head, roll your shoulders back, and take 3 deep belly breaths. Expand your body's physical footprint.";
+                    break;
+                case "Hot":
+                case "Tight":
+                    physicalText = "Temperature reset: Wash your hands and face with cool water, or hold an ice cube in your palm for 30 seconds to engage the parasympathetic nervous system.";
+                    break;
+                default:
+                    physicalText = "Somatic grounding: Place one hand on your chest and one on your belly. Press your feet firmly into the floor and feel the solid ground holding you.";
+            }
+
+            const socialText = `Schedule a low-stakes activity this week (e.g., getting a coffee with a friend, attending a local class) where romance is not the topic.`;
+
+            // Render
+            document.getElementById('out-s-narrative').innerText = narrativeText;
+            document.getElementById('out-s-reality').innerText = realityText;
+            document.getElementById('out-s-antidote').innerText = antidoteText;
+            document.getElementById('out-s-script').innerText = scriptText;
+            document.getElementById('out-s-physical').innerText = physicalText;
+            document.getElementById('out-s-social').innerText = socialText;
+
+            document.getElementById('output-shame').classList.add('active');
+            document.getElementById('output-shame').scrollIntoView({ behavior: 'smooth' });
+
+            // Save History
+            saveToHistory('shame', `Response: ${response} | Body: ${body}`, {
+                "Shame Script": scriptText,
+                "Actual Reality": realityText,
+                "Physical Reset": physicalText
+            });
+        });
+
+        // TOOL 3: RUMINATION STOP LOGIC
+        function loadSampleRumination() {
+            document.getElementById('r-freq').value = "Daily";
+            document.getElementById('r-what').value = "Everything";
+            document.getElementById('r-loops').value = "Why wasn't I enough";
+            document.getElementById('r-sleep').value = "Harder to fall asleep";
+            document.getElementById('r-work').value = "Distracted";
+        }
+
+        document.getElementById('form-rumination').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const freq = document.getElementById('r-freq').value;
+            const what = document.getElementById('r-what').value;
+            const loops = document.getElementById('r-loops').value;
+            const sleep = document.getElementById('r-sleep').value;
+            const work = document.getElementById('r-work').value;
+
+            // Estimate time lost
+            let minsPerDay = 15;
+            if (freq === "Hourly") minsPerDay = 120;
+            if (freq === "Few times daily") minsPerDay = 60;
+            if (freq === "Daily") minsPerDay = 30;
+            if (freq === "Few times weekly") minsPerDay = 10;
+
+            const hoursPerWeek = ((minsPerDay * 7) / 60).toFixed(1);
+
+            const costText = `At a checking/looping frequency of "${freq}", you are spending roughly ${hoursPerWeek} hours every week focused on checking ${what.toLowerCase()} and replaying "${loops}". That is valuable mental bandwidth pulled away from your sleep, focus, and energy.`;
+
+            const blockText = `Take 3 operational steps now: 1) Mute/unfollow their profiles. 2) Remove shortcut icons or hide social apps in a sub-folder. 3) Put a rubber band or sticky note on your phone as a physical pattern interrupt.`;
+
+            const thoughtText = `When you catch yourself asking "${loops}", firmly state mentally: "STOP. Searching for answers in their digital footprint will not change the past." Replace it with: "I am choosing to invest this attention in my present moment."`;
+
+            const ruleText = `Set a timer for 15 minutes at 5:00 PM as designated "Worry Time." If rumination pops up during the day, write it down on a note and defer it: "I will think about this at 5:00 PM." Outside of that window, mental loops are off-limits.`;
+
+            const sleepText = `Sleep impact noted: (${sleep}). Establish a screen-free buffer 45 minutes before bed. Leave your phone across the room so middle-of-the-night or early-morning checking is physically inconvenient.`;
+
+            const buddyText = `Tell a trusted friend: "I am cutting back on digital checking. If I feel the urge to inspect their profiles, I'm going to text you an emoji instead."`;
+
+            // Render
+            document.getElementById('out-r-cost').innerText = costText;
+            document.getElementById('out-r-block').innerText = blockText;
+            document.getElementById('out-r-thought').innerText = thoughtText;
+            document.getElementById('out-r-rule').innerText = ruleText;
+            document.getElementById('out-r-sleep').innerText = sleepText;
+            document.getElementById('out-r-buddy').innerText = buddyText;
+
+            document.getElementById('output-rumination').classList.add('active');
+            document.getElementById('output-rumination').scrollIntoView({ behavior: 'smooth' });
+
+            // Save History
+            saveToHistory('rumination', `Freq: ${freq} | Loop: ${loops}`, {
+                "Weekly Cost": `${hoursPerWeek} hours/week`,
+                "Thought Replacement": thoughtText,
+                "Block Protocol": blockText
+            });
+        });
+
+        // TOOL 4: IDENTITY REPAIR LOGIC
+        function loadSampleIdentity() {
+            document.getElementById('i-proves').value = "It proves that I'm too much, overly emotional, and ultimately unlovable.";
+            document.getElementById('i-evidence').value = "My friends value my openness; my past partner appreciated my thoughtfulness.";
+            document.getElementById('i-past').value = "Being excluded from a friend group in high school.";
+            document.getElementById('i-values').value = "Loyalty, humor, creativity, deep connection.";
+            document.getElementById('i-goodat').value = "Cooking complex dinners for people I care about.";
+            document.getElementById('i-valuesyou').value = "My sister, who always calls me for honest advice.";
+        }
+
+        document.getElementById('form-identity').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const proves = document.getElementById('i-proves').value || "that you are inadequate";
+            const evidence = document.getElementById('i-evidence').value || "None stated";
+            const past = document.getElementById('i-past').value || "Past experiences";
+            const values = document.getElementById('i-values').value || "Your personal principles";
+            const goodat = document.getElementById('i-goodat').value || "your unique skills";
+            const valuesyou = document.getElementById('i-valuesyou').value || "the people in your life";
+
+            const verdictText = `You are interpreting this rejection as absolute proof "${proves}". Rejection is not a judge's ruling on your total character. It is simply evidence of a single romantic mismatch.`;
+
+            const anchorText = `Your worth is anchored in non-romantic foundations:\n1) Your core values: ${values}\n2) Your competence in: ${goodat}\n3) Your meaningful bond with: ${valuesyou}`;
+
+            const patternText = `This rejection touched an old nerve tied to: "${past}". Recognize that your brain is stacking past wounds on top of this current situation, making today's rejection feel artificially huge.`;
+
+            const challengeText = `To disprove the narrative "${proves}", engage in one concrete action this week around your skill in ${goodat} or expressing your value of ${values}. Show your brain that your identity is active and multi-dimensional.`;
+
+            const strengthsText = `You bring genuine depth, including your values (${values}) and capacity to care. A rejection by someone who couldn't receive these qualities doesn't reduce their worth.`;
+
+            const filterText = `Future filter: Reserve your energy for individuals who recognize and align with your core values (${values}) without requiring you to shrink or adjust.`;
+
+            // Render
+            document.getElementById('out-i-verdict').innerText = verdictText;
+            document.getElementById('out-i-anchor').innerText = anchorText;
+            document.getElementById('out-i-pattern').innerText = patternText;
+            document.getElementById('out-i-challenge').innerText = challengeText;
+            document.getElementById('out-i-strengths').innerText = strengthsText;
+            document.getElementById('out-i-filter').innerText = filterText;
+
+            document.getElementById('output-identity').classList.add('active');
+            document.getElementById('output-identity').scrollIntoView({ behavior: 'smooth' });
+
+            // Save History
+            saveToHistory('identity', `Proves: ${proves.substring(0,25)}...`, {
+                "False Verdict": verdictText,
+                "Identity Anchors": anchorText,
+                "Action Challenge": challengeText
+            });
+        });
+
+        // TOOL 5: REENTRY DECISION LOGIC
+        function loadSampleReentry() {
+            document.getElementById('e-desire').value = "Cautiously open";
+            document.getElementById('e-readiness').value = "4";
+            document.getElementById('readiness-val').innerText = "4";
+            document.getElementById('e-fear').value = "Experiencing the exact same pain and feeling like a fool again.";
+            document.getElementById('e-makesready').value = "Feeling solid on my own without needing someone's validation.";
+            document.getElementById('e-support').value = "Moderate";
+        }
+
+        document.getElementById('form-reentry').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const desire = document.getElementById('e-desire').value;
+            const readiness = parseInt(document.getElementById('e-readiness').value);
+            const fear = document.getElementById('e-fear').value || "repetition of hurt";
+            const makesready = document.getElementById('e-makesready').value || "more time";
+            const support = document.getElementById('e-support').value;
+
+            let verdictText = "";
+            let experimentText = "";
+
+            if (readiness <= 3 || desire === "Never again" || desire === "Revenge dating") {
+                verdictText = "VERDICT: WAIT & PAUSE. Your emotional system is still processing raw pain or reaction. Forcing dating now carries a high risk of comparative frustration or seeking validation to patch a wound.";
+                experimentText = "Skip dating apps for 3-4 weeks. Focus on social environments where romantic stakes do not exist.";
+            } else if (readiness >= 4 && readiness <= 7) {
+                verdictText = "VERDICT: GENTLE EXPERIMENT. You are in a transitional phase. You do not need to dive deep into serious dating, but low-stakes interactions are acceptable if kept lightweight.";
+                experimentText = "Try ONE low-pressure activity (e.g., a 30-minute coffee or casual event). Set a firm time limit beforehand so you retain full control.";
+            } else {
+                verdictText = "VERDICT: OPEN TO GO. Your self-reported readiness indicates solid ground. Enter dating with explicit boundaries and clarity on what you want.";
+                experimentText = "Resume dating deliberately. Keep your pace slow and evaluate prospects against your standards early on.";
+            }
+
+            const waitText = `While you wait or move gently, focus on your internal readiness condition: "${makesready}". Nourish yourself without treating dating as an urgent test.`;
+
+            const fearAntidoteText = `Addressing your fear ("${fear}"): Pre-plan your exit strategy for dates. Remind yourself: "Even if someone rejects me again, I now know how to navigate the pain without losing my worth."`;
+
+            const supportText = `Your support network is currently: ${support}. Pick 1-2 trusted people to debrief with after any date, ensuring you don't process everything in isolation.`;
+
+            const redirectText = `Non-dating focus target: Choose one creative, physical, or professional goal to pursue over the next 30 days to ground your confidence outside romance.`;
+
+            // Render
+            document.getElementById('out-e-verdict').innerText = verdictText;
+            document.getElementById('out-e-wait').innerText = waitText;
+            document.getElementById('out-e-experiment').innerText = experimentText;
+            document.getElementById('out-e-fear').innerText = fearAntidoteText;
+            document.getElementById('out-e-support').innerText = supportText;
+            document.getElementById('out-e-redirect').innerText = redirectText;
+
+            document.getElementById('output-reentry').classList.add('active');
+            document.getElementById('output-reentry').scrollIntoView({ behavior: 'smooth' });
+
+            // Save History
+            saveToHistory('reentry', `Readiness: ${readiness}/10 | Desire: ${desire}`, {
+                "Verdict": verdictText,
+                "Gentle Experiment": experimentText,
+                "Fear Antidote": fearAntidoteText
+            });
+        });
+
+        // Initial Load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderHistory('autopsy');
+            renderHistory('shame');
+            renderHistory('rumination');
+            renderHistory('identity');
+            renderHistory('reentry');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,2422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signal - Dating Communication Toolkit</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #FF6B9D;
+            --primary-hover: #e85587;
+            --secondary: #4ECDC4;
+            --secondary-hover: #3dbab1;
+            --bg-gradient: linear-gradient(135deg, #FFE4E1 0%, #E0F7FA 100%);
+            --card-bg: #FFFFFF;
+            --text-main: #2D3748;
+            --text-muted: #718096;
+            --border: #E2E8F0;
+            --sidebar-width: 260px;
+            
+            /* Status Colors */
+            --badge-low: #CBD5E0;
+            --badge-med: #ECC94B;
+            --badge-high: #48BB78;
+            --verdict-green: #48BB78;
+            --verdict-yellow: #ECC94B;
+            --verdict-orange: #ED8936;
+            --verdict-red: #F56565;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Mobile Layout Header */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 0 16px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .mobile-header .brand {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--card-bg);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            z-index: 99;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 12px 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .sidebar-item {
+            padding: 2px 12px;
+        }
+
+        .sidebar-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-btn i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .sidebar-btn:hover {
+            background: #FFF5F7;
+            color: var(--primary);
+        }
+
+        .sidebar-btn:hover i {
+            color: var(--primary);
+        }
+
+        .sidebar-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .sidebar-btn.active i {
+            color: white;
+        }
+
+        /* Main Content Container */
+        .main-container {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 24px;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .content-area {
+            width: 100%;
+            max-width: 800px;
+            flex: 1;
+        }
+
+        .view-panel {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* UI Card Component */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        /* Tool Headers */
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .tool-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tool-title i {
+            color: var(--primary);
+        }
+
+        .btn-sample {
+            background: #E6FFFA;
+            color: #234E52;
+            border: 1px solid var(--secondary);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-sample:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        /* Dashboard Specifics */
+        .hero {
+            text-align: center;
+            margin-bottom: 36px;
+            padding: 20px 0;
+        }
+
+        .hero-logo {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .hero-tagline {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(255, 107, 157, 0.15);
+            border-color: var(--primary);
+        }
+
+        .dash-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: #FFF5F7;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+        }
+
+        .dash-card:nth-child(even) .dash-icon {
+            background: #E6FFFA;
+            color: var(--secondary);
+        }
+
+        .dash-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .dash-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .form-control, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background: #FAFAFA;
+            transition: border 0.2s;
+        }
+
+        .form-control:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #F7FAFC;
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.88rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .radio-label:hover {
+            border-color: var(--primary);
+        }
+
+        .radio-label input:checked + span {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Output Sections */
+        .output-container {
+            display: none;
+            margin-top: 24px;
+            border-top: 2px dashed var(--border);
+            padding-top: 24px;
+        }
+
+        .output-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .output-section {
+            margin-bottom: 20px;
+        }
+
+        .output-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .output-box {
+            background: #F7FAFC;
+            border-left: 4px solid var(--primary);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+        .badge-low { background: var(--badge-low); color: #2D3748; }
+        .badge-medium { background: var(--badge-med); color: #744210; }
+        .badge-high { background: var(--badge-high); color: white; }
+
+        /* Verdict Banners */
+        .verdict-banner {
+            padding: 16px 20px;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: 0.05em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .verdict-text-now { background: var(--verdict-green); }
+        .verdict-wait { background: var(--verdict-yellow); color: #744210; }
+        .verdict-dont-text { background: var(--verdict-red); }
+        .verdict-different { background: var(--verdict-orange); }
+
+        /* Copyable Message Block */
+        .copy-block {
+            background: #F7FAFC;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .copy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .copy-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--secondary-hover);
+            text-transform: uppercase;
+        }
+
+        .btn-copy {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .btn-copy:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .copy-text {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        /* Impulse Check Box */
+        .impulse-box {
+            background: #FFF5F7;
+            border: 1px solid #FED7E2;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .impulse-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-impulse {
+            padding: 6px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-impulse.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .impulse-message {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #9B2C2C;
+            font-weight: 500;
+            display: none;
+        }
+
+        /* Tabs UI */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* History Accordion */
+        .history-accordion {
+            margin-top: 30px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 0;
+            user-select: none;
+        }
+
+        .history-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-list {
+            display: none;
+            margin-top: 12px;
+        }
+
+        .history-list.active {
+            display: block;
+        }
+
+        .history-item {
+            background: #F7FAFC;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary);
+        }
+
+        .btn-clear-history {
+            background: none;
+            border: none;
+            color: var(--verdict-red);
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* Situation Buttons Grid */
+        .situation-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .btn-situation {
+            padding: 12px;
+            background: #F7FAFC;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .btn-situation:hover, .btn-situation.active {
+            background: #FFF5F7;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #2D3748;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px 0 12px 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            width: 100%;
+        }
+
+        /* Overlay for Mobile Sidebar */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 98;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 850px) {
+            .mobile-header {
+                display: flex;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                top: 0;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .main-container {
+                margin-left: 0;
+                width: 100%;
+                padding: 80px 16px 24px 16px;
+            }
+
+            .grid-dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .situation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="brand">
+            <i class="fa-solid fa-signal"></i> Signal
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Fixed Left Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="sidebar-brand" onclick="navTo('dashboard')">
+                <i class="fa-solid fa-signal"></i> Signal
+            </a>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-item">
+                <button class="sidebar-btn active" data-tool="dashboard">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </button>
+            </li>
+            <li class="sidebar-item">
+                <button class="sidebar-btn" data-tool="text-decoder">
+                    <i class="fa-solid fa-magnifying-glass"></i> Text Decoder
+                </button>
+            </li>
+            <li class="sidebar-item">
+                <button class="sidebar-btn" data-tool="should-i-text">
+                    <i class="fa-solid fa-paper-plane"></i> Should I Text Them?
+                </button>
+            </li>
+            <li class="sidebar-item">
+                <button class="sidebar-btn" data-tool="what-should-i-say">
+                    <i class="fa-solid fa-comment-dots"></i> What Should I Say?
+                </button>
+            </li>
+            <li class="sidebar-item">
+                <button class="sidebar-btn" data-tool="why-stopped">
+                    <i class="fa-solid fa-user-clock"></i> Why Stop Replying?
+                </button>
+            </li>
+            <li class="sidebar-item">
+                <button class="sidebar-btn" data-tool="first-date">
+                    <i class="fa-solid fa-wine-glass"></i> First Date Coach
+                </button>
+            </li>
+            <li class="sidebar-item">
+                <button class="sidebar-btn" data-tool="signal-checker">
+                    <i class="fa-solid fa-square-poll-vertical"></i> Date Signal Checker
+                </button>
+            </li>
+            <li class="sidebar-item">
+                <button class="sidebar-btn" data-tool="did-i-mess-up">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Did I Mess This Up?
+                </button>
+            </li>
+            <li class="sidebar-item">
+                <button class="sidebar-btn" data-tool="say-to-crush">
+                    <i class="fa-solid fa-heart"></i> Say to My Crush
+                </button>
+            </li>
+            <li class="sidebar-item">
+                <button class="sidebar-btn" data-tool="am-i-ignored">
+                    <i class="fa-solid fa-ghost"></i> Am I Being Ignored?
+                </button>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-container">
+        <div class="content-area">
+
+            <!-- DASHBOARD VIEW -->
+            <div id="dashboard" class="view-panel active">
+                <div class="hero">
+                    <h1 class="hero-logo">Signal</h1>
+                    <p class="hero-tagline">Decode texts. Stop overthinking. Know what to do.</p>
+                </div>
+                <div class="grid-dashboard">
+                    <div class="dash-card" onclick="navTo('text-decoder')">
+                        <div class="dash-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                        <h2 class="dash-title">Text Decoder</h2>
+                        <p class="dash-desc">Break down confusing messages into literal meanings and objective possibilities.</p>
+                    </div>
+                    <div class="dash-card" onclick="navTo('should-i-text')">
+                        <div class="dash-icon"><i class="fa-solid fa-paper-plane"></i></div>
+                        <h2 class="dash-title">Should I Text Them?</h2>
+                        <p class="dash-desc">Get a clear Verdict (Text, Wait, Don't Text) based on your exact situation.</p>
+                    </div>
+                    <div class="dash-card" onclick="navTo('what-should-i-say')">
+                        <div class="dash-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                        <h2 class="dash-title">What Should I Say?</h2>
+                        <p class="dash-desc">Craft balanced, tailored messages for awkward or tricky conversations.</p>
+                    </div>
+                    <div class="dash-card" onclick="navTo('why-stopped')">
+                        <div class="dash-icon"><i class="fa-solid fa-user-clock"></i></div>
+                        <h2 class="dash-title">Why Stop Replying?</h2>
+                        <p class="dash-desc">Analyze conversation drop-offs without falling into anxious assumptions.</p>
+                    </div>
+                    <div class="dash-card" onclick="navTo('first-date')">
+                        <div class="dash-icon"><i class="fa-solid fa-wine-glass"></i></div>
+                        <h2 class="dash-title">First Date Coach</h2>
+                        <p class="dash-desc">Practical guides, conversation starters, and post-date debriefing tools.</p>
+                    </div>
+                    <div class="dash-card" onclick="navTo('signal-checker')">
+                        <div class="dash-icon"><i class="fa-solid fa-square-poll-vertical"></i></div>
+                        <h2 class="dash-title">Date Signal Checker</h2>
+                        <p class="dash-desc">Evaluate mutual interest and effort patterns logically.</p>
+                    </div>
+                    <div class="dash-card" onclick="navTo('did-i-mess-up')">
+                        <div class="dash-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <h2 class="dash-title">Did I Mess This Up?</h2>
+                        <p class="dash-desc">Separate actual mistakes from spiraling thoughts and learn how to repair.</p>
+                    </div>
+                    <div class="dash-card" onclick="navTo('say-to-crush')">
+                        <div class="dash-icon"><i class="fa-solid fa-heart"></i></div>
+                        <h2 class="dash-title">Say to My Crush</h2>
+                        <p class="dash-desc">Find low-pressure openers and responses for every dating scenario.</p>
+                    </div>
+                    <div class="dash-card" onclick="navTo('am-i-ignored')">
+                        <div class="dash-icon"><i class="fa-solid fa-ghost"></i></div>
+                        <h2 class="dash-title">Am I Being Ignored?</h2>
+                        <p class="dash-desc">Assess response delays realistically using behavioral indicators.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOOL 1: TEXT DECODER -->
+            <div id="text-decoder" class="view-panel">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-magnifying-glass"></i> Text Decoder</h2>
+                        <button class="btn-sample" onclick="loadSample('text-decoder')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="td-input">Confusing Message</label>
+                        <textarea id="td-input" placeholder="Paste the confusing message here..."></textarea>
+                    </div>
+                    <button class="btn-primary" onclick="analyzeTextDecoder()"><i class="fa-solid fa-bolt"></i> Analyze Message</button>
+
+                    <div id="td-output" class="output-container">
+                        <div class="output-section">
+                            <div class="output-title">1. Literal Meaning</div>
+                            <div id="td-literal" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">2. Observable Emotional Tone</div>
+                            <div id="td-tone" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">3. Possible Interpretations</div>
+                            <div id="td-interpretations" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">4. What We Cannot Know</div>
+                            <div id="td-cannot-know" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">5. What Not To Assume</div>
+                            <div id="td-not-assume" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">6. Suggested Responses</div>
+                            <div id="td-responses"></div>
+                        </div>
+                        <div class="impulse-box">
+                            <div style="font-weight: 700; font-size: 0.9rem; color: #9B2C2C;">7. Impulse Check</div>
+                            <div style="font-size: 0.85rem; margin-top: 4px;">Are you feeling anxious right now?</div>
+                            <div class="impulse-actions">
+                                <button class="btn-impulse" onclick="toggleImpulse(this, true)">Yes</button>
+                                <button class="btn-impulse" onclick="toggleImpulse(this, false)">No</button>
+                            </div>
+                            <div class="impulse-message">Take a breath. You don't need to respond immediately. Step away for 10 minutes.</div>
+                        </div>
+                    </div>
+
+                    <div class="history-accordion">
+                        <div class="history-header" onclick="toggleHistory('td')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                            <button class="btn-clear-history" onclick="event.stopPropagation(); clearHistory('td');">Clear History</button>
+                        </div>
+                        <div id="td-history-list" class="history-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOOL 2: SHOULD I TEXT THEM? -->
+            <div id="should-i-text" class="view-panel">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-paper-plane"></i> Should I Text Them?</h2>
+                        <button class="btn-sample" onclick="loadSample('should-i-text')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="sit-happened">What happened?</label>
+                        <textarea id="sit-happened" placeholder="Briefly describe the context..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="sit-last-msg">Last message sent:</label>
+                        <textarea id="sit-last-msg" placeholder="What was the last text?"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Who sent the last message?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="sit-who" value="Me" checked> <span>Me</span></label>
+                            <label class="radio-label"><input type="radio" name="sit-who" value="Them"> <span>Them</span></label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="sit-time">Time since contact:</label>
+                        <select id="sit-time">
+                            <option value="<1hr">Less than 1 hour</option>
+                            <option value="1-6hr">1-6 hours</option>
+                            <option value="6-24hr">6-24 hours</option>
+                            <option value="1-3d">1-3 days</option>
+                            <option value="3-7d">3-7 days</option>
+                            <option value="1+w">1+ weeks</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="sit-stage">Relationship stage:</label>
+                        <select id="sit-stage">
+                            <option value="Just met">Just met</option>
+                            <option value="Talking">Talking</option>
+                            <option value="Dating">Dating</option>
+                            <option value="Exclusive">Exclusive</option>
+                            <option value="Complicated">Complicated</option>
+                            <option value="Ex">Ex</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Recent pattern:</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="sit-pattern" value="Fast" checked> <span>They usually reply fast</span></label>
+                            <label class="radio-label"><input type="radio" name="sit-pattern" value="Slow"> <span>Slow but consistent</span></label>
+                            <label class="radio-label"><input type="radio" name="sit-pattern" value="HotCold"> <span>Hot and cold</span></label>
+                            <label class="radio-label"><input type="radio" name="sit-pattern" value="Ghosted"> <span>Ghosted before</span></label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Desired outcome:</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="sit-outcome" value="Keep Going" checked> <span>Keep conversation going</span></label>
+                            <label class="radio-label"><input type="radio" name="sit-outcome" value="Ask Out"> <span>Ask them out</span></label>
+                            <label class="radio-label"><input type="radio" name="sit-outcome" value="Apologize"> <span>Apologize</span></label>
+                            <label class="radio-label"><input type="radio" name="sit-outcome" value="Check In"> <span>Check if they're okay</span></label>
+                            <label class="radio-label"><input type="radio" name="sit-outcome" value="End Things"> <span>End things</span></label>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="analyzeShouldIText()"><i class="fa-solid fa-calculator"></i> Evaluate Situation</button>
+
+                    <div id="sit-output" class="output-container">
+                        <div id="sit-verdict-banner" class="verdict-banner"></div>
+                        <div class="output-section">
+                            <div class="output-title">Evidence</div>
+                            <div id="sit-evidence" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">What Remains Uncertain</div>
+                            <div id="sit-uncertain" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">What Could Go Wrong</div>
+                            <div id="sit-risk" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Best Next Step</div>
+                            <div id="sit-next" class="output-box"></div>
+                        </div>
+                        <div id="sit-messages-section" class="output-section" style="display:none;">
+                            <div class="output-title">Suggested Messages</div>
+                            <div id="sit-messages"></div>
+                        </div>
+                    </div>
+
+                    <div class="history-accordion">
+                        <div class="history-header" onclick="toggleHistory('sit')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                            <button class="btn-clear-history" onclick="event.stopPropagation(); clearHistory('sit');">Clear History</button>
+                        </div>
+                        <div id="sit-history-list" class="history-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOOL 3: WHAT SHOULD I SAY? -->
+            <div id="what-should-i-say" class="view-panel">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-comment-dots"></i> What Should I Say?</h2>
+                        <button class="btn-sample" onclick="loadSample('what-should-i-say')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="wss-happened">What happened?</label>
+                        <textarea id="wss-happened" placeholder="Describe context..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="wss-who">Who are you speaking to?</label>
+                        <select id="wss-who">
+                            <option value="Crush">Crush</option>
+                            <option value="Partner">Partner</option>
+                            <option value="Ex">Ex</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Family">Family</option>
+                            <option value="Coworker">Coworker</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="wss-understand">What do you want them to understand?</label>
+                        <textarea id="wss-understand" placeholder="Your core message or key point..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="wss-outcome">Desired outcome:</label>
+                        <select id="wss-outcome">
+                            <option value="Apologize">Apologize</option>
+                            <option value="Ask out">Ask out</option>
+                            <option value="Set boundary">Set boundary</option>
+                            <option value="Express disappointment">Express disappointment</option>
+                            <option value="Ask about distance">Ask about distance</option>
+                            <option value="Reconnect">Reconnect</option>
+                            <option value="End relationship">End relationship</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Desired tone:</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="wss-tone" value="Warm" checked> <span>Warm</span></label>
+                            <label class="radio-label"><input type="radio" name="wss-tone" value="Calm"> <span>Calm / Confident</span></label>
+                            <label class="radio-label"><input type="radio" name="wss-tone" value="Direct"> <span>Direct</span></label>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="analyzeWhatShouldISay()"><i class="fa-solid fa-pen-nib"></i> Generate Message Options</button>
+
+                    <div id="wss-output" class="output-container">
+                        <div class="output-section">
+                            <div class="output-title">Generated Options</div>
+                            <div id="wss-options"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Why This Wording Works</div>
+                            <div id="wss-why" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">What NOT To Say</div>
+                            <div id="wss-not-say" class="output-box" style="border-left-color: var(--verdict-red); background: #FFF5F7;"></div>
+                        </div>
+                    </div>
+
+                    <div class="history-accordion">
+                        <div class="history-header" onclick="toggleHistory('wss')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                            <button class="btn-clear-history" onclick="event.stopPropagation(); clearHistory('wss');">Clear History</button>
+                        </div>
+                        <div id="wss-history-list" class="history-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOOL 4: WHY DID THEY STOP REPLYING? -->
+            <div id="why-stopped" class="view-panel">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-user-clock"></i> Why Stop Replying?</h2>
+                        <button class="btn-sample" onclick="loadSample('why-stopped')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="wsr-chat">Paste recent conversation (last 10-20 messages):</label>
+                        <textarea id="wsr-chat" style="min-height: 150px;" placeholder="Me: Hey! How was your weekend?
+Them: Pretty good, just relaxed!
+Me: Awesome, want to grab coffee this week?"></textarea>
+                    </div>
+                    <button class="btn-primary" onclick="analyzeWhyStopped()"><i class="fa-solid fa-magnifying-glass-chart"></i> Analyze Chat Patterns</button>
+
+                    <div id="wsr-output" class="output-container">
+                        <div class="output-section">
+                            <div class="output-title">What Changed</div>
+                            <div id="wsr-changed" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">What We Know (Facts Only)</div>
+                            <div id="wsr-know" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Possible Explanations</div>
+                            <div id="wsr-explanations" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">What We Cannot Know</div>
+                            <div id="wsr-cannot" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Best Next Move</div>
+                            <div id="wsr-next" class="output-box"></div>
+                        </div>
+                    </div>
+
+                    <div class="history-accordion">
+                        <div class="history-header" onclick="toggleHistory('wsr')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                            <button class="btn-clear-history" onclick="event.stopPropagation(); clearHistory('wsr');">Clear History</button>
+                        </div>
+                        <div id="wsr-history-list" class="history-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOOL 5: FIRST DATE COACH -->
+            <div id="first-date" class="view-panel">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-wine-glass"></i> First Date Coach</h2>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="switchTab('fd', 'before')">BEFORE</button>
+                        <button class="tab-btn" onclick="switchTab('fd', 'during')">DURING</button>
+                        <button class="tab-btn" onclick="switchTab('fd', 'after')">AFTER</button>
+                    </div>
+
+                    <!-- BEFORE TAB -->
+                    <div id="fd-tab-before" class="tab-content active">
+                        <div class="output-section">
+                            <div class="output-title">Conversation Starters</div>
+                            <div class="output-box">
+                                <ul style="padding-left: 20px;">
+                                    <li>"What's something exciting you've been working on or looking forward to lately?"</li>
+                                    <li>"If you had a completely free day with zero obligations, what would it look like?"</li>
+                                    <li>"What’s your favorite local hidden gem spot around here?"</li>
+                                    <li>"What was the highlight of your week so far?"</li>
+                                    <li>"Are you more of a spontaneous traveler or a meticulous planner?"</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Natural Follow-ups</div>
+                            <div class="output-box">
+                                <ul style="padding-left: 20px;">
+                                    <li>"How did you end up getting into that?"</li>
+                                    <li>"That’s interesting! What’s your favorite part about it?"</li>
+                                    <li>"Has that always been something you enjoyed?"</li>
+                                    <li>"What surprised you most when you first tried it?"</li>
+                                    <li>"Would you recommend that to someone giving it a shot for the first time?"</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Things to Avoid</div>
+                            <div class="output-box">
+                                <ul style="padding-left: 20px;">
+                                    <li>Deep ex-relationship debriefs or venting about past trauma.</li>
+                                    <li>Interviewing rapid-fire style without sharing your own stories.</li>
+                                    <li>Heavily controversial topics before establishing rapport.</li>
+                                    <li>Checking your phone frequently or placing it screen-up on table.</li>
+                                    <li>Monopolizing the conversation for more than 2 minutes at a time.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Confidence Prep Checklist</div>
+                            <div class="output-box">
+                                <label style="display:block; margin-bottom:4px;"><input type="checkbox"> Remind yourself: You are evaluating fit, not seeking approval.</label>
+                                <label style="display:block; margin-bottom:4px;"><input type="checkbox"> Arrive 5 minutes early to get comfortable in the space.</label>
+                                <label style="display:block;"><input type="checkbox"> Set phone to silent or Do Not Disturb mode.</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DURING TAB -->
+                    <div id="fd-tab-during" class="tab-content">
+                        <div class="output-section">
+                            <div class="output-title">Starting Conversation</div>
+                            <div class="output-box">
+                                <ul style="padding-left: 20px;">
+                                    <li>"Great to finally meet you in person! How was your trip over?"</li>
+                                    <li>"Love this venue spot—have you been here before?"</li>
+                                    <li>"How has your week been treating you so far?"</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Recovering from Silence</div>
+                            <div class="output-box">
+                                <ul style="padding-left: 20px;">
+                                    <li>"Random question, but what's the best meal you've had recently?"</li>
+                                    <li>"By the way, I was curious—how did you get into your current line of work?"</li>
+                                    <li>"So, what shows or music have you been obsessed with lately?"</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Showing Interest Respectfully</div>
+                            <div class="output-box">
+                                <ul style="padding-left: 20px;">
+                                    <li>"I really like your energy—it’s super refreshing."</li>
+                                    <li>"That’s impressive, I love how passionate you are about that."</li>
+                                    <li>"You have a great laugh!"</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Ending Naturally</div>
+                            <div class="output-box">
+                                <ul style="padding-left: 20px;">
+                                    <li>"I had a really nice time with you tonight. Let’s head out whenever you're ready."</li>
+                                    <li>"I should probably head out soon, but I really enjoyed chatting with you!"</li>
+                                    <li>"Thanks for a fun evening! Text me when you get home so I know you made it back safely."</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="output-section" style="margin-top:20px;">
+                            <button class="btn-primary" style="background:#ED8936;" onclick="document.getElementById('fd-emergency').style.display='block'"><i class="fa-solid fa-triangle-exclamation"></i> Emergency: We Have Nothing To Say!</button>
+                            <div id="fd-emergency" class="output-box" style="display:none; margin-top:10px; border-left-color:#ED8936;">
+                                <strong>5 Instant Conversation Rescues:</strong>
+                                <ol style="padding-left: 20px; margin-top: 6px;">
+                                    <li>"What's a hot take or opinion you hold that most people disagree with?"</li>
+                                    <li>"If you won a trip anywhere tomorrow, where are you flying?"</li>
+                                    <li>"What was your absolute worst job ever?"</li>
+                                    <li>"What's your ultimate comfort food?"</li>
+                                    <li>"Notice anything interesting in the room right now?"</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AFTER TAB -->
+                    <div id="fd-tab-after" class="tab-content">
+                        <button class="btn-sample" style="margin-bottom:12px;" onclick="loadSample('first-date-after')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Debrief</button>
+                        <div class="form-group">
+                            <label class="form-label" for="fd-after-desc">Describe what happened on the date:</label>
+                            <textarea id="fd-after-desc" placeholder="How did it go? How did it end? Did they text after?"></textarea>
+                        </div>
+                        <button class="btn-primary" onclick="analyzeFirstDateAfter()"><i class="fa-solid fa-clipboard-check"></i> Debrief Date</button>
+
+                        <div id="fd-after-output" class="output-container">
+                            <div class="output-section">
+                                <div class="output-title">Positive Signals</div>
+                                <div id="fd-pos" class="output-box"></div>
+                            </div>
+                            <div class="output-section">
+                                <div class="output-title">Ambiguous Signals</div>
+                                <div id="fd-amb" class="output-box"></div>
+                            </div>
+                            <div class="output-section">
+                                <div class="output-title">Possible Concerns</div>
+                                <div id="fd-con" class="output-box"></div>
+                            </div>
+                            <div class="output-section">
+                                <div class="output-title">Suggested Next Step</div>
+                                <div id="fd-next" class="output-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOOL 6: DATE SIGNAL CHECKER -->
+            <div id="signal-checker" class="view-panel">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-square-poll-vertical"></i> Date Signal Checker</h2>
+                        <button class="btn-sample" onclick="loadSample('signal-checker')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">1. Who usually initiates conversation?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="sc-q1" value="positive" checked> <span>Equally shared or mostly them</span></label>
+                            <label class="radio-label"><input type="radio" name="sc-q1" value="ambiguous"> <span>Varies week to week</span></label>
+                            <label class="radio-label"><input type="radio" name="sc-q1" value="concerning"> <span>Almost exclusively me</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">2. Are their responses consistent?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="sc-q2" value="positive" checked> <span>Yes, steady tempo</span></label>
+                            <label class="radio-label"><input type="radio" name="sc-q2" value="ambiguous"> <span>Slow but reliable</span></label>
+                            <label class="radio-label"><input type="radio" name="sc-q2" value="concerning"> <span>Hot & cold / days of silence</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">3. Do they make plans and follow through?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="sc-q3" value="positive" checked> <span>Yes, suggests specific times/dates</span></label>
+                            <label class="radio-label"><input type="radio" name="sc-q3" value="ambiguous"> <span>Vague "we should hang out"</span></label>
+                            <label class="radio-label"><input type="radio" name="sc-q3" value="concerning"> <span>Cancels last minute / rarely makes effort</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">4. Do they show interest in learning about you?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="sc-q4" value="positive" checked> <span>Asks open questions & engages</span></label>
+                            <label class="radio-label"><input type="radio" name="sc-q4" value="ambiguous"> <span>Answers politely, asks few questions</span></label>
+                            <label class="radio-label"><input type="radio" name="sc-q4" value="concerning"> <span>Talks mostly about themselves</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">5. Do they remember details you share?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="sc-q5" value="positive" checked> <span>Brings up past mentions naturally</span></label>
+                            <label class="radio-label"><input type="radio" name="sc-q5" value="ambiguous"> <span>Remembers major points only</span></label>
+                            <label class="radio-label"><input type="radio" name="sc-q5" value="concerning"> <span>Forgets things repeatedly</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">6. Do they respect your boundaries?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="sc-q6" value="positive" checked> <span>Completely respectful and considerate</span></label>
+                            <label class="radio-label"><input type="radio" name="sc-q6" value="ambiguous"> <span>A bit pushy but backs off when asked</span></label>
+                            <label class="radio-label"><input type="radio" name="sc-q6" value="concerning"> <span>Disregards or tests boundaries</span></label>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" onclick="analyzeSignalChecker()"><i class="fa-solid fa-chart-pie"></i> Evaluate Mutual Interest</button>
+
+                    <div id="sc-output" class="output-container">
+                        <div class="output-section">
+                            <div class="output-title">Positive Signals Identified</div>
+                            <div id="sc-positive" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Ambiguous Signals</div>
+                            <div id="sc-ambiguous" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Concerning Signals</div>
+                            <div id="sc-concerning" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">What We Can Reasonably Infer</div>
+                            <div id="sc-infer" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">What We Cannot Know</div>
+                            <div id="sc-cannot" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Recommended Action</div>
+                            <div id="sc-next" class="output-box"></div>
+                        </div>
+                    </div>
+
+                    <div class="history-accordion">
+                        <div class="history-header" onclick="toggleHistory('sc')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                            <button class="btn-clear-history" onclick="event.stopPropagation(); clearHistory('sc');">Clear History</button>
+                        </div>
+                        <div id="sc-history-list" class="history-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOOL 7: DID I MESS THIS UP? -->
+            <div id="did-i-mess-up" class="view-panel">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-triangle-exclamation"></i> Did I Mess This Up?</h2>
+                        <button class="btn-sample" onclick="loadSample('did-i-mess-up')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="dim-said">What did you say or do?</label>
+                        <textarea id="dim-said" placeholder="Describe your action or text..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="dim-responded">How did they respond?</label>
+                        <textarea id="dim-responded" placeholder="Their response or reaction..."></textarea>
+                    </div>
+                    <button class="btn-primary" onclick="analyzeDidIMessUp()"><i class="fa-solid fa-scale-balanced"></i> Assess Situation</button>
+
+                    <div id="dim-output" class="output-container">
+                        <div id="dim-badge" class="verdict-banner"></div>
+                        <div class="output-section">
+                            <div class="output-title">Objective Facts</div>
+                            <div id="dim-facts" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Assumptions You Might Be Adding</div>
+                            <div id="dim-assumptions" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Possible Interpretations</div>
+                            <div id="dim-interpretations" class="output-box"></div>
+                        </div>
+                        <div id="dim-repair-section" class="output-section" style="display:none;">
+                            <div class="output-title">Suggested Repair Message</div>
+                            <div id="dim-repair"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">What To Do Next</div>
+                            <div id="dim-next" class="output-box"></div>
+                        </div>
+                    </div>
+
+                    <div class="history-accordion">
+                        <div class="history-header" onclick="toggleHistory('dim')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                            <button class="btn-clear-history" onclick="event.stopPropagation(); clearHistory('dim');">Clear History</button>
+                        </div>
+                        <div id="dim-history-list" class="history-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOOL 8: WHAT DO I SAY TO MY CRUSH? -->
+            <div id="say-to-crush" class="view-panel">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-heart"></i> Say to My Crush</h2>
+                        <button class="btn-sample" onclick="loadSample('say-to-crush')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                    </div>
+
+                    <label class="form-label">Select Situation:</label>
+                    <div class="situation-grid">
+                        <button class="btn-situation active" onclick="selectCrushSit(this, 'first')">First Message</button>
+                        <button class="btn-situation" onclick="selectCrushSit(this, 'continue')">Continue Conversation</button>
+                        <button class="btn-situation" onclick="selectCrushSit(this, 'askout')">Ask Them Out</button>
+                        <button class="btn-situation" onclick="selectCrushSit(this, 'like')">Tell Them I Like Them</button>
+                        <button class="btn-situation" onclick="selectCrushSit(this, 'distant')">They Seem Distant</button>
+                        <button class="btn-situation" onclick="selectCrushSit(this, 'rejected')">They Rejected Me</button>
+                        <button class="btn-situation" onclick="selectCrushSit(this, 'apologize')">Apologize</button>
+                        <button class="btn-situation" onclick="selectCrushSit(this, 'reconnect')">Reconnect</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="stc-context">Brief Context (Optional):</label>
+                        <textarea id="stc-context" placeholder="Add specific details like shared hobbies, recent topics, etc..."></textarea>
+                    </div>
+
+                    <button class="btn-primary" onclick="analyzeSayToCrush()"><i class="fa-solid fa-wand-magic"></i> Generate Message Suggestions</button>
+
+                    <div id="stc-output" class="output-container">
+                        <div class="output-section">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <div class="output-title" style="margin-bottom:0;">Message Suggestions</div>
+                                <button class="btn-sample" onclick="makeMoreNatural()"><i class="fa-solid fa-sliders"></i> Make More Natural</button>
+                            </div>
+                            <div id="stc-options"></div>
+                        </div>
+                    </div>
+
+                    <div class="history-accordion">
+                        <div class="history-header" onclick="toggleHistory('stc')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                            <button class="btn-clear-history" onclick="event.stopPropagation(); clearHistory('stc');">Clear History</button>
+                        </div>
+                        <div id="stc-history-list" class="history-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOOL 9: AM I BEING IGNORED? -->
+            <div id="am-i-ignored" class="view-panel">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-ghost"></i> Am I Being Ignored?</h2>
+                        <button class="btn-sample" onclick="loadSample('am-i-ignored')"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="aibi-count">Unanswered messages sent:</label>
+                        <input type="number" id="aibi-count" class="form-control" value="1" min="1" max="10">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="aibi-time">Time since last reply:</label>
+                        <select id="aibi-time">
+                            <option value="<1hr">Less than 1 hour</option>
+                            <option value="1-6hr">1-6 hours</option>
+                            <option value="6-24hr">6-24 hours</option>
+                            <option value="1-3d">1-3 days</option>
+                            <option value="3-7d">3-7 days</option>
+                            <option value="1+w">1+ weeks</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Who usually starts conversations?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="aibi-starter" value="Me" checked> <span>Mostly me</span></label>
+                            <label class="radio-label"><input type="radio" name="aibi-starter" value="Both"> <span>We both do</span></label>
+                            <label class="radio-label"><input type="radio" name="aibi-starter" value="Them"> <span>Mostly them</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Has reply speed changed recently?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="aibi-speed" value="Slower" checked> <span>Yes, slower</span></label>
+                            <label class="radio-label"><input type="radio" name="aibi-speed" value="Same"> <span>No, same</span></label>
+                            <label class="radio-label"><input type="radio" name="aibi-speed" value="Faster"> <span>Yes, faster</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Have they left messages on read?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="aibi-read" value="Yes" checked> <span>Yes</span></label>
+                            <label class="radio-label"><input type="radio" name="aibi-read" value="No"> <span>No</span></label>
+                            <label class="radio-label"><input type="radio" name="aibi-read" value="Unsure"> <span>Not sure</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="aibi-changes">Any recent life changes you know of? (Optional)</label>
+                        <textarea id="aibi-changes" placeholder="e.g., Work deadlines, exams, travel, illness..."></textarea>
+                    </div>
+
+                    <button class="btn-primary" onclick="analyzeAmIIgnored()"><i class="fa-solid fa-chart-line"></i> Calculate Reality Check</button>
+
+                    <div id="aibi-output" class="output-container">
+                        <div class="output-section">
+                            <div class="output-title">Observed Pattern</div>
+                            <div id="aibi-pattern" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">What It Could Mean</div>
+                            <div id="aibi-meaning" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">What It Does NOT Prove</div>
+                            <div id="aibi-not-prove" class="output-box"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Recommended Concrete Action</div>
+                            <div id="aibi-action" class="output-box"></div>
+                        </div>
+                    </div>
+
+                    <div class="history-accordion">
+                        <div class="history-header" onclick="toggleHistory('aibi')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                            <button class="btn-clear-history" onclick="event.stopPropagation(); clearHistory('aibi');">Clear History</button>
+                        </div>
+                        <div id="aibi-history-list" class="history-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Footer -->
+            <footer class="footer">
+                For entertainment purposes only. Not professional advice.
+            </footer>
+        </div>
+    </main>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">Copied!</div>
+
+    <!-- Application Logic -->
+    <script>
+        // --- ROUTING & NAVIGATION ---
+        function navTo(toolId) {
+            document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sidebar-btn').forEach(el => el.classList.remove('active'));
+
+            const targetView = document.getElementById(toolId);
+            if(targetView) targetView.classList.add('active');
+
+            const targetBtn = document.querySelector(`.sidebar-btn[data-tool="${toolId}"]`);
+            if(targetBtn) targetBtn.classList.add('active');
+
+            // Close mobile menu if open
+            closeMobileSidebar();
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.querySelectorAll('.sidebar-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                navTo(btn.getAttribute('data-tool'));
+            });
+        });
+
+        // Mobile Sidebar Functionality
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function openMobileSidebar() {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.add('open');
+        }
+
+        function closeMobileSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('open');
+        }
+
+        hamburgerBtn.addEventListener('click', openMobileSidebar);
+        sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+        // --- UTILITY FUNCTIONS ---
+        function showToast(msg = "Copied!") {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied!");
+            });
+        }
+
+        function renderCopyBlock(label, text) {
+            const safeText = text.replace(/"/g, '&quot;');
+            return `
+                <div class="copy-block">
+                    <div class="copy-header">
+                        <span class="copy-label">${label}</span>
+                        <button class="btn-copy" onclick="copyToClipboard('${safeText}')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                    <div class="copy-text">${text}</div>
+                </div>
+            `;
+        }
+
+        function toggleImpulse(btn, isAnxious) {
+            const box = btn.closest('.impulse-box');
+            box.querySelectorAll('.btn-impulse').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const msg = box.querySelector('.impulse-message');
+            msg.style.display = isAnxious ? 'block' : 'none';
+        }
+
+        function switchTab(toolPrefix, tabName) {
+            document.querySelectorAll(`#${toolPrefix}-tab-${tabName}`).forEach(el => el.parentElement.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active')));
+            const btns = document.querySelectorAll(`.tabs .tab-btn`);
+            
+            // Activate Tab UI
+            const tabContent = document.getElementById(`${toolPrefix}-tab-${tabName}`);
+            if(tabContent) {
+                const parent = tabContent.parentElement;
+                parent.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                tabContent.classList.add('active');
+            }
+
+            event.target.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // --- LOCALSTORAGE HISTORY ENGINE ---
+        function saveHistory(toolId, input, output) {
+            const key = `signal_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            const entry = {
+                id: Date.now(),
+                input: input,
+                output: output,
+                timestamp: new Date().toLocaleString()
+            };
+            history.unshift(entry);
+            if (history.length > 50) history = history.slice(0, 50);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = `signal_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const container = document.getElementById(`${toolId}-history-list`);
+            if(!container) return;
+
+            if (history.length === 0) {
+                container.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted); padding:8px 0;">No saved analyses yet.</div>`;
+                return;
+            }
+
+            container.innerHTML = history.slice(0, 10).map(item => {
+                let preview = typeof item.input === 'string' ? item.input : JSON.stringify(item.input);
+                if(preview.length > 40) preview = preview.substring(0, 40) + '...';
+                return `
+                    <div class="history-item" onclick="reloadHistoryItem('${toolId}', ${item.id})">
+                        <span><strong>${item.timestamp}</strong> - ${preview}</span>
+                        <i class="fa-solid fa-chevron-right" style="font-size:0.7rem; color:var(--text-muted);"></i>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleHistory(toolId) {
+            const list = document.getElementById(`${toolId}-history-list`);
+            if(list) list.classList.toggle('active');
+        }
+
+        function clearHistory(toolId) {
+            const key = `signal_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+        }
+
+        function reloadHistoryItem(toolId, id) {
+            const key = `signal_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const item = history.find(h => h.id === id);
+            if(!item) return;
+
+            // Trigger re-rendering of output based on tool type
+            if(toolId === 'td') renderTextDecoderOutput(item.output);
+            else if(toolId === 'sit') renderShouldITextOutput(item.output);
+            else if(toolId === 'wss') renderWhatShouldISayOutput(item.output);
+            else if(toolId === 'wsr') renderWhyStoppedOutput(item.output);
+            else if(toolId === 'sc') renderSignalCheckerOutput(item.output);
+            else if(toolId === 'dim') renderDidIMessUpOutput(item.output);
+            else if(toolId === 'stc') renderSayToCrushOutput(item.output);
+            else if(toolId === 'aibi') renderAmIIgnoredOutput(item.output);
+
+            showToast("Loaded from history!");
+        }
+
+        // Initialize history containers on load
+        window.addEventListener('DOMContentLoaded', () => {
+            ['td', 'sit', 'wss', 'wsr', 'sc', 'dim', 'stc', 'aibi'].forEach(renderHistory);
+        });
+
+        // --- SAMPLE SCENARIO LOADERS ---
+        function loadSample(tool) {
+            if(tool === 'text-decoder') {
+                document.getElementById('td-input').value = "k.";
+            } else if(tool === 'should-i-text') {
+                document.getElementById('sit-happened').value = "Had a great second date 2 days ago. Sent a follow-up text yesterday morning asking about her weekend plans.";
+                document.getElementById('sit-last-msg').value = "Hey! Loved that restaurant recommendation. Hope your weekend is starting off great!";
+                document.querySelector('input[name="sit-who"][value="Me"]').checked = true;
+                document.getElementById('sit-time').value = "1-3d";
+                document.getElementById('sit-stage').value = "Dating";
+                document.querySelector('input[name="sit-pattern"][value="Fast"]').checked = true;
+                document.querySelector('input[name="sit-outcome"][value="Ask Out"]').checked = true;
+            } else if(tool === 'what-should-i-say') {
+                document.getElementById('wss-happened').value = "They cancelled our Friday plans last minute for the second time this month with a vague excuse.";
+                document.getElementById('wss-who').value = "Dating";
+                document.getElementById('wss-understand').value = "I like spending time with them, but my time is valuable and last-minute cancellations feel disrespectful.";
+                document.getElementById('wss-outcome').value = "Set boundary";
+                document.querySelector('input[name="wss-tone"][value="Calm"]').checked = true;
+            } else if(tool === 'why-stopped') {
+                document.getElementById('wsr-chat').value = `Me: Hey! How was your presentation today?
+Them: It went super well! Huge relief honestly.
+Me: That's awesome! We should definitely celebrate this weekend. Are you free Saturday?
+Them: Thanks! Yeah maybe, I'll have to see how my workload looks!
+Me: Sounds good, let me know!
+Them: k`;
+            } else if(tool === 'first-date-after') {
+                document.getElementById('fd-after-desc').value = "We had drinks for 2 hours. Conversation flowed easily and we laughed a lot. At the end, they gave me a warm hug and said 'Let's do this again soon!' but haven't texted yet today (it's afternoon).";
+            } else if(tool === 'signal-checker') {
+                document.querySelector('input[name="sc-q1"][value="positive"]').checked = true;
+                document.querySelector('input[name="sc-q2"][value="ambiguous"]').checked = true;
+                document.querySelector('input[name="sc-q3"][value="positive"]').checked = true;
+                document.querySelector('input[name="sc-q4"][value="positive"]').checked = true;
+                document.querySelector('input[name="sc-q5"][value="ambiguous"]').checked = true;
+                document.querySelector('input[name="sc-q6"][value="positive"]').checked = true;
+            } else if(tool === 'did-i-mess-up') {
+                document.getElementById('dim-said').value = "I made a sarcastic joke about their favorite movie franchise during dinner.";
+                document.getElementById('dim-responded').value = "They laughed and said 'Hey don't trash my childhood!', but then got quiet for a few minutes before changing the subject.";
+            } else if(tool === 'say-to-crush') {
+                document.getElementById('stc-context').value = "We talked about indie rock music at a party last weekend.";
+            } else if(tool === 'am-i-ignored') {
+                document.getElementById('aibi-count').value = 2;
+                document.getElementById('aibi-time').value = "1-3d";
+                document.querySelector('input[name="aibi-starter"][value="Me"]').checked = true;
+                document.querySelector('input[name="aibi-speed"][value="Slower"]').checked = true;
+                document.querySelector('input[name="aibi-read"][value="Yes"]').checked = true;
+                document.getElementById('aibi-changes').value = "They mentioned having final exams coming up this week.";
+            }
+        }
+
+        // --- TOOL 1: TEXT DECODER LOGIC ---
+        function analyzeTextDecoder() {
+            const input = document.getElementById('td-input').value.trim();
+            if(!input) return alert("Please enter a message to analyze.");
+
+            let output = {};
+            const cleanInput = input.toLowerCase();
+
+            if(cleanInput === "k" || cleanInput === "k.") {
+                output = {
+                    literal: "The letter 'k' — an abbreviated acknowledgment.",
+                    tone: "Short, neutral to potentially cold.",
+                    interpretations: [
+                        { text: "Neutral acknowledgment", conf: "Low" },
+                        { text: "Mild irritation", conf: "Medium" },
+                        { text: "Conversation shutdown", conf: "Medium" },
+                        { text: "Busy/distracted", conf: "High" },
+                        { text: "Typical texting style for this person", conf: "High" }
+                    ],
+                    cannotKnow: "We cannot know their emotional state, what they were doing, or whether this tone is unusual for them.",
+                    notAssume: "Don't assume anger, rejection, or that they are punishing you.",
+                    responses: {
+                        casual: "Sounds good!",
+                        warm: "Okay! Let me know when you're free to chat more.",
+                        space: "No response needed right now."
+                    }
+                };
+            } else if(cleanInput.includes("love") || cleanInput.includes("miss") || cleanInput.includes("thinking of you")) {
+                output = {
+                    literal: "Direct expression of affection or emotional connection.",
+                    tone: "Warm, affectionate, and open.",
+                    interpretations: [
+                        { text: "Genuine affection & high interest", conf: "High" },
+                        { text: "Seeking emotional connection", conf: "High" },
+                        { text: "Habitual warm communication", conf: "Medium" }
+                    ],
+                    cannotKnow: "We cannot know their long-term expectations or exact current mood.",
+                    notAssume: "Don't assume this guarantees immediate availability or commitment.",
+                    responses: {
+                        casual: "Miss you too! Hope your day is going awesome.",
+                        warm: "Aww thinking of you too! Can't wait to catch up soon.",
+                        space: "So sweet of you to say! Talk soon."
+                    }
+                };
+            } else if(cleanInput.includes("?") || cleanInput.length > 80) {
+                output = {
+                    literal: "An engaging query or detailed message requiring a thoughtful response.",
+                    tone: "Engaged, inquisitive, and open.",
+                    interpretations: [
+                        { text: "Genuinely interested in continuing conversation", conf: "High" },
+                        { text: "Seeking specific information or planning", conf: "High" },
+                        { text: "Polite engagement", conf: "Medium" }
+                    ],
+                    cannotKnow: "We cannot know how urgently they expect an answer.",
+                    notAssume: "Don't assume hesitation or depth where simple interest exists.",
+                    responses: {
+                        casual: "Good question! Let me check and get back to you.",
+                        warm: "I'd love to chat more about this—free for a quick call later?",
+                        space: "Got your message! I'm a bit tied up now but will reply shortly."
+                    }
+                };
+            } else {
+                output = {
+                    literal: `Direct statement: "${input}"`,
+                    tone: "Standard conversational tone.",
+                    interpretations: [
+                        { text: "Standard direct communication", conf: "High" },
+                        { text: "Context-dependent mood or brevity", conf: "Medium" },
+                        { text: "Casual casual interaction", conf: "Low" }
+                    ],
+                    cannotKnow: "We cannot know their exact physical environment or underlying emotional state.",
+                    notAssume: "Don't assume negative intent without explicit indicators.",
+                    responses: {
+                        casual: "Got it!",
+                        warm: "Thanks for letting me know! Hope you're having a good day.",
+                        space: "Cool, talk later!"
+                    }
+                };
+            }
+
+            saveHistory('td', input, output);
+            renderTextDecoderOutput(output);
+        }
+
+        function renderTextDecoderOutput(output) {
+            document.getElementById('td-literal').innerText = output.literal;
+            document.getElementById('td-tone').innerText = output.tone;
+            
+            document.getElementById('td-interpretations').innerHTML = '<ul style="padding-left:20px;">' + 
+                output.interpretations.map(i => {
+                    const badgeClass = i.conf === 'High' ? 'badge-high' : i.conf === 'Medium' ? 'badge-medium' : 'badge-low';
+                    return `<li style="margin-bottom:6px;">${i.text} <span class="badge ${badgeClass}">${i.conf}</span></li>`;
+                }).join('') + '</ul>';
+
+            document.getElementById('td-cannot-know').innerText = output.cannotKnow;
+            document.getElementById('td-not-assume').innerText = output.notAssume;
+
+            document.getElementById('td-responses').innerHTML = 
+                renderCopyBlock("Casual", output.responses.casual) +
+                renderCopyBlock("Warm", output.responses.warm) +
+                renderCopyBlock("Give Them Space", output.responses.space);
+
+            document.getElementById('td-output').classList.add('active');
+        }
+
+        // --- TOOL 2: SHOULD I TEXT THEM? LOGIC ---
+        function analyzeShouldIText() {
+            const happened = document.getElementById('sit-happened').value;
+            const lastMsg = document.getElementById('sit-last-msg').value;
+            const who = document.querySelector('input[name="sit-who"]:checked').value;
+            const time = document.getElementById('sit-time').value;
+            const stage = document.getElementById('sit-stage').value;
+            const pattern = document.querySelector('input[name="sit-pattern"]:checked').value;
+            const outcome = document.querySelector('input[name="sit-outcome"]:checked').value;
+
+            let verdict = "";
+            let bannerClass = "";
+            let evidence = [];
+            let uncertain = "";
+            let risk = "";
+            let nextStep = "";
+            let messages = null;
+
+            if (pattern === 'Ghosted' && time === '1+w' && who === 'Me') {
+                verdict = "DON'T TEXT";
+                bannerClass = "verdict-dont-text";
+                evidence = ["You were the last to reach out.", "A week+ has passed without engagement.", "History indicates ghosting pattern."];
+                uncertain = "Whether they lost phone access or simply moved on.";
+                risk = "Texting again lowers your boundaries and rarely yields the warm response you desire.";
+                nextStep = "Focus your energy elsewhere. Protect your peace and dignity.";
+            } else if (who === 'Them' && time === '<1hr' && stage === 'Exclusive') {
+                verdict = "WAIT";
+                bannerClass = "verdict-wait";
+                evidence = ["Less than 1 hour has elapsed.", "High baseline security in an exclusive relationship."];
+                uncertain = "What task currently has their attention.";
+                risk = "Triple-texting within minutes can project unnecessary anxiety.";
+                nextStep = "Give it a few hours. They will reply when free.";
+            } else if (stage === 'Just met' && who === 'Them' && (time === '1-6hr' || time === '6-24hr') && outcome === 'Ask Out') {
+                verdict = "TEXT NOW";
+                bannerClass = "verdict-text-now";
+                evidence = ["They sent the last message.", "Timing is optimal (within 24 hours).", "Momentum is high for asking them out."];
+                uncertain = "Their exact schedule for the upcoming week.";
+                risk = "Minimal risk—striking while interest is warm.";
+                nextStep = "Send a low-pressure invitation with a specific activity.";
+                messages = {
+                    casual: "Hey! Loved chatting earlier. Free for coffee this Saturday?",
+                    warm: "I had a great time talking with you! I'd love to take you out for drinks sometime this week if you're free?",
+                    direct: "Hey, let's get together this weekend. Are you free Friday or Saturday evening?"
+                };
+            } else if (stage === 'Ex' && who === 'Me') {
+                verdict = "DON'T TEXT";
+                bannerClass = "verdict-dont-text";
+                evidence = ["Ex-relationship dynamic.", "You sent the last message.", "High emotional vulnerability."];
+                uncertain = "If reaching out will re-open unhealed wounds.";
+                risk = "Re-starting anxious attachment cycles.";
+                nextStep = "Write what you want to say in your private notes app instead of sending it.";
+            } else if (outcome === 'Apologize' && who === 'Me' && time !== '<1hr') {
+                verdict = "SEND A DIFFERENT MESSAGE";
+                bannerClass = "verdict-different";
+                evidence = ["An apology is needed to clear tension.", "Enough time has passed for initial emotions to cool."];
+                uncertain = "If they are ready to receive the apology immediately.";
+                risk = "Over-explaining or becoming defensive in the text.";
+                nextStep = "Send a concise, sincere apology with zero expectations of a response.";
+                messages = {
+                    casual: "Hey, I was reflecting on earlier and realized I came off wrong. Sorry about that!",
+                    warm: "Hey, I wanted to apologize for how I handled things earlier. I value you and want to make sure we're good.",
+                    direct: "Hey, I made a mistake earlier and I own that. I'm sorry. Let me know whenever you're open to talking."
+                };
+            } else {
+                if(who === 'Them') {
+                    verdict = "TEXT NOW";
+                    bannerClass = "verdict-text-now";
+                    evidence = ["Ball is in your court—they sent the last text.", "Keeps communication flow balanced."];
+                    uncertain = "How fast they expect a reply.";
+                    risk = "Low risk.";
+                    nextStep = "Reply naturally without overthinking format.";
+                    messages = {
+                        casual: "Hey! Just catching up on messages—how's your day going?",
+                        warm: "Hey there! Was just thinking about what you said—hope you're having a great week!",
+                        direct: "Hey! Free to catch up briefly today?"
+                    };
+                } else {
+                    verdict = "WAIT";
+                    bannerClass = "verdict-wait";
+                    evidence = ["You sent the last message.", "Allowing breathing room maintains healthy balance."];
+                    uncertain = "When they will next check their phone.";
+                    risk = "Double texting prematurely can appear overly eager or anxious.";
+                    nextStep = "Wait at least 24 hours before considering a light check-in.";
+                }
+            }
+
+            const inputData = { happened, lastMsg, who, time, stage, pattern, outcome };
+            const outputData = { verdict, bannerClass, evidence, uncertain, risk, nextStep, messages };
+
+            saveHistory('sit', inputData, outputData);
+            renderShouldITextOutput(outputData);
+        }
+
+        function renderShouldITextOutput(output) {
+            const banner = document.getElementById('sit-verdict-banner');
+            banner.className = `verdict-banner ${output.bannerClass}`;
+            banner.innerText = output.verdict;
+
+            document.getElementById('sit-evidence').innerHTML = `<ul style="padding-left:20px;">${output.evidence.map(e => `<li>${e}</li>`).join('')}</ul>`;
+            document.getElementById('sit-uncertain').innerText = output.uncertain;
+            document.getElementById('sit-risk').innerText = output.risk;
+            document.getElementById('sit-next').innerText = output.nextStep;
+
+            const msgSection = document.getElementById('sit-messages-section');
+            if(output.messages) {
+                msgSection.style.display = 'block';
+                document.getElementById('sit-messages').innerHTML = 
+                    renderCopyBlock("Casual", output.messages.casual) +
+                    renderCopyBlock("Warm", output.messages.warm) +
+                    renderCopyBlock("Direct", output.messages.direct);
+            } else {
+                msgSection.style.display = 'none';
+            }
+
+            document.getElementById('sit-output').classList.add('active');
+        }
+
+        // --- TOOL 3: WHAT SHOULD I SAY? LOGIC ---
+        function analyzeWhatShouldISay() {
+            const happened = document.getElementById('wss-happened').value;
+            const who = document.getElementById('wss-who').value;
+            const understand = document.getElementById('wss-understand').value;
+            const outcome = document.getElementById('wss-outcome').value;
+            const tone = document.querySelector('input[name="wss-tone"]:checked').value;
+
+            let templates = [];
+            let why = "";
+            let notSay = "";
+
+            if(outcome === 'Apologize') {
+                templates = [
+                    "I want to own what I did. I know my actions affected you, and I'm genuinely sorry. Moving forward, I'm going to make sure I do things differently.",
+                    "Hey, I've been thinking about what happened. I really care about us and I'm sorry for my part in this. I'd love to chat when you're ready.",
+                    "I made a mistake and I own that completely. I'm sorry for making you feel that way. Let me know how I can make it right."
+                ];
+                why = "Directly takes responsibility without making excuses or shifting blame onto the other person.";
+                notSay = "Avoid saying 'I'm sorry you felt that way' or 'I didn't mean to, BUT...'";
+            } else if(outcome === 'Ask out') {
+                templates = [
+                    "I've really enjoyed getting to know you! Would you want to grab coffee or drinks this weekend?",
+                    "Hey! I'm heading to this cool spot on Thursday—would love for you to join me if you're free?",
+                    "Let's get together this week! Are you free Tuesday or Wednesday after work?"
+                ];
+                why = "Clear, low-pressure invitation with a concrete idea rather than vague 'we should hang out sometime'.";
+                notSay = "Don't say 'We should hang out whenever you happen to be free forever'.";
+            } else if(outcome === 'Set boundary') {
+                templates = [
+                    "I need to be honest about something. When plans change last minute, I feel disrespected. Going forward, I need a bit more communication.",
+                    "Hey, I value our connection, but I need us to slow down a bit so I can stay balanced.",
+                    "I'm not comfortable with that dynamic. I need us to keep things clear and respectful."
+                ];
+                why = "Uses 'I' statements to express personal needs clearly without launching an aggressive attack.";
+                notSay = "Avoid passive-aggressive hints or aggressive accusations like 'You always ruin things'.";
+            } else {
+                templates = [
+                    "Hey, I've noticed things feel a bit distant lately. Is everything okay? Here if you want to talk.",
+                    "I appreciate our connection, but I think it's best if we take a step back right now.",
+                    "Hey! Was thinking about you today—hope everything is going smoothly on your end."
+                ];
+                why = "Establishes calm, grounded communication while prioritizing clarity.";
+                notSay = "Avoid sending multi-paragraph emotional walls of text.";
+            }
+
+            // Adapt tone
+            if(tone === 'Warm') {
+                templates = templates.map(t => "Hey! " + t.replace("I need", "I really value you and I need"));
+            } else if(tone === 'Direct') {
+                templates = templates.map(t => t.replace("Hey, ", "").replace("I've been thinking... ", ""));
+            }
+
+            const inputData = { happened, who, understand, outcome, tone };
+            const outputData = { templates, why, notSay };
+
+            saveHistory('wss', inputData, outputData);
+            renderWhatShouldISayOutput(outputData);
+        }
+
+        function renderWhatShouldISayOutput(output) {
+            document.getElementById('wss-options').innerHTML = output.templates.map((t, idx) => 
+                renderCopyBlock(`Option ${idx + 1}`, t)
+            ).join('');
+            document.getElementById('wss-why').innerText = output.why;
+            document.getElementById('wss-not-say').innerText = output.notSay;
+            document.getElementById('wss-output').classList.add('active');
+        }
+
+        // --- TOOL 4: WHY DID THEY STOP REPLYING? LOGIC ---
+        function analyzeWhyStopped() {
+            const chat = document.getElementById('wsr-chat').value.trim();
+            if(!chat) return alert("Please paste a conversation transcript.");
+
+            let changed = "Text length shortened significantly; response latency increased.";
+            let know = "The conversation halted after the last message shown. No explicit goodbye was stated.";
+            let explanations = [
+                "Temporary distraction or busy work/life schedule (High Probability)",
+                "Loss of immediate momentum or conversation ran its natural course (Medium Probability)",
+                "Uncertainty on how to respond to the last text (Medium Probability)"
+            ];
+            let cannot = "We cannot determine if they read the text, their physical location, or their current emotional priority.";
+            let nextMove = "Wait 48-72 hours. If no reply, send one light, completely new topic text (zero guilt/pressure).";
+
+            if(chat.toLowerCase().includes("busy") || chat.toLowerCase().includes("work")) {
+                explanations.unshift("Stated external workload/obligations (High Probability)");
+            }
+
+            const inputData = chat.substring(0, 50);
+            const outputData = { changed, know, explanations, cannot, nextMove };
+
+            saveHistory('wsr', inputData, outputData);
+            renderWhyStoppedOutput(outputData);
+        }
+
+        function renderWhyStoppedOutput(output) {
+            document.getElementById('wsr-changed').innerText = output.changed;
+            document.getElementById('wsr-know').innerText = output.know;
+            document.getElementById('wsr-explanations').innerHTML = `<ul style="padding-left:20px;">${output.explanations.map(e => `<li>${e}</li>`).join('')}</ul>`;
+            document.getElementById('wsr-cannot').innerText = output.cannot;
+            document.getElementById('wsr-next').innerText = output.nextMove;
+            document.getElementById('wsr-output').classList.add('active');
+        }
+
+        // --- TOOL 5: FIRST DATE COACH (AFTER DEBRIEF) ---
+        function analyzeFirstDateAfter() {
+            const desc = document.getElementById('fd-after-desc').value.trim();
+            if(!desc) return alert("Please describe how the date went.");
+
+            document.getElementById('fd-pos').innerText = "Warm physical goodbye, positive verbal affirmation ('Let's do this again'), smooth 2-hour flow.";
+            document.getElementById('fd-amb').innerText = "No text sent yet today—common when people are back at work or processing.";
+            document.getElementById('fd-con').innerText = "None prominent based on the described interaction.";
+            document.getElementById('fd-next').innerText = "Send a light text this evening: 'Had a great time with you yesterday! Hope your week is off to a good start.'";
+
+            document.getElementById('fd-after-output').classList.add('active');
+        }
+
+        // --- TOOL 6: DATE SIGNAL CHECKER LOGIC ---
+        function analyzeSignalChecker() {
+            const q1 = document.querySelector('input[name="sc-q1"]:checked').value;
+            const q2 = document.querySelector('input[name="sc-q2"]:checked').value;
+            const q3 = document.querySelector('input[name="sc-q3"]:checked').value;
+            const q4 = document.querySelector('input[name="sc-q4"]:checked').value;
+            const q5 = document.querySelector('input[name="sc-q5"]:checked').value;
+            const q6 = document.querySelector('input[name="sc-q6"]:checked').value;
+
+            const answers = [q1, q2, q3, q4, q5, q6];
+            const posCount = answers.filter(a => a === 'positive').length;
+            const conCount = answers.filter(a => a === 'concerning').length;
+
+            let pos = [], amb = [], con = [];
+            if(q1 === 'positive') pos.push("Initiation is mutual or balanced."); else if(q1==='concerning') con.push("You are carrying initiation effort alone."); else amb.push("Initiation fluctuates.");
+            if(q2 === 'positive') pos.push("Consistent response tempo."); else if(q2==='concerning') con.push("Hot and cold communication patterns."); else amb.push("Slow response cadence.");
+            if(q3 === 'positive') pos.push("Follows through on concrete plans."); else if(q3==='concerning') con.push("Cancels plans or stays vague."); else amb.push("Vague about scheduling.");
+            if(q4 === 'positive') pos.push("Shows curiosity about your life."); else con.push("Self-centered interaction style.");
+            if(q5 === 'positive') pos.push("Remembers details and builds rapport.");
+            if(q6 === 'positive') pos.push("Respects your boundaries completely."); else if(q6==='concerning') con.push("Boundary testing behavior.");
+
+            let infer = "";
+            let next = "";
+
+            if(posCount >= 4) {
+                infer = "High mutual interest and healthy relational foundation.";
+                next = "Continue enjoying the progression. Maintain open, reciprocal effort.";
+            } else if(conCount >= 3) {
+                infer = "Low interest or low availability; effort imbalance is prominent.";
+                next = "Match their energy level. Stop over-investing until reciprocal effort is established.";
+            } else {
+                infer = "Moderate interest with some communication barriers or style differences.";
+                next = "Observe over the next 2 weeks. Communicate preferences clearly.";
+            }
+
+            const inputData = { q1, q2, q3, q4, q5, q6 };
+            const outputData = { pos, amb, con, infer, cannot: "We cannot know what external personal stressors may be affecting their availability.", next };
+
+            saveHistory('sc', inputData, outputData);
+            renderSignalCheckerOutput(outputData);
+        }
+
+        function renderSignalCheckerOutput(output) {
+            document.getElementById('sc-positive').innerHTML = output.pos.length ? `<ul style="padding-left:20px;">${output.pos.map(i=>`<li>${i}</li>`).join('')}</ul>` : "None highlighted.";
+            document.getElementById('sc-ambiguous').innerHTML = output.amb.length ? `<ul style="padding-left:20px;">${output.amb.map(i=>`<li>${i}</li>`).join('')}</ul>` : "None highlighted.";
+            document.getElementById('sc-concerning').innerHTML = output.con.length ? `<ul style="padding-left:20px;">${output.con.map(i=>`<li>${i}</li>`).join('')}</ul>` : "None highlighted.";
+            document.getElementById('sc-infer').innerText = output.infer;
+            document.getElementById('sc-cannot').innerText = output.cannot;
+            document.getElementById('sc-next').innerText = output.next;
+            document.getElementById('sc-output').classList.add('active');
+        }
+
+        // --- TOOL 7: DID I MESS THIS UP? LOGIC ---
+        function analyzeDidIMessUp() {
+            const said = document.getElementById('dim-said').value.trim();
+            const responded = document.getElementById('dim-responded').value.trim();
+            if(!said || !responded) return alert("Please fill in both fields.");
+
+            const respClean = responded.toLowerCase();
+            let classification = "";
+            let badgeClass = "";
+            let facts = `You said/did: "${said}". They responded: "${responded}".`;
+            let assumptions = "Assuming that brief silence or subject changes equate to severe offense or loss of attraction.";
+            let interpretations = [];
+            let repairMsg = null;
+            let next = "";
+
+            if(respClean.includes("lol") || respClean.includes("haha") || respClean.includes("😂") || respClean.includes("😄")) {
+                classification = "PROBABLY FINE";
+                badgeClass = "verdict-text-now";
+                interpretations = ["They took it playfully as intended.", "They were momentarily surprised but moved past it naturally.", "No lasting offense taken."];
+                next = "Let it go! Over-apologizing for minor playful banter creates awkwardness where none existed.";
+            } else if(respClean.includes("k") || respClean === "ok" || respClean.length < 5) {
+                classification = "WORTH REPAIRING";
+                badgeClass = "verdict-different";
+                interpretations = ["They may have felt slightly stung or caught off guard.", "They shifted focus because they were unsure how to respond.", "They were busy."];
+                repairMsg = "Hey! Realized my joke earlier might have landed weirdly—didn't mean anything by it! Hope you're having a good day.";
+                next = "Send one quick, light clearing text and then transition back to normal warmth.";
+            } else {
+                classification = "UNCLEAR";
+                badgeClass = "verdict-wait";
+                interpretations = ["Neutral reaction without obvious offense.", "Conversation simply shifted direction.", "Processing the comment."];
+                next = "Observe next interactions. If warmth continues normally, no action required.";
+            }
+
+            const inputData = { said, responded };
+            const outputData = { classification, badgeClass, facts, assumptions, interpretations, repairMsg, next };
+
+            saveHistory('dim', inputData, outputData);
+            renderDidIMessUpOutput(outputData);
+        }
+
+        function renderDidIMessUpOutput(output) {
+            const badge = document.getElementById('dim-badge');
+            badge.className = `verdict-banner ${output.badgeClass}`;
+            badge.innerText = output.classification;
+
+            document.getElementById('dim-facts').innerText = output.facts;
+            document.getElementById('dim-assumptions').innerText = output.assumptions;
+            document.getElementById('dim-interpretations').innerHTML = `<ul style="padding-left:20px;">${output.interpretations.map(i=>`<li>${i}</li>`).join('')}</ul>`;
+            
+            const repSec = document.getElementById('dim-repair-section');
+            if(output.repairMsg) {
+                repSec.style.display = 'block';
+                document.getElementById('dim-repair').innerHTML = renderCopyBlock("Repair Text", output.repairMsg);
+            } else {
+                repSec.style.display = 'none';
+            }
+
+            document.getElementById('dim-next').innerText = output.next;
+            document.getElementById('dim-output').classList.add('active');
+        }
+
+        // --- TOOL 8: WHAT DO I SAY TO MY CRUSH? LOGIC ---
+        let currentCrushSit = 'first';
+
+        function selectCrushSit(btn, sitKey) {
+            document.querySelectorAll('.btn-situation').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCrushSit = sitKey;
+        }
+
+        function analyzeSayToCrush() {
+            const context = document.getElementById('stc-context').value.trim();
+            let options = [];
+
+            if(currentCrushSit === 'first') {
+                options = [
+                    { label: "Casual", text: "Hey! Was just thinking about that conversation we had—how did your week end up going?" },
+                    { label: "Confident", text: "Hey! We haven't caught up in a bit. Let's get coffee or drinks this week." },
+                    { label: "Warm", text: "Hey! Hope you're having a great week so far. Saw something today that reminded me of our chat!" }
+                ];
+            } else if(currentCrushSit === 'askout') {
+                options = [
+                    { label: "Casual", text: "Hey, free for a drink or coffee this weekend?" },
+                    { label: "Confident", text: "I'd love to take you out this week. Are you free Thursday night?" },
+                    { label: "Warm", text: "I really enjoy our conversations! Would you want to hang out together in person soon?" }
+                ];
+            } else {
+                options = [
+                    { label: "Casual", text: "Hey! Hope you're having a good week!" },
+                    { label: "Confident", text: "Let me know when you're free to catch up next!" },
+                    { label: "Warm", text: "Thinking of you! Hope everything is going great today." }
+                ];
+            }
+
+            if(context) {
+                options = options.map(o => ({
+                    label: o.label,
+                    text: o.text + ` (Re: ${context})`
+                }));
+            }
+
+            const inputData = { sit: currentCrushSit, context };
+            const outputData = { options };
+
+            saveHistory('stc', inputData, outputData);
+            renderSayToCrushOutput(outputData);
+        }
+
+        function renderSayToCrushOutput(output) {
+            document.getElementById('stc-options').innerHTML = output.options.map(o => 
+                renderCopyBlock(o.label, o.text)
+            ).join('');
+            document.getElementById('stc-output').classList.add('active');
+        }
+
+        function makeMoreNatural() {
+            const copyTexts = document.querySelectorAll('#stc-options .copy-text');
+            copyTexts.forEach(el => {
+                let txt = el.innerText;
+                txt = txt.toLowerCase().replace("hey!", "hey,").replace("great week", "good week").replace("would you want to", "down to");
+                el.innerText = txt;
+            });
+            showToast("Reworded casually!");
+        }
+
+        // --- TOOL 9: AM I BEING IGNORED? LOGIC ---
+        function analyzeAmIIgnored() {
+            const count = parseInt(document.getElementById('aibi-count').value);
+            const time = document.getElementById('aibi-time').value;
+            const starter = document.querySelector('input[name="aibi-starter"]:checked').value;
+            const speed = document.querySelector('input[name="aibi-speed"]:checked').value;
+            const read = document.querySelector('input[name="aibi-read"]:checked').value;
+            const changes = document.getElementById('aibi-changes').value;
+
+            let pattern = `Sent ${count} unanswered text(s) over ${time}. Response tempo: ${speed}. Read status: ${read}.`;
+            let meaning = [];
+            let notProve = [];
+            let action = "";
+
+            if(count >= 2 || time === '3-7d' || time === '1+w') {
+                meaning = [
+                    "Decreased investment or interest level (High Probability)",
+                    "Severe schedule overwhelm or emotional burnout (Medium Probability)",
+                    "Decision to step back without clear communication (Medium Probability)"
+                ];
+                notProve = [
+                    "Does NOT prove your worth or value as a person.",
+                    "Does NOT prove they hate you or are actively malicious.",
+                    "Does NOT mean you did anything wrong."
+                ];
+                action = "Stop reaching out entirely. Put your phone away and match their silence with quiet self-respect.";
+            } else {
+                meaning = [
+                    "Busy with current daily tasks/work (High Probability)",
+                    "Read message during a meeting/task and forgot to reply (High Probability)",
+                    "Needs space to formulate a proper reply (Medium Probability)"
+                ];
+                notProve = [
+                    "Does NOT prove they are ignoring you intentionally.",
+                    "Does NOT prove sudden loss of attraction."
+                ];
+                action = "Give it 24-48 hours before drawing any conclusions or sending anything further.";
+            }
+
+            const inputData = { count, time, starter, speed, read, changes };
+            const outputData = { pattern, meaning, notProve, action };
+
+            saveHistory('aibi', inputData, outputData);
+            renderAmIIgnoredOutput(outputData);
+        }
+
+        function renderAmIIgnoredOutput(output) {
+            document.getElementById('aibi-pattern').innerText = output.pattern;
+            document.getElementById('aibi-meaning').innerHTML = `<ul style="padding-left:20px;">${output.meaning.map(m=>`<li>${m}</li>`).join('')}</ul>`;
+            document.getElementById('aibi-not-prove').innerHTML = `<ul style="padding-left:20px;">${output.notProve.map(np=>`<li>${np}</li>`).join('')}</ul>`;
+            document.getElementById('aibi-action').innerText = output.action;
+            document.getElementById('aibi-output').classList.add('active');
+        }
+    </script>
+</body>
+</html>

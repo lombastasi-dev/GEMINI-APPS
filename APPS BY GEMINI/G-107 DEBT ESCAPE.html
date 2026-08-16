@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DebtEscape — Practical Debt Action Toolkit</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --charcoal: #212529;
+            --charcoal-light: #343a40;
+            --charcoal-muted: #6c757d;
+            --green: #2DC653;
+            --green-dark: #25a244;
+            --green-light: #d8f3dc;
+            --green-subtle: #f0fff4;
+            --bg-gradient: linear-gradient(135deg, #F8F9FA 0%, #F0FFF4 100%);
+            --card-bg: #FFFFFF;
+            --border-color: #e9ecef;
+            --shadow-sm: 0 2px 8px rgba(33, 37, 41, 0.05);
+            --shadow-md: 0 4px 16px rgba(33, 37, 41, 0.08);
+            --radius-xl: 1rem;
+            --radius-lg: 0.75rem;
+            --radius-md: 0.5rem;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--charcoal);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* App Container Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #ffffff;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            background-color: var(--green);
+            color: white;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .brand-title {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--charcoal);
+            letter-spacing: -0.5px;
+        }
+
+        .brand-title span {
+            color: var(--green);
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-lg);
+            color: var(--charcoal-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background-color: #f8f9fa;
+            color: var(--charcoal);
+        }
+
+        .nav-item.active {
+            background-color: var(--green-subtle);
+            color: var(--green-dark);
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.active i {
+            color: var(--green);
+        }
+
+        /* Mobile Header / Hamburger */
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.875rem 1.25rem;
+            z-index: 90;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-toggle {
+            background: transparent;
+            border: none;
+            font-size: 1.35rem;
+            color: var(--charcoal);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(33, 37, 41, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 860px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Footer */
+        .app-footer {
+            margin-top: auto;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+            text-align: center;
+            font-size: 0.8125rem;
+            color: var(--charcoal-muted);
+            line-height: 1.5;
+        }
+
+        /* UI Card Components */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .affirmation-banner {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            border-radius: var(--radius-xl);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .affirmation-icon {
+            font-size: 1.75rem;
+            background: rgba(255, 255, 255, 0.2);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .affirmation-text h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.15rem;
+        }
+
+        .affirmation-text p {
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        /* Typography & Headings */
+        .page-title {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: var(--charcoal);
+            margin-bottom: 0.35rem;
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            color: var(--charcoal-muted);
+            font-size: 1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--charcoal);
+
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--green-dark);
+        }
+
+        .btn-secondary {
+            background-color: #f1f3f5;
+            color: var(--charcoal);
+            border-color: #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e9ecef;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border-color: var(--green);
+            color: var(--green-dark);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--green-subtle);
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.8125rem;
+            border-radius: var(--radius-md);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--charcoal);
+            margin-bottom: 0.375rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid #ced4da;
+            border-radius: var(--radius-lg);
+            font-size: 0.95rem;
+            color: var(--charcoal);
+            background-color: #ffffff;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(45, 198, 83, 0.2);
+        }
+
+        select.form-control {
+            appearance: auto;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .radio-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .radio-label input[type="radio"] {
+            accent-color: var(--green);
+            width: 16px;
+            height: 16px;
+        }
+
+        .input-grid-5 {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        @media (max-width: 640px) {
+            .input-grid-5 {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+                padding: 0.75rem;
+                background: #f8f9fa;
+                border-radius: var(--radius-md);
+            }
+        }
+
+        /* Dashboard Specific Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--green);
+        }
+
+        .tool-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-lg);
+            background: var(--green-subtle);
+            color: var(--green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-card-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.35rem;
+            color: var(--charcoal);
+        }
+
+        .tool-card-desc {
+            font-size: 0.875rem;
+            color: var(--charcoal-muted);
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .tool-card-link {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--green-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        /* Results Display Panels */
+        .results-panel {
+            background: #ffffff;
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--green);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: var(--shadow-md);
+
+        }
+
+        .results-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--charcoal-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--charcoal);
+        }
+
+        .metric-value.highlight {
+            color: var(--green-dark);
+        }
+
+        .metric-sub {
+            font-size: 0.8rem;
+            color: var(--charcoal-muted);
+            margin-top: 0.25rem;
+        }
+
+        .reframe-box {
+            background: var(--green-subtle);
+            border-left: 4px solid var(--green);
+            padding: 1rem 1.25rem;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+            margin: 1.25rem 0;
+        }
+
+        .reframe-box h5 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--green-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .reframe-box p {
+            font-size: 0.9rem;
+            color: var(--charcoal);
+        }
+
+        /* Script Output Box */
+        .script-container {
+            position: relative;
+            background: #212529;
+            color: #f8f9fa;
+            padding: 1.25rem;
+            border-radius: var(--radius-lg);
+            font-family: inherit;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-size: 0.9375rem;
+            margin: 1rem 0;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            border: none;
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Visual Bar Chart for Tool 3 */
+        .chart-bar-container {
+            margin-bottom: 0.875rem;
+        }
+
+        .chart-label-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .chart-track {
+            height: 12px;
+            background: #e9ecef;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .chart-fill {
+            height: 100%;
+            background: var(--green);
+            border-radius: 6px;
+            transition: width 0.5s ease-out;
+        }
+
+        .chart-fill.high-spend {
+            background: #e63946;
+        }
+
+        /* Progress Bar for Tool 5 */
+        .progress-track-lg {
+            height: 24px;
+            background: #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .progress-fill-lg {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green) 0%, #25a244 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            transition: width 0.6s ease;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--charcoal);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 0.875rem;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Accordion / History Section */
+        .history-section {
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            padding: 0.5rem 0;
+        }
+
+        .history-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--charcoal-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .history-list {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 0.875rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+
+        .history-item-date {
+            font-size: 0.75rem;
+            color: var(--charcoal-muted);
+        }
+
+        /* View Switching Logic */
+        .tool-view {
+            display: none;
+        }
+
+        .tool-view.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+                opacity: 1;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .main-content {
+                padding: 1.25rem 1rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div class="brand-logo" style="width: 30px; height: 30px; font-size: 1rem;">
+                <i class="fa-solid fa-compass"></i>
+            </div>
+            <span class="brand-title" style="font-size: 1.1rem;">Debt<span>Escape</span></span>
+        </div>
+        <button class="mobile-toggle" id="mobileToggleBtn" aria-label="Toggle menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-compass"></i>
+                </div>
+                <div class="brand-title">Debt<span>Escape</span></div>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-target="dashboard">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </button>
+                <button class="nav-item" data-target="tool1">
+                    <i class="fa-solid fa-map-location-dot"></i> 1. Debt Map
+                </button>
+                <button class="nav-item" data-target="tool2">
+                    <i class="fa-solid fa-chess"></i> 2. Payoff Strategy
+                </button>
+                <button class="nav-item" data-target="tool3">
+                    <i class="fa-solid fa-magnifying-glass-dollar"></i> 3. Leak Finder
+                </button>
+                <button class="nav-item" data-target="tool4">
+                    <i class="fa-solid fa-comments"></i> 4. Negotiation
+                </button>
+                <button class="nav-item" data-target="tool5">
+                    <i class="fa-solid fa-chart-line"></i> 5. Progress Tracker
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-wrapper">
+            <main class="main-content">
+
+                <!-- Affirmation Banner -->
+                <div class="affirmation-banner">
+                    <div class="affirmation-icon">
+                        <i class="fa-solid fa-shield-heart"></i>
+                    </div>
+                    <div class="affirmation-text">
+                        <h4>You are not your debt.</h4>
+                        <p>Debt is a financial calculation, not a personal character flaw. Focus on the next actionable step today.</p>
+                    </div>
+                </div>
+
+                <!-- VIEW 0: DASHBOARD -->
+                <section id="dashboard" class="tool-view active">
+                    <div style="margin-bottom: 2rem;">
+                        <h1 class="page-title">Debt Escape Planner</h1>
+                        <p class="page-subtitle">See a way out. Take the first concrete step today.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <a class="tool-card" onclick="switchView('tool1')">
+                            <div>
+                                <div class="tool-card-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                                <h3 class="tool-card-title">1. Debt Map</h3>
+                                <p class="tool-card-desc">Gain instant clarity on exact numbers, interest strain, and minimum burdens.</p>
+                            </div>
+                            <div class="tool-card-link">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                        </a>
+
+                        <a class="tool-card" onclick="switchView('tool2')">
+                            <div>
+                                <div class="tool-card-icon"><i class="fa-solid fa-chess"></i></div>
+                                <h3 class="tool-card-title">2. Payoff Strategy</h3>
+                                <p class="tool-card-desc">Choose between Avalanche and Snowball options to create an actionable sequence.</p>
+                            </div>
+                            <div class="tool-card-link">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                        </a>
+
+                        <a class="tool-card" onclick="switchView('tool3')">
+                            <div>
+                                <div class="tool-card-icon"><i class="fa-solid fa-magnifying-glass-dollar"></i></div>
+                                <h3 class="tool-card-title">3. Spending Leak Finder</h3>
+                                <p class="tool-card-desc">Locate subtle spending drains and instantly free up extra cash flow.</p>
+                            </div>
+                            <div class="tool-card-link">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                        </a>
+
+                        <a class="tool-card" onclick="switchView('tool4')">
+                            <div>
+                                <div class="tool-card-icon"><i class="fa-solid fa-comments"></i></div>
+                                <h3 class="tool-card-title">4. Negotiation Scripts</h3>
+                                <p class="tool-card-desc">Word-for-word call scripts to request lower rates, fee waivers, or plans.</p>
+                            </div>
+                            <div class="tool-card-link">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                        </a>
+
+                        <a class="tool-card" onclick="switchView('tool5')">
+                            <div>
+                                <div class="tool-card-icon"><i class="fa-solid fa-chart-line"></i></div>
+                                <h3 class="tool-card-title">5. Progress Tracker</h3>
+                                <p class="tool-card-desc">Track real balances over time, reframe setbacks, and celebrate milestones.</p>
+                            </div>
+                            <div class="tool-card-link">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- VIEW 1: DEBT MAP -->
+                <section id="tool1" class="tool-view">
+                    <div class="section-header">
+                        <div>
+                            <h1 class="page-title">Tool 1: Debt Map</h1>
+                            <p class="page-subtitle">"I don't even know how much I owe total."</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSampleTool1()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="formTool1" onsubmit="analyzeTool1(event)">
+                            <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--charcoal);">Enter your active debts (up to 5):</h3>
+                            
+                            <div id="debtInputsContainer">
+                                <!-- Debt rows generated dynamically -->
+                            </div>
+
+                            <button type="button" class="btn btn-secondary btn-sm" style="margin-bottom: 1.5rem;" onclick="addDebtRow()">
+                                <i class="fa-solid fa-plus"></i> Add Another Debt
+                            </button>
+
+                            <hr style="border:0; border-top: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label" for="t1_income">Monthly Net Income (Take-Home)</label>
+                                    <input type="number" id="t1_income" class="form-control" placeholder="e.g. 3500" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="t1_expenses">Monthly Essential Expenses</label>
+                                    <input type="number" id="t1_expenses" class="form-control" placeholder="Rent, food, utilities" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fa-solid fa-calculator"></i> Generate Debt Map
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="resultsTool1" class="results-panel" style="display:none;">
+                        <!-- Results injected here -->
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('t1')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Tool 1 History</span>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); clearHistory('t1')">Clear</button>
+                        </div>
+                        <div id="historyList_t1" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- VIEW 2: PAYOFF STRATEGY -->
+                <section id="tool2" class="tool-view">
+                    <div class="section-header">
+                        <div>
+                            <h1 class="page-title">Tool 2: Payoff Strategy</h1>
+                            <p class="page-subtitle">"I don't know which debt to attack first."</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSampleTool2()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="formTool2" onsubmit="analyzeTool2(event)">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label" for="t2_totalDebt">Total Debt Balance ($)</label>
+                                    <input type="number" id="t2_totalDebt" class="form-control" placeholder="15000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="t2_totalMin">Total Minimum Payments ($)</label>
+                                    <input type="number" id="t2_totalMin" class="form-control" placeholder="400" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="t2_extra">Extra Monthly Payment ($)</label>
+                                    <input type="number" id="t2_extra" class="form-control" placeholder="0 or more" value="0">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your Motivation Style</label>
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="t2_style" value="snowball" checked>
+                                        Quick wins motivate me (Snowball - smallest balance first)
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="t2_style" value="avalanche">
+                                        Lowest cost motivates me (Avalanche - highest interest first)
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="t2_style" value="hybrid">
+                                        I need a hybrid approach
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fa-solid fa-compass"></i> Calculate Payoff Plan
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="resultsTool2" class="results-panel" style="display:none;"></div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('t2')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Tool 2 History</span>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); clearHistory('t2')">Clear</button>
+                        </div>
+                        <div id="historyList_t2" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: SPENDING LEAK FINDER -->
+                <section id="tool3" class="tool-view">
+                    <div class="section-header">
+                        <div>
+                            <h1 class="page-title">Tool 3: Spending Leak Finder</h1>
+                            <p class="page-subtitle">"I don't know where my money is actually going each month."</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSampleTool3()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="formTool3" onsubmit="analyzeTool3(event)">
+                            <p class="page-subtitle" style="margin-bottom: 1rem; font-size: 0.9rem;">Estimate your monthly expenditure across these categories:</p>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                                <div class="form-group"><label class="form-label">Housing (Rent/Mortgage)</label><input type="number" class="form-control t3-cat" data-cat="Housing" value="0"></div>
+                                <div class="form-group"><label class="form-label">Groceries & Food</label><input type="number" class="form-control t3-cat" data-cat="Groceries" value="0"></div>
+                                <div class="form-group"><label class="form-label">Dining Out / Takeout</label><input type="number" class="form-control t3-cat" data-cat="Dining Out" value="0"></div>
+                                <div class="form-group"><label class="form-label">Transportation / Fuel</label><input type="number" class="form-control t3-cat" data-cat="Transportation" value="0"></div>
+                                <div class="form-group"><label class="form-label">Subscriptions & Apps</label><input type="number" class="form-control t3-cat" data-cat="Subscriptions" value="0"></div>
+                                <div class="form-group"><label class="form-label">Entertainment / Outings</label><input type="number" class="form-control t3-cat" data-cat="Entertainment" value="0"></div>
+                                <div class="form-group"><label class="form-label">Shopping / Clothing</label><input type="number" class="form-control t3-cat" data-cat="Shopping" value="0"></div>
+                                <div class="form-group"><label class="form-label">Personal Care</label><input type="number" class="form-control t3-cat" data-cat="Personal Care" value="0"></div>
+                                <div class="form-group"><label class="form-label">Debt Minimums</label><input type="number" class="form-control t3-cat" data-cat="Debt Minimums" value="0"></div>
+                                <div class="form-group"><label class="form-label">Savings / Emergency</label><input type="number" class="form-control t3-cat" data-cat="Savings" value="0"></div>
+                                <div class="form-group"><label class="form-label">Miscellaneous</label><input type="number" class="form-control t3-cat" data-cat="Miscellaneous" value="0"></div>
+                                <div class="form-group"><label class="form-label">Unaccounted / "I Don't Know"</label><input type="number" class="form-control t3-cat" data-cat="Unaccounted" value="0"></div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1rem;">
+                                <i class="fa-solid fa-magnifying-glass"></i> Audit My Spending
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="resultsTool3" class="results-panel" style="display:none;"></div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('t3')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Tool 3 History</span>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); clearHistory('t3')">Clear</button>
+                        </div>
+                        <div id="historyList_t3" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: NEGOTIATION SCRIPTS -->
+                <section id="tool4" class="tool-view">
+                    <div class="section-header">
+                        <div>
+                            <h1 class="page-title">Tool 4: Negotiation Scripts</h1>
+                            <p class="page-subtitle">"I'm afraid to call my creditors. I don't know what to say."</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSampleTool4()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="formTool4" onsubmit="analyzeTool4(event)">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label" for="t4_creditor">Who do you need to call?</label>
+                                    <select id="t4_creditor" class="form-control">
+                                        <option value="Credit Card Company">Credit Card Company</option>
+                                        <option value="Student Loan Servicer">Student Loan Servicer</option>
+                                        <option value="Medical Billing Dept">Medical Billing Dept</option>
+                                        <option value="Collections Agency">Collections Agency</option>
+                                        <option value="Landlord / Housing">Landlord / Housing</option>
+                                        <option value="Utility Company">Utility Company</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="t4_situation">Your Situation:</label>
+                                    <select id="t4_situation" class="form-control">
+                                        <option value="Lost income / Unemployment">Lost income / Unemployment</option>
+                                        <option value="Reduced work hours">Reduced work hours</option>
+                                        <option value="Medical emergency">Medical emergency</option>
+                                        <option value="Divorce / Family change">Divorce / Family change</option>
+                                        <option value="Behind on payments">Behind on payments</option>
+                                        <option value="Just feeling overwhelmed">Just feeling overwhelmed</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="t4_goal">What do you need?</label>
+                                    <select id="t4_goal" class="form-control">
+                                        <option value="Lower interest rate">Lower interest rate</option>
+                                        <option value="Manageable payment plan">Manageable payment plan</option>
+                                        <option value="Temporary forbearance">Temporary forbearance</option>
+                                        <option value="Settlement offer">Settlement offer</option>
+                                        <option value="Remove late fees">Remove late fees</option>
+                                        <option value="Extend payment due date">Extend payment due date</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="t4_confidence">Your Current Call Confidence (1 = Nervous, 10 = Ready): <span id="confValue" style="color:var(--green-dark); font-weight:700;">5</span></label>
+                                <input type="range" id="t4_confidence" min="1" max="10" value="5" class="form-control" style="padding:0;" oninput="document.getElementById('confValue').innerText = this.value">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fa-solid fa-phone"></i> Generate Custom Call Script
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="resultsTool4" class="results-panel" style="display:none;"></div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('t4')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Tool 4 History</span>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); clearHistory('t4')">Clear</button>
+                        </div>
+                        <div id="historyList_t4" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- VIEW 5: PROGRESS TRACKER -->
+                <section id="tool5" class="tool-view">
+                    <div class="section-header">
+                        <div>
+                            <h1 class="page-title">Tool 5: Progress Tracker</h1>
+                            <p class="page-subtitle">"I feel like I'm not making fast enough progress and I want to quit."</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSampleTool5()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="formTool5" onsubmit="analyzeTool5(event)">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label" for="t5_startDebt">Starting Total Debt ($)</label>
+                                    <input type="number" id="t5_startDebt" class="form-control" placeholder="20000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="t5_currDebt">Current Total Debt ($)</label>
+                                    <input type="number" id="t5_currDebt" class="form-control" placeholder="17000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="t5_months">Months Working On This</label>
+                                    <input type="number" id="t5_months" class="form-control" placeholder="6" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="t5_setbacks">Setbacks or Unexpected Expenses Faced:</label>
+                                <textarea id="t5_setbacks" class="form-control" placeholder="e.g. Car repair took $400 last month..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="t5_wins">One Win or positive habit established:</label>
+                                <textarea id="t5_wins" class="form-control" placeholder="e.g. Cooked dinner 5 days a week, made minimums on time..."></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fa-solid fa-award"></i> Evaluate My Progress
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="resultsTool5" class="results-panel" style="display:none;"></div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('t5')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Tool 5 History</span>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); clearHistory('t5')">Clear</button>
+                        </div>
+                        <div id="historyList_t5" class="history-list"></div>
+                    </div>
+
+                </section>
+            </main>
+
+            <!-- Global Footer -->
+            <footer class="app-footer">
+                <p>For educational and planning purposes only. Not financial advice. For major financial decisions, consult a certified financial professional.</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check" style="color:var(--green);"></i>
+        <span id="toastText">Copied to clipboard!</span>
+    </div>
+
+    <script>
+        // Global App State & Init
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            initTool1Rows();
+            renderAllHistories();
+        });
+
+        // Mobile Sidebar Toggle Logic
+        const mobileToggleBtn = document.getElementById('mobileToggleBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function toggleMobileSidebar() {
+            sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('mobile-open');
+        }
+
+        mobileToggleBtn.addEventListener('click', toggleMobileSidebar);
+        sidebarOverlay.addEventListener('click', toggleMobileSidebar);
+
+        // View Navigation
+        function switchView(targetId) {
+            document.querySelectorAll('.tool-view').forEach(view => view.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+
+            const targetView = document.getElementById(targetId);
+            if (targetView) targetView.classList.add('active');
+
+            const activeNav = document.querySelector(`.nav-item[data-target="${targetId}"]`);
+            if (activeNav) activeNav.classList.add('active');
+
+            if (sidebar.classList.contains('mobile-open')) {
+                toggleMobileSidebar();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function initNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const target = item.getAttribute('data-target');
+                    switchView(target);
+                });
+            });
+        }
+
+        // Toast Notification System
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toastText');
+            toastText.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2200);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied script to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy text.');
+            });
+        }
+
+        // TOOL 1 LOGIC
+        let debtRowCounter = 0;
+
+        function initTool1Rows() {
+            const container = document.getElementById('debtInputsContainer');
+            container.innerHTML = '';
+            debtRowCounter = 0;
+            for (let i = 0; i < 3; i++) {
+                addDebtRow();
+            }
+        }
+
+        function addDebtRow() {
+            const container = document.getElementById('debtInputsContainer');
+            if (container.children.length >= 5) {
+                alert('Maximum 5 debts allowed per calculation.');
+                return;
+            }
+            debtRowCounter++;
+            const row = document.createElement('div');
+            row.className = 'input-grid-5 debt-row';
+            row.innerHTML = `
+                <div>
+                    <label class="form-label" style="font-size:0.75rem;">Creditor Name</label>
+                    <input type="text" class="form-control t1-name" placeholder="Debt #${debtRowCounter}">
+                </div>
+                <div>
+                    <label class="form-label" style="font-size:0.75rem;">Balance ($)</label>
+                    <input type="number" class="form-control t1-balance" placeholder="0">
+                </div>
+                <div>
+                    <label class="form-label" style="font-size:0.75rem;">Min Pay ($)</label>
+                    <input type="number" class="form-control t1-min" placeholder="0">
+                </div>
+                <div>
+                    <label class="form-label" style="font-size:0.75rem;">APR (%)</label>
+                    <input type="number" step="0.1" class="form-control t1-apr" placeholder="0">
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <label class="form-label" style="font-size:0.75rem;">Past Due?</label>
+                    <input type="checkbox" class="t1-pastdue" style="width:18px; height:18px; accent-color:var(--green); margin-top:6px;">
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function loadSampleTool1() {
+            initTool1Rows();
+            const rows = document.querySelectorAll('.debt-row');
+            
+            // Card 1
+            rows[0].querySelector('.t1-name').value = "Visa Credit Card";
+            rows[0].querySelector('.t1-balance').value = "4500";
+            rows[0].querySelector('.t1-min').value = "135";
+            rows[0].querySelector('.t1-apr').value = "22.9";
+            rows[0].querySelector('.t1-pastdue').checked = false;
+
+            // Card 2
+            rows[1].querySelector('.t1-name').value = "Auto Loan";
+            rows[1].querySelector('.t1-balance').value = "11200";
+            rows[1].querySelector('.t1-min').value = "280";
+            rows[1].querySelector('.t1-apr').value = "6.5";
+            rows[1].querySelector('.t1-pastdue').checked = false;
+
+            // Card 3
+            rows[2].querySelector('.t1-name').value = "Federal Student Loan";
+            rows[2].querySelector('.t1-balance').value = "18500";
+            rows[2].querySelector('.t1-min').value = "190";
+            rows[2].querySelector('.t1-apr').value = "4.8";
+            rows[2].querySelector('.t1-pastdue').checked = false;
+
+            document.getElementById('t1_income').value = "3800";
+            document.getElementById('t1_expenses').value = "2900";
+        }
+
+        function analyzeTool1(e) {
+            e.preventDefault();
+            const rows = document.querySelectorAll('.debt-row');
+            let debts = [];
+            let totalDebt = 0;
+            let totalMin = 0;
+
+            rows.forEach((row, idx) => {
+                const name = row.querySelector('.t1-name').value || `Debt #${idx+1}`;
+                const balance = parseFloat(row.querySelector('.t1-balance').value) || 0;
+                const min = parseFloat(row.querySelector('.t1-min').value) || 0;
+                const apr = parseFloat(row.querySelector('.t1-apr').value) || 0;
+                const pastDue = row.querySelector('.t1-pastdue').checked;
+
+                if (balance > 0) {
+                    debts.push({ name, balance, min, apr, pastDue });
+                    totalDebt += balance;
+                    totalMin += min;
+                }
+            });
+
+            if (debts.length === 0) {
+                alert('Please fill in at least one debt entry with a balance.');
+                return;
+            }
+
+            const income = parseFloat(document.getElementById('t1_income').value) || 0;
+            const expenses = parseFloat(document.getElementById('t1_expenses').value) || 0;
+            const netCashFlow = income - expenses;
+            const remainingCash = netCashFlow - totalMin;
+            const dtiRatio = income > 0 ? ((totalMin / income) * 100).toFixed(1) : 'N/A';
+
+            // Rank by APR
+            const sortedDebts = [...debts].sort((a, b) => b.apr - a.apr);
+
+            const resultsDiv = document.getElementById('resultsTool1');
+            resultsDiv.style.display = 'block';
+
+            resultsDiv.innerHTML = `
+                <div class="results-header">
+                    <h3 class="section-title"><i class="fa-solid fa-square-poll-vertical"></i> Your Debt Map Summary</h3>
+                    <span class="btn btn-secondary btn-sm" onclick="window.print()"><i class="fa-solid fa-print"></i> Print</span>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Debt Balance</div>
+                        <div class="metric-value highlight">$${totalDebt.toLocaleString()}</div>
+                        <div class="metric-sub">${debts.length} active account(s)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Monthly Minimum Burden</div>
+                        <div class="metric-value">$${totalMin.toLocaleString()}</div>
+                        <div class="metric-sub">${dtiRatio}% of monthly take-home</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Remaining Monthly Cushion</div>
+                        <div class="metric-value" style="color:${remainingCash < 0 ? '#e63946' : 'var(--charcoal)'}">$${remainingCash.toLocaleString()}</div>
+                        <div class="metric-sub">After essentials ($${expenses}) & minimums</div>
+                    </div>
+                </div>
+
+                <div class="reframe-box">
+                    <h5><i class="fa-solid fa-lightbulb"></i> Emotional Reframe</h5>
+                    <p>This total figure of <strong>$${totalDebt.toLocaleString()}</strong> is purely structural information — it is not a measurement of your value or personal worth. Laying it out transparently is your first power move towards total control.</p>
+                </div>
+
+                <h4 style="font-size:1rem; margin: 1.25rem 0 0.75rem 0;">Interest Pain Ranking (Attack Priority Order):</h4>
+                <div style="background:#f8f9fa; border-radius:var(--radius-lg); padding:0.5rem 1rem; margin-bottom:1rem;">
+                    ${sortedDebts.map((d, i) => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding: 0.6rem 0; border-bottom: ${i < sortedDebts.length - 1 ? '1px solid #e9ecef' : 'none'}">
+                            <div>
+                                <strong>#${i+1} ${d.name}</strong> 
+                                ${d.pastDue ? '<span style="background:#f8d7da; color:#721c24; font-size:0.7rem; padding:2px 6px; border-radius:4px; margin-left:6px;">PAST DUE</span>' : ''}
+                                <div style="font-size:0.8rem; color:var(--charcoal-muted);">Balance: $${d.balance.toLocaleString()} | Min: $${d.min}/mo</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <span style="font-weight:700; color:#e63946;">${d.apr}% APR</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            saveHistory('t1', { date: new Date().toLocaleDateString(), summary: `Total Debt: $${totalDebt.toLocaleString()} (${debts.length} accounts)` });
+        }
+
+        // TOOL 2 LOGIC
+        function loadSampleTool2() {
+            document.getElementById('t2_totalDebt').value = "15000";
+            document.getElementById('t2_totalMin').value = "400";
+            document.getElementById('t2_extra').value = "150";
+            document.querySelector('input[name="t2_style"][value="snowball"]').checked = true;
+        }
+
+        function analyzeTool2(e) {
+            e.preventDefault();
+            const totalDebt = parseFloat(document.getElementById('t2_totalDebt').value) || 0;
+            const minPayment = parseFloat(document.getElementById('t2_totalMin').value) || 0;
+            const extraPayment = parseFloat(document.getElementById('t2_extra').value) || 0;
+            const style = document.querySelector('input[name="t2_style"]:checked').value;
+
+            const totalMonthly = minPayment + extraPayment;
+            if (totalMonthly <= 0) {
+                alert('Please enter a valid monthly payment.');
+                return;
+            }
+
+            // Approximate month calculation (est average ~15% APR for simulation)
+            const approxMonths = Math.ceil(totalDebt / (totalMonthly * 0.85));
+
+            let recTitle = "";
+            let recDesc = "";
+
+            if (style === 'snowball') {
+                recTitle = "Debt Snowball Method";
+                recDesc = "Target your smallest balance debt first while paying minimums on the rest. Eliminating small debts quickly gives you momentum and psychological wins.";
+            } else if (style === 'avalanche') {
+                recTitle = "Debt Avalanche Method";
+                recDesc = "Target the debt with the highest interest rate (APR) first. Mathematically, this minimizes total interest paid over time and achieves debt freedom in the absolute shortest time.";
+            } else {
+                recTitle = "Hybrid Approach";
+                recDesc = "Pay off 1 tiny debt first for an immediate momentum boost, then instantly switch to targeting the highest interest rate debt.";
+            }
+
+            const resultsDiv = document.getElementById('resultsTool2');
+            resultsDiv.style.display = 'block';
+
+            resultsDiv.innerHTML = `
+                <div class="results-header">
+                    <h3 class="section-title"><i class="fa-solid fa-chess"></i> Strategy Recommendation</h3>
+                </div>
+
+                <div style="background:var(--green-subtle); border: 1px solid var(--green); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.25rem;">
+                    <h4 style="color:var(--green-dark); font-size: 1.15rem; margin-bottom:0.35rem;">Recommended Path: ${recTitle}</h4>
+                    <p style="font-size:0.925rem; color:var(--charcoal);">${recDesc}</p>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Monthly Allocation</div>
+                        <div class="metric-value highlight">$${totalMonthly.toLocaleString()}</div>
+                        <div class="metric-sub">$${minPayment} min + $${extraPayment} extra</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Estimated Time Horizon</div>
+                        <div class="metric-value">~${approxMonths} Months</div>
+                        <div class="metric-sub">Approximately ${(approxMonths/12).toFixed(1)} years</div>
+                    </div>
+                </div>
+
+                ${extraPayment === 0 ? `
+                    <div style="background:#fff3cd; border:1px solid #ffeeba; border-radius:var(--radius-lg); padding:1rem; margin-bottom:1.25rem;">
+                        <h5 style="color:#856404; font-size:0.95rem; margin-bottom:0.5rem;"><i class="fa-solid fa-triangle-exclamation"></i> Extra Monthly Allocation is Currently $0</h5>
+                        <p style="font-size:0.875rem; color:#856404; margin-bottom:0.5rem;">To speed up your freedom date, here are 3 ways to unlock $50–$100/month:</p>
+                        <ul style="font-size:0.85rem; padding-left:1.25rem; color:#856404;">
+                            <li>Pause 2 recurring streaming/subscription services ($30/mo)</li>
+                            <li>Commit to one "No-Spend Weekend" per month ($50/mo)</li>
+                            <li>Call your insurance provider or cable company for a bill reduction ($25/mo)</li>
+                        </ul>
+                    </div>
+                ` : ''}
+
+                <div style="background:#f8f9fa; border-radius:var(--radius-lg); padding:1.25rem; border:1px solid var(--border-color);">
+                    <h4 style="font-size:1rem; margin-bottom:0.5rem; color:var(--charcoal);"><i class="fa-solid fa-play" style="color:var(--green);"></i> Your Immediate Single Action</h4>
+                    <p style="font-size:0.9rem; color:var(--charcoal-muted);">Make minimum payments on all non-target debts. Direct your total extra monthly amount of <strong>$${extraPayment > 0 ? extraPayment : 25}</strong> towards your top target debt starting today.</p>
+                </div>
+            `;
+
+            saveHistory('t2', { date: new Date().toLocaleDateString(), summary: `Strategy: ${recTitle} ($${totalMonthly}/mo total)` });
+        }
+
+        // TOOL 3 LOGIC
+        function loadSampleTool3() {
+            const inputs = document.querySelectorAll('.t3-cat');
+            const sampleData = {
+                "Housing": 1200,
+                "Groceries": 450,
+                "Dining Out": 380,
+                "Transportation": 220,
+                "Subscriptions": 85,
+                "Entertainment": 160,
+                "Shopping": 210,
+                "Personal Care": 70,
+                "Debt Minimums": 350,
+                "Savings": 50,
+                "Miscellaneous": 290,
+                "Unaccounted": 150
+            };
+
+            inputs.forEach(input => {
+                const cat = input.getAttribute('data-cat');
+                if (sampleData[cat] !== undefined) {
+                    input.value = sampleData[cat];
+                }
+            });
+        }
+
+        function analyzeTool3(e) {
+            e.preventDefault();
+            const inputs = document.querySelectorAll('.t3-cat');
+            let totalSpend = 0;
+            let categories = [];
+
+            inputs.forEach(input => {
+                const name = input.getAttribute('data-cat');
+                const amount = parseFloat(input.value) || 0;
+                totalSpend += amount;
+                categories.push({ name, amount });
+            });
+
+            if (totalSpend === 0) {
+                alert('Please enter spending figures in at least one category.');
+                return;
+            }
+
+            // Sort by amount descending
+            categories.sort((a, b) => b.amount - a.amount);
+
+            const resultsDiv = document.getElementById('resultsTool3');
+            resultsDiv.style.display = 'block';
+
+            // Identify leaks (Dining Out, Subscriptions, Unaccounted, Misc)
+            const leaks = categories.filter(c => ['Dining Out', 'Subscriptions', 'Unaccounted', 'Miscellaneous'].includes(c.name) && c.amount > 50);
+
+            resultsDiv.innerHTML = `
+                <div class="results-header">
+                    <h3 class="section-title"><i class="fa-solid fa-magnifying-glass-dollar"></i> Spending Audit Results</h3>
+                </div>
+
+                <div class="metric-card" style="margin-bottom:1.5rem;">
+                    <div class="metric-label">Total Monthly Outflow Evaluated</div>
+                    <div class="metric-value highlight">$${totalSpend.toLocaleString()}</div>
+                </div>
+
+                <h4 style="font-size:1rem; margin-bottom:1rem;">Visual Spending Distribution:</h4>
+                <div style="margin-bottom:1.5rem;">
+                    ${categories.map(c => {
+                        const pct = Math.round((c.amount / totalSpend) * 100);
+                        const isHighLeak = ['Dining Out', 'Subscriptions', 'Unaccounted'].includes(c.name) && c.amount > 100;
+                        return `
+                            <div class="chart-bar-container">
+                                <div class="chart-label-row">
+                                    <span>${c.name}</span>
+                                    <span>$${c.amount} (${pct}%)</span>
+                                </div>
+                                <div class="chart-track">
+                                    <div class="chart-fill ${isHighLeak ? 'high-spend' : ''}" style="width: ${pct}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+
+                ${leaks.length > 0 ? `
+                    <div style="background:#fff3cd; border:1px solid #ffeeba; border-radius:var(--radius-lg); padding:1rem; margin-bottom:1.25rem;">
+                        <h5 style="color:#856404; font-size:0.95rem; margin-bottom:0.35rem;"><i class="fa-solid fa-triangle-exclamation"></i> Identified Primary Leaks</h5>
+                        <p style="font-size:0.875rem; color:#856404;">Noticeable non-essential outflows detected in: <strong>${leaks.map(l => l.name + ' ($' + l.amount + ')').join(', ')}</strong>.</p>
+                    </div>
+                ` : ''}
+
+                <div class="reframe-box" style="margin-bottom:1.25rem;">
+                    <h5><i class="fa-solid fa-bolt"></i> 3 Quick Reduction Wins</h5>
+                    <ul style="font-size:0.875rem; padding-left:1.25rem; margin-top:0.35rem; line-height:1.6;">
+                        <li><strong>Audit Subscriptions:</strong> Cancel 2 unused memberships to immediately capture $30–$50/mo.</li>
+                        <li><strong>Cap Dining Out:</strong> Shift just 2 restaurant meals per week to home prep to reclaim $120–$180/mo.</li>
+                        <li><strong>Track the "Unaccounted":</strong> Keep cash receipts for 7 days to eliminate hidden leaks ($50+/mo).</li>
+                    </ul>
+                </div>
+
+                <div style="background:#f8f9fa; border-radius:var(--radius-lg); padding:1.25rem; border:1px solid var(--border-color);">
+                    <h5 style="font-size:0.95rem; font-weight:700; margin-bottom:0.35rem; color:var(--charcoal);"><i class="fa-solid fa-calendar-check" style="color:var(--green);"></i> The 7-Day Spending Freeze Challenge</h5>
+                    <p style="font-size:0.875rem; color:var(--charcoal-muted);">For the next 7 days, pause all non-essential purchases (dining out, impulse items, app downloads). Direct any unspent funds straight to your target debt balance.</p>
+                </div>
+            `;
+
+            saveHistory('t3', { date: new Date().toLocaleDateString(), summary: `Audited $${totalSpend.toLocaleString()} monthly spend` });
+        }
+
+        // TOOL 4 LOGIC
+        function loadSampleTool4() {
+            document.getElementById('t4_creditor').value = "Credit Card Company";
+            document.getElementById('t4_situation').value = "Behind on payments";
+            document.getElementById('t4_goal').value = "Manageable payment plan";
+            document.getElementById('t4_confidence').value = "4";
+            document.getElementById('confValue').innerText = "4";
+        }
+
+        function analyzeTool4(e) {
+            e.preventDefault();
+            const creditor = document.getElementById('t4_creditor').value;
+            const situation = document.getElementById('t4_situation').value;
+            const goal = document.getElementById('t4_goal').value;
+            const confidence = document.getElementById('t4_confidence').value;
+
+            // Template Script Logic
+            const scriptText = `Hello, my name is [Your Name], account number [Account Number]. I am calling today because I am actively taking steps to manage my account responsibility. 
+
+Due to a recent hardship (${situation.toLowerCase()}), I am finding it difficult to keep up with the current terms. I want to pay my balance, but I need your assistance to make it sustainable.
+
+I am requesting a ${goal.toLowerCase()} so that I can maintain consistent monthly payments. What options do you have available under your hardship program?`;
+
+            const resultsDiv = document.getElementById('resultsTool4');
+            resultsDiv.style.display = 'block';
+
+            resultsDiv.innerHTML = `
+                <div class="results-header">
+                    <h3 class="section-title"><i class="fa-solid fa-comments"></i> Your Custom Phone Call Script</h3>
+                </div>
+
+                <p style="font-size:0.875rem; color:var(--charcoal-muted); margin-bottom:0.5rem;">Read this script word-for-word when you connect with representative:</p>
+
+                <div class="script-container">
+                    <button class="copy-btn" onclick="copyToClipboard(\`${scriptText.replace(/`/g, '\`')}\`)"><i class="fa-solid fa-copy"></i> Copy Script</button>
+                    ${scriptText}
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:1rem; margin-top:1.25rem;">
+                    <div style="background:#f8f9fa; border-radius:var(--radius-lg); padding:1rem; border:1px solid var(--border-color);">
+                        <h5 style="font-size:0.9rem; font-weight:700; margin-bottom:0.5rem; color:var(--charcoal);"><i class="fa-solid fa-list-check" style="color:var(--green);"></i> What to Have Ready</h5>
+                        <ul style="font-size:0.8rem; padding-left:1rem; color:var(--charcoal-muted); line-height:1.5;">
+                            <li>Account number & recent statement</li>
+                            <li>Exact monthly income & basic budget figures</li>
+                            <li>Target payment amount you can realistically afford</li>
+                            <li>Pen and paper to write down representative details</li>
+                        </ul>
+                    </div>
+
+                    <div style="background:#f8f9fa; border-radius:var(--radius-lg); padding:1rem; border:1px solid var(--border-color);">
+                        <h5 style="font-size:0.9rem; font-weight:700; margin-bottom:0.5rem; color:var(--charcoal);"><i class="fa-solid fa-shield-halved" style="color:var(--green);"></i> What to Say If...</h5>
+                        <p style="font-size:0.8rem; color:var(--charcoal-muted); margin-bottom:0.35rem;"><strong>They say NO:</strong> "I understand. May I please speak with a supervisor or your hardship/retention department?"</p>
+                        <p style="font-size:0.8rem; color:var(--charcoal-muted);"><strong>They pressure you:</strong> "I want to be sure I make a agreement I can keep. Can you send this offer in writing?"</p>
+                    </div>
+                </div>
+
+                <div class="reframe-box" style="margin-top:1.25rem;">
+                    <h5><i class="fa-solid fa-turn-down"></i> Backup Plan</h5>
+                    <p>If initial phone negotiation yields no result, request a temporary 60-day forbearance or inquire about accredited Non-Profit Credit Counseling (NFCC.org) for formal payment management programs.</p>
+                </div>
+            `;
+
+            saveHistory('t4', { date: new Date().toLocaleDateString(), summary: `Script for ${creditor} (${goal})` });
+        }
+
+        // TOOL 5 LOGIC
+        function loadSampleTool5() {
+            document.getElementById('t5_startDebt').value = "20000";
+            document.getElementById('t5_currDebt').value = "16500";
+            document.getElementById('t5_months').value = "7";
+            document.getElementById('t5_setbacks').value = "Unplanned car brake repairs ($350) required using cash flow last month.";
+            document.getElementById('t5_wins').value = "Successfully stopped buying daily coffee and haven't missed a single minimum payment.";
+        }
+
+        function analyzeTool5(e) {
+            e.preventDefault();
+            const startDebt = parseFloat(document.getElementById('t5_startDebt').value) || 0;
+            const currDebt = parseFloat(document.getElementById('t5_currDebt').value) || 0;
+            const months = parseFloat(document.getElementById('t5_months').value) || 1;
+            const setbacks = document.getElementById('t5_setbacks').value || "None reported";
+            const wins = document.getElementById('t5_wins').value || "None reported";
+
+            if (startDebt <= 0) {
+                alert('Please enter a valid starting debt balance.');
+                return;
+            }
+
+            const paidOff = startDebt - currDebt;
+            const pctPaid = Math.max(0, Math.min(100, ((paidOff / startDebt) * 100))).toFixed(1);
+            const monthlyPace = Math.round(paidOff / Math.max(1, months));
+
+            const resultsDiv = document.getElementById('resultsTool5');
+            resultsDiv.style.display = 'block';
+
+            resultsDiv.innerHTML = `
+                <div class="results-header">
+                    <h3 class="section-title"><i class="fa-solid fa-chart-line"></i> Your Progress Analytics</h3>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Debt Reduced</div>
+                        <div class="metric-value highlight">$${paidOff.toLocaleString()}</div>
+                        <div class="metric-sub">${pctPaid}% of debt eliminated</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Average Monthly Reduction</div>
+                        <div class="metric-value">$${monthlyPace.toLocaleString()}/mo</div>
+                        <div class="metric-sub">Across ${months} month(s)</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.875rem; font-weight:600; margin-bottom:0.25rem;">
+                        <span>Overall Reduction Progress</span>
+                        <span>${pctPaid}% Complete</span>
+                    </div>
+                    <div class="progress-track-lg">
+                        <div class="progress-fill-lg" style="width: ${Math.max(5, pctPaid)}%;">
+                            ${pctPaid}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reframe-box">
+                    <h5><i class="fa-solid fa-arrows-rotate"></i> Setback Reframe</h5>
+                    <p><strong>Setbacks are data, not failure.</strong> Factoring in life events like <em>"${setbacks}"</em> while continuing to pay down $${paidOff.toLocaleString()} total proves that your momentum is resilient.</p>
+                </div>
+
+                <div style="background:#f8f9fa; border-radius:var(--radius-lg); padding:1.25rem; border:1px solid var(--border-color); margin-top:1rem;">
+                    <h5 style="font-size:0.95rem; font-weight:700; margin-bottom:0.35rem; color:var(--charcoal);"><i class="fa-solid fa-star" style="color:var(--green);"></i> Celebrating Your Momentum</h5>
+                    <p style="font-size:0.875rem; color:var(--charcoal-muted); margin-bottom:0.5rem;"><strong>Acknowledged Win:</strong> ${wins}</p>
+                    <p style="font-size:0.875rem; color:var(--charcoal-muted);"><strong>Next Milestone Goal:</strong> Target reaching $${Math.max(0, currDebt - 1000).toLocaleString()} remaining debt balance!</p>
+                </div>
+            `;
+
+            saveHistory('t5', { date: new Date().toLocaleDateString(), summary: `Reduced $${paidOff.toLocaleString()} (${pctPaid}%) in ${months} months` });
+        }
+
+        // HISTORY MANAGEMENT (localStorage)
+        function saveHistory(toolId, item) {
+            const key = `debt_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            history.unshift(item);
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = `debt_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const listEl = document.getElementById(`historyList_${toolId}`);
+            if (!listEl) return;
+
+            if (history.length === 0) {
+                listEl.innerHTML = `<div style="font-size:0.85rem; color:var(--charcoal-muted); padding:0.5rem 0;">No previous calculation history saved.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = history.map(h => `
+                <div class="history-item">
+                    <span>${h.summary}</span>
+                    <span class="history-item-date">${h.date}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderAllHistories() {
+            ['t1', 't2', 't3', 't4', 't5'].forEach(renderHistory);
+        }
+
+        function toggleHistory(toolId) {
+            const listEl = document.getElementById(`historyList_${toolId}`);
+            if (listEl) {
+                listEl.style.display = listEl.style.display === 'none' ? 'flex' : 'none';
+            }
+        }
+
+        function clearHistory(toolId) {
+            const key = `debt_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast('History cleared.');
+        }
+    </script>
+</body>
+</html>

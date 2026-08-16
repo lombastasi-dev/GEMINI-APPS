@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micromanagement Survival Kit</title>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #3D5A80;
+            --primary-hover: #2B4162;
+            --primary-light: #EBF1F5;
+            --accent: #EE9B00;
+            --accent-hover: #D88C00;
+            --accent-light: #FFF5E0;
+            --bg-start: #F0F4F8;
+            --bg-end: #FFF8E7;
+            --card-bg: #FFFFFF;
+            --text-main: #2C3E50;
+            --text-muted: #6C757D;
+            --border-color: #E2E8F0;
+            --success-bg: #D1E7DD;
+            --success-text: #0F5132;
+            --warning-bg: #FFF3CD;
+            --warning-text: #664D03;
+            --danger-bg: #F8D7DA;
+            --danger-text: #842029;
+            --sidebar-width: 260px;
+            --radius: 1rem;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            min-height: 100vh;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Layout Structure */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #FFFFFF;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            background-color: #FFFFFF;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            box-shadow: var(--shadow);
+        }
+
+        .mobile-title {
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.35rem;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 950;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Views management */
+        .view {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* UI Cards */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.75rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard-hero {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #2B4162 100%);
+            color: #FFFFFF;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-hero h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .dashboard-hero p {
+            font-size: 1.1rem;
+            color: #E2E8F0;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .dash-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .dash-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .dash-card-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .dash-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Tool Headers & Forms */
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tool-title-area h2 {
+            font-size: 1.6rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+        }
+
+        .tool-title-area p.problem-statement {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .btn-sample {
+            background-color: var(--accent-light);
+            color: var(--accent-hover);
+            border: 1px solid #FCD34D;
+            padding: 0.55rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-sample:hover {
+            background-color: #FEF3C7;
+            color: #B45309;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #FAFAFA;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #FFFFFF;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 400;
+            font-size: 0.92rem;
+            cursor: pointer;
+        }
+
+        .checkbox-label input, .radio-label input {
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #FFFFFF;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Output Card Styling */
+        .output-card {
+            display: none;
+            background-color: #FFFFFF;
+            border-radius: var(--radius);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            margin-top: 1.5rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .output-card.active {
+            display: block;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .output-header h3 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .output-section {
+            margin-bottom: 1.25rem;
+        }
+
+        .output-section h4 {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .output-box {
+            background-color: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .script-box {
+            background-color: #F1F5F9;
+            border-left: 4px solid var(--primary);
+            font-family: 'Inter', sans-serif;
+            white-space: pre-wrap;
+            padding-right: 3rem;
+        }
+
+        .btn-copy {
+            position: absolute;
+            top: 0.6rem;
+            right: 0.6rem;
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 0.35rem;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* Verdict Banners for Tool 5 */
+        .verdict-banner {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .verdict-fixable {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            border: 1px solid #A3CFBB;
+        }
+
+        .verdict-borderline {
+            background-color: var(--warning-bg);
+            color: var(--warning-text);
+            border: 1px solid #FFE69C;
+        }
+
+        .verdict-exit {
+            background-color: var(--danger-bg);
+            color: var(--danger-text);
+            border: 1px solid #F5C2C7;
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 2rem;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            padding: 0.5rem 0;
+        }
+
+        .history-header h4 {
+            font-size: 1rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-clear-history {
+            background: none;
+            border: none;
+            color: var(--danger-text);
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .history-list {
+            display: none;
+            margin-top: 0.75rem;
+            gap: 0.75rem;
+            flex-direction: column;
+        }
+
+        .history-list.active {
+            display: flex;
+        }
+
+        .history-item {
+            background-color: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .history-date {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .history-summary {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .btn-restore {
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .btn-restore:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--primary);
+            color: #FFFFFF;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        .app-footer {
+            background-color: #FFFFFF;
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-top: auto;
+            width: 100%;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .overlay.open {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 1.25rem 1rem;
+            }
+
+            .dashboard-hero h2 {
+                font-size: 1.75rem;
+            }
+
+            .grid-dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .tool-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .btn-sample {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="mobile-title">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Survival Kit</span>
+        </div>
+        <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Overlay for Mobile Sidebar -->
+    <div class="overlay" id="sidebar-overlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h1>Micromanagement<br><span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">Survival Kit</span></h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-item active" data-view="dashboard">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a class="nav-item" data-view="tool1">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>Check-In Calculator</span>
+                </a>
+                <a class="nav-item" data-view="tool2">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    <span>Boundary Script Builder</span>
+                </a>
+                <a class="nav-item" data-view="tool3">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Autonomy Audit</span>
+                </a>
+                <a class="nav-item" data-view="tool4">
+                    <i class="fa-solid fa-file-shield"></i>
+                    <span>Documentation Shield</span>
+                </a>
+                <a class="nav-item" data-view="tool5">
+                    <i class="fa-solid fa-door-open"></i>
+                    <span>Stay or Go Evaluator</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Container -->
+        <main class="main-content">
+            <div class="content-wrapper">
+
+                <!-- DASHBOARD VIEW -->
+                <section id="dashboard" class="view active">
+                    <div class="dashboard-hero">
+                        <h2>Micromanagement Survival Kit</h2>
+                        <p>Reclaim your autonomy without burning the bridge. Tactical, practical, and constructive tools for navigating high-control managers.</p>
+                    </div>
+
+                    <div class="grid-dashboard">
+                        <div class="dash-card" onclick="switchView('tool1')">
+                            <div class="dash-card-header">
+                                <div class="dash-card-icon"><i class="fa-solid fa-calculator"></i></div>
+                                <h3>Check-In Calculator</h3>
+                            </div>
+                            <p>Assess check-in frequency against role benchmarks, calculate time lost, and generate proactive visibility scripts.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool2')">
+                            <div class="dash-card-header">
+                                <div class="dash-card-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                                <h3>Boundary Script Builder</h3>
+                            </div>
+                            <p>Generate professional, tailored scripts to set boundaries based on your boss's specific anxiety or leadership style.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool3')">
+                            <div class="dash-card-header">
+                                <div class="dash-card-icon"><i class="fa-solid fa-compass"></i></div>
+                                <h3>Autonomy Audit</h3>
+                            </div>
+                            <p>Map your current control vs. constraint areas and design low-risk micro-experiments to build credibility and freedom.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool4')">
+                            <div class="dash-card-header">
+                                <div class="dash-card-icon"><i class="fa-solid fa-file-shield"></i></div>
+                                <h3>Documentation Shield</h3>
+                            </div>
+                            <p>Create non-confrontational CYA email templates and establish paper trails to protect against moving goalposts.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool5')">
+                            <div class="dash-card-header">
+                                <div class="dash-card-icon"><i class="fa-solid fa-door-open"></i></div>
+                                <h3>Stay or Go Evaluator</h3>
+                            </div>
+                            <p>Objective diagnosis of whether your situation is fixable, borderline, or requires an active exit strategy.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: CHECK-IN CALCULATOR -->
+                <section id="tool1" class="view">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-title-area">
+                                <h2>Check-In Calculator</h2>
+                                <p class="problem-statement">"My boss checks on me way too often. What's reasonable?"</p>
+                            </div>
+                            <button class="btn-sample" onclick="loadSampleTool1()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-tool1" onsubmit="calculateTool1(event)">
+                            <div class="form-group">
+                                <label for="t1-frequency">How many times does your boss check in per day?</label>
+                                <select id="t1-frequency" class="form-control" required>
+                                    <option value="1-2">1 - 2 times per day</option>
+                                    <option value="3-5">3 - 5 times per day</option>
+                                    <option value="6-10">6 - 10 times per day</option>
+                                    <option value="10+">10+ times per day</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What form do check-ins take? (Select all that apply)</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-channel" value="Email"> Email</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-channel" value="Instant message"> Instant message (Slack / Teams)</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-channel" value="Phone call"> Phone call</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-channel" value="Desk drop-by"> Desk drop-by / In-person</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-channel" value="Meeting request"> Ad-hoc Meeting request</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Do they ask for updates you already provided?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t1-repeat" value="Yes" required> Yes, regularly</label>
+                                    <label class="radio-label"><input type="radio" name="t1-repeat" value="Sometimes"> Sometimes</label>
+                                    <label class="radio-label"><input type="radio" name="t1-repeat" value="No"> No, they just ask for new info</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Does the check-in change your work or just monitor it?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t1-impact" value="Changes direction" required> Changes direction / Adds new mandates</label>
+                                    <label class="radio-label"><input type="radio" name="t1-impact" value="Just monitors"> Just monitors status / Progress checking</label>
+                                    <label class="radio-label"><input type="radio" name="t1-impact" value="Both"> Both</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-seniority">Your role seniority:</label>
+                                <select id="t1-seniority" class="form-control" required>
+                                    <option value="Entry-level">Entry-level</option>
+                                    <option value="Mid-level">Mid-level</option>
+                                    <option value="Senior">Senior</option>
+                                    <option value="Lead">Lead / Manager</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-primary">
+                                <i class="fa-solid fa-chart-pie"></i> Analyze Check-In Burden
+                            </button>
+                        </form>
+
+                        <div id="output-tool1" class="output-card">
+                            <div class="output-header">
+                                <h3><i class="fa-solid fa-square-poll-vertical"></i> Diagnostic Analysis</h3>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>1. Frequency Assessment</h4>
+                                <div id="t1-out-assessment" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>2. Cost Calculator (Impact)</h4>
+                                <div id="t1-out-cost" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>3. The Real Fear (Boss Anxiety)</h4>
+                                <div id="t1-out-fear" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>4. Response Tactics</h4>
+                                <div id="t1-out-tactics" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>5. Proactive Alignment Script</h4>
+                                <div class="output-box script-box" id="t1-out-script">
+                                </div>
+                                <button class="btn-copy" onclick="copyText('t1-out-script')"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </div>
+                        </div>
+
+                        <!-- History Accordion -->
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool1')">
+                                <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Runs History</h4>
+                                <div>
+                                    <button class="btn-clear-history" onclick="clearHistory(event, 'tool1')">Clear</button>
+                                    <i class="fa-solid fa-chevron-down" id="t1-hist-icon"></i>
+                                </div>
+                            </div>
+                            <div class="history-list" id="t1-history-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: BOUNDARY SCRIPT BUILDER -->
+                <section id="tool2" class="view">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-title-area">
+                                <h2>Boundary Script Builder</h2>
+                                <p class="problem-statement">"I need to push back without getting fired."</p>
+                            </div>
+                            <button class="btn-sample" onclick="loadSampleTool2()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-tool2" onsubmit="calculateTool2(event)">
+                            <div class="form-group">
+                                <label for="t2-boundary">What boundary do you need?</label>
+                                <select id="t2-boundary" class="form-control" required>
+                                    <option value="Fewer check-ins">Fewer check-ins / Reduced status pings</option>
+                                    <option value="More advance notice">More advance notice for requests/deadlines</option>
+                                    <option value="Less after-hours contact">Less after-hours contact / Weekend pings</option>
+                                    <option value="Stop redoing my work">Stop redoing my work without consulting me</option>
+                                    <option value="Let me own a decision">Let me own a decision / Stop overriding choices</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Your boss's communication style:</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2-style" value="Data-driven" required> Data-driven (Loves metrics, facts, and structure)</label>
+                                    <label class="radio-label"><input type="radio" name="t2-style" value="Relationship-driven"> Relationship-driven (Values harmony, team vibe, trust)</label>
+                                    <label class="radio-label"><input type="radio" name="t2-style" value="Authority-driven"> Authority-driven (Top-down, focused on control and hierarchy)</label>
+                                    <label class="radio-label"><input type="radio" name="t2-style" value="Anxious"> Anxious / Reactionary (Perpetually worried about risk)</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Have you set a boundary before?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2-past" value="Yes and it worked" required> Yes, and it worked well</label>
+                                    <label class="radio-label"><input type="radio" name="t2-past" value="Yes and it failed"> Yes, but it failed / was ignored</label>
+                                    <label class="radio-label"><input type="radio" name="t2-past" value="Never"> Never set one yet</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Your relationship strength:</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2-rel" value="Strong" required> Strong (High trust baseline)</label>
+                                    <label class="radio-label"><input type="radio" name="t2-rel" value="Neutral"> Neutral (Workable, professional)</label>
+                                    <label class="radio-label"><input type="radio" name="t2-rel" value="Strained"> Strained (Tense or volatile)</label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-primary">
+                                <i class="fa-solid fa-pen-nib"></i> Generate Custom Boundary Script
+                            </button>
+                        </form>
+
+                        <div id="output-tool2" class="output-card">
+                            <div class="output-header">
+                                <h3><i class="fa-solid fa-comments"></i> Script Strategy & Playbook</h3>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>1. Tailored Boundary Statement</h4>
+                                <div style="position: relative;">
+                                    <div class="output-box script-box" id="t2-out-script"></div>
+                                    <button class="btn-copy" onclick="copyText('t2-out-script')"><i class="fa-regular fa-copy"></i> Copy</button>
+                                </div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>2. Strategic Framing Angle</h4>
+                                <div id="t2-out-framing" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>3. Timing Recommendation</h4>
+                                <div id="t2-out-timing" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>4. Pushback Defense (2 Counter-Responses)</h4>
+                                <div id="t2-out-pushback" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>5. Positive Reinforcement Strategy</h4>
+                                <div id="t2-out-reinforce" class="output-box"></div>
+                            </div>
+                        </div>
+
+                        <!-- History Accordion -->
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool2')">
+                                <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Runs History</h4>
+                                <div>
+                                    <button class="btn-clear-history" onclick="clearHistory(event, 'tool2')">Clear</button>
+                                    <i class="fa-solid fa-chevron-down" id="t2-hist-icon"></i>
+                                </div>
+                            </div>
+                            <div class="history-list" id="t2-history-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: AUTONOMY AUDIT -->
+                <section id="tool3" class="view">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-title-area">
+                                <h2>Autonomy Audit</h2>
+                                <p class="problem-statement">"I feel like I have no control over my own work."</p>
+                            </div>
+                            <button class="btn-sample" onclick="loadSampleTool3()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-tool3" onsubmit="calculateTool3(event)">
+                            <div class="form-group">
+                                <label for="t3-alone">Which decisions can you currently make alone?</label>
+                                <textarea id="t3-alone" class="form-control" placeholder="e.g. Formatting slides, scheduling vendor calls..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-overturned">Which decisions get overturned or questioned?</label>
+                                <textarea id="t3-overturned" class="form-control" placeholder="e.g. Campaign copy, posting times, minor budget shifts..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-enjoy">What parts of your job do you actually enjoy?</label>
+                                <textarea id="t3-enjoy" class="form-control" placeholder="e.g. Analyzing data, creative strategy, mentoring..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-trust">What would you do differently if you had full trust?</label>
+                                <textarea id="t3-trust" class="form-control" placeholder="e.g. Automate weekly reports, choose vendors independently..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-primary">
+                                <i class="fa-solid fa-map-location-dot"></i> Generate Autonomy Map
+                            </button>
+                        </form>
+
+                        <div id="output-tool3" class="output-card">
+                            <div class="output-header">
+                                <h3><i class="fa-solid fa-chart-line"></i> Autonomy Roadmap</h3>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>1. Your Autonomy Map</h4>
+                                <div id="t3-out-map" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>2. Low-Risk Autonomy Zones</h4>
+                                <div id="t3-out-zones" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>3. Trust Deposits (3 Credibility Wins)</h4>
+                                <div id="t3-out-deposits" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>4. Specific 2-Week Autonomy Experiment</h4>
+                                <div id="t3-out-experiment" class="output-box"></div>
+                            </div>
+                        </div>
+
+                        <!-- History Accordion -->
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool3')">
+                                <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Runs History</h4>
+                                <div>
+                                    <button class="btn-clear-history" onclick="clearHistory(event, 'tool3')">Clear</button>
+                                    <i class="fa-solid fa-chevron-down" id="t3-hist-icon"></i>
+                                </div>
+                            </div>
+                            <div class="history-list" id="t3-history-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: DOCUMENTATION SHIELD -->
+                <section id="tool4" class="view">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-title-area">
+                                <h2>Documentation Shield</h2>
+                                <p class="problem-statement">"I need to protect myself from blame when they change their mind."</p>
+                            </div>
+                            <button class="btn-sample" onclick="loadSampleTool4()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-tool4" onsubmit="calculateTool4(event)">
+                            <div class="form-group">
+                                <label for="t4-changed">What keeps getting changed or denied?</label>
+                                <textarea id="t4-changed" class="form-control" placeholder="e.g. Verbal design approvals, project scope changes, agreed deadlines..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-comm">How do they communicate changes?</label>
+                                <select id="t4-comm" class="form-control" required>
+                                    <option value="Verbally">Verbally (1-on-1s or in passing)</option>
+                                    <option value="Email">Email</option>
+                                    <option value="Chat">Instant Chat (Slack/Teams)</option>
+                                    <option value="In meetings">In group meetings</option>
+                                    <option value="They don't, they just blame me">They don't communicate — they just blame me later</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Have you been criticized for something they originally approved?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t4-criticized" value="Yes" required> Yes, repeatedly</label>
+                                    <label class="radio-label"><input type="radio" name="t4-criticized" value="No"> No, not yet</label>
+                                    <label class="radio-label"><input type="radio" name="t4-criticized" value="Not sure"> Not sure / Hard to tell</label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-primary">
+                                <i class="fa-solid fa-shield-cat"></i> Generate Protection Shield
+                            </button>
+                        </form>
+
+                        <div id="output-tool4" class="output-card">
+                            <div class="output-header">
+                                <h3><i class="fa-solid fa-file-contract"></i> Protection & Documentation Protocol</h3>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>1. Non-Confrontational CYA Email Template</h4>
+                                <div style="position: relative;">
+                                    <div class="output-box script-box" id="t4-out-template"></div>
+                                    <button class="btn-copy" onclick="copyText('t4-out-template')"><i class="fa-regular fa-copy"></i> Copy</button>
+                                </div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>2. Cover-Your-Bases Checklist (5 Daily Habits)</h4>
+                                <div id="t4-out-checklist" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>3. Paper Trail Management Strategy</h4>
+                                <div id="t4-out-trail" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>4. De-escalating Confrontation Protocol</h4>
+                                <div id="t4-out-confronted" class="output-box"></div>
+                            </div>
+                        </div>
+
+                        <!-- History Accordion -->
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool4')">
+                                <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Runs History</h4>
+                                <div>
+                                    <button class="btn-clear-history" onclick="clearHistory(event, 'tool4')">Clear</button>
+                                    <i class="fa-solid fa-chevron-down" id="t4-hist-icon"></i>
+                                </div>
+                            </div>
+                            <div class="history-list" id="t4-history-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: STAY OR GO EVALUATOR -->
+                <section id="tool5" class="view">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-title-area">
+                                <h2>Stay or Go Evaluator</h2>
+                                <p class="problem-statement">"Is this fixable or is it time to leave?"</p>
+                            </div>
+                            <button class="btn-sample" onclick="loadSampleTool5()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-tool5" onsubmit="calculateTool5(event)">
+                            <div class="form-group">
+                                <label for="t5-duration">How long has the micromanagement lasted?</label>
+                                <select id="t5-duration" class="form-control" required>
+                                    <option value="<1mo">Less than 1 month</option>
+                                    <option value="1-3mo">1 to 3 months</option>
+                                    <option value="3-6mo">3 to 6 months</option>
+                                    <option value="6mo+">6+ months</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Have you tried addressing it?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5-addressed" value="Yes multiple times" required> Yes, multiple times</label>
+                                    <label class="radio-label"><input type="radio" name="t5-addressed" value="Once"> Once</label>
+                                    <label class="radio-label"><input type="radio" name="t5-addressed" value="Not yet"> Not yet</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Is it affecting your health or sleep?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5-health" value="Yes significantly" required> Yes, significantly (high anxiety, insomnia, physical symptoms)</label>
+                                    <label class="radio-label"><input type="radio" name="t5-health" value="Somewhat"> Somewhat (frustrated, occasional stress)</label>
+                                    <label class="radio-label"><input type="radio" name="t5-health" value="No"> No, manageable</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Are you still learning or growing here?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5-growth" value="Yes" required> Yes, acquiring valuable skills/experience</label>
+                                    <label class="radio-label"><input type="radio" name="t5-growth" value="Stalled"> Stalled, learning plateaued</label>
+                                    <label class="radio-label"><input type="radio" name="t5-growth" value="No, it's holding me back"> No, it's actively holding me back</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-rest">How's the rest of the job?</label>
+                                <select id="t5-rest" class="form-control" required>
+                                    <option value="Great except this">Great except for this manager (Great pay, brand, work)</option>
+                                    <option value="Mixed">Mixed (Some good aspects, some drawbacks)</option>
+                                    <option value="Bad overall">Bad overall (Poor pay, culture, and manager)</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-primary">
+                                <i class="fa-solid fa-scale-balanced"></i> Evaluate Career Decision
+                            </button>
+                        </form>
+
+                        <div id="output-tool5" class="output-card">
+                            <div class="output-header">
+                                <h3><i class="fa-solid fa-compass-drafting"></i> Strategic Career Diagnosis</h3>
+                            </div>
+
+                            <div id="t5-out-verdict" class="verdict-banner"></div>
+
+                            <div class="output-section">
+                                <h4>1. Core Evidence</h4>
+                                <div id="t5-out-evidence" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>2. One Final Tactic to Try</h4>
+                                <div id="t5-out-tactic" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>3. Recommended Decision Timeline</h4>
+                                <div id="t5-out-timeline" class="output-box"></div>
+                            </div>
+
+                            <div class="output-section">
+                                <h4>4. Low-Visibility Exit Prep</h4>
+                                <div id="t5-out-exit" class="output-box"></div>
+                            </div>
+                        </div>
+
+                        <!-- History Accordion -->
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool5')">
+                                <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Runs History</h4>
+                                <div>
+                                    <button class="btn-clear-history" onclick="clearHistory(event, 'tool5')">Clear</button>
+                                    <i class="fa-solid fa-chevron-down" id="t5-hist-icon"></i>
+                                </div>
+                            </div>
+                            <div class="history-list" id="t5-history-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+        For workplace strategy and reflection purposes only. Not legal, HR, or therapeutic advice. For serious workplace issues, consult your HR department or an employment attorney.
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // DOM Elements & Navigation Management
+        const navItems = document.querySelectorAll('.nav-item');
+        const views = document.querySelectorAll('.view');
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function switchView(viewId) {
+            views.forEach(v => v.classList.remove('active'));
+            navItems.forEach(n => n.classList.remove('active'));
+
+            const targetView = document.getElementById(viewId);
+            if (targetView) {
+                targetView.classList.add('active');
+            }
+
+            const activeNav = document.querySelector(`.nav-item[data-view="${viewId}"]`);
+            if (activeNav) {
+                activeNav.classList.add('active');
+            }
+
+            // Close mobile menu if open
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const view = item.getAttribute('data-view');
+                switchView(view);
+            });
+        });
+
+        // Mobile Sidebar Controls
+        hamburgerBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        });
+
+        // Toast Helper
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        // LocalStorage Management
+        function saveHistory(toolId, data) {
+            const key = `micro_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            history.unshift({
+                timestamp: new Date().toLocaleString(),
+                data: data
+            });
+            // Max 30 items
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = `micro_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const listEl = document.getElementById(`${toolId.replace('tool', 't')}-history-list`);
+            if (!listEl) return;
+
+            if (history.length === 0) {
+                listEl.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-muted); padding: 0.5rem 0;">No saved runs yet.</div>';
+                return;
+            }
+
+            listEl.innerHTML = history.map((item, index) => `
+                <div class="history-item">
+                    <div class="history-item-info">
+                        <span class="history-summary">${item.data.summary}</span>
+                        <span class="history-date">${item.timestamp}</span>
+                    </div>
+                    <button class="btn-restore" onclick="restoreHistory('${toolId}', ${index})">View</button>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistory(toolId) {
+            const prefix = toolId.replace('tool', 't');
+            const list = document.getElementById(`${prefix}-history-list`);
+            const icon = document.getElementById(`${prefix}-hist-icon`);
+            list.classList.toggle('active');
+            if (list.classList.contains('active')) {
+                icon.className = 'fa-solid fa-chevron-up';
+            } else {
+                icon.className = 'fa-solid fa-chevron-down';
+            }
+        }
+
+        function clearHistory(e, toolId) {
+            e.stopPropagation();
+            if (confirm("Clear all saved history for this tool?")) {
+                localStorage.removeItem(`micro_history_${toolId}`);
+                renderHistory(toolId);
+            }
+        }
+
+        function restoreHistory(toolId, index) {
+            const key = `micro_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            if (!history[index]) return;
+            
+            const item = history[index].data;
+            if (toolId === 'tool1') renderTool1Output(item);
+            else if (toolId === 'tool2') renderTool2Output(item);
+            else if (toolId === 'tool3') renderTool3Output(item);
+            else if (toolId === 'tool4') renderTool4Output(item);
+            else if (toolId === 'tool5') renderTool5Output(item);
+
+            document.getElementById(`output-${toolId}`).scrollIntoView({ behavior: 'smooth' });
+        }
+
+
+        // TOOL 1 LOGIC
+        function loadSampleTool1() {
+            document.getElementById('t1-frequency').value = '6-10';
+            const checkboxes = document.querySelectorAll('input[name="t1-channel"]');
+            checkboxes.forEach(cb => {
+                cb.checked = (cb.value === 'Instant message' || cb.value === 'Email');
+            });
+            document.querySelector('input[name="t1-repeat"][value="Yes"]').checked = true;
+            document.querySelector('input[name="t1-impact"][value="Just monitors"]').checked = true;
+            document.getElementById('t1-seniority').value = 'Mid-level';
+        }
+
+        function calculateTool1(e) {
+            e.preventDefault();
+            const freq = document.getElementById('t1-frequency').value;
+            const channels = Array.from(document.querySelectorAll('input[name="t1-channel"]:checked')).map(cb => cb.value);
+            const repeat = document.querySelector('input[name="t1-repeat"]:checked').value;
+            const impact = document.querySelector('input[name="t1-impact"]:checked').value;
+            const seniority = document.getElementById('t1-seniority').value;
+
+            // Calculations & Rules
+            let isExcessive = false;
+            if (seniority === 'Lead' || seniority === 'Senior') {
+                if (freq !== '1-2') isExcessive = true;
+            } else if (seniority === 'Mid-level') {
+                if (freq === '6-10' || freq === '10+') isExcessive = true;
+            } else {
+                if (freq === '10+') isExcessive = true;
+            }
+
+            let minsPerCheckin = 12; // base context switch
+            if (channels.includes('Meeting request')) minsPerCheckin += 20;
+            if (channels.includes('Phone call')) minsPerCheckin += 10;
+
+            let checkinsPerDay = 1.5;
+            if (freq === '3-5') checkinsPerDay = 4;
+            if (freq === '6-10') checkinsPerDay = 8;
+            if (freq === '10+') checkinsPerDay = 12;
+
+            const totalHoursLostPerWeek = Math.round((checkinsPerDay * minsPerCheckin * 5) / 60 * 10) / 10;
+
+            let fearAnalysis = "";
+            if (repeat === 'Yes') {
+                fearAnalysis = "<strong>Fear of Information Loss & Lack of Visibility:</strong> Your boss likely suffers from working-memory overload or feels accountable to senior management without having a clear, pulse-check view of ongoing efforts. They check in not because they doubt your effort, but because they lack a reliable dashboard or predictable rhythm.";
+            } else if (impact === 'Changes direction') {
+                fearAnalysis = "<strong>Anxiety Over Outcomes & Quality Control:</strong> Your boss is worried about being blindsided by misaligned output or flawed deliverables. They intervene to exercise control over design and choices rather than waiting for completion.";
+            } else {
+                fearAnalysis = "<strong>Uncertainty & General Executive Pressure:</strong> Your manager is experiencing pressure from above or lacks trust in remote/async workflows, translating their personal anxiety into constant oversight.";
+            }
+
+            const data = {
+                summary: `${freq} check-ins/day (${seniority})`,
+                isExcessive,
+                freq,
+                seniority,
+                channels: channels.join(', ') || 'General',
+                repeat,
+                impact,
+                totalHoursLostPerWeek,
+                fearAnalysis
+            };
+
+            renderTool1Output(data);
+            saveHistory('tool1', data);
+        }
+
+        function renderTool1Output(d) {
+            const outBox = document.getElementById('output-tool1');
+            outBox.classList.add('active');
+
+            document.getElementById('t1-out-assessment').innerHTML = `
+                <div style="font-weight: 700; color: ${d.isExcessive ? '#B45309' : '#0F5132'}; margin-bottom: 0.35rem;">
+                    Status: ${d.isExcessive ? '⚠️ HIGHLY EXCESSIVE FOR YOUR ROLE' : '✅ REASONABLE / EXPECTED'}
+                </div>
+                For a <strong>${d.seniority}</strong> employee, <strong>${d.freq}</strong> daily check-ins is ${d.isExcessive ? 'significantly above standard autonomy benchmarks. This level of supervision disrupts deep focus and signals hyper-vigilance.' : 'within expected operational alignment ranges, though optimization is still possible.'}
+            `;
+
+            document.getElementById('t1-out-cost').innerHTML = `
+                <strong>Estimated Time Lost:</strong> ~<span style="color: var(--accent-hover); font-weight:700;">${d.totalHoursLostPerWeek} hours per week</span>.<br>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">(Calculated based on average interruption recovery time across ${d.channels} interactions).</span>
+            `;
+
+            document.getElementById('t1-out-fear').innerHTML = d.fearAnalysis;
+
+            document.getElementById('t1-out-tactics').innerHTML = `
+                <ul style="padding-left: 1.25rem; line-height: 1.6;">
+                    <li><strong>Proactive Updates:</strong> Send a structured 3-bullet summary every morning before they ask.</li>
+                    <li><strong>Scheduled Sync Rhythms:</strong> Propose a standing 10-minute daily end-of-day wrap or bi-weekly sync to cluster inquiries.</li>
+                    <li><strong>Clarifying Priority Questions:</strong> When interrupted, ask: "I'm currently focused on [Project X]. Should I pause that to pivot to this update right away?"</li>
+                </ul>
+            `;
+
+            document.getElementById('t1-out-script').innerText = 
+`"Hi [Manager Name], 
+
+I want to make sure I'm giving you full visibility into my work without bogging you down with real-time updates. 
+
+I noticed we're checking in around ${d.freq.split(' ')[0]} times a day across ${d.channels}. To save you time and help me protect dedicated deep-work blocks for key deliverables, I’d like to try sending you a daily 3-bullet summary email at 4:30 PM covering:
+1. Completed milestones today
+2. Focus for tomorrow
+3. Any blockers where I need your input
+
+If anything urgent comes up outside this, please feel free to ping me. How does that rhythm sound to you?"`;
+        }
+
+
+        // TOOL 2 LOGIC
+        function loadSampleTool2() {
+            document.getElementById('t2-boundary').value = 'Stop redoing my work';
+            document.querySelector('input[name="t2-style"][value="Anxious"]').checked = true;
+            document.querySelector('input[name="t2-past"][value="Yes and it failed"]').checked = true;
+            document.querySelector('input[name="t2-rel"][value="Strained"]').checked = true;
+        }
+
+        function calculateTool2(e) {
+            e.preventDefault();
+            const boundary = document.getElementById('t2-boundary').value;
+            const style = document.querySelector('input[name="t2-style"]:checked').value;
+            const past = document.querySelector('input[name="t2-past"]:checked').value;
+            const rel = document.querySelector('input[name="t2-rel"]:checked').value;
+
+            let statement = "";
+            let framing = "";
+            let timing = "";
+            let pushback = "";
+            let reinforce = "";
+
+            // Custom Script Generation
+            if (boundary === 'Stop redoing my work') {
+                statement = `"I’ve noticed that after I submit drafts, you often end up rewriting portions yourself. To save you time and make sure I’m hitting your exact standard, I’d love to walk through your edits on the last draft so I can adopt your exact framing on the next version."`;
+                framing = "Position this as saving their valuable time and elevating your alignment with their standard, rather than criticizing their urge to rewrite.";
+            } else if (boundary === 'Fewer check-ins') {
+                statement = `"I want to make sure you have complete peace of mind on progress while protecting my dedicated blocks for execution. Can we establish a set end-of-day progress report rather than ad-hoc pings throughout the day?"`;
+                framing = "Focus on efficiency and deliverable velocity. Frame it as giving them consistent structure while boosting your output speed.";
+            } else if (boundary === 'More advance notice') {
+                statement = `"To ensure I deliver the highest quality output for client reviews, I work best when given 48 hours lead time on new requests. When quick-turn items come up, I want to clarify which existing project to deprioritize."`;
+                framing = "Frame advance notice as quality control and priority protection.";
+            } else if (boundary === 'Less after-hours contact') {
+                statement = `"I want to ensure I'm fully recharged and sharp for our morning strategy sessions. I will be offline after 6:30 PM, but if there is an operational emergency, please call my line directly."`;
+                framing = "Frame off-hours recovery as essential for peak performance during business hours.";
+            } else {
+                statement = `"I'd love to take full ownership of this decision based on the agreed guidelines. I’ll make the final call and send you a brief memo on the outcome, so you don't have to carry the extra decision load."`;
+                framing = "Frame decision ownership as relieving their operational cognitive burden.";
+            }
+
+            // Adjustments based on Style
+            if (style === 'Data-driven') {
+                framing += " Use numbers and productivity metrics during the chat.";
+            } else if (style === 'Anxious') {
+                framing += " Reassure them that risks are managed and you won't leave them exposed.";
+            } else if (style === 'Authority-driven') {
+                framing += " Always defer to their ultimate authority while asking for permission to trial this process.";
+            }
+
+            // Timing
+            timing = rel === 'Strained' ? "Schedule during a neutral, calm moment (e.g. regular 1-on-1). Never raise this in the middle of a live revision flare-up." : "Bring this up casually during your next 1-on-1 or project kick-off meeting.";
+
+            // Pushback handling
+            pushback = `
+                <p style="margin-bottom:0.5rem;"><strong>If they say:</strong> "I just prefer to handle it quickly myself."<br>
+                <strong>Your reply:</strong> "I completely understand speed is important. However, if I don't learn your exact preferences, I'll keep bringing you drafts that require your time. Let's try one round where you give feedback and I execute."</p>
+                <p><strong>If they say:</strong> "I need to know what's happening at all times."<br>
+                <strong>Your reply:</strong> "Understood! My goal is total transparency. That's why the scheduled daily summary will give you a comprehensive log without constant interruptions."</p>
+            `;
+
+            reinforce = "When they respect the boundary (e.g., leave a decision to you or skip mid-day pings), send a quick note: 'Thanks for trusting me with that decision—the outcome was X, and it saved us 2 days of turnaround time!'";
+
+            const data = {
+                summary: `Boundary: ${boundary} (${style} boss)`,
+                boundary,
+                style,
+                past,
+                rel,
+                statement,
+                framing,
+                timing,
+                pushback,
+                reinforce
+            };
+
+            renderTool2Output(data);
+            saveHistory('tool2', data);
+        }
+
+        function renderTool2Output(d) {
+            document.getElementById('output-tool2').classList.add('active');
+            document.getElementById('t2-out-script').innerText = d.statement;
+            document.getElementById('t2-out-framing').innerHTML = d.framing;
+            document.getElementById('t2-out-timing').innerHTML = d.timing;
+            document.getElementById('t2-out-pushback').innerHTML = d.pushback;
+            document.getElementById('t2-out-reinforce').innerHTML = d.reinforce;
+        }
+
+
+        // TOOL 3 LOGIC
+        function loadSampleTool3() {
+            document.getElementById('t3-alone').value = "Formatting presentation slides, compiling raw data reports, scheduling internal team syncs.";
+            document.getElementById('t3-overturned').value = "Campaign headlines, social media posting schedules, vendor selection, email copy tone.";
+            document.getElementById('t3-enjoy').value = "Copywriting, strategic positioning, analyzing audience metrics.";
+            document.getElementById('t3-trust').value = "A/B test campaign headlines independently, select software vendors, set posting schedules.";
+        }
+
+        function calculateTool3(e) {
+            e.preventDefault();
+            const alone = document.getElementById('t3-alone').value;
+            const overturned = document.getElementById('t3-overturned').value;
+            const enjoy = document.getElementById('t3-enjoy').value;
+            const trust = document.getElementById('t3-trust').value;
+
+            const map = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div style="background: #EBF1F5; padding: 0.75rem; border-radius: 0.5rem;">
+                        <strong style="color: var(--primary);"><i class="fa-solid fa-check-circle"></i> High Autonomy Zone</strong>
+                        <p style="margin-top: 0.35rem; font-size: 0.88rem;">${alone}</p>
+                    </div>
+                    <div style="background: #FFF3CD; padding: 0.75rem; border-radius: 0.5rem;">
+                        <strong style="color: #664D03;"><i class="fa-solid fa-triangle-exclamation"></i> Overridden Zone</strong>
+                        <p style="margin-top: 0.35rem; font-size: 0.88rem;">${overturned}</p>
+                    </div>
+                </div>
+            `;
+
+            const zones = "Look for tasks in the 'Overturned Zone' that have low financial or brand risk (e.g. minor copy tweaks, posting schedules). These are your primary candidates for reclaiming autonomy.";
+
+            const deposits = `
+                <ol style="padding-left: 1.25rem; line-height: 1.6;">
+                    <li><strong>Pre-emptive Option Proposal:</strong> Instead of asking 'What should I do?', bring 2 options with a stated recommendation ('I recommend Option A because X').</li>
+                    <li><strong>Flawless Standard Work:</strong> Flawlessly deliver low-stakes items without reminders 3 times in a row to establish baseline reliability.</li>
+                    <li><strong>Post-Action Reporting:</strong> Execute a small decision within agreed bounds and report it in your regular summary: 'Decided X to meet Y deadline; no action needed from you.'</li>
+                </ol>
+            `;
+
+            const experiment = `
+                <strong>The 2-Week "Inform-and-Proceed" Trial:</strong><br>
+                For the next 14 days, pick ONE recurring item from your micro-decisions (e.g., draft scheduling or initial vendor outreach). Send a brief notice: <em>"I will finalize [Item X] by 3 PM tomorrow using [Strategy Y] unless you prefer a different direction."</em> If they don't object, execute. Track the successful outcome to review at your next 1-on-1.
+            `;
+
+            const data = {
+                summary: `Autonomy Audit (${alone.substring(0, 20)}...)`,
+                map,
+                zones,
+                deposits,
+                experiment
+            };
+
+            renderTool3Output(data);
+            saveHistory('tool3', data);
+        }
+
+        function renderTool3Output(d) {
+            document.getElementById('output-tool3').classList.add('active');
+            document.getElementById('t3-out-map').innerHTML = d.map;
+            document.getElementById('t3-out-zones').innerHTML = d.zones;
+            document.getElementById('t3-out-deposits').innerHTML = d.deposits;
+            document.getElementById('t3-out-experiment').innerHTML = d.experiment;
+        }
+
+
+        // TOOL 4 LOGIC
+        function loadSampleTool4() {
+            document.getElementById('t4-changed').value = "Verbal campaign approval given during 1-on-1, which was later criticized as 'unauthorized' when a VP asked about it.";
+            document.getElementById('t4-comm').value = "Verbally";
+            document.querySelector('input[name="t4-criticized"][value="Yes"]').checked = true;
+        }
+
+        function calculateTool4(e) {
+            e.preventDefault();
+            const changed = document.getElementById('t4-changed').value;
+            const comm = document.getElementById('t4-comm').value;
+            const criticized = document.querySelector('input[name="t4-criticized"]:checked').value;
+
+            const template = 
+`Subject: Re: Recap & Next Steps - [Project Name]
+
+Hi [Manager Name],
+
+Thanks for the quick chat earlier! To make sure we're fully aligned on priorities, here is a recap of what we agreed on:
+
+1. Approved Direction: [Insert key decision, e.g., proceed with Headline Option B]
+2. Key Adjustment: [Insert any shift discussed]
+3. Deliverable Timeline: I will share the revised draft by [Date/Time].
+
+Please let me know if I missed or misunderstood anything. Otherwise, I’ll move forward on this basis!
+
+Best,
+[Your Name]`;
+
+            const checklist = `
+                <ul style="padding-left: 1.25rem; line-height: 1.6;">
+                    <li><strong>Send Written Recaps:</strong> Follow up every verbal instruction with a 3-sentence email recap within 1 hour.</li>
+                    <li><strong>Centralize Action Logs:</strong> Maintain a shared digital document/board (e.g. Notion, Trello, or Excel) showing approval status and timestamps.</li>
+                    <li><strong>Document Changes in Real-Time:</strong> Log the exact date, context, and instruction when goals shift mid-project.</li>
+                    <li><strong>Archive Verbal Feedback:</strong> Note verbal comments immediately in project ticket notes.</li>
+                    <li><strong>Keep Personal Offline Backup:</strong> Keep copies of key written sign-offs saved in your personal work folder.</li>
+                </ul>
+            `;
+
+            const trail = "Organize folders by Project Name > Sign-offs. Save approval emails as PDFs or flagged threads. When verbal directives are given, tag the email thread with 'Approval_Recap'.";
+
+            const confronted = `
+                <strong>Non-Accusatory Response Strategy:</strong><br>
+                If confronted about a changed direction, avoid saying "You told me to do this."<br>
+                Instead say: <em>"I want to make sure I followed our alignment correctly. On [Date], I sent over a recap confirming [X direction], and proceeded based on that note. Let’s review where the gap occurred so I can adjust for next time."</em>
+            `;
+
+            const data = {
+                summary: `Shield against: ${comm} changes`,
+                template,
+                checklist,
+                trail,
+                confronted
+            };
+
+            renderTool4Output(data);
+            saveHistory('tool4', data);
+        }
+
+        function renderTool4Output(d) {
+            document.getElementById('output-tool4').classList.add('active');
+            document.getElementById('t4-out-template').innerText = d.template;
+            document.getElementById('t4-out-checklist').innerHTML = d.checklist;
+            document.getElementById('t4-out-trail').innerHTML = d.trail;
+            document.getElementById('t4-out-confronted').innerHTML = d.confronted;
+        }
+
+
+        // TOOL 5 LOGIC
+        function loadSampleTool5() {
+            document.getElementById('t5-duration').value = '6mo+';
+            document.querySelector('input[name="t5-addressed"][value="Once"]').checked = true;
+            document.querySelector('input[name="t5-health"][value="Yes significantly"]').checked = true;
+            document.querySelector('input[name="t5-growth"][value="Stalled"]').checked = true;
+            document.getElementById('t5-rest').value = 'Great except this';
+        }
+
+        function calculateTool5(e) {
+            e.preventDefault();
+            const duration = document.getElementById('t5-duration').value;
+            const addressed = document.querySelector('input[name="t5-addressed"]:checked').value;
+            const health = document.querySelector('input[name="t5-health"]:checked').value;
+            const growth = document.querySelector('input[name="t5-growth"]:checked').value;
+            const rest = document.getElementById('t5-rest').value;
+
+            let verdictClass = "";
+            let verdictText = "";
+            let evidence = [];
+            let tactic = "";
+            let timeline = "";
+            let exit = "";
+
+            // Scoring system
+            let score = 0;
+            if (duration === '6mo+') score += 3;
+            else if (duration === '3-6mo') score += 2;
+
+            if (addressed === 'Yes multiple times') score += 3;
+            if (health === 'Yes significantly') score += 4;
+            if (growth === 'No, it's holding me back') score += 3;
+            if (rest === 'Bad overall') score += 3;
+
+            if (health === 'Yes significantly' || score >= 8) {
+                verdictClass = "verdict-exit";
+                verdictText = "🚨 RECOMMENDATION: ACTIVE EXIT STRATEGY";
+                evidence = [
+                    "Significant negative health/sleep impacts indicate severe chronic workplace stress.",
+                    "Long duration (>6 months) combined with stalled growth indicates entrenched organizational habits.",
+                    "Attempts to address the issue have yields limited or temporary improvements."
+                ];
+                tactic = "Execute a structured internal transfer request or prepare an external job search while maintaining baseline performance.";
+                timeline = "Begin discreet job search immediately. Aim for exit within 60-90 days.";
+                exit = `
+                    <ul style="padding-left: 1.25rem; line-height: 1.6;">
+                        <li>Quietly update LinkedIn profile and portfolio during off-hours.</li>
+                        <li>Request recommendations from trusted peers outside your immediate manager's line of reporting.</li>
+                        <li>Maintain steady, predictable work output to avoid performance flags during your job hunt.</li>
+                    </ul>
+                `;
+            } else if (score >= 4) {
+                verdictClass = "verdict-borderline";
+                verdictText = "⚠️ RECOMMENDATION: BORDERLINE (TIME-BOXED TRIAL)";
+                evidence = [
+                    "The situation is causing friction but growth or job quality retains some strategic value.",
+                    "Micromanagement has lasted a medium duration and requires structured boundary testing before giving up.",
+                    "Health impact is present but manageable."
+                ];
+                tactic = "Initiate a formal 'Alignment & Working Style' conversation with your manager using Tool 2 scripts.";
+                timeline = "Time-box your trial to 30 days. If no behavioral shift occurs after clear boundaries, pivot to Exit Strategy.";
+                exit = `
+                    <ul style="padding-left: 1.25rem; line-height: 1.6;">
+                        <li>Map out internal team transfer opportunities within the company.</li>
+                        <li>Document accomplishments and metric impacts for resume preparation.</li>
+                        <li>Build strong relationships with lateral department leaders.</li>
+                    </ul>
+                `;
+            } else {
+                verdictClass = "verdict-fixable";
+                verdictText = "✅ RECOMMENDATION: FIXABLE / WORKABLE";
+                evidence = [
+                    "Micromanagement is relatively recent or has not yet been directly addressed.",
+                    "Health and career growth remain intact.",
+                    "High baseline job satisfaction overall makes resolution highly valuable."
+                ];
+                tactic = "Implement proactive daily update rhythms (Tool 1) and establish basic clear documentation shields (Tool 4).";
+                timeline = "Re-evaluate in 4 to 6 weeks after consistently executing proactive communication tactics.";
+                exit = `
+                    <ul style="padding-left: 1.25rem; line-height: 1.6;">
+                        <li>Focus on building high trust through early proactive communication.</li>
+                        <li>Keep personal career logs for annual review leverage.</li>
+                        <li>No external job search required at this time.</li>
+                    </ul>
+                `;
+            }
+
+            const data = {
+                summary: `Verdict: ${verdictText.split(':')[1].trim()}`,
+                verdictClass,
+                verdictText,
+                evidence,
+                tactic,
+                timeline,
+                exit
+            };
+
+            renderTool5Output(data);
+            saveHistory('tool5', data);
+        }
+
+        function renderTool5Output(d) {
+            document.getElementById('output-tool5').classList.add('active');
+            
+            const verdictBanner = document.getElementById('t5-out-verdict');
+            verdictBanner.className = `verdict-banner ${d.verdictClass}`;
+            verdictBanner.innerText = d.verdictText;
+
+            document.getElementById('t5-out-evidence').innerHTML = `<ul style="padding-left: 1.25rem; line-height: 1.6;">${d.evidence.map(e => `<li>${e}</li>`).join('')}</ul>`;
+            document.getElementById('t5-out-tactic').innerHTML = d.tactic;
+            document.getElementById('t5-out-timeline').innerHTML = d.timeline;
+            document.getElementById('t5-out-exit').innerHTML = d.exit;
+        }
+
+        // Initial Load setup
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistory('tool1');
+            renderHistory('tool2');
+            renderHistory('tool3');
+            renderHistory('tool4');
+            renderHistory('tool5');
+        });
+    </script>
+</body>
+</html>

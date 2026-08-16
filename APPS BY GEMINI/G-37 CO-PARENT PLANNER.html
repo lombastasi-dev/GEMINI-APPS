@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Co-Parent Planner | Practical Logistics & Communication Toolkit</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* ==========================================================================
+       CSS VARIABLES & BASE STYLES
+       ========================================================================== */
+    :root {
+      --primary-navy: #1D3557;
+      --navy-light: #2A4A75;
+      --warm-sage: #81B29A;
+      --sage-dark: #62947C;
+      --sage-light: #EAF4F0;
+      --bg-gradient: linear-gradient(135deg, #F1FAEE 0%, #F5F7F4 100%);
+      --card-bg: #FFFFFF;
+      --text-main: #2B2D42;
+      --text-muted: #5C6B73;
+      --border-color: #E2E8F0;
+      --shadow-sm: 0 2px 8px rgba(29, 53, 87, 0.06);
+      --shadow-md: 0 4px 16px rgba(29, 53, 87, 0.1);
+      --radius-xl: 1rem; /* 16px */
+      --radius-lg: 0.75rem; /* 12px */
+      --radius-md: 0.5rem; /* 8px */
+      --sidebar-width: 260px;
+      --transition: all 0.25s ease-in-out;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ==========================================================================
+       LAYOUT STRUCTURE
+       ========================================================================== */
+    .app-container {
+      display: flex;
+      flex: 1;
+      width: 100%;
+      position: relative;
+    }
+
+    /* Fixed Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: #FFFFFF;
+      border-right: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-brand {
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--primary-navy);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+    }
+
+    .sidebar-brand i {
+      color: var(--warm-sage);
+      font-size: 1.3rem;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 1.25rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.925rem;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      text-align: left;
+      transition: var(--transition);
+    }
+
+    .nav-item button:hover {
+      background-color: var(--sage-light);
+      color: var(--primary-navy);
+    }
+
+    .nav-item button.active {
+      background-color: var(--primary-navy);
+      color: #FFFFFF;
+    }
+
+    .nav-item button i {
+      width: 20px;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .nav-item button.active i {
+      color: var(--warm-sage);
+    }
+
+    /* Main Area */
+    .main-wrapper {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      width: calc(100% - var(--sidebar-width));
+      transition: margin 0.3s ease;
+    }
+
+    .top-bar {
+      display: none; /* Mobile only */
+      background: #FFFFFF;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .mobile-brand {
+      font-weight: 700;
+      color: var(--primary-navy);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--primary-navy);
+      cursor: pointer;
+      padding: 0.25rem;
+    }
+
+    .main-content {
+      flex: 1;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Footer */
+    .app-footer {
+      background-color: #FFFFFF;
+      border-top: 1px solid var(--border-color);
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+
+    .app-footer-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    /* ==========================================================================
+       UI COMPONENTS & CARDS
+       ========================================================================== */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      padding: 1.5rem; /* Padding 6 */
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .page-header {
+      margin-bottom: 1.75rem;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary-navy);
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .problem-banner {
+      background: #FFF5F5;
+      border-left: 4px solid #E53E3E;
+      padding: 1rem 1.25rem;
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      margin-bottom: 1.5rem;
+      font-size: 0.925rem;
+      color: #9B2C2C;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--primary-navy);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control, .form-select {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.925rem;
+      color: var(--text-main);
+      background-color: #FAFAFA;
+      transition: var(--transition);
+    }
+
+    .form-control:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--warm-sage);
+      background-color: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(129, 178, 154, 0.2);
+    }
+
+    textarea.form-control {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .radio-group, .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-top: 0.25rem;
+    }
+
+    .radio-label, .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .radio-label input, .checkbox-label input {
+      accent-color: var(--primary-navy);
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.925rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition);
+    }
+
+    .btn-primary {
+      background-color: var(--primary-navy);
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--navy-light);
+    }
+
+    .btn-secondary {
+      background-color: var(--sage-light);
+      color: var(--primary-navy);
+      border: 1px solid var(--warm-sage);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--warm-sage);
+      color: #FFFFFF;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .btn-outline:hover {
+      background-color: #F8FAFC;
+      color: var(--primary-navy);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.825rem;
+    }
+
+    /* Results Output Sections */
+    .results-container {
+      display: none;
+      margin-top: 2rem;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-section {
+      background: #FFFFFF;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .result-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .result-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--primary-navy);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .script-box {
+      background-color: #F8FAFC;
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--warm-sage);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      font-family: inherit;
+      font-size: 0.925rem;
+      white-space: pre-wrap;
+      color: var(--text-main);
+      margin-top: 0.5rem;
+      position: relative;
+    }
+
+    /* Copy Button */
+    .btn-copy {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 0.35rem 0.65rem;
+      font-size: 0.775rem;
+      color: var(--primary-navy);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    .btn-copy:hover {
+      background: var(--sage-light);
+      border-color: var(--warm-sage);
+    }
+
+    /* Dashboard Grid */
+    .dashboard-hero {
+      text-align: center;
+      padding: 2rem 1rem 2.5rem;
+      background: #FFFFFF;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+    }
+
+    .dashboard-hero h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--primary-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    .dashboard-hero p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 500px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--sage-light);
+      color: var(--sage-dark);
+      padding: 0.4rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .dashboard-card {
+      background: #FFFFFF;
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--warm-sage);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-lg);
+      background: var(--sage-light);
+      color: var(--primary-navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      margin-bottom: 1rem;
+    }
+
+    .dashboard-card h3 {
+      font-size: 1.1rem;
+      color: var(--primary-navy);
+      margin-bottom: 0.4rem;
+    }
+
+    .dashboard-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .card-link {
+      margin-top: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--warm-sage);
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    /* History Accordion */
+    .history-section {
+      margin-top: 2rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .history-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-navy);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .history-item {
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .history-summary {
+      padding: 0.85rem 1rem;
+      background: #FAFAFA;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--primary-navy);
+    }
+
+    .history-summary:hover {
+      background: #F1F5F9;
+    }
+
+    .history-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: normal;
+    }
+
+    .history-details {
+      padding: 1rem;
+      display: none;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.875rem;
+      background: #FFFFFF;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--primary-navy);
+      color: #FFFFFF;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Overlay for Mobile Sidebar */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 95;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE DESIGN (MOBILE)
+       ========================================================================== */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay.open {
+        display: block;
+      }
+
+      .main-wrapper {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .top-bar {
+        display: flex;
+      }
+
+      .main-content {
+        padding: 1.25rem 1rem;
+      }
+
+      .dashboard-hero h1 {
+        font-size: 1.75rem;
+      }
+
+      .dashboard-hero p {
+        font-size: 0.95rem;
+      }
+
+      .btn-row {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
+    <!-- Fixed Left Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="#" class="sidebar-brand" onclick="switchTool('dashboard'); return false;">
+          <i class="fa-solid fa-hands-holding-child"></i>
+          <span>Co-Parent Planner</span>
+        </a>
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <button id="nav-dashboard" class="active" onclick="switchTool('dashboard')">
+            <i class="fa-solid fa-house"></i>
+            <span>Dashboard</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button id="nav-comm" onclick="switchTool('comm')">
+            <i class="fa-solid fa-comments"></i>
+            <span>Comm Protocol</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button id="nav-schedule" onclick="switchTool('schedule')">
+            <i class="fa-solid fa-calendar-days"></i>
+            <span>Schedule Sync</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button id="nav-expense" onclick="switchTool('expense')">
+            <i class="fa-solid fa-calculator"></i>
+            <span>Expense Splitter</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button id="nav-decision" onclick="switchTool('decision')">
+            <i class="fa-solid fa-gavel"></i>
+            <span>Decision Maker</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button id="nav-conflict" onclick="switchTool('conflict')">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Conflict Cooler</span>
+          </button>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <!-- Mobile Top Bar -->
+      <div class="top-bar">
+        <div class="mobile-brand">
+          <i class="fa-solid fa-hands-holding-child" style="color: var(--warm-sage);"></i>
+          <span>Co-Parent Planner</span>
+        </div>
+        <button class="hamburger-btn" onclick="toggleMobileSidebar()" aria-label="Open Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+      <!-- Main Body Container -->
+      <main class="main-content">
+
+        <!-- ===================================================================
+             VIEW 0: DASHBOARD
+             =================================================================== -->
+        <section id="view-dashboard" class="view-panel">
+          <div class="dashboard-hero">
+            <span class="hero-badge"><i class="fa-solid fa-heart"></i> Child-Centered Logistics</span>
+            <h1 style="margin-top: 0.75rem;">Co-Parent Planner</h1>
+            <p>Parent together without being together. De-escalate communication, clarify schedules, and put your child first.</p>
+          </div>
+
+          <div class="dashboard-grid">
+            <!-- Tool 1 Card -->
+            <div class="dashboard-card" onclick="switchTool('comm')">
+              <div class="card-icon"><i class="fa-solid fa-comments"></i></div>
+              <h3>Communication Protocol</h3>
+              <p>Turn arguments into neutral, business-like requests with structured scripts and tone guides.</p>
+              <div class="card-link">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Tool 2 Card -->
+            <div class="dashboard-card" onclick="switchTool('schedule')">
+              <div class="card-icon"><i class="fa-solid fa-calendar-days"></i></div>
+              <h3>Schedule Sync</h3>
+              <p>Eliminate handoff chaos with unambiguous schedule templates, swap rules, and holiday plans.</p>
+              <div class="card-link">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Tool 3 Card -->
+            <div class="dashboard-card" onclick="switchTool('expense')">
+              <div class="card-icon"><i class="fa-solid fa-calculator"></i></div>
+              <h3>Expense Splitter</h3>
+              <p>Establish fair financial formulas, reimbursement protocols, and clear receipt guidelines.</p>
+              <div class="card-link">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Tool 4 Card -->
+            <div class="dashboard-card" onclick="switchTool('decision')">
+              <div class="card-icon"><i class="fa-solid fa-gavel"></i></div>
+              <h3>Decision Maker</h3>
+              <p>Resolve medical, school, and social deadlocks objectively focused on your child's best interests.</p>
+              <div class="card-link">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Tool 5 Card -->
+            <div class="dashboard-card" onclick="switchTool('conflict')">
+              <div class="card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+              <h3>Conflict Cooler</h3>
+              <p>Apply emergency brakes to heated exchanges with custom pause phrases and cooling protocols.</p>
+              <div class="card-link">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================================
+             TOOL 1: COMMUNICATION PROTOCOL
+             =================================================================== -->
+        <section id="view-comm" class="view-panel" style="display: none;">
+          <div class="page-header">
+            <h2 class="page-title"><i class="fa-solid fa-comments" style="color: var(--warm-sage);"></i> Communication Protocol</h2>
+            <p class="page-subtitle">Transform tense texts into firm, neutral, child-focused communications.</p>
+          </div>
+
+          <div class="problem-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span><strong>Problem:</strong> "Every text turns into an argument."</span>
+          </div>
+
+          <div class="card">
+            <form id="form-comm" onsubmit="event.preventDefault(); processCommTool();">
+              <div class="form-group">
+                <label class="form-label" for="comm-issue">What is the issue you need to discuss?</label>
+                <textarea id="comm-issue" class="form-control" placeholder="e.g., Changing pickup time on Friday due to work meeting..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="comm-need">What do you need from them?</label>
+                <textarea id="comm-need" class="form-control" placeholder="e.g., Agreement to move pickup from 5:00 PM to 6:30 PM..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="comm-style">Current communication style:</label>
+                <select id="comm-style" class="form-select" required>
+                  <option value="Hostile">Hostile</option>
+                  <option value="Cold">Cold</option>
+                  <option value="Civil">Civil</option>
+                  <option value="Friendly">Friendly</option>
+                  <option value="Inconsistent">Inconsistent</option>
+                  <option value="Through lawyers only">Through lawyers only</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Is this urgent?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="comm-urgency" value="Yes" checked> Yes (Within 24 hrs)</label>
+                  <label class="radio-label"><input type="radio" name="comm-urgency" value="No"> No</label>
+                  <label class="radio-label"><input type="radio" name="comm-urgency" value="Can wait"> Can wait (General update)</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="comm-fear">What is your fear if you say nothing?</label>
+                <textarea id="comm-fear" class="form-control" placeholder="e.g., I will be late and cause a scene at handoff..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="comm-age">Child's age:</label>
+                <select id="comm-age" class="form-select" required>
+                  <option value="0-2">0-2 years</option>
+                  <option value="3-5">3-5 years</option>
+                  <option value="6-9" selected>6-9 years</option>
+                  <option value="10-12">10-12 years</option>
+                  <option value="13-15">13-15 years</option>
+                  <option value="16-18">16-18 years</option>
+                </select>
+              </div>
+
+              <div class="btn-row">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Protocol</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleComm()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Output Results -->
+          <div id="results-comm" class="results-container">
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-bullseye"></i> Your Position</div>
+              <p id="res-comm-position" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-shield-halved"></i> The Boundary</div>
+              <p id="res-comm-boundary" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-paper-plane"></i> Message Script</div>
+              <div class="script-box">
+                <span id="res-comm-script"></span>
+                <button class="btn-copy" onclick="copyText('res-comm-script')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-compass"></i> Tone Guide</div>
+              <p id="res-comm-tone" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-triangle-exclamation"></i> If They Respond Negatively</div>
+              <p id="res-comm-negative" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-clock-rotate-left"></i> If They Ignore It</div>
+              <p id="res-comm-ignore" class="text-content"></p>
+            </div>
+          </div>
+
+          <!-- History Accordion -->
+          <div class="history-section">
+            <div class="history-header">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Saved Protocols History</span>
+              <button class="btn btn-outline btn-sm" onclick="clearHistory('comm')">Clear History</button>
+            </div>
+            <div id="history-comm" class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- ===================================================================
+             TOOL 2: SCHEDULE SYNC
+             =================================================================== -->
+        <section id="view-schedule" class="view-panel" style="display: none;">
+          <div class="page-header">
+            <h2 class="page-title"><i class="fa-solid fa-calendar-days" style="color: var(--warm-sage);"></i> Schedule Sync</h2>
+            <p class="page-subtitle">Build clear custody handoffs, swap rules, and predictable routines.</p>
+          </div>
+
+          <div class="problem-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span><strong>Problem:</strong> "Handoffs are chaotic and we constantly argue about who has the kids when."</span>
+          </div>
+
+          <div class="card">
+            <form id="form-schedule" onsubmit="event.preventDefault(); processScheduleTool();">
+              <div class="form-group">
+                <label class="form-label" for="sched-arrangement">Current custody arrangement:</label>
+                <select id="sched-arrangement" class="form-select" required>
+                  <option value="50/50">50/50 Shared Custody</option>
+                  <option value="Primary with me">Primary with me</option>
+                  <option value="Primary with them">Primary with them</option>
+                  <option value="No formal arrangement">No formal arrangement</option>
+                  <option value="Court-ordered">Court-ordered</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="sched-conflicts">Typical handoff conflicts:</label>
+                <textarea id="sched-conflicts" class="form-control" placeholder="e.g., Tardiness, last-minute cancellations, arguments at door..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="sched-transport">Transportation responsibility:</label>
+                <select id="sched-transport" class="form-select" required>
+                  <option value="Me">Me (I handle transport)</option>
+                  <option value="Them">Them (They handle transport)</option>
+                  <option value="Both">Both (Receiving parent picks up)</option>
+                  <option value="Third party">Third party / Neutral site</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="sched-events">Special events coming up:</label>
+                <textarea id="sched-events" class="form-control" placeholder="e.g., Summer vacation, school musical, soccer tournament..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="sched-childpref">Child's preference (if known/age-appropriate):</label>
+                <textarea id="sched-childpref" class="form-control" placeholder="e.g., Prefers direct school transitions to avoid tension..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="sched-flex">Flexibility you can offer:</label>
+                <textarea id="sched-flex" class="form-control" placeholder="e.g., Willing to swap weekends with 48h notice..." required></textarea>
+              </div>
+
+              <div class="btn-row">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Schedule Plan</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleSchedule()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Output Results -->
+          <div id="results-schedule" class="results-container">
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-circle-exclamation"></i> The Schedule Gap</div>
+              <p id="res-sched-gap" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-calendar-check"></i> The Formal Proposal</div>
+              <p id="res-sched-proposal" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-car"></i> The Handoff Protocol</div>
+              <p id="res-sched-handoff" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-repeat"></i> The Swap Rule</div>
+              <p id="res-sched-swap" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-tree"></i> The Holiday Template</div>
+              <p id="res-sched-holiday" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-file-lines"></i> The Documentation</div>
+              <p id="res-sched-doc" class="text-content"></p>
+            </div>
+          </div>
+
+          <!-- History -->
+          <div class="history-section">
+            <div class="history-header">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Saved Schedule Plans</span>
+              <button class="btn btn-outline btn-sm" onclick="clearHistory('schedule')">Clear History</button>
+            </div>
+            <div id="history-schedule" class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- ===================================================================
+             TOOL 3: EXPENSE SPLITTER
+             =================================================================== -->
+        <section id="view-expense" class="view-panel" style="display: none;">
+          <div class="page-header">
+            <h2 class="page-title"><i class="fa-solid fa-calculator" style="color: var(--warm-sage);"></i> Expense Splitter</h2>
+            <p class="page-subtitle">Establish objective, friction-free rules for shared child expenses.</p>
+          </div>
+
+          <div class="problem-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span><strong>Problem:</strong> "We fight about who pays for school, sports, medical, and clothes."</span>
+          </div>
+
+          <div class="card">
+            <form id="form-expense" onsubmit="event.preventDefault(); processExpenseTool();">
+              <div class="form-group">
+                <label class="form-label" for="exp-monthly">Child's monthly expenses (estimate $):</label>
+                <input type="number" id="exp-monthly" class="form-control" placeholder="e.g., 600" required min="0">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="exp-split">Current split:</label>
+                <select id="exp-split" class="form-select" required>
+                  <option value="50/50">50/50</option>
+                  <option value="Proportional to income">Proportional to income</option>
+                  <option value="I pay everything">I pay everything</option>
+                  <option value="They pay everything">They pay everything</option>
+                  <option value="We argue about every bill">We argue about every bill</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="exp-income">Income disparity:</label>
+                <select id="exp-income" class="form-select" required>
+                  <option value="I earn more">I earn more</option>
+                  <option value="They earn more">They earn more</option>
+                  <option value="Similar">Similar</option>
+                  <option value="Unknown">Unknown</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="exp-dispute">Recent expense dispute:</label>
+                <textarea id="exp-dispute" class="form-control" placeholder="e.g., Refusing to pay 50% of soccer registration..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="exp-support">Child support status:</label>
+                <select id="exp-support" class="form-select" required>
+                  <option value="Court-ordered and paid">Court-ordered and paid</option>
+                  <option value="Informal">Informal</option>
+                  <option value="Behind">Behind / Unpaid</option>
+                  <option value="Not applicable">Not applicable</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="exp-upcoming">One upcoming large expense:</label>
+                <textarea id="exp-upcoming" class="form-control" placeholder="e.g., Orthodontic braces or summer camp..." required></textarea>
+              </div>
+
+              <div class="btn-row">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Financial Framework</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleExpense()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Output Results -->
+          <div id="results-expense" class="results-container">
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-scale-balanced"></i> The Fair Formula</div>
+              <p id="res-exp-formula" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-table"></i> The Tracker Template</div>
+              <p id="res-exp-tracker" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-receipt"></i> The Reimbursement Protocol</div>
+              <p id="res-exp-protocol" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-handshake-slash"></i> Dispute Resolution</div>
+              <p id="res-exp-dispute" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-piggy-bank"></i> The Big Expense Plan</div>
+              <p id="res-exp-big" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-check-double"></i> The Receipt Rule</div>
+              <p id="res-exp-receipt" class="text-content"></p>
+            </div>
+          </div>
+
+          <!-- History -->
+          <div class="history-section">
+            <div class="history-header">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Saved Expense Frameworks</span>
+              <button class="btn btn-outline btn-sm" onclick="clearHistory('expense')">Clear History</button>
+            </div>
+            <div id="history-expense" class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- ===================================================================
+             TOOL 4: DECISION MAKER
+             =================================================================== -->
+        <section id="view-decision" class="view-panel" style="display: none;">
+          <div class="page-header">
+            <h2 class="page-title"><i class="fa-solid fa-gavel" style="color: var(--warm-sage);"></i> Decision Maker</h2>
+            <p class="page-subtitle">Navigate major healthcare, education, and activity choices without standoffs.</p>
+          </div>
+
+          <div class="problem-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span><strong>Problem:</strong> "We can't agree on medical, educational, or social decisions."</span>
+          </div>
+
+          <div class="card">
+            <form id="form-decision" onsubmit="event.preventDefault(); processDecisionTool();">
+              <div class="form-group">
+                <label class="form-label" for="dec-type">Decision type:</label>
+                <select id="dec-type" class="form-select" required>
+                  <option value="Medical">Medical</option>
+                  <option value="Educational">Educational</option>
+                  <option value="Religious">Religious</option>
+                  <option value="Social">Social</option>
+                  <option value="Disciplinary">Disciplinary</option>
+                  <option value="Activity">Activity / Extracurricular</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="dec-yourpos">Your position:</label>
+                <textarea id="dec-yourpos" class="form-control" placeholder="e.g., I support starting recommended ADHD evaluation and therapy..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="dec-theirpos">Their position:</label>
+                <textarea id="dec-theirpos" class="form-control" placeholder="e.g., Opposed to medical labeling or medication..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="dec-childpref">Child's preference (if applicable):</label>
+                <textarea id="dec-childpref" class="form-control" placeholder="e.g., Wants help focusing at school but feels scared of doctor visits..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="dec-urgency">Urgency:</label>
+                <select id="dec-urgency" class="form-select" required>
+                  <option value="Emergency">Emergency</option>
+                  <option value="Time-sensitive">Time-sensitive</option>
+                  <option value="Can wait">Can wait</option>
+                  <option value="Philosophical standoff">Philosophical standoff</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="dec-custody">Legal custody:</label>
+                <select id="dec-custody" class="form-select" required>
+                  <option value="Joint">Joint Legal Custody</option>
+                  <option value="Sole to me">Sole Custody to me</option>
+                  <option value="Sole to them">Sole Custody to them</option>
+                  <option value="Unclear">Unclear / In process</option>
+                </select>
+              </div>
+
+              <div class="btn-row">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Analyze & Draft Solution</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleDecision()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Output Results -->
+          <div id="results-decision" class="results-container">
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-diagram-project"></i> The Decision Framework</div>
+              <p id="res-dec-framework" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-comment-dots"></i> The Discussion Script</div>
+              <div class="script-box">
+                <span id="res-dec-script"></span>
+                <button class="btn-copy" onclick="copyText('res-dec-script')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-magnifying-glass"></i> The Information Gap</div>
+              <p id="res-dec-gap" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-scale-unbalanced"></i> The Tie-Breaker</div>
+              <p id="res-dec-tiebreaker" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-child-reaching"></i> The Child's Voice</div>
+              <p id="res-dec-childvoice" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-box-archive"></i> The Documentation</div>
+              <p id="res-dec-doc" class="text-content"></p>
+            </div>
+          </div>
+
+          <!-- History -->
+          <div class="history-section">
+            <div class="history-header">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Saved Decision Guides</span>
+              <button class="btn btn-outline btn-sm" onclick="clearHistory('decision')">Clear History</button>
+            </div>
+            <div id="history-decision" class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- ===================================================================
+             TOOL 5: CONFLICT COOLER
+             =================================================================== -->
+        <section id="view-conflict" class="view-panel" style="display: none;">
+          <div class="page-header">
+            <h2 class="page-title"><i class="fa-solid fa-shield-halved" style="color: var(--warm-sage);"></i> Conflict Cooler</h2>
+            <p class="page-subtitle">Emergency brake and de-escalation toolkit when emotions boil over.</p>
+          </div>
+
+          <div class="problem-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span><strong>Problem:</strong> "We need an emergency brake when conversations get heated."</span>
+          </div>
+
+          <div class="card">
+            <form id="form-conflict" onsubmit="event.preventDefault(); processConflictTool();">
+              <div class="form-group">
+                <label class="form-label" for="con-trigger">Recent conflict trigger:</label>
+                <textarea id="con-trigger" class="form-control" placeholder="e.g., Arrived 20 minutes late for pickup without notice..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="con-escalation">How it escalated:</label>
+                <select id="con-escalation" class="form-select" required>
+                  <option value="Text war">Text war</option>
+                  <option value="Phone yelling">Phone yelling</option>
+                  <option value="In-front-of-child argument">In-front-of-child argument</option>
+                  <option value="Passive aggression">Passive aggression</option>
+                  <option value="Threats">Threats</option>
+                  <option value="Silent treatment">Silent treatment</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="con-reaction">Your go-to reaction when attacked:</label>
+                <select id="con-reaction" class="form-select" required>
+                  <option value="Defend">Defend</option>
+                  <option value="Attack back">Attack back</option>
+                  <option value="Shut down">Shut down</option>
+                  <option value="Cry">Cry</option>
+                  <option value="Leave">Leave</option>
+                  <option value="Try to reason">Try to reason</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="con-exposure">Child's exposure to conflict:</label>
+                <select id="con-exposure" class="form-select" required>
+                  <option value="Never">Never</option>
+                  <option value="Rarely">Rarely</option>
+                  <option value="Sometimes">Sometimes</option>
+                  <option value="Often">Often</option>
+                  <option value="They know everything">They know everything</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="con-method">Cooling method that works for you:</label>
+                <textarea id="con-method" class="form-control" placeholder="e.g., Taking a 20-minute walk, putting phone on Do Not Disturb..." required></textarea>
+              </div>
+
+              <div class="btn-row">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-snowflake"></i> Build De-escalation Strategy</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleConflict()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Output Results -->
+          <div id="results-conflict" class="results-container">
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-arrows-spin"></i> The Escalation Pattern</div>
+              <p id="res-con-pattern" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-heart-crack"></i> The Child Impact</div>
+              <p id="res-con-impact" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-circle-pause"></i> The Pause Phrase</div>
+              <div class="script-box">
+                <span id="res-con-pause"></span>
+                <button class="btn-copy" onclick="copyText('res-con-pause')"><i class="fa-regular fa-copy"></i> Copy Pause Phrase</button>
+              </div>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-pen-to-square"></i> The Written-Only Rule</div>
+              <p id="res-con-written" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-hourglass-half"></i> The Timeout Protocol</div>
+              <p id="res-con-timeout" class="text-content"></p>
+            </div>
+
+            <div class="result-section">
+              <div class="result-title"><i class="fa-solid fa-user-tie"></i> The Mediation Prompt</div>
+              <p id="res-con-mediation" class="text-content"></p>
+            </div>
+          </div>
+
+          <!-- History -->
+          <div class="history-section">
+            <div class="history-header">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Saved De-escalation Plans</span>
+              <button class="btn btn-outline btn-sm" onclick="clearHistory('conflict')">Clear History</button>
+            </div>
+            <div id="history-conflict" class="history-list"></div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Global Mandatory Footer -->
+      <footer class="app-footer">
+        <div class="app-footer-inner">
+          <i class="fa-solid fa-scale-balanced" style="color: var(--warm-sage);"></i>
+          <span>For practical planning purposes only. Not legal, financial, or therapeutic advice. For custody or legal matters, consult a family law attorney.</span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-circle-check" style="color: var(--warm-sage);"></i>
+    <span id="toast-message">Copied!</span>
+  </div>
+
+  <!-- =========================================================================
+       JAVASCRIPT LOGIC
+       ========================================================================= -->
+  <script>
+    /* ==========================================================================
+       NAVIGATION & UI LOGIC
+       ========================================================================== */
+    function switchTool(toolId) {
+      // Hide all panels
+      document.querySelectorAll('.view-panel').forEach(panel => {
+        panel.style.display = 'none';
+      });
+
+      // Show selected panel
+      const selectedPanel = document.getElementById(`view-${toolId}`);
+      if (selectedPanel) {
+        selectedPanel.style.display = 'block';
+      }
+
+      // Update sidebar active buttons
+      document.querySelectorAll('.nav-item button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const activeNav = document.getElementById(`nav-${toolId}`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+
+      // Close mobile sidebar if open
+      closeMobileSidebar();
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Refresh history for active tool
+      if (toolId !== 'dashboard') {
+        renderHistory(toolId);
+      }
+    }
+
+    function toggleMobileSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+
+    function closeMobileSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    /* Copy & Toast Utils */
+    function copyText(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Copied to clipboard!");
+      }).catch(err => {
+        console.error('Copy failed', err);
+      });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    /* ==========================================================================
+       LOCALSTORAGE HISTORY SYSTEM (MAX 30 ITEMS PER TOOL)
+       ========================================================================== */
+    function saveToHistory(toolId, summary, detailsHtml) {
+      const storageKey = `coparent_history_${toolId}`;
+      let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      
+      const newItem = {
+        id: Date.now(),
+        timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        summary: summary,
+        details: detailsHtml
+      };
+
+      history.unshift(newItem);
+      if (history.length > 30) {
+        history = history.slice(0, 30);
+      }
+
+      localStorage.setItem(storageKey, JSON.stringify(history));
+      renderHistory(toolId);
+    }
+
+    function renderHistory(toolId) {
+      const storageKey = `coparent_history_${toolId}`;
+      const historyContainer = document.getElementById(`history-${toolId}`);
+      if (!historyContainer) return;
+
+      const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+
+      if (history.length === 0) {
+        historyContainer.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">No saved history yet.</p>';
+        return;
+      }
+
+      historyContainer.innerHTML = history.map((item, index) => `
+        <div class="history-item">
+          <div class="history-summary" onclick="toggleHistoryDetail('${toolId}', ${index})">
+            <span>${escapeHtml(item.summary)}</span>
+            <span class="history-time">${item.timestamp} <i class="fa-solid fa-chevron-down" style="margin-left: 0.4rem;"></i></span>
+          </div>
+          <div id="hist-detail-${toolId}-${index}" class="history-details">
+            ${item.details}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleHistoryDetail(toolId, index) {
+      const el = document.getElementById(`hist-detail-${toolId}-${index}`);
+      if (el) {
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+      }
+    }
+
+    function clearHistory(toolId) {
+      if (confirm("Are you sure you want to clear history for this tool?")) {
+        localStorage.removeItem(`coparent_history_${toolId}`);
+        renderHistory(toolId);
+        showToast("History cleared");
+      }
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+
+
+    /* ==========================================================================
+       TOOL 1: COMMUNICATION PROTOCOL LOGIC & SAMPLE
+       ========================================================================== */
+    function loadSampleComm() {
+      document.getElementById('comm-issue').value = "I need to shift Friday's pickup time from 5:00 PM to 6:30 PM because of a mandatory work meeting.";
+      document.getElementById('comm-need').value = "Confirmation that 6:30 PM pickup works, or agreement for them to hold the kids until 6:30 PM.";
+      document.getElementById('comm-style').value = "Hostile";
+      document.querySelector('input[name="comm-urgency"][value="Yes"]').checked = true;
+      document.getElementById('comm-fear').value = "They will accuse me of being irresponsible or refuse to accommodate, leading to a fight in front of the kids.";
+      document.getElementById('comm-age').value = "6-9";
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function processCommTool() {
+      const issue = document.getElementById('comm-issue').value.trim();
+      const need = document.getElementById('comm-need').value.trim();
+      const style = document.getElementById('comm-style').value;
+      const urgency = document.querySelector('input[name="comm-urgency"]:checked').value;
+      const fear = document.getElementById('comm-fear').value.trim();
+      const age = document.getElementById('comm-age').value;
+
+      // Position
+      const positionText = `You are seeking a practical adjustment regarding: "${issue}". Your goal is simply to secure: "${need}", prioritizing stability for your ${age}-year-old child over interpersonal friction.`;
+
+      // Boundary
+      const boundaryText = `Keep this request strictly business-focused. Do not apologize excessively, defend your personal schedule, or engage in personal defense regarding past conflicts. Set a polite response window of 24 hours.`;
+
+      // Script (BIFF Method: Brief, Informative, Friendly, Firm)
+      const scriptText = `Hi. I am writing to request a schedule adjustment for Friday. Due to a work commitment, I will need to adjust pickup to 6:30 PM instead of 5:00 PM. Please let me know by tomorrow at 5:00 PM if this works for you. Thank you for helping accommodate this for the kids.`;
+
+      // Tone Guide
+      const toneText = `Communication style is set to '${style}'. Maintain a calm, neutral, and matter-of-fact tone. Eliminate any emotional words or defensive statements. Treat this like an email to a professional co-worker.`;
+
+      // Negative Response
+      const negativeText = `If they respond with hostility or bring up unrelated past issues, do NOT take the bait. Acknowledge only the logistics: "Thank you for the reply. Please let me know if 6:30 PM works or if we need to arrange an alternative pickup point." If hostility persists, document it and proceed with standard legal protocol.`;
+
+      // Ignore
+      const ignoreText = `If no response is received within 24 hours, send a brief follow-up: "Following up on my previous message regarding Friday at 6:30 PM. Please confirm if this time works." Keep a screenshot for your log.`;
+
+      // Render Outputs
+      document.getElementById('res-comm-position').innerText = positionText;
+      document.getElementById('res-comm-boundary').innerText = boundaryText;
+      document.getElementById('res-comm-script').innerText = scriptText;
+      document.getElementById('res-comm-tone').innerText = toneText;
+      document.getElementById('res-comm-negative').innerText = negativeText;
+      document.getElementById('res-comm-ignore').innerText = ignoreText;
+
+      document.getElementById('results-comm').style.display = 'block';
+      document.getElementById('results-comm').scrollIntoView({ behavior: 'smooth' });
+
+      // Save History
+      const detailsHtml = `
+        <p><strong>Issue:</strong> ${escapeHtml(issue)}</p>
+        <p><strong>Script:</strong> <em>${escapeHtml(scriptText)}</em></p>
+      `;
+      saveToHistory('comm', `Comm Request: ${issue.substring(0, 40)}...`, detailsHtml);
+    }
+
+
+    /* ==========================================================================
+       TOOL 2: SCHEDULE SYNC LOGIC & SAMPLE
+       ========================================================================== */
+    function loadSampleSchedule() {
+      document.getElementById('sched-arrangement').value = "50/50";
+      document.getElementById('sched-conflicts').value = "Constant last-minute delay texts on Sunday handoffs, arguing at the doorstep, and unannounced changes.";
+      document.getElementById('sched-transport').value = "Both";
+      document.getElementById('sched-events').value = "Upcoming Thanksgiving long weekend and child's school play next month.";
+      document.getElementById('sched-childpref').value = "Child gets anxious during long waiting periods or doorstep arguments.";
+      document.getElementById('sched-flex').value = "Can offer 48-hour advance swap notice and flexibility on mid-week evening dinners.";
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function processScheduleTool() {
+      const arrangement = document.getElementById('sched-arrangement').value;
+      const conflicts = document.getElementById('sched-conflicts').value.trim();
+      const transport = document.getElementById('sched-transport').value;
+      const events = document.getElementById('sched-events').value.trim();
+      const flex = document.getElementById('sched-flex').value.trim();
+
+      const gapText = `The current tension stems from vague transition protocols under your ${arrangement} setup. Conflicts such as "${conflicts}" occur when expectations around timing and locations are not explicitly fixed.`;
+
+      const proposalText = `Establish a structured 2-2-3 or alternating week schedule. Transition times must be hardcoded (e.g., Sundays at 5:00 PM or school drop-off/pick-up). School-based handoffs minimize direct contact and ease child anxiety.`;
+
+      const handoffText = `Handoff Protocol: Transportation assigned as '${transport}'. Handoffs should occur at a neutral location (e.g., school curbside or public park) or via receiving parent pickup. Keep transitions under 2 minutes: quick hug, positive encouragement, no adult discussions.`;
+
+      const swapText = `Swap Rule: All schedule adjustment requests must be submitted in writing at least 48 hours in advance. Swaps must be reciprocal within 30 days. If a swap cannot be agreed upon, the standard schedule stands.`;
+
+      const holidayText = `Holiday Plan: Alternate major holidays annually (Even years: Parent A has Thanksgiving/Odd years: Parent B). Events mentioned ("${events}") must be logged into a shared calendar 30 days prior.`;
+
+      const docText = `Confirm every agreed change via email or app within 12 hours: "Per our agreement, I will hold the kids for an extra day on Friday and swap for Sunday..." Keep all records centralized.`;
+
+      document.getElementById('res-sched-gap').innerText = gapText;
+      document.getElementById('res-sched-proposal').innerText = proposalText;
+      document.getElementById('res-sched-handoff').innerText = handoffText;
+      document.getElementById('res-sched-swap').innerText = swapText;
+      document.getElementById('res-sched-holiday').innerText = holidayText;
+      document.getElementById('res-sched-doc').innerText = docText;
+
+      document.getElementById('results-schedule').style.display = 'block';
+      document.getElementById('results-schedule').scrollIntoView({ behavior: 'smooth' });
+
+      const detailsHtml = `
+        <p><strong>Arrangement:</strong> ${arrangement}</p>
+        <p><strong>Handoff Plan:</strong> ${escapeHtml(handoffText)}</p>
+      `;
+      saveToHistory('schedule', `Schedule Plan: ${arrangement}`, detailsHtml);
+    }
+
+
+    /* ==========================================================================
+       TOOL 3: EXPENSE SPLITTER LOGIC & SAMPLE
+       ========================================================================== */
+    function loadSampleExpense() {
+      document.getElementById('exp-monthly').value = "500";
+      document.getElementById('exp-split').value = "Proportional to income";
+      document.getElementById('exp-income').value = "They earn more";
+      document.getElementById('exp-dispute').value = "Agreed on 60/40 proportional split, but co-parent refuses to reimburse for mandatory school uniform and extracurricular soccer fees.";
+      document.getElementById('exp-support').value = "Court-ordered and paid";
+      document.getElementById('exp-upcoming').value = "Upcoming $1,200 dental braces initial payment.";
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function processExpenseTool() {
+      const monthly = parseFloat(document.getElementById('exp-monthly').value) || 0;
+      const splitType = document.getElementById('exp-split').value;
+      const income = document.getElementById('exp-income').value;
+      const dispute = document.getElementById('exp-dispute').value.trim();
+      const upcoming = document.getElementById('exp-upcoming').value.trim();
+
+      let splitRatio = "50% / 50%";
+      if (splitType === "Proportional to income") {
+        splitRatio = income === "They earn more" ? "60% (Them) / 40% (You)" : "60% (You) / 40% (Them)";
+      }
+
+      const formulaText = `Based on your setup (${splitType}, income: ${income}), the recommended split ratio for non-routine agreed expenses is ${splitRatio}. Monthly base estimate is $${monthly}.`;
+
+      const trackerText = `Shared Expense Log Format: Date | Item Description | Total Cost | Your Share | Their Share | Receipt Attached (Y/N) | Status (Pending/Paid).`;
+
+      const protocolText = `Submit reimbursement requests on the 1st and 15th of each month. All requests must include an itemized receipt. Payment expected within 14 days of receipt submission.`;
+
+      const disputeText = `Addressing dispute: "${dispute}". Any single non-essential expense over $50 requires written pre-approval from both parents prior to purchase. Medical, school, and essential clothing are mandatory shared costs.`;
+
+      const bigText = `Strategy for upcoming expense ("${upcoming}"): Require 14-day advance notice with official quote/invoice. Payments should be made directly to the vendor/provider by each parent according to the agreed ratio.`;
+
+      const receiptText = `Receipt Standard: Digital photo upload showing vendor, date, line items, and total within 7 days of purchase. No receipt = non-reimbursable unless pre-approved.`;
+
+      document.getElementById('res-exp-formula').innerText = formulaText;
+      document.getElementById('res-exp-tracker').innerText = trackerText;
+      document.getElementById('res-exp-protocol').innerText = protocolText;
+      document.getElementById('res-exp-dispute').innerText = disputeText;
+      document.getElementById('res-exp-big').innerText = bigText;
+      document.getElementById('res-exp-receipt').innerText = receiptText;
+
+      document.getElementById('results-expense').style.display = 'block';
+      document.getElementById('results-expense').scrollIntoView({ behavior: 'smooth' });
+
+      const detailsHtml = `
+        <p><strong>Monthly Estimate:</strong> $${monthly}</p>
+        <p><strong>Formula:</strong> ${escapeHtml(formulaText)}</p>
+      `;
+      saveToHistory('expense', `Expense Split: $${monthly}/mo (${splitRatio})`, detailsHtml);
+    }
+
+
+    /* ==========================================================================
+       TOOL 4: DECISION MAKER LOGIC & SAMPLE
+       ========================================================================== */
+    function loadSampleDecision() {
+      document.getElementById('dec-type').value = "Medical";
+      document.getElementById('dec-yourpos').value = "Child is struggling in 3rd grade. Teacher recommended formal ADHD evaluation by a pediatric specialist.";
+      document.getElementById('dec-theirpos').value = "Opposed to medical evaluation, believes child is just energetic and fears medication/labeling.";
+      document.getElementById('dec-childpref').value = "Child feels frustrated in class and wants help catching up with classmates.";
+      document.getElementById('dec-urgency').value = "Time-sensitive";
+      document.getElementById('dec-custody').value = "Joint";
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function processDecisionTool() {
+      const type = document.getElementById('dec-type').value;
+      const yourPos = document.getElementById('dec-yourpos').value.trim();
+      const theirPos = document.getElementById('dec-theirpos').value.trim();
+      const childPref = document.getElementById('dec-childpref').value.trim();
+      const urgency = document.getElementById('dec-urgency').value;
+      const custody = document.getElementById('dec-custody').value;
+
+      const frameworkText = `Decision Focus (${type}): Test against objective 3-step criteria: 1) What does independent professional expertise advise? 2) Does this decision support the child's daily health and educational wellbeing? 3) Is it minimally disruptive to both households?`;
+
+      const scriptText = `I want to address the upcoming ${type} decision regarding our child. My focus is entirely on what supports their growth best. Here is the objective recommendation from specialists. Let's review the facts together before making a choice.`;
+
+      const gapText = `Information needed: Obtain a written summary or formal recommendation directly from a licensed professional (e.g., pediatrician, teacher, therapist). Basing decisions on third-party medical/educational data removes personal bias.`;
+
+      const tiebreakerText = `Custody status is '${custody}'. Under Joint Legal Custody, both parents must consent to major decisions. If a deadlock persists after reviewing expert input, consultation with a parenting coordinator or family mediator is the next required step before court intervention.`;
+
+      const childVoiceText = childPref ? `Child's Perspective: "${childPref}". Keep the child informed in an age-appropriate manner without placing the weight of adult decisions on their shoulders.` : `Ensure the child's feelings are heard without placing the adult decision-making burden on them.`;
+
+      const docText = `Log all joint decisions in writing: "Per our discussion on [Date], we have agreed to proceed with [Decision]. Both parents consent as recorded in this message."`;
+
+      document.getElementById('res-dec-framework').innerText = frameworkText;
+      document.getElementById('res-dec-script').innerText = scriptText;
+      document.getElementById('res-dec-gap').innerText = gapText;
+      document.getElementById('res-dec-tiebreaker').innerText = tiebreakerText;
+      document.getElementById('res-dec-childvoice').innerText = childVoiceText;
+      document.getElementById('res-dec-doc').innerText = docText;
+
+      document.getElementById('results-decision').style.display = 'block';
+      document.getElementById('results-decision').scrollIntoView({ behavior: 'smooth' });
+
+      const detailsHtml = `
+        <p><strong>Type:</strong> ${type}</p>
+        <p><strong>Your Pos:</strong> ${escapeHtml(yourPos)}</p>
+      `;
+      saveToHistory('decision', `Decision Guide: ${type}`, detailsHtml);
+    }
+
+
+    /* ==========================================================================
+       TOOL 5: CONFLICT COOLER LOGIC & SAMPLE
+       ========================================================================== */
+    function loadSampleConflict() {
+      document.getElementById('con-trigger').value = "Co-parent arrived 30 minutes late for pickup, then started arguing on the porch regarding weekend plans.";
+      document.getElementById('con-escalation').value = "In-front-of-child argument";
+      document.getElementById('con-reaction').value = "Defend";
+      document.getElementById('con-exposure').value = "Sometimes";
+      document.getElementById('con-method').value = "Pausing the talk, taking a 15-minute walk, and switching strictly to text/email.";
+      showToast("Sample Scenario Loaded!");
+    }
+
+    function processConflictTool() {
+      const trigger = document.getElementById('con-trigger').value.trim();
+      const escalation = document.getElementById('con-escalation').value;
+      const reaction = document.getElementById('con-reaction').value;
+      const exposure = document.getElementById('con-exposure').value;
+      const method = document.getElementById('con-method').value.trim();
+
+      const patternText = `Conflict Loop: Trigger ("${trigger}") -> Escalation via ${escalation} -> Reaction (${reaction}). Recognizing this loop is the first step to breaking it before it impacts the child.`;
+
+      const impactText = `Child Exposure Level: ${exposure}. Exposure to active adult conflict elevates child cortisol and anxiety. Immediate cool-down is essential to protect their emotional safety.`;
+
+      const pauseScriptText = `I want to make sure we handle this constructively for our child. Let's pause this conversation right now. I will review your message and reply in writing by tomorrow morning.`;
+
+      const writtenText = `Written-Only Rule: Immediately switch to written messaging (email or parenting app). Verbal debates escalate quickly; written communication enforces a pause and creates a clear record.`;
+
+      const timeoutText = `Timeout Protocol: Enforce a mandatory 24-hour cooling-off period before responding to non-emergency accusatory texts. Use your personal cooling method: "${method}".`;
+
+      const mediationText = `Mediation Prompt: If conversations routinely escalate to ${escalation}, engage a certified family mediator or parenting coordinator to establish enforceable ground rules.`;
+
+      document.getElementById('res-con-pattern').innerText = patternText;
+      document.getElementById('res-con-impact').innerText = impactText;
+      document.getElementById('res-con-pause').innerText = pauseScriptText;
+      document.getElementById('res-con-written').innerText = writtenText;
+      document.getElementById('res-con-timeout').innerText = timeoutText;
+      document.getElementById('res-con-mediation').innerText = mediationText;
+
+      document.getElementById('results-conflict').style.display = 'block';
+      document.getElementById('results-conflict').scrollIntoView({ behavior: 'smooth' });
+
+      const detailsHtml = `
+        <p><strong>Trigger:</strong> ${escapeHtml(trigger)}</p>
+        <p><strong>Pause Phrase:</strong> <em>${escapeHtml(pauseScriptText)}</em></p>
+      `;
+      saveToHistory('conflict', `Conflict Cooler: ${escalation}`, detailsHtml);
+    }
+
+    // Initialize Page
+    document.addEventListener('DOMContentLoaded', () => {
+      switchTool('dashboard');
+    });
+  </script>
+</body>
+</html>

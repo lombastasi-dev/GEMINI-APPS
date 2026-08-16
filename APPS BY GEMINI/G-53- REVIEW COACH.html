@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Review Coach</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --deep-blue: #1B263B;
+            --warm-peach: #F4A261;
+            --peach-hover: #E76F51;
+            --bg-gradient-start: #EDF2F4;
+            --bg-gradient-end: #FFF5F0;
+            --text-dark: #2B2D42;
+            --text-muted: #6C757D;
+            --card-bg: #FFFFFF;
+            --border-color: #E9ECEF;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #FFFFFF;
+            border-right: 1px solid var(--border-color);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-header i {
+            font-size: 24px;
+            color: var(--warm-peach);
+        }
+
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--deep-blue);
+            line-height: 1.2;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+        }
+
+        .nav-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item button:hover {
+            background-color: #F8F9FA;
+            color: var(--deep-blue);
+        }
+
+        .nav-item button.active {
+            background-color: var(--deep-blue);
+            color: #FFFFFF;
+        }
+
+        .nav-item button.active i {
+            color: var(--warm-peach);
+        }
+
+        .nav-item button i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            background-color: #FFFFFF;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .mobile-title {
+            font-weight: 700;
+            color: var(--deep-blue);
+            font-size: 16px;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--deep-blue);
+            cursor: pointer;
+        }
+
+        /* Overlay for mobile sidebar */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        /* Screen views */
+        .screen {
+            display: none;
+            width: 100%;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .screen-header {
+            margin-bottom: 24px;
+        }
+
+        .screen-header h2 {
+            font-size: 24px;
+            color: var(--deep-blue);
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .screen-header p.problem-statement {
+            font-size: 15px;
+            color: #D97706;
+            background-color: #FEF3C7;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border-left: 4px solid var(--warm-peach);
+            font-weight: 500;
+        }
+
+        /* Hero Dashboard */
+        .hero-card {
+            background: linear-gradient(135deg, var(--deep-blue) 0%, #2C3E50 100%);
+            color: #FFFFFF;
+            text-align: center;
+            padding: 40px 24px;
+        }
+
+        .hero-card h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #FFFFFF;
+        }
+
+        .hero-card p.tagline {
+            font-size: 18px;
+            color: var(--warm-peach);
+            font-weight: 500;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .dash-card {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+        }
+
+        .dash-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background-color: #FFF5F0;
+            color: var(--warm-peach);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .dash-card h3 {
+            font-size: 16px;
+            color: var(--deep-blue);
+        }
+
+        .dash-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--deep-blue);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: #FAFAFA;
+            color: var(--text-dark);
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--warm-peach);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(244, 162, 97, 0.15);
+        }
+
+        textarea.form-control {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 400;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--deep-blue);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: #2C3E50;
+        }
+
+        .btn-secondary {
+            background-color: #E9ECEF;
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #DEE2E6;
+        }
+
+        .btn-copy {
+            background-color: #FFF5F0;
+            color: var(--warm-peach);
+            border: 1px solid #F4A26133;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--warm-peach);
+            color: #FFFFFF;
+        }
+
+        /* Output Formatting */
+        .output-section {
+            margin-top: 32px;
+            display: none;
+        }
+
+        .output-section.active {
+            display: block;
+        }
+
+        .output-card {
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .output-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .output-card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--deep-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .output-card-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333333;
+            white-space: pre-line;
+        }
+
+        .script-box {
+            background-color: #F8F9FA;
+            border-left: 4px solid var(--deep-blue);
+            padding: 14px;
+            font-family: inherit;
+            border-radius: 0 6px 6px 0;
+            margin-top: 8px;
+        }
+
+        /* Accordion for History */
+        .history-section {
+            margin-top: 32px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+
+        .history-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--deep-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-content {
+            display: none;
+            margin-top: 16px;
+        }
+
+        .history-content.active {
+            display: block;
+        }
+
+        .history-item {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:hover {
+            border-color: var(--warm-peach);
+        }
+
+        .history-item-date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .history-item-snippet {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--deep-blue);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--deep-blue);
+            color: #FFFFFF;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        .app-footer {
+            margin-top: auto;
+            width: 100%;
+            background-color: #FFFFFF;
+            border-top: 1px solid var(--border-color);
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px 12px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="mobile-title">Performance Review Coach</div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-compass"></i>
+                <h1>Review Coach</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <button data-screen="dashboard" class="active">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Dashboard</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-screen="evidence">
+                        <i class="fa-solid fa-box-archive"></i>
+                        <span>Evidence Collector</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-screen="defense">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Defense Prep</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-screen="goals">
+                        <i class="fa-solid fa-bullseye"></i>
+                        <span>Goal Negotiator</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-screen="rating">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Rating Conversation</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-screen="post">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span>Post-Review Plan</span>
+                    </button>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-container">
+
+                <!-- DASHBOARD SCREEN -->
+                <section id="screen-dashboard" class="screen active">
+                    <div class="card hero-card">
+                        <h2>Performance Review Coach</h2>
+                        <p class="tagline">Walk in prepared. Walk out with a plan.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card dash-card" data-target="evidence">
+                            <div class="dash-card-icon"><i class="fa-solid fa-box-archive"></i></div>
+                            <h3>Evidence Collector</h3>
+                            <p>Build an unassailable record of impact and convert tasks into business value.</p>
+                        </div>
+                        <div class="card dash-card" data-target="defense">
+                            <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h3>Defense Prep</h3>
+                            <p>Map out constructive responses to expected criticism with calm authority.</p>
+                        </div>
+                        <div class="card dash-card" data-target="goals">
+                            <div class="dash-card-icon"><i class="fa-solid fa-bullseye"></i></div>
+                            <h3>Goal Negotiator</h3>
+                            <p>Shape future targets to be realistic, well-resourced, and career-advancing.</p>
+                        </div>
+                        <div class="card dash-card" data-target="rating">
+                            <div class="dash-card-icon"><i class="fa-solid fa-sliders"></i></div>
+                            <h3>Rating Conversation</h3>
+                            <p>Advocate effectively for the score you deserve with structured evidence.</p>
+                        </div>
+                        <div class="card dash-card" data-target="post">
+                            <div class="dash-card-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+                            <h3>Post-Review Action Plan</h3>
+                            <p>Process outcomes, craft follow-ups, and convert feedback into progress.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: EVIDENCE COLLECTOR -->
+                <section id="screen-evidence" class="screen">
+                    <div class="card">
+                        <div class="screen-header">
+                            <h2><i class="fa-solid fa-box-archive" style="color:var(--warm-peach);"></i> Evidence Collector</h2>
+                            <p class="problem-statement">"I need proof of what I've accomplished so I'm not judged on recency bias."</p>
+                        </div>
+
+                        <form id="form-evidence">
+                            <div class="form-group">
+                                <label for="ev-period">Your review period:</label>
+                                <select id="ev-period" class="form-control">
+                                    <option value="Last 3mo">Last 3 Months</option>
+                                    <option value="Last 6mo">Last 6 Months</option>
+                                    <option value="Last 1yr" selected>Last 1 Year</option>
+                                    <option value="Since hire">Since Hire</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ev-projects">Key projects completed:</label>
+                                <textarea id="ev-projects" class="form-control" placeholder="List major deliverables or initiatives..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ev-results">Quantifiable results:</label>
+                                <textarea id="ev-results" class="form-control" placeholder="Metrics, revenue, time saved, efficiency gains..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ev-feedback">Positive feedback received:</label>
+                                <textarea id="ev-feedback" class="form-control" placeholder="Praise from clients, peers, cross-functional partners..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ev-challenges">Challenges overcome:</label>
+                                <textarea id="ev-challenges" class="form-control" placeholder="Resource shortages, tight deadlines, complex problems solved..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ev-skills">Skills developed:</label>
+                                <textarea id="ev-skills" class="form-control" placeholder="New software, leadership techniques, domain knowledge..."></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary load-sample" data-tool="evidence">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-gears"></i> Generate Portfolio
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-evidence" class="output-section"></div>
+                    <div id="history-evidence" class="history-section"></div>
+                </section>
+
+                <!-- TOOL 2: THE DEFENSE PREP -->
+                <section id="screen-defense" class="screen">
+                    <div class="card">
+                        <div class="screen-header">
+                            <h2><i class="fa-solid fa-shield-halved" style="color:var(--warm-peach);"></i> The Defense Prep</h2>
+                            <p class="problem-statement">"I'm expecting criticism and I need to respond without getting defensive."</p>
+                        </div>
+
+                        <form id="form-defense">
+                            <div class="form-group">
+                                <label for="def-criticism">What criticism do you expect?</label>
+                                <textarea id="def-criticism" class="form-control" placeholder="Specific critique or area of dissatisfaction..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Is the criticism fair?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="def-fair" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="def-fair" value="Partially" checked> Partially</label>
+                                    <label class="radio-label"><input type="radio" name="def-fair" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="def-fair" value="Not sure"> Not sure</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="def-evidence">What evidence do you have about this issue?</label>
+                                <textarea id="def-evidence" class="form-control" placeholder="Context, timeline, external factors, dependency logs..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="def-action">What have you already done to address it?</label>
+                                <textarea id="def-action" class="form-control" placeholder="Corrective steps taken, new protocols adopted..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="def-emotion">What's your emotional reaction to this criticism?</label>
+                                <select id="def-emotion" class="form-control">
+                                    <option value="Shame">Shame</option>
+                                    <option value="Anger">Anger</option>
+                                    <option value="Fear" selected>Fear</option>
+                                    <option value="Acceptance">Acceptance</option>
+                                    <option value="Confusion">Confusion</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary load-sample" data-tool="defense">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-gears"></i> Build Defense Plan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-defense" class="output-section"></div>
+                    <div id="history-defense" class="history-section"></div>
+                </section>
+
+                <!-- TOOL 3: GOAL NEGOTIATOR -->
+                <section id="screen-goals" class="screen">
+                    <div class="card">
+                        <div class="screen-header">
+                            <h2><i class="fa-solid fa-bullseye" style="color:var(--warm-peach);"></i> Goal Negotiator</h2>
+                            <p class="problem-statement">"I need to influence next period's goals so they're achievable and career-building."</p>
+                        </div>
+
+                        <form id="form-goals">
+                            <div class="form-group">
+                                <label for="goal-mgr">Goals suggested by manager:</label>
+                                <textarea id="goal-mgr" class="form-control" placeholder="Targets proposed by leadership..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="goal-career">Your career goals:</label>
+                                <textarea id="goal-career" class="form-control" placeholder="Skills, roles, or visibility you want to develop..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="goal-resources">What resources do you need?</label>
+                                <textarea id="goal-resources" class="form-control" placeholder="Budget, staffing, training, tooling, executive support..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="goal-obstacles">What obstacles do you foresee?</label>
+                                <textarea id="goal-obstacles" class="form-control" placeholder="Market trends, capacity bottlenecks, dependencies..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="goal-ambition">How ambitious should next period be?</label>
+                                <select id="goal-ambition" class="form-control">
+                                    <option value="Stretch">Stretch (Aggressive Growth)</option>
+                                    <option value="Steady" selected>Steady (Sustainable / High Performance)</option>
+                                    <option value="Recovery">Recovery (Stabilization / Capacity Management)</option>
+                                    <option value="Not sure">Not sure</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary load-sample" data-tool="goals">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-gears"></i> Draft Strategy
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-goals" class="output-section"></div>
+                    <div id="history-goals" class="history-section"></div>
+                </section>
+
+                <!-- TOOL 4: THE RATING CONVERSATION -->
+                <section id="screen-rating" class="screen">
+                    <div class="card">
+                        <div class="screen-header">
+                            <h2><i class="fa-solid fa-sliders" style="color:var(--warm-peach);"></i> The Rating Conversation</h2>
+                            <p class="problem-statement">"I think I'm getting an unfair rating and I need to address it."</p>
+                        </div>
+
+                        <form id="form-rating">
+                            <div class="form-group">
+                                <label for="rate-expected">Expected rating from manager:</label>
+                                <select id="rate-expected" class="form-control">
+                                    <option value="Exceeds">Exceeds Expectations</option>
+                                    <option value="Meets" selected>Meets Expectations</option>
+                                    <option value="Needs Improvement">Needs Improvement</option>
+                                    <option value="Unsatisfactory">Unsatisfactory</option>
+                                    <option value="Don't know">Don't know</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="rate-deserved">What you believe you deserve:</label>
+                                <select id="rate-deserved" class="form-control">
+                                    <option value="Exceeds" selected>Exceeds Expectations</option>
+                                    <option value="Meets">Meets Expectations</option>
+                                    <option value="Needs Improvement">Needs Improvement</option>
+                                    <option value="Unsatisfactory">Unsatisfactory</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="rate-evidence">Evidence for your rating:</label>
+                                <textarea id="rate-evidence" class="form-control" placeholder="Specific metrics, peer evaluations, unexpected scope delivered..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Have you received informal feedback during the cycle?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="rate-informal" value="Positive" checked> Positive</label>
+                                    <label class="radio-label"><input type="radio" name="rate-informal" value="Mixed"> Mixed</label>
+                                    <label class="radio-label"><input type="radio" name="rate-informal" value="Negative"> Negative</label>
+                                    <label class="radio-label"><input type="radio" name="rate-informal" value="None"> None</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Your relationship with reviewer:</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="rate-rel" value="Strong"> Strong</label>
+                                    <label class="radio-label"><input type="radio" name="rate-rel" value="Neutral" checked> Neutral</label>
+                                    <label class="radio-label"><input type="radio" name="rate-rel" value="Strained"> Strained</label>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary load-sample" data-tool="rating">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-gears"></i> Build Case
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-rating" class="output-section"></div>
+                    <div id="history-rating" class="history-section"></div>
+                </section>
+
+                <!-- TOOL 5: POST-REVIEW ACTION PLAN -->
+                <section id="screen-post" class="screen">
+                    <div class="card">
+                        <div class="screen-header">
+                            <h2><i class="fa-solid fa-clipboard-check" style="color:var(--warm-peach);"></i> Post-Review Action Plan</h2>
+                            <p class="problem-statement">"The review is over. Now what?"</p>
+                        </div>
+
+                        <form id="form-post">
+                            <div class="form-group">
+                                <label for="post-actual">Your actual rating received:</label>
+                                <select id="post-actual" class="form-control">
+                                    <option value="Exceeds">Exceeds Expectations</option>
+                                    <option value="Meets" selected>Meets Expectations</option>
+                                    <option value="Needs Improvement">Needs Improvement</option>
+                                    <option value="Unsatisfactory">Unsatisfactory</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="post-feedback">Key feedback received:</label>
+                                <textarea id="post-feedback" class="form-control" placeholder="Main critical or developmental points discussed..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="post-promises">Promises made by manager:</label>
+                                <textarea id="post-promises" class="form-control" placeholder="Mentorship, promotion timeline, budget, training, support..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="post-takeaway">Your biggest takeaway:</label>
+                                <textarea id="post-takeaway" class="form-control" placeholder="Core lesson or realization from this review..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="post-emotion">Your emotional state after:</label>
+                                <select id="post-emotion" class="form-control">
+                                    <option value="Motivated">Motivated</option>
+                                    <option value="Okay">Okay</option>
+                                    <option value="Disappointed" selected>Disappointed</option>
+                                    <option value="Angry">Angry</option>
+                                    <option value="Worried">Worried</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary load-sample" data-tool="post">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-gears"></i> Create Action Plan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-post" class="output-section"></div>
+                    <div id="history-post" class="history-section"></div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Global Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            For career preparation and reflection only. Not legal, HR, or therapeutic advice. For disputes over ratings or termination concerns, consult an employment attorney or HR representative.
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- UI & NAVIGATION MANAGEMENT ---
+            const sidebar = document.getElementById('sidebar');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const navButtons = document.querySelectorAll('.nav-links button');
+            const screens = document.querySelectorAll('.screen');
+            const dashCards = document.querySelectorAll('.dash-card');
+
+            function switchScreen(screenId) {
+                // Update navigation visual state
+                navButtons.forEach(btn => {
+                    if (btn.dataset.screen === screenId) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+
+                // Display selected screen
+                screens.forEach(screen => {
+                    if (screen.id === `screen-${screenId}`) {
+                        screen.classList.add('active');
+                    } else {
+                        screen.classList.remove('active');
+                    }
+                });
+
+                // Scroll back to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Close mobile sidebar if open
+                closeMobileSidebar();
+
+                // Refresh history view for tool screen
+                if (screenId !== 'dashboard') {
+                    renderHistory(screenId);
+                }
+            }
+
+            function closeMobileSidebar() {
+                sidebar.classList.remove('mobile-open');
+                sidebarOverlay.classList.remove('mobile-open');
+            }
+
+            hamburgerBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-open');
+                sidebarOverlay.classList.toggle('mobile-open');
+            });
+
+            sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+            navButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchScreen(btn.dataset.screen);
+                });
+            });
+
+            dashCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    switchScreen(card.dataset.target);
+                });
+            });
+
+
+            // --- SAMPLE SCENARIOS DATA ---
+            const sampleData = {
+                evidence: {
+                    period: 'Last 1yr',
+                    projects: 'Lead migration to new internal CRM system; restructured client onboarding flow; mentored 2 junior specialists.',
+                    results: 'Increased team operational efficiency by 20%; reduced customer support response time by 15 minutes; zero downtime during CRM cutover.',
+                    feedback: 'Client Lead commended seamless execution during quarterly QBR; received verbal praise from Regional VP for team leadership during cutover.',
+                    challenges: 'Overcame a 30% staffing shortage during peak migration phase by redesigning workflow automation.',
+                    skills: 'Mastered Salesforce Enterprise suite; completed Advanced Agile Project Management certification.'
+                },
+                defense: {
+                    criticism: 'Missed two key project deliverables during Q2.',
+                    fair: 'Partially',
+                    evidence: 'Timeline logs show upstream vendor dependencies were delayed by 3 weeks, directly impacting sprint completion dates.',
+                    action: 'Implemented a daily blocker-tracking dashboard and negotiated stricter SLA commitments with vendor partners.',
+                    emotion: 'Fear'
+                },
+                goals: {
+                    mgr: 'Increase quarterly output target by 30% and take ownership of regional reporting.',
+                    career: 'Develop formal cross-functional leadership skills and build visibility with senior executives.',
+                    resources: 'Dedicated junior analyst support for routine data pulling and $2,500 professional training budget.',
+                    obstacles: 'Anticipated industry market slowdown in Q3 and current capacity limits across team.',
+                    ambition: 'Steady'
+                },
+                rating: {
+                    expected: 'Meets',
+                    deserved: 'Exceeds',
+                    evidence: 'Exceeded core targets by 18%; delivered CRM project 2 weeks ahead of target; stepped in to cover team lead duties for 2 months.',
+                    informal: 'Positive',
+                    rel: 'Neutral'
+                },
+                post: {
+                    actual: 'Meets',
+                    feedback: 'Strong technical execution, but needs to increase executive visibility and cross-departmental communication.',
+                    promises: 'Manager offered to facilitate monthly 1-on-1s with Director and support leadership workshop enrollment.',
+                    takeaway: 'Doing good work isn\'t enough; I need to actively communicate impact across department boundaries.',
+                    emotion: 'Disappointed'
+                }
+            };
+
+            // Load sample event handlers
+            document.querySelectorAll('.load-sample').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tool = e.currentTarget.dataset.tool;
+                    const data = sampleData[tool];
+
+                    if (tool === 'evidence') {
+                        document.getElementById('ev-period').value = data.period;
+                        document.getElementById('ev-projects').value = data.projects;
+                        document.getElementById('ev-results').value = data.results;
+                        document.getElementById('ev-feedback').value = data.feedback;
+                        document.getElementById('ev-challenges').value = data.challenges;
+                        document.getElementById('ev-skills').value = data.skills;
+                    } else if (tool === 'defense') {
+                        document.getElementById('def-criticism').value = data.criticism;
+                        document.querySelector(`input[name="def-fair"][value="${data.fair}"]`).checked = true;
+                        document.getElementById('def-evidence').value = data.evidence;
+                        document.getElementById('def-action').value = data.action;
+                        document.getElementById('def-emotion').value = data.emotion;
+                    } else if (tool === 'goals') {
+                        document.getElementById('goal-mgr').value = data.mgr;
+                        document.getElementById('goal-career').value = data.career;
+                        document.getElementById('goal-resources').value = data.resources;
+                        document.getElementById('goal-obstacles').value = data.obstacles;
+                        document.getElementById('goal-ambition').value = data.ambition;
+                    } else if (tool === 'rating') {
+                        document.getElementById('rate-expected').value = data.expected;
+                        document.getElementById('rate-deserved').value = data.deserved;
+                        document.getElementById('rate-evidence').value = data.evidence;
+                        document.querySelector(`input[name="rate-informal"][value="${data.informal}"]`).checked = true;
+                        document.querySelector(`input[name="rate-rel"][value="${data.rel}"]`).checked = true;
+                    } else if (tool === 'post') {
+                        document.getElementById('post-actual').value = data.actual;
+                        document.getElementById('post-feedback').value = data.feedback;
+                        document.getElementById('post-promises').value = data.promises;
+                        document.getElementById('post-takeaway').value = data.takeaway;
+                        document.getElementById('post-emotion').value = data.emotion;
+                    }
+
+                    showToast('Sample scenario loaded!');
+                });
+            });
+
+
+            // --- LOCAL STORAGE & HISTORY MANAGEMENT ---
+            function saveHistory(toolId, inputSummary, outputData) {
+                const key = `review_history_${toolId}`;
+                let history = [];
+                try {
+                    history = JSON.parse(localStorage.getItem(key)) || [];
+                } catch (e) {
+                    history = [];
+                }
+
+                const newEntry = {
+                    id: Date.now(),
+                    timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                    summary: inputSummary,
+                    data: outputData
+                };
+
+                history.unshift(newEntry);
+                if (history.length > 30) history = history.slice(0, 30); // Max 30 items
+
+                localStorage.setItem(key, JSON.stringify(history));
+                renderHistory(toolId);
+            }
+
+            function getHistory(toolId) {
+                const key = `review_history_${toolId}`;
+                try {
+                    return JSON.parse(localStorage.getItem(key)) || [];
+                } catch (e) {
+                    return [];
+                }
+            }
+
+            function clearHistory(toolId) {
+                const key = `review_history_${toolId}`;
+                localStorage.removeItem(key);
+                renderHistory(toolId);
+                showToast('History cleared.');
+            }
+
+            function renderHistory(toolId) {
+                const container = document.getElementById(`history-${toolId}`);
+                if (!container) return;
+
+                const history = getHistory(toolId);
+
+                if (history.length === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                let html = `
+                    <div class="history-header" onclick="toggleHistoryContent('${toolId}')">
+                        <div class="history-title">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Previous Analysis History (${history.length})
+                        </div>
+                        <i class="fa-solid fa-chevron-down" id="history-icon-${toolId}"></i>
+                    </div>
+                    <div class="history-content" id="history-list-${toolId}">
+                        <div style="text-align:right; margin-bottom:10px;">
+                            <button class="btn btn-secondary" style="padding:4px 8px; font-size:12px;" onclick="clearHistory('${toolId}')">Clear History</button>
+                        </div>
+                `;
+
+                history.forEach(item => {
+                    html += `
+                        <div class="history-item" onclick="loadHistoryItem('${toolId}', ${item.id})">
+                            <div>
+                                <div class="history-item-snippet">${escapeHtml(item.summary)}</div>
+                                <div class="history-item-date">${item.timestamp}</div>
+                            </div>
+                            <i class="fa-solid fa-arrow-right" style="color:var(--text-muted); font-size:12px;"></i>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+                container.innerHTML = html;
+            }
+
+            window.toggleHistoryContent = function(toolId) {
+                const content = document.getElementById(`history-list-${toolId}`);
+                const icon = document.getElementById(`history-icon-${toolId}`);
+                if (content.classList.contains('active')) {
+                    content.classList.remove('active');
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    content.classList.add('active');
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            };
+
+            window.clearHistory = clearHistory;
+
+            window.loadHistoryItem = function(toolId, id) {
+                const history = getHistory(toolId);
+                const item = history.find(h => h.id === id);
+                if (!item) return;
+
+                const outputContainer = document.getElementById(`output-${toolId}`);
+                outputContainer.innerHTML = item.data;
+                outputContainer.classList.add('active');
+                outputContainer.scrollIntoView({ behavior: 'smooth' });
+            };
+
+
+            // --- UTILITY FUNCTIONS ---
+            function showToast(message) {
+                const toast = document.getElementById('toast');
+                const toastMsg = document.getElementById('toast-message');
+                toastMsg.innerText = message;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            }
+
+            window.copyToClipboard = function(elementId) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                const text = element.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('Copied to clipboard!');
+                }).catch(() => {
+                    showToast('Failed to copy.');
+                });
+            };
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return str.replace(/&/g, "&amp;")
+                          .replace(/</g, "&lt;")
+                          .replace(/>/g, "&gt;")
+                          .replace(/"/g, "&quot;")
+                          .replace(/'/g, "&#039;");
+            }
+
+
+            // --- ANALYSIS TEMPLATE ENGINES ---
+
+            // Tool 1: Evidence Collector Logic
+            document.getElementById('form-evidence').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const period = document.getElementById('ev-period').value;
+                const projects = document.getElementById('ev-projects').value || 'Key operational projects';
+                const results = document.getElementById('ev-results').value || 'Maintained steady high performance output';
+                const feedback = document.getElementById('ev-feedback').value || 'Positive operational momentum noted by colleagues';
+                const challenges = document.getElementById('ev-challenges').value || 'Navigated standard resource and timeline constraints';
+                const skills = document.getElementById('ev-skills').value || 'Refined core domain competencies';
+
+                const html = `
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-file-lines"></i> The Brag Document</span>
+                            <button class="btn btn-copy" onclick="copyToClipboard('script-brag')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="output-card-content" id="script-brag">
+<strong>Performance Record (${escapeHtml(period)})</strong>
+
+• <strong>Core Deliverables:</strong> ${escapeHtml(projects)}
+• <strong>Quantifiable Impact:</strong> ${escapeHtml(results)}
+• <strong>Stakeholder Feedback:</strong> ${escapeHtml(feedback)}
+• <strong>Problem Solving & Resilience:</strong> ${escapeHtml(challenges)}
+• <strong>Skill Acquisition & Growth:</strong> ${escapeHtml(skills)}
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-arrow-trend-up"></i> The Impact Translation</span>
+                        </div>
+                        <div class="output-card-content">
+To elevate these points for executive review, frame activities as strategic business outcomes:
+• <em>Task Execution</em> → <strong>Business Velocity:</strong> Frameworks applied in "${escapeHtml(projects)}" ensured predictable delivery schedules.
+• <em>Daily Labor</em> → <strong>Bottom-Line Value:</strong> Output directly generated output efficiency: "${escapeHtml(results)}".
+• <em>Overcoming Friction</em> → <strong>Risk Mitigation:</strong> Successfully mitigated operational risk under adverse conditions: "${escapeHtml(challenges)}".
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-star"></i> The STAR Stories (Situation-Task-Action-Result)</span>
+                        </div>
+                        <div class="output-card-content">
+<strong>Story 1: Key Initiative</strong>
+• <strong>Situation/Task:</strong> Execution required for project milestones during ${escapeHtml(period)}.
+• <strong>Action:</strong> Led execution focused on: ${escapeHtml(projects)}.
+• <strong>Result:</strong> Delivered concrete outcome: ${escapeHtml(results)}.
+
+<strong>Story 2: Overcoming Adversity</strong>
+• <strong>Situation/Task:</strong> Unanticipated barrier emerged: ${escapeHtml(challenges)}.
+• <strong>Action:</strong> Implemented solution leveraging development in: ${escapeHtml(skills)}.
+• <strong>Result:</strong> Preserved performance standards and earned recognition: ${escapeHtml(feedback)}.
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-magnifying-glass"></i> The Gap Filler</span>
+                        </div>
+                        <div class="output-card-content">
+• <strong>Missing Data Audit:</strong> If exact percentage or dollar metrics are missing for "${escapeHtml(results)}", estimate capacity saved (e.g., "Saved ~2-3 hours/week across the team").
+• <strong>Qualitative Approximation:</strong> Convert verbal praise ("${escapeHtml(feedback)}") into documented trust by referencing team dependency during critical phases.
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-regular fa-paper-plane"></i> The Preview Email</span>
+                            <button class="btn btn-copy" onclick="copyToClipboard('script-ev-email')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="output-card-content">
+                            <div class="script-box" id="script-ev-email">
+Subject: Pre-Meeting Summary & Review Highlights - [Your Name]
+
+Hi [Manager Name],
+
+Ahead of our upcoming performance review conversation, I've compiled a brief summary of my key contributions and impact over the ${escapeHtml(period)} for your convenience:
+
+1. Major Deliverables: ${escapeHtml(projects)}
+2. Key Measurable Outcomes: ${escapeHtml(results)}
+3. Capability & Growth Highlights: ${escapeHtml(skills)}
+
+I look forward to discussing how we can build on these results in the upcoming cycle.
+
+Best regards,
+[Your Name]
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const outputContainer = document.getElementById('output-evidence');
+                outputContainer.innerHTML = html;
+                outputContainer.classList.add('active');
+                outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+                saveHistory('evidence', `Evidence: ${projects.substring(0, 30)}...`, html);
+            });
+
+
+            // Tool 2: Defense Prep Logic
+            document.getElementById('form-defense').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const criticism = document.getElementById('def-criticism').value || 'Unspecified area of critique';
+                const fair = document.querySelector('input[name="def-fair"]:checked').value;
+                const evidence = document.getElementById('def-evidence').value || 'Relevant contextual factors existed';
+                const action = document.getElementById('def-action').value || 'Active monitoring and proactive adjustments';
+                const emotion = document.getElementById('def-emotion').value;
+
+                let strategyText = "";
+                if (fair === 'Yes') {
+                    strategyText = "<strong>Ownership Strategy:</strong> Validate the feedback immediately without excuses. Shift 80% of conversation time to your proactive corrective actions.";
+                } else if (fair === 'No') {
+                    strategyText = "<strong>Objective Pushback Strategy:</strong> Remain neutral. Do not argue feelings; present third-party data and timeline logs calmly.";
+                } else {
+                    strategyText = "<strong>Bifurcation Strategy:</strong> Separate valid operational insights from external variables outside your direct control.";
+                }
+
+                let emotionalTip = "";
+                switch(emotion) {
+                    case 'Shame': emotionalTip = "<strong>Managing Shame:</strong> Separate your self-worth from tactical performance. A feedback point is an operational variable, not a personal verdict."; break;
+                    case 'Anger': emotionalTip = "<strong>Managing Anger:</strong> Lower your speech volume by 10% and slow your cadence. Pause 2 full seconds before answering any point."; break;
+                    case 'Fear': emotionalTip = "<strong>Managing Fear:</strong> Keep both feet flat on the floor (grounding). Remember: feedback is a negotiation, not an interrogation."; break;
+                    case 'Acceptance': emotionalTip = "<strong>Leveraging Acceptance:</strong> Channel calm energy into collaborative problem solving."; break;
+                    default: emotionalTip = "<strong>Managing Confusion:</strong> Use targeted inquiry questions rather than defensive statements.";
+                }
+
+                const html = `
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-compass"></i> The Response Framework (Acknowledge-Context-Action-Future)</span>
+                        </div>
+                        <div class="output-card-content">
+• <strong>1. Acknowledge:</strong> Hear the core concern without immediate refutation.
+• <strong>2. Context:</strong> Introduce key factors objectively: "${escapeHtml(evidence)}".
+• <strong>3. Action:</strong> Detail solutions already deployed: "${escapeHtml(action)}".
+• <strong>4. Future:</strong> Reiterate long-term performance alignment.
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-comment-dots"></i> The Verbal Script</span>
+                            <button class="btn btn-copy" onclick="copyToClipboard('script-def-talk')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="output-card-content">
+                            <div class="script-box" id="script-def-talk">
+"I appreciate you bringing up the concern regarding '${escapeHtml(criticism)}'. 
+
+To provide complete visibility: ${escapeHtml(evidence)}. 
+
+Recognizing the impact of this issue, I've taken proactive steps: ${escapeHtml(action)}. Moving forward, I am committed to maintaining this improved standard."
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-scale-balanced"></i> Nuanced Assessment (${fair} Fairness)</span>
+                        </div>
+                        <div class="output-card-content">
+${strategyText}
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-heart-pulse"></i> Emotional Regulation & In-Room Grounding</span>
+                        </div>
+                        <div class="output-card-content">
+${emotionalTip}
+
+• <strong>Box Breathing Technique:</strong> Inhale 4s -> Hold 4s -> Exhale 4s -> Hold 4s before entering the room to reset physical nervous system arousal.
+                        </div>
+                    </div>
+                `;
+
+                const outputContainer = document.getElementById('output-defense');
+                outputContainer.innerHTML = html;
+                outputContainer.classList.add('active');
+                outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+                saveHistory('defense', `Defense: ${criticism.substring(0, 30)}...`, html);
+            });
+
+
+            // Tool 3: Goal Negotiator Logic
+            document.getElementById('form-goals').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const mgrGoals = document.getElementById('goal-mgr').value || 'Standard team targets';
+                const career = document.getElementById('goal-career').value || 'General skill advancement';
+                const resources = document.getElementById('goal-resources').value || 'Adequate time and baseline tool access';
+                const obstacles = document.getElementById('goal-obstacles').value || 'Standard operational capacity constraints';
+                const ambition = document.getElementById('goal-ambition').value;
+
+                const html = `
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-handshake"></i> The Alignment Script</span>
+                            <button class="btn btn-copy" onclick="copyToClipboard('script-goal-align')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="output-card-content">
+                            <div class="script-box" id="script-goal-align">
+"I'm fully aligned with your vision regarding '${escapeHtml(mgrGoals)}'. To ensure maximum success and support my growth in '${escapeHtml(career)}', I want to make sure we set up the right framework for the coming cycle."
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-triangle-exclamation"></i> The Objective Reality Check</span>
+                        </div>
+                        <div class="output-card-content">
+Framing potential roadblocks constructively:
+• <strong>Identified Risk:</strong> ${escapeHtml(obstacles)}
+• <strong>Framing Approach:</strong> "To ensure predictable execution against these goals, we should account for ${escapeHtml(obstacles)} early so it doesn't create bottlenecks."
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-cubes"></i> The Resource Request Language</span>
+                            <button class="btn btn-copy" onclick="copyToClipboard('script-goal-res')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="output-card-content">
+                            <div class="script-box" id="script-goal-res">
+"To hit these aggressive targets reliably, securing the right support will be crucial. Specifically: ${escapeHtml(resources)}. With these in place, I am confident we can meet our primary objectives."
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-code-fork"></i> The Counter-Proposal Structure (${ambition} Target Profile)</span>
+                        </div>
+                        <div class="output-card-content">
+• <strong>Target Level:</strong> ${ambition} pacing recommended.
+• <strong>Alternative Metric Pitch:</strong> "If resources remain fixed, let's establish a tiered goal structure: Target A (Baseline) and Target B (Stretch Goal)."
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-envelope"></i> Post-Meeting Written Confirmation Template</span>
+                            <button class="btn btn-copy" onclick="copyToClipboard('script-goal-confirm')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="output-card-content">
+                            <div class="script-box" id="script-goal-confirm">
+Subject: Summary of Agreed Objectives & Key Goals - [Your Name]
+
+Hi [Manager Name],
+
+Thank you for discussing my goals for the upcoming period. As agreed:
+
+• Primary Objectives: ${escapeHtml(mgrGoals)}
+• Key Support/Resources Identified: ${escapeHtml(resources)}
+• Agreed Next Steps / Checkpoints: Monthly progress review on 1st of each month.
+
+Best,
+[Your Name]
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const outputContainer = document.getElementById('output-goals');
+                outputContainer.innerHTML = html;
+                outputContainer.classList.add('active');
+                outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+                saveHistory('goals', `Goals: ${mgrGoals.substring(0, 30)}...`, html);
+            });
+
+
+            // Tool 4: Rating Conversation Logic
+            document.getElementById('form-rating').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const expected = document.getElementById('rate-expected').value;
+                const deserved = document.getElementById('rate-deserved').value;
+                const evidence = document.getElementById('rate-evidence').value || 'Demonstrated consistent high-value output';
+                const informal = document.querySelector('input[name="rate-informal"]:checked').value;
+                const rel = document.querySelector('input[name="rate-rel"]:checked').value;
+
+                const html = `
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-gavel"></i> The Case for [${deserved}] Rating</span>
+                            <button class="btn btn-copy" onclick="copyToClipboard('script-rate-case')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="output-card-content">
+                            <div class="script-box" id="script-rate-case">
+"Based on my performance evaluation and outcomes over this cycle, I believe my contributions map to an '${escapeHtml(deserved)}' rating. Key outcomes include: ${escapeHtml(evidence)}. Furthermore, ongoing feedback throughout the period was consistently ${escapeHtml(informal.toLowerCase())}."
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-stopwatch"></i> Tactical Timing</span>
+                        </div>
+                        <div class="output-card-content">
+• <strong>Optimal Window:</strong> Raise your self-assessment evidence <em>before</em> ratings are locked in HR calibration systems.
+• <strong>During Review Meeting:</strong> If a lower rating is presented, listen fully first, take notes, and request a follow-up discussion in 24-48 hours to review comparative data.
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-user-check"></i> Tone & Executive Presence</span>
+                        </div>
+                        <div class="output-card-content">
+• Maintain a professional, collaborative demeanor (Relationship Context: ${rel}).
+• Avoid accusatory language ("You gave me..."). Use objective framing ("The data indicates...").
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-route"></i> Path Forward (If Rating is Fixed)</span>
+                            <button class="btn btn-copy" onclick="copyToClipboard('script-rate-fixed')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="output-card-content">
+                            <div class="script-box" id="script-rate-fixed">
+"I understand the final rating stands at '${escapeHtml(expected)}'. My goal is to consistently deliver at an '${escapeHtml(deserved)}' level. Can we define 3 specific, measurable milestones required to guarantee that higher rating in the next cycle?"
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-file-signature"></i> Official Record & Documentation</span>
+                        </div>
+                        <div class="output-card-content">
+• Add a formal, neutral employee comment to the review system focusing strictly on facts, additional metrics, and uncounted contributions.
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-sitemap"></i> Escalation Guidance</span>
+                        </div>
+                        <div class="output-card-content">
+• Involve Skip-Level leadership or HR <em>only</em> if there is a clear breach of objective metrics, documented procedural errors, or systemic policy non-compliance.
+                        </div>
+                    </div>
+                `;
+
+                const outputContainer = document.getElementById('output-rating');
+                outputContainer.innerHTML = html;
+                outputContainer.classList.add('active');
+                outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+                saveHistory('rating', `Rating Case: Deserved ${deserved} vs ${expected}`, html);
+            });
+
+
+            // Tool 5: Post-Review Action Plan Logic
+            document.getElementById('form-post').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const actual = document.getElementById('post-actual').value;
+                const feedback = document.getElementById('post-feedback').value || 'General performance standard maintained';
+                const promises = document.getElementById('post-promises').value || 'Standard ongoing 1-on-1 support';
+                const takeaway = document.getElementById('post-takeaway').value || 'Maintain focus on key departmental priorities';
+                const emotion = document.getElementById('post-emotion').value;
+
+                const html = `
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-calendar-days"></i> Immediate 30-Day Action Plan</span>
+                        </div>
+                        <div class="output-card-content">
+• <strong>Days 1-10:</strong> Synthesize review notes; send formal follow-up email confirming points.
+• <strong>Days 11-20:</strong> Build tactical tracker addressing core feedback: "${escapeHtml(feedback)}".
+• <strong>Days 21-30:</strong> Schedule 30-day progress check with manager to demonstrate proactive momentum.
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-regular fa-paper-plane"></i> Follow-Up Email Template</span>
+                            <button class="btn btn-copy" onclick="copyToClipboard('script-post-email')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="output-card-content">
+                            <div class="script-box" id="script-post-email">
+Subject: Thank You & Post-Review Summary - [Your Name]
+
+Hi [Manager Name],
+
+Thank you for our review discussion. I appreciate the feedback regarding: ${escapeHtml(feedback)}.
+
+I also noted our agreed commitments moving forward: ${escapeHtml(promises)}. 
+
+I'm focused on applying these insights right away and look forward to our next regular checkpoint.
+
+Best regards,
+[Your Name]
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-bullhorn"></i> Promises Checkpoint Schedule</span>
+                        </div>
+                        <div class="output-card-content">
+• Calendar recurring quarterly calendar holds to track commitments made by management: "${escapeHtml(promises)}".
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-brain"></i> Emotional Processing (${emotion})</span>
+                        </div>
+                        <div class="output-card-content">
+• <strong>Current Mindset:</strong> Processing ${emotion}.
+• <strong>Constructive Reframe:</strong> "${escapeHtml(takeaway)}". Allow 24 hours before making long-term career decisions. Focus strictly on controllable tactical outputs.
+                        </div>
+                    </div>
+
+                    <div class="output-card">
+                        <div class="output-card-header">
+                            <span class="output-card-title"><i class="fa-solid fa-compass-drafting"></i> Strategic Career Assessment</span>
+                        </div>
+                        <div class="output-card-content">
+• <strong>Stay & Grow vs. Prepare Exit:</strong> If rating and feedback are supported by development resources, focus on internal growth. If commitments (${escapeHtml(promises)}) go unfulfilled over two consecutive cycles, begin discrete market benchmarking.
+                        </div>
+                    </div>
+                `;
+
+                const outputContainer = document.getElementById('output-post');
+                outputContainer.innerHTML = html;
+                outputContainer.classList.add('active');
+                outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+                saveHistory('post', `Post-Plan: Rating ${actual} - ${emotion}`, html);
+            });
+
+        });
+    </script>
+</body>
+</html>

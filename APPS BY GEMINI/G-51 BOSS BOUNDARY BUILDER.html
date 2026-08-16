@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BossBoundaryBuilder</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* RESET & CORE STYLES */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #F1FAEE 0%, #FFF8E7 100%);
+      color: #2B2D42;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* LAYOUT STRUCTURE */
+    .app-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* SIDEBAR STYLES */
+    .sidebar {
+      width: 260px;
+      background-color: #FFFFFF;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-header {
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #EAEAEA;
+    }
+    .sidebar-header i {
+      font-size: 24px;
+      color: #F4A261;
+    }
+    .sidebar-header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1D3557;
+      line-height: 1.2;
+    }
+    .nav-list {
+      list-style: none;
+      padding: 16px 0;
+    }
+    .nav-item button {
+      width: 100%;
+      padding: 14px 24px;
+      border: none;
+      background: none;
+      text-align: left;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: #4A5568;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-left: 4px solid transparent;
+    }
+    .nav-item button:hover {
+      background-color: #F8F9FA;
+      color: #1D3557;
+    }
+    .nav-item button.active {
+      background-color: #EBF3FA;
+      color: #1D3557;
+      font-weight: 600;
+      border-left-color: #1D3557;
+    }
+    .nav-item button i {
+      width: 20px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    /* MOBILE HEADER */
+    .mobile-header {
+      display: none;
+      background-color: #1D3557;
+      color: #FFFFFF;
+      padding: 16px 20px;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+    .mobile-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .mobile-header button {
+      background: none;
+      border: none;
+      color: #FFFFFF;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    /* MAIN CONTENT AREA */
+    .main-wrapper {
+      flex: 1;
+      margin-left: 260px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+    .main-content {
+      max-width: 850px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 24px;
+      flex: 1;
+    }
+
+    /* CARDS & UI COMPONENTS */
+    .card {
+      background: #FFFFFF;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1D3557;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-subtitle {
+      font-size: 14px;
+      color: #6C757D;
+      margin-bottom: 24px;
+    }
+
+    /* FORMS & INPUTS */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1D3557;
+      margin-bottom: 8px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #DDE2E5;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      color: #2B2D42;
+      background-color: #FAFAFA;
+      transition: all 0.2s ease;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #1D3557;
+      background-color: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(29, 53, 87, 0.1);
+    }
+    textarea.form-control {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .radio-group, .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .radio-label, .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      background: #FAFAFA;
+      padding: 10px 16px;
+      border: 1px solid #DDE2E5;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+    .radio-label:hover, .checkbox-label:hover {
+      background: #F0F4F8;
+    }
+    .radio-label input, .checkbox-label input {
+      accent-color: #1D3557;
+    }
+
+    /* BUTTONS */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      transition: all 0.2s ease;
+    }
+    .btn-primary {
+      background-color: #1D3557;
+      color: #FFFFFF;
+    }
+    .btn-primary:hover {
+      background-color: #14243B;
+    }
+    .btn-secondary {
+      background-color: #F4A261;
+      color: #FFFFFF;
+    }
+    .btn-secondary:hover {
+      background-color: #E76F51;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #DDE2E5;
+      color: #4A5568;
+    }
+    .btn-outline:hover {
+      background: #F8F9FA;
+      color: #1D3557;
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    /* OUTPUT COMPONENTS & RESULTS */
+    .results-container {
+      margin-top: 32px;
+      display: none;
+    }
+    .results-container.active {
+      display: block;
+    }
+    .output-section {
+      background: #F8F9FA;
+      border-left: 4px solid #1D3557;
+      border-radius: 0 8px 8px 0;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .output-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1D3557;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .output-content {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+      white-space: pre-wrap;
+    }
+
+    /* STATUS BADGES */
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    .badge-green { background-color: #E6F4EA; color: #137333; }
+    .badge-yellow { background-color: #FEF7E0; color: #B06000; }
+    .badge-red { background-color: #FCE8E6; color: #C5221F; }
+
+    /* DASHBOARD GRID */
+    .dash-hero {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px 0;
+    }
+    .dash-hero h2 {
+      font-size: 32px;
+      color: #1D3557;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .dash-hero p {
+      font-size: 16px;
+      color: #6C757D;
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .tool-card {
+      background: #FFFFFF;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      border: 1px solid #EAEAEA;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .tool-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      border-color: #1D3557;
+    }
+    .tool-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #EBF3FA;
+      color: #1D3557;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+    .tool-card h3 {
+      font-size: 16px;
+      color: #1D3557;
+      margin-bottom: 8px;
+    }
+    .tool-card p {
+      font-size: 13px;
+      color: #6C757D;
+      line-height: 1.5;
+    }
+
+    /* HISTORY ACCORDION */
+    .history-section {
+      margin-top: 40px;
+      border-top: 1px solid #EAEAEA;
+      padding-top: 24px;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+    .history-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1D3557;
+    }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .history-item {
+      background: #FAFAFA;
+      border: 1px solid #EAEAEA;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+    }
+    .history-item-header {
+      display: flex;
+      justify-content: space-between;
+      color: #6C757D;
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+
+    /* FOOTER */
+    footer {
+      background-color: #1D3557;
+      color: #A0AEC0;
+      text-align: center;
+      padding: 20px 24px;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: auto;
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1D3557;
+      color: #FFF;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      z-index: 200;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE MEDIA QUERIES */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .mobile-header {
+        display: flex;
+      }
+      .main-wrapper {
+        margin-left: 0;
+      }
+      .main-content {
+        padding: 20px 16px;
+      }
+      .card {
+        padding: 20px;
+      }
+      .overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 95;
+      }
+      .overlay.active {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MOBILE OVERLAY -->
+  <div class="overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- MOBILE HEADER -->
+  <div class="mobile-header">
+    <h1>BossBoundaryBuilder</h1>
+    <button onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+  </div>
+
+  <div class="app-container">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-shield-halved"></i>
+        <h1>BossBoundary<br>Builder</h1>
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <button class="active" onclick="switchTool('dashboard')">
+            <i class="fa-solid fa-chart-pie"></i> Dashboard
+          </button>
+        </li>
+        <li class="nav-item">
+          <button onclick="switchTool('assessment')">
+            <i class="fa-solid fa-compass"></i> The Assessment
+          </button>
+        </li>
+        <li class="nav-item">
+          <button onclick="switchTool('profNo')">
+            <i class="fa-solid fa-comment-slash"></i> The Professional No
+          </button>
+        </li>
+        <li class="nav-item">
+          <button onclick="switchTool('afterHours')">
+            <i class="fa-solid fa-moon"></i> After-Hours Defender
+          </button>
+        </li>
+        <li class="nav-item">
+          <button onclick="switchTool('scope')">
+            <i class="fa-solid fa-layer-group"></i> Scope Protector
+          </button>
+        </li>
+        <li class="nav-item">
+          <button onclick="switchTool('exit')">
+            <i class="fa-solid fa-door-open"></i> The Exit Plan
+          </button>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-wrapper">
+      <main class="main-content">
+
+        <!-- TOOL: DASHBOARD -->
+        <section id="tool-dashboard" class="tool-view">
+          <div class="dash-hero">
+            <h2>Boss Boundary Builder</h2>
+            <p>Push back without pushing your luck.</p>
+          </div>
+          <div class="tools-grid">
+            <div class="tool-card" onclick="switchTool('assessment')">
+              <div class="tool-icon"><i class="fa-solid fa-compass"></i></div>
+              <h3>1. The Assessment</h3>
+              <p>Evaluate your boss's reaction profile, leverage, and timing readiness before taking action.</p>
+            </div>
+            <div class="tool-card" onclick="switchTool('profNo')">
+              <div class="tool-icon"><i class="fa-solid fa-comment-slash"></i></div>
+              <h3>2. The Professional No</h3>
+              <p>Refuse unreasonable assignments gracefully through trade-off prioritization.</p>
+            </div>
+            <div class="tool-card" onclick="switchTool('afterHours')">
+              <div class="tool-icon"><i class="fa-solid fa-moon"></i></div>
+              <h3>3. After-Hours Defender</h3>
+              <p>Reclaim evenings and weekends with tactical communication scripts and filters.</p>
+            </div>
+            <div class="tool-card" onclick="switchTool('scope')">
+              <div class="tool-icon"><i class="fa-solid fa-layer-group"></i></div>
+              <h3>4. Scope Protector</h3>
+              <p>Halt gradual workload expansion and link core deliverables back to compensation.</p>
+            </div>
+            <div class="tool-card" onclick="switchTool('exit')">
+              <div class="tool-icon"><i class="fa-solid fa-door-open"></i></div>
+              <h3>5. The Exit Plan</h3>
+              <p>Assess boundary breakdown signals and structure a quiet, strategically timed departure.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 1: THE ASSESSMENT -->
+        <section id="tool-assessment" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-compass"></i> Tool 1: The Assessment</div>
+            <div class="card-subtitle">Evaluate boss responsiveness, personal leverage, and pushback risk.</div>
+            
+            <form id="form-assessment">
+              <div class="form-group">
+                <label class="form-label">How does your boss react to pushback?</label>
+                <select class="form-control" id="assess-react">
+                  <option value="Listens and adjusts">Listens and adjusts</option>
+                  <option value="Tolerates it">Tolerates it</option>
+                  <option value="Gets defensive">Gets defensive</option>
+                  <option value="Punishes it">Punishes it</option>
+                  <option value="Never seen it">Never seen it</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Your boss's management style:</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="assess-style" value="Data-driven" checked> Data-driven</label>
+                  <label class="radio-label"><input type="radio" name="assess-style" value="Relationship-driven"> Relationship-driven</label>
+                  <label class="radio-label"><input type="radio" name="assess-style" value="Authority-driven"> Authority-driven</label>
+                  <label class="radio-label"><input type="radio" name="assess-style" value="Chaotic"> Chaotic</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">How long have you worked together?</label>
+                <select class="form-control" id="assess-tenure">
+                  <option value="<3mo">&lt; 3 months</option>
+                  <option value="3-6mo">3 - 6 months</option>
+                  <option value="6mo-1yr">6 months - 1 year</option>
+                  <option value="1yr+">1 year +</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Your recent performance:</label>
+                <select class="form-control" id="assess-perf">
+                  <option value="Exceeding">Exceeding Expectations</option>
+                  <option value="Meeting">Meeting Expectations</option>
+                  <option value="Mixed">Mixed Performance</option>
+                  <option value="Struggling">Struggling</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Your relationship strength:</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="assess-rel" value="Strong" checked> Strong</label>
+                  <label class="radio-label"><input type="radio" name="assess-rel" value="Neutral"> Neutral</label>
+                  <label class="radio-label"><input type="radio" name="assess-rel" value="Strained"> Strained</label>
+                  <label class="radio-label"><input type="radio" name="assess-rel" value="Fear-based"> Fear-based</label>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="runAssessment()"><i class="fa-solid fa-calculator"></i> Analyze Readiness</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleAssessment()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="results-assessment" class="results-container">
+            <div class="card">
+              <div class="card-title">Assessment Results</div>
+              <div class="output-section">
+                <div class="output-title">Pushback Readiness</div>
+                <div class="output-content" id="out-assess-readiness"></div>
+              </div>
+              <div class="output-section">
+                <div class="output-title">The Risk Matrix</div>
+                <div class="output-content" id="out-assess-risk"></div>
+              </div>
+              <div class="output-section">
+                <div class="output-title">The Boss Profile</div>
+                <div class="output-content" id="out-assess-profile"></div>
+              </div>
+              <div class="output-section">
+                <div class="output-title">Your Leverage</div>
+                <div class="output-content" id="out-assess-leverage"></div>
+              </div>
+              <div class="output-section">
+                <div class="output-title">The Timing</div>
+                <div class="output-content" id="out-assess-timing"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="history-section">
+            <div class="history-header" onclick="toggleHistory('assessment')">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Saved Assessments History</span>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('assessment');">Clear History</button>
+            </div>
+            <div id="history-assessment" class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 2: THE PROFESSIONAL NO -->
+        <section id="tool-profNo" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-comment-slash"></i> Tool 2: The Professional No</div>
+            <div class="card-subtitle">Say no to impossible asks without triggering professional backlash.</div>
+            
+            <form id="form-profNo">
+              <div class="form-group">
+                <label class="form-label">What were you asked to do?</label>
+                <textarea class="form-control" id="no-task" placeholder="e.g. Lead the Q3 migration project while managing daily ops..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Why is it a problem?</label>
+                <select class="form-control" id="no-reason">
+                  <option value="Too much work">Too much work</option>
+                  <option value="Not my role">Not my role</option>
+                  <option value="Unrealistic deadline">Unrealistic deadline</option>
+                  <option value="No resources">No resources</option>
+                  <option value="Ethical concern">Ethical concern</option>
+                  <option value="Already tried and failed">Already tried and failed</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">The deadline:</label>
+                <input type="text" class="form-control" id="no-deadline" placeholder="e.g. This Friday by 5 PM">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">What else is on your plate?</label>
+                <textarea class="form-control" id="no-plate" placeholder="e.g. Managing 3 active client campaigns, client onboarding..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Your goal:</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="no-goal" value="Get deadline moved" checked> Get deadline moved</label>
+                  <label class="radio-label"><input type="radio" name="no-goal" value="Get help"> Get help / resources</label>
+                  <label class="radio-label"><input type="radio" name="no-goal" value="Get it removed"> Get it removed</label>
+                  <label class="radio-label"><input type="radio" name="no-goal" value="Get clarity"> Get clarity</label>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="runProfNo()"><i class="fa-solid fa-pen-nib"></i> Generate Strategy</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleProfNo()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="results-profNo" class="results-container">
+            <div class="card">
+              <div class="card-title">Strategy & Script</div>
+              
+              <div class="output-section">
+                <div class="output-title">The Reframe</div>
+                <div class="output-content" id="out-no-reframe"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">
+                  <span>The Script</span>
+                  <button class="btn btn-outline btn-sm" onclick="copyToClipboard('out-no-script')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+                <div class="output-content" id="out-no-script"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">The Trade-Off Table</div>
+                <div class="output-content" id="out-no-tradeoff"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">If They Insist</div>
+                <div class="output-content" id="out-no-insist"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">If They Get Angry</div>
+                <div class="output-content" id="out-no-angry"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">
+                  <span>The Follow-Up Email</span>
+                  <button class="btn btn-outline btn-sm" onclick="copyToClipboard('out-no-email')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+                <div class="output-content" id="out-no-email"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="history-section">
+            <div class="history-header" onclick="toggleHistory('profNo')">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Saved Professional No History</span>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('profNo');">Clear History</button>
+            </div>
+            <div id="history-profNo" class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 3: AFTER-HOURS DEFENDER -->
+        <section id="tool-afterHours" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-moon"></i> Tool 3: After-Hours Defender</div>
+            <div class="card-subtitle">Establish firm digital boundaries around personal time.</div>
+            
+            <form id="form-afterHours">
+              <div class="form-group">
+                <label class="form-label">When do they contact you?</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-label"><input type="checkbox" name="ah-when" value="Before 8am"> Before 8am</label>
+                  <label class="checkbox-label"><input type="checkbox" name="ah-when" value="After 6pm"> After 6pm</label>
+                  <label class="checkbox-label"><input type="checkbox" name="ah-when" value="Weekends"> Weekends</label>
+                  <label class="checkbox-label"><input type="checkbox" name="ah-when" value="Holidays"> Holidays</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">How do they contact you?</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-label"><input type="checkbox" name="ah-how" value="Email"> Email</label>
+                  <label class="checkbox-label"><input type="checkbox" name="ah-how" value="Text"> Text</label>
+                  <label class="checkbox-label"><input type="checkbox" name="ah-how" value="Call"> Call</label>
+                  <label class="checkbox-label"><input type="checkbox" name="ah-how" value="Chat app"> Chat app (Slack/Teams)</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Do they say it's urgent?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="ah-urgent" value="Always"> Always</label>
+                  <label class="radio-label"><input type="radio" name="ah-urgent" value="Sometimes" checked> Sometimes</label>
+                  <label class="radio-label"><input type="radio" name="ah-urgent" value="Rarely"> Rarely</label>
+                  <label class="radio-label"><input type="radio" name="ah-urgent" value="Never, just expects fast response"> Never, just expects fast response</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Have you set any after-hours boundaries?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="ah-prior" value="Yes"> Yes</label>
+                  <label class="radio-label"><input type="radio" name="ah-prior" value="Vaguely"> Vaguely</label>
+                  <label class="radio-label"><input type="radio" name="ah-prior" value="No" checked> No</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Your personal obligations:</label>
+                <select class="form-control" id="ah-obligations">
+                  <option value="Family">Family / Children</option>
+                  <option value="Caregiving">Elderly / Medical Caregiving</option>
+                  <option value="Health needs">Health / Wellness needs</option>
+                  <option value="Second job">Second job / Studies</option>
+                  <option value="Just need rest">Personal recovery / Need rest</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="runAfterHours()"><i class="fa-solid fa-shield-halved"></i> Build Boundary Plan</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleAfterHours()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="results-afterHours" class="results-container">
+            <div class="card">
+              <div class="card-title">Boundary Defense Protocol</div>
+
+              <div class="output-section">
+                <div class="output-title">
+                  <span>The Boundary Statement</span>
+                  <button class="btn btn-outline btn-sm" onclick="copyToClipboard('out-ah-statement')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+                <div class="output-content" id="out-ah-statement"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">The Expectation Reset</div>
+                <div class="output-content" id="out-ah-reset"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">The Urgency Filter</div>
+                <div class="output-content" id="out-ah-filter"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">
+                  <span>The Auto-Response Template</span>
+                  <button class="btn btn-outline btn-sm" onclick="copyToClipboard('out-ah-autoreply')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+                <div class="output-content" id="out-ah-autoreply"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">If They Violate It (Escalation)</div>
+                <div class="output-content" id="out-ah-escalation"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="history-section">
+            <div class="history-header" onclick="toggleHistory('afterHours')">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Saved After-Hours History</span>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('afterHours');">Clear History</button>
+            </div>
+            <div id="history-afterHours" class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 4: SCOPE PROTECTOR -->
+        <section id="tool-scope" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-layer-group"></i> Tool 4: Scope Protector</div>
+            <div class="card-subtitle">Identify scope creep and renegotiate workload or compensation.</div>
+            
+            <form id="form-scope">
+              <div class="form-group">
+                <label class="form-label">Your original job description / core role:</label>
+                <textarea class="form-control" id="scope-orig" placeholder="e.g. Marketing Coordinator: Campaign scheduling, copywriting..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">What has been added?</label>
+                <textarea class="form-control" id="scope-added" placeholder="e.g. Social media community management, event execution, weekly executive analytics..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Over what time period?</label>
+                <select class="form-control" id="scope-period">
+                  <option value="<1mo">&lt; 1 month</option>
+                  <option value="1-3mo">1 - 3 months</option>
+                  <option value="3-6mo">3 - 6 months</option>
+                  <option value="6mo+">6 months +</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Has your title or pay changed?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="scope-pay" value="Yes"> Yes</label>
+                  <label class="radio-label"><input type="radio" name="scope-pay" value="No" checked> No</label>
+                  <label class="radio-label"><input type="radio" name="scope-pay" value="Promised but not delivered"> Promised but not delivered</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">How is this affecting your core work?</label>
+                <textarea class="form-control" id="scope-impact" placeholder="e.g. Core marketing campaigns are running behind schedule, quality is dropping..."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="runScope()"><i class="fa-solid fa-arrows-split-up-and-left"></i> Analyze Scope Creep</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleScope()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="results-scope" class="results-container">
+            <div class="card">
+              <div class="card-title">Scope Realignment Plan</div>
+
+              <div class="output-section">
+                <div class="output-title">The Scope Comparison</div>
+                <div class="output-content" id="out-scope-comp"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">
+                  <span>The Conversation Script</span>
+                  <button class="btn btn-outline btn-sm" onclick="copyToClipboard('out-scope-script')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+                <div class="output-content" id="out-scope-script"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">The Compensation Angle</div>
+                <div class="output-content" id="out-scope-comp-angle"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">The Prioritization Frame</div>
+                <div class="output-content" id="out-scope-prio"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">If Ignored (Documentation Strategy)</div>
+                <div class="output-content" id="out-scope-ignored"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="history-section">
+            <div class="history-header" onclick="toggleHistory('scope')">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Saved Scope History</span>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('scope');">Clear History</button>
+            </div>
+            <div id="history-scope" class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 5: THE EXIT PLAN -->
+        <section id="tool-exit" class="tool-view" style="display:none;">
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-door-open"></i> Tool 5: The Exit Plan</div>
+            <div class="card-subtitle">Evaluate when boundaries have failed and manage a safe exit strategy.</div>
+            
+            <form id="form-exit">
+              <div class="form-group">
+                <label class="form-label">How many boundaries have you tried to set?</label>
+                <select class="form-control" id="exit-count">
+                  <option value="1">1</option>
+                  <option value="2-3">2 - 3</option>
+                  <option value="4+">4 +</option>
+                  <option value="Lost count">Lost count</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">What was the result?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="exit-res" value="Some improvement"> Some improvement</label>
+                  <label class="radio-label"><input type="radio" name="exit-res" value="Temporary improvement"> Temporary improvement</label>
+                  <label class="radio-label"><input type="radio" name="exit-res" value="No change" checked> No change</label>
+                  <label class="radio-label"><input type="radio" name="exit-res" value="Got worse"> Got worse</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Is it affecting your health?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="exit-health" value="Yes significantly"> Yes, significantly</label>
+                  <label class="radio-label"><input type="radio" name="exit-health" value="Somewhat" checked> Somewhat</label>
+                  <label class="radio-label"><input type="radio" name="exit-health" value="No"> No</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Are you still growing professionally?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="exit-growth" value="Yes"> Yes</label>
+                  <label class="radio-label"><input type="radio" name="exit-growth" value="Stalled" checked> Stalled</label>
+                  <label class="radio-label"><input type="radio" name="exit-growth" value="No, I'm shrinking"> No, I'm shrinking</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">How's the rest of the company culture?</label>
+                <select class="form-control" id="exit-culture">
+                  <option value="Great">Great (Manager is an isolated case)</option>
+                  <option value="Mixed">Mixed</option>
+                  <option value="Also toxic">Systemically Toxic</option>
+                  <option value="Not sure">Not sure</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="runExit()"><i class="fa-solid fa-person-walking-arrow-right"></i> Evaluate Exit Path</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleExit()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="results-exit" class="results-container">
+            <div class="card">
+              <div class="card-title">Exit Assessment & Roadmap</div>
+
+              <div class="output-section">
+                <div class="output-title">The Verdict</div>
+                <div class="output-content" id="out-exit-verdict"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">One More Tactic</div>
+                <div class="output-content" id="out-exit-tactic"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">The Transfer Option</div>
+                <div class="output-content" id="out-exit-transfer"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">The Quiet Search</div>
+                <div class="output-content" id="out-exit-search"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">The Financial Cushion</div>
+                <div class="output-content" id="out-exit-cushion"></div>
+              </div>
+
+              <div class="output-section">
+                <div class="output-title">The Timeline</div>
+                <div class="output-content" id="out-exit-timeline"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="history-section">
+            <div class="history-header" onclick="toggleHistory('exit')">
+              <span class="history-title"><i class="fa-solid fa-history"></i> Saved Exit Plans History</span>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('exit');">Clear History</button>
+            </div>
+            <div id="history-exit" class="history-list"></div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- GLOBAL FOOTER -->
+      <footer>
+        For professional communication strategy only. Not legal, HR, or therapeutic advice. For harassment or unsafe working conditions, consult appropriate authorities.
+      </footer>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-check-circle"></i>
+    <span id="toast-message">Copied to clipboard!</span>
+  </div>
+
+  <!-- APPLICATION LOGIC -->
+  <script>
+    /* ==========================================================================
+       NAVIGATION & UI LOGIC
+       ========================================================================== */
+    function switchTool(toolId) {
+      // Update sidebar nav active state
+      const navButtons = document.querySelectorAll('.nav-item button');
+      navButtons.forEach(btn => btn.classList.remove('active'));
+      
+      const targetBtn = Array.from(navButtons).find(btn => btn.getAttribute('onclick').includes(toolId));
+      if (targetBtn) targetBtn.classList.add('active');
+
+      // Hide all view sections, show target
+      const views = document.querySelectorAll('.tool-view');
+      views.forEach(v => v.style.display = 'none');
+      
+      const selectedView = document.getElementById(`tool-${toolId}`);
+      if (selectedView) selectedView.style.display = 'block';
+
+      // Close mobile menu if open
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('mobileOverlay').classList.remove('active');
+
+      // Refresh history for active tool
+      if (toolId !== 'dashboard') {
+        renderHistory(toolId);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('mobileOverlay').classList.toggle('active');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function copyToClipboard(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Copied!");
+      }).catch(err => {
+        showToast("Failed to copy text.");
+      });
+    }
+
+    /* ==========================================================================
+       LOCALSTORAGE HISTORY MANAGEMENT
+       ========================================================================== */
+    function saveHistoryItem(toolId, itemData) {
+      const storageKey = `bossbound_history_${toolId}`;
+      let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      
+      itemData.timestamp = new Date().toLocaleString();
+      history.unshift(itemData); // add to top
+      
+      // Keep max 30 items
+      if (history.length > 30) {
+        history = history.slice(0, 30);
+      }
+      
+      localStorage.setItem(storageKey, JSON.stringify(history));
+      renderHistory(toolId);
+    }
+
+    function renderHistory(toolId) {
+      const storageKey = `bossbound_history_${toolId}`;
+      const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const container = document.getElementById(`history-${toolId}`);
+      
+      if (!container) return;
+      if (history.length === 0) {
+        container.innerHTML = `<div style="font-size:13px; color:#888; font-style:italic;">No saved entries yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = history.map((item, index) => {
+        return `
+          <div class="history-item">
+            <div class="history-item-header">
+              <span>Entry #${history.length - index}</span>
+              <span>${item.timestamp}</span>
+            </div>
+            <div><strong>Summary:</strong> ${item.summary}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function clearHistory(toolId) {
+      const storageKey = `bossbound_history_${toolId}`;
+      localStorage.removeItem(storageKey);
+      renderHistory(toolId);
+      showToast("History cleared.");
+    }
+
+    function toggleHistory(toolId) {
+      const container = document.getElementById(`history-${toolId}`);
+      if (container.style.display === 'none') {
+        container.style.display = 'flex';
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    /* ==========================================================================
+       TOOL 1: THE ASSESSMENT LOGIC
+       ========================================================================== */
+    function loadSampleAssessment() {
+      document.getElementById('assess-react').value = "Gets defensive";
+      const styles = document.getElementsByName('assess-style');
+      styles.forEach(r => r.checked = (r.value === 'Authority-driven'));
+      document.getElementById('assess-tenure').value = "6mo-1yr";
+      document.getElementById('assess-perf').value = "Meeting";
+      const rels = document.getElementsByName('assess-rel');
+      rels.forEach(r => r.checked = (r.value === 'Neutral'));
+    }
+
+    function runAssessment() {
+      const react = document.getElementById('assess-react').value;
+      const style = document.querySelector('input[name="assess-style"]:checked').value;
+      const tenure = document.getElementById('assess-tenure').value;
+      const perf = document.getElementById('assess-perf').value;
+      const rel = document.querySelector('input[name="assess-rel"]:checked').value;
+
+      // Logic calculations
+      let readinessBadge = '';
+      let riskText = '';
+      let profileText = '';
+      let leverageText = '';
+      let timingText = '';
+
+      if (react === 'Punishes it' || rel === 'Fear-based' || perf === 'Struggling') {
+        readinessBadge = '<span class="badge badge-red">RED LIGHT - High Caution Required</span>';
+        riskText = 'High Risk: Direct pushback may lead to formal micro-management, adverse performance marks, or emotional escalation.\nProtection Strategy: Document everything in writing; do not push back verbally without an audit trail.';
+      } else if (react === 'Gets defensive' || rel === 'Strained' || style === 'Authority-driven') {
+        readinessBadge = '<span class="badge badge-yellow">YELLOW LIGHT - Strategic Framing Needed</span>';
+        riskText = 'Moderate Risk: Ego collision or authority challenge. \nProtection Strategy: Reframe all boundaries around shared department goals and operational constraints rather than personal limits.';
+      } else {
+        readinessBadge = '<span class="badge badge-green">GREEN LIGHT - Safe to Proceed</span>';
+        riskText = 'Low Risk: Manager displays functional professional maturity. \nProtection Strategy: Frame boundaries directly, focus on efficiency, and offer alternative solutions.';
+      }
+
+      // Profile logic
+      if (style === 'Data-driven') {
+        profileText = 'Data-Driven Boss: Ignore emotions. Present metrics, capacity models, and trade-off ratios. Show impact on ROI.';
+      } else if (style === 'Relationship-driven') {
+        profileText = 'Relationship-Driven Boss: Frame pushback around team harmony, quality of output, and long-term sustainability.';
+      } else if (style === 'Authority-driven') {
+        profileText = 'Authority-Driven Boss: Always acknowledge their hierarchy first ("You make the final call, but I want to give you visibility on constraints..."). Give options, not refusals.';
+      } else {
+        profileText = 'Chaotic Boss: Create visual clarity for them. Send bulleted priority lists and ask them to select top 2 items.';
+      }
+
+      // Leverage logic
+      let levArr = [];
+      if (perf === 'Exceeding') levArr.push('High performance output grants significant goodwill.');
+      if (tenure === '1yr+') levArr.push('Deep institutional knowledge makes you expensive to replace.');
+      if (rel === 'Strong') levArr.push('Established trust buffer lowers risk of misinterpretation.');
+      if (levArr.length === 0) levArr.push('Standard leverage: Rely strictly on objective workload transparency.');
+      leverageText = levArr.join('\n');
+
+      // Timing
+      timingText = '• Schedule during 1-on-1s, never in team meetings or broad email threads.\n• Raise issues during morning planning sessions, avoiding end-of-day stress spikes.\n• Never push back during an active crisis; wait until post-mortem execution phase.';
+
+      document.getElementById('out-assess-readiness').innerHTML = readinessBadge;
+      document.getElementById('out-assess-risk').innerText = riskText;
+      document.getElementById('out-assess-profile').innerText = profileText;
+      document.getElementById('out-assess-leverage').innerText = leverageText;
+      document.getElementById('out-assess-timing').innerText = timingText;
+
+      document.getElementById('results-assessment').classList.add('active');
+
+      saveHistoryItem('assessment', {
+        summary: `Reaction: ${react} | Style: ${style} | Leverage: ${perf}`
+      });
+    }
+
+    /* ==========================================================================
+       TOOL 2: THE PROFESSIONAL NO LOGIC
+       ========================================================================== */
+    function loadSampleProfNo() {
+      document.getElementById('no-task').value = "Take ownership of the new internal workflow automation initiative due this Friday.";
+      document.getElementById('no-reason').value = "Unrealistic deadline";
+      document.getElementById('no-deadline').value = "This Friday at 5 PM";
+      document.getElementById('no-plate').value = "Currently managing 3 high-priority active client onboarding pipelines and preparing the monthly executive briefing.";
+      const goals = document.getElementsByName('no-goal');
+      goals.forEach(r => r.checked = (r.value === 'Get deadline moved'));
+    }
+
+    function runProfNo() {
+      const task = document.getElementById('no-task').value || "the new assignment";
+      const reason = document.getElementById('no-reason').value;
+      const deadline = document.getElementById('no-deadline').value || "the deadline";
+      const plate = document.getElementById('no-plate').value || "existing core work";
+      const goal = document.querySelector('input[name="no-goal"]:checked').value;
+
+      document.getElementById('out-no-reframe').innerText = 
+        `Position this not as a refusal to work, but as a risk-mitigation strategy for key operational goals. Frame it as ensuring quality output on higher-value priorities (${plate.substring(0, 40)}...).`;
+
+      document.getElementById('out-no-script').innerText = 
+        `"Thanks for bringing me in on '${task}'. I want to make sure this gets executed correctly. Right now, my capacity is dedicated to: ${plate}. \n\nGiven the deadline of ${deadline}, adding this directly will compromise the output on those deliverables. To make room for this, which of the current projects should I pause or reassign?"`;
+
+      document.getElementById('out-no-tradeoff').innerText = 
+        `CURRENT COMMITMENTS | NEW ASK IMPACT\n--------------------------------------------\n1. Active Deliverables (${plate.substring(0, 30)}) -> At risk of delayed timeline\n2. New Task (${task.substring(0, 30)}) -> High error risk if rushed for ${deadline}`;
+
+      document.getElementById('out-no-insist').innerText = 
+        `If they insist 'it all needs to get done':\n"I understand these are all vital. Since hours are fixed, I will execute '${task}' first, but please note that delivery for ${plate.substring(0, 30)} will shift back accordingly. I'll send an updated timeline summary."`;
+
+      document.getElementById('out-no-angry').innerText = 
+        `De-escalation Tactic:\nMaintain a calm, analytical tone. Do not argue. \n"I hear how important this is to you. I want to succeed here too. Let's look at the calendar together so we can figure out what gets primary focus."`;
+
+      document.getElementById('out-no-email').innerText = 
+        `Subject: Priority Alignment & Delivery Timeline - [Your Name]\n\nHi [Manager Name],\n\nFollowing up on our conversation regarding ${task}.\n\nTo ensure we maintain execution quality across key goals, I have updated my delivery plan as discussed:\n\n- Primary Focus: ${task} (Target: ${deadline})\n- Adjusted Focus: ${plate} (Timelines extended accordingly)\n\nPlease let me know if you would prefer a different prioritization order.\n\nBest,\n[Your Name]`;
+
+      document.getElementById('results-profNo').classList.add('active');
+
+      saveHistoryItem('profNo', {
+        summary: `Ask: ${task.substring(0, 30)}... | Goal: ${goal}`
+      });
+    }
+
+    /* ==========================================================================
+       TOOL 3: AFTER-HOURS DEFENDER LOGIC
+       ========================================================================== */
+    function loadSampleAfterHours() {
+      const whens = document.getElementsByName('ah-when');
+      whens.forEach(cb => cb.checked = (cb.value === 'After 6pm' || cb.value === 'Weekends'));
+      
+      const hows = document.getElementsByName('ah-how');
+      hows.forEach(cb => cb.checked = (cb.value === 'Email' || cb.value === 'Text'));
+
+      const urgents = document.getElementsByName('ah-urgent');
+      urgents.forEach(r => r.checked = (r.value === 'Sometimes'));
+
+      const priors = document.getElementsByName('ah-prior');
+      priors.forEach(r => r.checked = (r.value === 'No'));
+
+      document.getElementById('ah-obligations').value = "Just need rest";
+    }
+
+    function runAfterHours() {
+      const selectedWhen = Array.from(document.querySelectorAll('input[name="ah-when"]:checked')).map(c => c.value);
+      const selectedHow = Array.from(document.querySelectorAll('input[name="ah-how"]:checked')).map(c => c.value);
+      const urgent = document.querySelector('input[name="ah-urgent"]:checked').value;
+      const obl = document.getElementById('ah-obligations').value;
+
+      const whenStr = selectedWhen.length ? selectedWhen.join(', ') : 'after-hours';
+      const howStr = selectedHow.length ? selectedHow.join(', ') : 'digital channels';
+
+      document.getElementById('out-ah-statement').innerText = 
+        `"To ensure I stay focused and perform at my best during core hours, I disconnect from ${howStr} during ${whenStr}. If a true operational emergency arises, please call my mobile directly."`;
+
+      document.getElementById('out-ah-reset').innerText = 
+        `Set clear expectations in your email signature and Slack/Teams status:\n"Core Working Hours: 8:30 AM - 5:30 PM. Communications received outside these hours will be reviewed next business morning."`;
+
+      document.getElementById('out-ah-filter').innerText = 
+        `Is it truly urgent?\n1. Will operations halt within 4 hours if unaddressed?\n2. Does it involve a critical system outage or key client emergency?\n3. Is it merely a thought or request the sender wants off their mind?\n-> If NO to #1 and #2, process it during core hours.`;
+
+      document.getElementById('out-ah-autoreply').innerText = 
+        `"Thanks for reaching out. I am currently offline and focused on personal/family commitments. I will review and reply to your message first thing tomorrow morning."`;
+
+      document.getElementById('out-ah-escalation').innerText = 
+        `1. Gentle Reminder: "Just a heads-up, I received your text last night. I'll take care of it right now during work hours."\n2. Firm Alignment: "I noticed several messages over the weekend. As discussed, I reserve weekends for personal responsibilities (${obl}) so I can be fully engaged during the week."\n3. HR / Formal Step: Document frequency and impact if non-urgent communications continue to invade off-hours systematically.`;
+
+      document.getElementById('results-afterHours').classList.add('active');
+
+      saveHistoryItem('afterHours', {
+        summary: `Contacts via ${howStr} during ${whenStr}`
+      });
+    }
+
+    /* ==========================================================================
+       TOOL 4: SCOPE PROTECTOR LOGIC
+       ========================================================================== */
+    function loadSampleScope() {
+      document.getElementById('scope-orig').value = "Marketing Coordinator: Content creation, campaign scheduling, monthly reporting.";
+      document.getElementById('scope-added').value = "Social media community management, live event execution, weekly executive dashboarding.";
+      document.getElementById('scope-period').value = "6mo+";
+      const pays = document.getElementsByName('scope-pay');
+      pays.forEach(r => r.checked = (r.value === 'No'));
+      document.getElementById('scope-impact').value = "Core marketing campaign deliverables are experiencing delays, overall strategy quality is compromised.";
+    }
+
+    function runScope() {
+      const orig = document.getElementById('scope-orig').value || "Original role responsibilities";
+      const added = document.getElementById('scope-added').value || "New additional tasks";
+      const period = document.getElementById('scope-period').value;
+      const pay = document.querySelector('input[name="scope-pay"]:checked').value;
+      const impact = document.getElementById('scope-impact').value || "Core performance suffering";
+
+      document.getElementById('out-scope-comp').innerText = 
+        `ORIGINAL CORE SCOPE:\n${orig}\n\nADDED RESPONSIBILITIES (Last ${period}):\n${added}\n\nOPERATIONAL IMPACT:\n${impact}`;
+
+      document.getElementById('out-scope-script').innerText = 
+        `"Over the last ${period}, my role has expanded beyond initial core responsibilities to include: ${added.substring(0, 60)}...\n\nWhile I am glad to support team objectives, taking on these tasks affects my ability to focus on my core mandate (${orig.substring(0, 40)}...). I'd like to review the workload so we can align on expectations."`;
+
+      document.getElementById('out-scope-comp-angle').innerText = 
+        pay === 'No' || pay === 'Promised but not delivered' ?
+        `Compensation Leverage: "Given that these added duties (${added.substring(0, 30)}...) represent a permanent expansion of responsibilities, I would like to discuss adjusting my title and compensation to reflect this broader scope."` :
+        `Compensation Angle: Role expansion has been matched with pay, but bandwidth remains finite. Focus on resource delegation rather than compensation.`;
+
+      document.getElementById('out-scope-prio').innerText = 
+        `"I can perform all of these functions, but not all of them simultaneously with high quality. Let's rank these items: Which top 3 deliverables take absolute priority?"`;
+
+      document.getElementById('out-scope-ignored').innerText = 
+        `If your manager dismisses scope expansion:\n1. Maintain a log of weekly hours spent on added tasks vs core tasks.\n2. In performance reviews, explicitly highlight core goal delays caused by assigned non-core work.\n3. Send periodic status updates stating: "Assuming priority remains on [Added Task], target completion for [Core Task] is shifted to [Date]."`;
+
+      document.getElementById('results-scope').classList.add('active');
+
+      saveHistoryItem('scope', {
+        summary: `Added: ${added.substring(0, 30)}... over ${period}`
+      });
+    }
+
+    /* ==========================================================================
+       TOOL 5: THE EXIT PLAN LOGIC
+       ========================================================================== */
+    function loadSampleExit() {
+      document.getElementById('exit-count').value = "4+";
+      const results = document.getElementsByName('exit-res');
+      results.forEach(r => r.checked = (r.value === 'No change'));
+      const healths = document.getElementsByName('exit-health');
+      healths.forEach(r => r.checked = (r.value === 'Somewhat'));
+      const growths = document.getElementsByName('exit-growth');
+      growths.forEach(r => r.checked = (r.value === 'Stalled'));
+      document.getElementById('exit-culture').value = "Mixed";
+    }
+
+    function runExit() {
+      const count = document.getElementById('exit-count').value;
+      const res = document.querySelector('input[name="exit-res"]:checked').value;
+      const health = document.querySelector('input[name="exit-health"]:checked').value;
+      const growth = document.querySelector('input[name="exit-growth"]:checked').value;
+      const culture = document.getElementById('exit-culture').value;
+
+      let verdict = '';
+      if ((count === '4+' || count === 'Lost count') && (res === 'No change' || res === 'Got worse')) {
+        verdict = '<span class="badge badge-red">VERDICT: EXIT STRATEGY RECOMMENDED</span>\nBoundary resistance is structural. Continued effort yields diminishing returns and career damage.';
+      } else if (res === 'Temporary improvement' || count === '2-3') {
+        verdict = '<span class="badge badge-yellow">VERDICT: BORDERLINE</span>\nManager shows minor adaptability. Try one structured written reset before initiating departure.';
+      } else {
+        verdict = '<span class="badge badge-green">VERDICT: FIXABLE</span>\nFurther formal communication and trade-off structures may resolve issues.';
+      }
+
+      document.getElementById('out-exit-verdict').innerHTML = verdict;
+
+      document.getElementById('out-exit-tactic').innerText = 
+        `Final Boundary Test: Request a formal sit-down focused strictly on professional sustainability. Present a structured priority list in writing and request clear manager alignment. Their reaction will confirm whether staying is viable.`;
+
+      document.getElementById('out-exit-transfer').innerText = 
+        culture === 'Great' || culture === 'Mixed' ?
+        `Internal Transfer Strategy: Explore lateral moves to other departments. Connect discreetly with managers in adjacent units. Highlight your track record while citing a desire for professional development.` :
+        `Internal Transfer Not Recommended: Systemic toxicity across the company means internal shifts will likely yield similar dynamic problems. Focus on external opportunities.`;
+
+      document.getElementById('out-exit-search').innerText = 
+        `Quiet Job Search Protocol:\n• Conduct interview scheduling during personal lunch hours or off-days.\n• Never use company hardware, email, or network for job hunting.\n• Keep LinkedIn updates discreet (disable activity broadcasts).`;
+
+      document.getElementById('out-exit-cushion').innerText = 
+        `Target 3-6 months of essential living expenses saved before taking drastic action, or secure a signed offer prior to handing in notice.`;
+
+      document.getElementById('out-exit-timeline').innerText = 
+        `Recommended Transition Timeline:\n• Weeks 1-2: Resume updates, networking outreach.\n• Weeks 3-6: Active applications and preliminary phone screens.\n• Weeks 7-10: Final round interviews & contract negotiation.\n• Week 11+: Formal 2-week notice submission.`;
+
+      document.getElementById('results-exit').classList.add('active');
+
+      saveHistoryItem('exit', {
+        summary: `Tried: ${count} boundaries | Outcome: ${res}`
+      });
+    }
+
+    // INITIALIZATION
+    window.onload = function() {
+      // Render initial history if any
+      ['assessment', 'profNo', 'afterHours', 'scope', 'exit'].forEach(id => renderHistory(id));
+    };
+  </script>
+</body>
+</html>

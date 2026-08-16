@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustAndPrivacy - Relationship Toolkit</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --slate-blue: #457B9D;
+            --slate-blue-dark: #1D3557;
+            --slate-blue-light: #A8DADC;
+            --warm-rose: #E07A5F;
+            --warm-rose-light: #F4A261;
+            --bg-start: #F8F9FA;
+            --bg-end: #FEF1F0;
+            --card-bg: #FFFFFF;
+            --text-main: #2B2D42;
+            --text-muted: #6C757D;
+            --border-color: #E9ECEF;
+            --success: #2A9D8F;
+            --warning: #E76F51;
+            --radius-xl: 1rem;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--warm-rose);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--slate-blue-dark);
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(69, 123, 157, 0.08);
+            color: var(--slate-blue);
+        }
+
+        .nav-item.active {
+            background-color: var(--slate-blue);
+            color: #ffffff;
+        }
+
+        .nav-item.active i {
+            color: #ffffff;
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 1.25rem;
+            text-align: center;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 1.25rem;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 900;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            color: var(--slate-blue-dark);
+        }
+
+        .mobile-toggle {
+            background: none;
+            border: none;
+            font-size: 1.35rem;
+            color: var(--slate-blue);
+            cursor: pointer;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 950;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 5rem);
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        /* Hero / Header Section */
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--slate-blue-dark);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-tagline {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            margin-bottom: 1.75rem;
+        }
+
+        /* Tool Grid on Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .dash-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--slate-blue-light);
+        }
+
+        .dash-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background-color: rgba(69, 123, 157, 0.1);
+            color: var(--slate-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .dash-card:nth-child(even) .dash-icon {
+            background-color: rgba(224, 122, 95, 0.1);
+            color: var(--warm-rose);
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--slate-blue-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .dash-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.925rem;
+            font-weight: 600;
+            color: var(--slate-blue-dark);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control, select, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #FAFAFA;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .form-control:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--slate-blue);
+            background-color: #FFFFFF;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.35rem;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+            accent-color: var(--slate-blue);
+        }
+
+        .slider-value {
+            font-weight: 700;
+            color: var(--slate-blue);
+            min-width: 2rem;
+            text-align: center;
+            background: rgba(69, 123, 157, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Buttons & Controls */
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--slate-blue);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--slate-blue-dark);
+        }
+
+        .btn-secondary {
+            background-color: rgba(224, 122, 95, 0.12);
+            color: var(--warm-rose);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(224, 122, 95, 0.22);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background-color: #F1F3F5;
+            color: var(--text-main);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        /* Output & Results Styling */
+        .output-container {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+        }
+
+        .section-header-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.25rem;
+            background-color: rgba(69, 123, 157, 0.12);
+            color: var(--slate-blue-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-block {
+            background-color: #FAFAFA;
+            border-left: 4px solid var(--slate-blue);
+            padding: 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin-bottom: 1.25rem;
+        }
+
+        .result-block.rose {
+            border-left-color: var(--warm-rose);
+        }
+
+        .result-block.success {
+            border-left-color: var(--success);
+        }
+
+        .result-block h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--slate-blue-dark);
+            margin-bottom: 0.4rem;
+        }
+
+        .result-block p, .result-block ul {
+            font-size: 0.925rem;
+            color: var(--text-main);
+        }
+
+        .result-block ul {
+            padding-left: 1.2rem;
+            margin-top: 0.4rem;
+        }
+
+        .result-block li {
+            margin-bottom: 0.25rem;
+        }
+
+        .script-box {
+            background-color: #FFFFFF;
+            border: 1px dashed var(--slate-blue);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            position: relative;
+            font-style: italic;
+            color: var(--text-main);
+            margin-top: 0.5rem;
+            font-size: 0.925rem;
+        }
+
+        .script-box .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+        }
+
+        /* Accordion / History Section */
+        .history-section {
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .history-item {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            background-color: #FFFFFF;
+            overflow: hidden;
+        }
+
+        .history-item-header {
+            padding: 0.75rem 1rem;
+            background-color: #FAFAFA;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .history-item-header:hover {
+            background-color: #F1F3F5;
+        }
+
+        .history-item-body {
+            padding: 1rem;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            background-color: #FFFFFF;
+        }
+
+        .history-item-body.open {
+            display: block;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--slate-blue-dark);
+            color: #FFFFFF;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: auto;
+            padding: 2rem 0 1rem 0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Problem Framing Callout */
+        .problem-frame {
+            background-color: rgba(224, 122, 95, 0.08);
+            border-left: 3px solid var(--warm-rose);
+            padding: 0.85rem 1.1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            font-size: 0.9rem;
+            color: var(--slate-blue-dark);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        /* Partner Column Layout for Tool 1 */
+        .partner-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .partner-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .partner-box {
+            background: #FAFAFA;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .partner-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--slate-blue);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 5rem;
+            }
+
+            .overlay.mobile-open {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Mobile Header Navigation -->
+        <header class="mobile-header">
+            <div class="mobile-brand">
+                <i class="fa-solid fa-shield-halved" style="color: var(--warm-rose);"></i>
+                <span>TrustAndPrivacy</span>
+            </div>
+            <button class="mobile-toggle" id="mobileMenuBtn" aria-label="Toggle Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </header>
+
+        <div class="overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h1>Trust & Privacy</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-item active" data-target="dashboard">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a class="nav-item" data-target="tool1">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                    <span>Boundary Audit</span>
+                </a>
+                <a class="nav-item" data-target="tool2">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>Transparency Talk</span>
+                </a>
+                <a class="nav-item" data-target="tool3">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <span>Phone & Account Protocol</span>
+                </a>
+                <a class="nav-item" data-target="tool4">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Suspicion Decoder</span>
+                </a>
+                <a class="nav-item" data-target="tool5">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                    <span>Rebuild Plan</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Workspace -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                
+                <!-- VIEW 0: DASHBOARD -->
+                <section id="dashboard" class="view-section active">
+                    <div class="card">
+                        <h2 class="hero-title">Trust & Privacy</h2>
+                        <p class="hero-tagline">Healthy boundaries or hidden secrets? Find the line together.</p>
+                        <p style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 1rem;">
+                            Privacy is the healthy space where individual identity lives. Secrecy is the intentional hiding of information that directly impacts your partner's wellbeing or safety. Use these tools to align expectations, decode anxieties, and navigate digital transparency.
+                        </p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dash-card" onclick="switchTab('tool1')">
+                            <div class="dash-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                            <h3>Boundary Audit</h3>
+                            <p>Map expectations for phones, money, location, and social life to identify alignment and conflict zones.</p>
+                        </div>
+                        <div class="dash-card" onclick="switchTab('tool2')">
+                            <div class="dash-icon"><i class="fa-solid fa-comments"></i></div>
+                            <h3>Transparency Talk</h3>
+                            <p>Translate demands for openness or requests for privacy into core underlying emotional needs.</p>
+                        </div>
+                        <div class="dash-card" onclick="switchTab('tool3')">
+                            <div class="dash-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                            <h3>Phone & Account Protocol</h3>
+                            <p>Set clear, mutually agreed rules for digital devices and finances without resort to surveillance.</p>
+                        </div>
+                        <div class="dash-card" onclick="switchTab('tool4')">
+                            <div class="dash-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                            <h3>Suspicion Decoder</h3>
+                            <p>Differentiate between intuitive danger signals, past trauma responses, and unfounded anxiety.</p>
+                        </div>
+                        <div class="dash-card" onclick="switchTab('tool5')">
+                            <div class="dash-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                            <h3>Rebuild Plan</h3>
+                            <p>Construct a phased roadmap back to security after secrecy or betrayal has damaged trust.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: BOUNDARY AUDIT -->
+                <section id="tool1" class="view-section">
+                    <div class="card">
+                        <h2 class="hero-title">Boundary Audit</h2>
+                        <div class="problem-frame">
+                            <i class="fa-solid fa-circle-question" style="margin-right: 0.4rem; color: var(--warm-rose);"></i>
+                            <strong>Problem:</strong> "We don't know what's normal to share and what's normal to keep private."
+                        </div>
+
+                        <form id="form-tool1">
+                            <div class="partner-grid">
+                                <!-- Partner A -->
+                                <div class="partner-box">
+                                    <div class="partner-title"><i class="fa-solid fa-user"></i> Partner 1 (You)</div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Phone Password Sharing</label>
+                                        <select id="t1_p1_phone">
+                                            <option value="Already shared">Already shared</option>
+                                            <option value="Willing to share">Willing to share</option>
+                                            <option value="Private but not secret">Private but not secret</option>
+                                            <option value="Absolutely private">Absolutely private</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Location Tracking</label>
+                                        <select id="t1_p1_location">
+                                            <option value="We track each other">We track each other</option>
+                                            <option value="Available if asked">Available if asked</option>
+                                            <option value="Only for safety">Only for safety/travel</option>
+                                            <option value="Invasive">Feels invasive</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Social Media Access</label>
+                                        <select id="t1_p1_social">
+                                            <option value="Full access">Full access / Logins shared</option>
+                                            <option value="Follow each other">Follow each other openly</option>
+                                            <option value="Occasional check">Occasional check-ins</option>
+                                            <option value="Private">Private accounts</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Spending Transparency</label>
+                                        <select id="t1_p1_spending">
+                                            <option value="Every purchase shared">Every purchase shared</option>
+                                            <option value="Big purchases discussed">Big purchases discussed</option>
+                                            <option value="Separate finances">Separate finances, no questions</option>
+                                            <option value="Some hidden spending">Some hidden discretionary spending</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Friend Communication</label>
+                                        <select id="t1_p1_friends">
+                                            <option value="Tell everything">Tell everything</option>
+                                            <option value="Mention close friends">Mention close friends/topics</option>
+                                            <option value="Private but not secret">Private chats, not secret</option>
+                                            <option value="Completely private">Completely private</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Past Relationship Details</label>
+                                        <select id="t1_p1_past">
+                                            <option value="Full disclosure">Full disclosure</option>
+                                            <option value="Overview only">Overview only</option>
+                                            <option value="Only if relevant">Only if relevant</option>
+                                            <option value="Completely private">Completely private</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Partner B -->
+                                <div class="partner-box">
+                                    <div class="partner-title"><i class="fa-solid fa-user-gear"></i> Partner 2</div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Phone Password Sharing</label>
+                                        <select id="t1_p2_phone">
+                                            <option value="Already shared">Already shared</option>
+                                            <option value="Willing to share">Willing to share</option>
+                                            <option value="Private but not secret">Private but not secret</option>
+                                            <option value="Absolutely private">Absolutely private</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Location Tracking</label>
+                                        <select id="t1_p2_location">
+                                            <option value="We track each other">We track each other</option>
+                                            <option value="Available if asked">Available if asked</option>
+                                            <option value="Only for safety">Only for safety/travel</option>
+                                            <option value="Invasive">Feels invasive</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Social Media Access</label>
+                                        <select id="t1_p2_social">
+                                            <option value="Full access">Full access / Logins shared</option>
+                                            <option value="Follow each other">Follow each other openly</option>
+                                            <option value="Occasional check">Occasional check-ins</option>
+                                            <option value="Private">Private accounts</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Spending Transparency</label>
+                                        <select id="t1_p2_spending">
+                                            <option value="Every purchase shared">Every purchase shared</option>
+                                            <option value="Big purchases discussed">Big purchases discussed</option>
+                                            <option value="Separate finances">Separate finances, no questions</option>
+                                            <option value="Some hidden spending">Some hidden discretionary spending</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Friend Communication</label>
+                                        <select id="t1_p2_friends">
+                                            <option value="Tell everything">Tell everything</option>
+                                            <option value="Mention close friends">Mention close friends/topics</option>
+                                            <option value="Private but not secret">Private chats, not secret</option>
+                                            <option value="Completely private">Completely private</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Past Relationship Details</label>
+                                        <select id="t1_p2_past">
+                                            <option value="Full disclosure">Full disclosure</option>
+                                            <option value="Overview only">Overview only</option>
+                                            <option value="Only if relevant">Only if relevant</option>
+                                            <option value="Completely private">Completely private</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool1()">Analyze Alignment</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool1" class="output-container">
+                        <div class="card">
+                            <h3 class="hero-title" style="font-size: 1.4rem;">Boundary Audit Analysis</h3>
+                            
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-map"></i> The Privacy Map</div>
+                                <p id="t1-out-map">Mapping individual boundaries...</p>
+                            </div>
+
+                            <div class="result-block success">
+                                <div class="section-header-pill"><i class="fa-solid fa-circle-check"></i> Alignment Zones</div>
+                                <p id="t1-out-alignment">Areas where you already agree...</p>
+                            </div>
+
+                            <div class="result-block rose">
+                                <div class="section-header-pill"><i class="fa-solid fa-triangle-exclamation"></i> Conflict Zones</div>
+                                <p id="t1-out-conflict">Areas where expectations clash...</p>
+                            </div>
+
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-scale-balanced"></i> The Normalizer</div>
+                                <p id="t1-out-normalizer">Context on relational diversity...</p>
+                            </div>
+
+                            <div class="result-block rose">
+                                <div class="section-header-pill"><i class="fa-solid fa-flag"></i> Red Flag Check</div>
+                                <p id="t1-out-redflag">Evaluating potential secrecy issues...</p>
+                            </div>
+
+                            <div class="result-block success">
+                                <div class="section-header-pill"><i class="fa-solid fa-flag"></i> Green Flag Check</div>
+                                <p id="t1-out-greenflag">Evaluating core trust foundations...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section" id="t1-history-wrapper">
+                        <div class="history-header">
+                            <span class="history-title">Previous Audits</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool1')">Clear History</button>
+                        </div>
+                        <div id="t1-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: THE TRANSPARENCY TALK -->
+                <section id="tool2" class="view-section">
+                    <div class="card">
+                        <h2 class="hero-title">The Transparency Talk</h2>
+                        <div class="problem-frame">
+                            <i class="fa-solid fa-circle-question" style="margin-right: 0.4rem; color: var(--warm-rose);"></i>
+                            <strong>Problem:</strong> "I want more openness. They say I'm controlling. Or: I want privacy. They say I'm hiding something."
+                        </div>
+
+                        <form id="form-tool2">
+                            <div class="form-group">
+                                <label class="form-label">What transparency do you want more of?</label>
+                                <textarea id="t2_want_transparency" placeholder="e.g., Knowing passwords, seeing phone texts, financial receipts, location details..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What does that transparency represent to you?</label>
+                                <select id="t2_rep_transparency">
+                                    <option value="Safety">Safety (Feeling secure in the relationship)</option>
+                                    <option value="Respect">Respect (Feeling valued and included)</option>
+                                    <option value="Intimacy">Intimacy (Deep closeness and oneness)</option>
+                                    <option value="Control">Control (Managing my anxiety or outcomes)</option>
+                                    <option value="Reassurance">Reassurance (Calming doubts or fears)</option>
+                                    <option value="Fairness">Fairness (Equal openness on both sides)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What privacy do you want protected?</label>
+                                <textarea id="t2_want_privacy" placeholder="e.g., Unmonitored chats with friends, separate personal accounts, alone time without check-ins..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What does that privacy represent to you?</label>
+                                <select id="t2_rep_privacy">
+                                    <option value="Autonomy">Autonomy (Feeling like an independent person)</option>
+                                    <option value="Identity">Identity (Preserving who I am outside the couple)</option>
+                                    <option value="Trust">Trust (Being trusted without having to prove it)</option>
+                                    <option value="Boundaries">Boundaries (Protecting confidences of my friends)</option>
+                                    <option value="Normal">Normal (How I was raised / my default boundary)</option>
+                                    <option value="Fear of judgment">Fear of judgment (Afraid of being misunderstood/criticized)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Has trust been broken before?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2_trust_broken" value="Yes, by partner" checked> Yes, by current partner</label>
+                                    <label class="radio-label"><input type="radio" name="t2_trust_broken" value="Yes, by ex"> Yes, in a past relationship</label>
+                                    <label class="radio-label"><input type="radio" name="t2_trust_broken" value="No"> No major breach</label>
+                                    <label class="radio-label"><input type="radio" name="t2_trust_broken" value="Not sure"> Unclear / Micro-breaches</label>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool2()">Frame Conversation</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool2" class="output-container">
+                        <div class="card">
+                            <h3 class="hero-title" style="font-size: 1.4rem;">Transparency & Need Reframing</h3>
+                            
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-heart"></i> The Transparency Need</div>
+                                <p id="t2-out-trans-need">Analyzing request...</p>
+                            </div>
+
+                            <div class="result-block rose">
+                                <div class="section-header-pill"><i class="fa-solid fa-shield"></i> The Privacy Need</div>
+                                <p id="t2-out-priv-need">Analyzing resistance...</p>
+                            </div>
+
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-handshake"></i> The Negotiation Frame</div>
+                                <p id="t2-out-frame">Core reframe for mutual validation...</p>
+                            </div>
+
+                            <div class="result-block success">
+                                <div class="section-header-pill"><i class="fa-solid fa-sliders"></i> Compromise Zones</div>
+                                <div id="t2-out-compromise">Middle-ground options...</div>
+                            </div>
+
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-stairs"></i> Gradual Transparency Plan</div>
+                                <p id="t2-out-gradual">Step-up roadmap...</p>
+                            </div>
+
+                            <div class="result-block success">
+                                <div class="section-header-pill"><i class="fa-solid fa-lock"></i> The Privacy Guarantee</div>
+                                <p id="t2-out-guarantee">Safeguarding autonomy...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section" id="t2-history-wrapper">
+                        <div class="history-header">
+                            <span class="history-title">Previous Talks</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool2')">Clear History</button>
+                        </div>
+                        <div id="t2-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: PHONE / ACCOUNT PROTOCOL -->
+                <section id="tool3" class="view-section">
+                    <div class="card">
+                        <h2 class="hero-title">Phone / Account Protocol</h2>
+                        <div class="problem-frame">
+                            <i class="fa-solid fa-circle-question" style="margin-right: 0.4rem; color: var(--warm-rose);"></i>
+                            <strong>Problem:</strong> "Our phones or bank accounts have become a tension-filled battleground."
+                        </div>
+
+                        <form id="form-tool3">
+                            <div class="form-group">
+                                <label class="form-label">Current Device Rule</label>
+                                <select id="t3_phone_rule">
+                                    <option value="Open phones">Open phones (passwords shared, free access)</option>
+                                    <option value="Ask first">Ask first before taking/looking</option>
+                                    <option value="Private">Strictly private (no codes shared)</option>
+                                    <option value="We fight about it">We actively fight about rules</option>
+                                    <option value="One snoops">One partner secretively checks / snoops</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What triggered the digital conflict?</label>
+                                <textarea id="t3_trigger" placeholder="e.g., Hidden app found, deleted messages, unexpected charge, secret messaging with an ex..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What would make you feel safe WITHOUT checking their phone?</label>
+                                <textarea id="t3_safe_without_check" placeholder="e.g., Direct verbal updates, phone placed face-up, emotional presence, honest answers when asked..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What would make you feel trusted even if they looked at your device?</label>
+                                <textarea id="t3_trusted_if_checked" placeholder="e.g., Context given before judging, not taking private friend ventings out of context, asking respectfully..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Financial Account Access</label>
+                                <select id="t3_financial_access">
+                                    <option value="Joint everything">Joint everything (Shared accounts & cards)</option>
+                                    <option value="Joint + separate">Joint main account + separate personal accounts</option>
+                                    <option value="Separate but visible">Separate accounts, fully visible balances</option>
+                                    <option value="Separate and private">Separate accounts and private details</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool3()">Establish Protocol</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool3" class="output-container">
+                        <div class="card">
+                            <h3 class="hero-title" style="font-size: 1.4rem;">Digital & Financial Protocol</h3>
+                            
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-mobile-retro"></i> The Device Dynamic</div>
+                                <p id="t3-out-battle">What the device represents...</p>
+                            </div>
+
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-layer-group"></i> Digital Transparency Levels</div>
+                                <div id="t3-out-options">3 options to choose from...</div>
+                            </div>
+
+                            <div class="result-block success">
+                                <div class="section-header-pill"><i class="fa-solid fa-calendar-check"></i> The Check-In Agreement</div>
+                                <p id="t3-out-checkin">Structured discussion agreement...</p>
+                            </div>
+
+                            <div class="result-block rose">
+                                <div class="section-header-pill"><i class="fa-solid fa-user-shield"></i> Snooping & Boundary Boundary</div>
+                                <p id="t3-out-snooping">Addressing unagreed checks...</p>
+                            </div>
+
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-wallet"></i> Financial Alignment</div>
+                                <p id="t3-out-financial">Money transparency structure...</p>
+                            </div>
+
+                            <div class="result-block success">
+                                <div class="section-header-pill"><i class="fa-solid fa-rotate-right"></i> The Rebuild Ritual</div>
+                                <p id="t3-out-ritual">Daily non-digital trust action...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section" id="t3-history-wrapper">
+                        <div class="history-header">
+                            <span class="history-title">Previous Protocols</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool3')">Clear History</button>
+                        </div>
+                        <div id="t3-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: SUSPICION DECODER -->
+                <section id="tool4" class="view-section">
+                    <div class="card">
+                        <h2 class="hero-title">Suspicion Decoder</h2>
+                        <div class="problem-frame">
+                            <i class="fa-solid fa-circle-question" style="margin-right: 0.4rem; color: var(--warm-rose);"></i>
+                            <strong>Problem:</strong> "I have a bad feeling but I don't know if it's real intuition or my own insecurity."
+                        </div>
+
+                        <form id="form-tool4">
+                            <div class="form-group">
+                                <label class="form-label">What specifically feels off?</label>
+                                <textarea id="t4_off_description" placeholder="e.g., Phone turned face down, sudden shift in affection, working late without notice, distant behavior..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Concrete evidence you have:</label>
+                                <textarea id="t4_evidence_real" placeholder="e.g., Unexplained money missing, contradictory story, flirty text message seen... (Leave empty if none)"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Evidence you don't have, but fear:</label>
+                                <textarea id="t4_evidence_feared" placeholder="e.g., What if they have a second burner phone? What if they are meeting someone on work trips?"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your betrayal history:</label>
+                                <select id="t4_past_history">
+                                    <option value="Cheated on before">I was cheated on / betrayed in a past relationship</option>
+                                    <option value="Cheated on someone">I have cheated on someone in the past</option>
+                                    <option value="Grew up with infidelity">Grew up with infidelity/secrets in family of origin</option>
+                                    <option value="No history">No personal history of major betrayal</option>
+                                    <option value="Multiple betrayals">Multiple complex betrayals in past</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Current Personal Stress Level (1-10)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t4_stress_level" min="1" max="10" value="5" oninput="document.getElementById('stress_val').innerText = this.value">
+                                    <span class="slider-value" id="stress_val">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Have you talked to them about this feeling?</label>
+                                <select id="t4_talked">
+                                    <option value="Yes, directly">Yes, brought it up directly and calmly</option>
+                                    <option value="Yes, indirectly">Yes, made passive remarks / accusatory comments</option>
+                                    <option value="No, I'm investigating">No, I am investigating / gathering facts first</option>
+                                    <option value="No, I'm afraid">No, I'm afraid of their reaction or looking 'crazy'</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool4()">Decode Suspicion</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool4" class="output-container">
+                        <div class="card">
+                            <h3 class="hero-title" style="font-size: 1.4rem;">Suspicion Assessment</h3>
+                            
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-brain"></i> Suspicion Classification</div>
+                                <p id="t4-out-type">Analyzing pattern...</p>
+                            </div>
+
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-scale-unbalanced"></i> Evidence Audit</div>
+                                <p id="t4-out-evidence">Fact vs. Anxiety assessment...</p>
+                            </div>
+
+                            <div class="result-block success">
+                                <div class="section-header-pill"><i class="fa-solid fa-comment-dots"></i> Conversation Script</div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Express concern without triggering defensiveness:</p>
+                                <div class="script-box">
+                                    <span id="t4-out-script">Script content...</span>
+                                    <button class="btn btn-outline btn-sm copy-btn" onclick="copyToClipboard('t4-out-script')"><i class="fa-regular fa-copy"></i> Copy</button>
+                                </div>
+                            </div>
+
+                            <div class="result-block rose">
+                                <div class="section-header-pill"><i class="fa-solid fa-hand"></i> The Investigation Stop</div>
+                                <p id="t4-out-stop">When checking becomes harmful...</p>
+                            </div>
+
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-clipboard-question"></i> Self-Check Questions</div>
+                                <ul id="t4-out-selfcheck"></ul>
+                            </div>
+
+                            <div class="result-block rose">
+                                <div class="section-header-pill"><i class="fa-solid fa-user-doctor"></i> Professional Prompt</div>
+                                <p id="t4-out-professional">When to seek therapy...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section" id="t4-history-wrapper">
+                        <div class="history-header">
+                            <span class="history-title">Previous Assessments</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool4')">Clear History</button>
+                        </div>
+                        <div id="t4-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: REBUILD PLAN -->
+                <section id="tool5" class="view-section">
+                    <div class="card">
+                        <h2 class="hero-title">Rebuild Plan</h2>
+                        <div class="problem-frame">
+                            <i class="fa-solid fa-circle-question" style="margin-right: 0.4rem; color: var(--warm-rose);"></i>
+                            <strong>Problem:</strong> "Secrecy or betrayal has damaged trust. We need a concrete path back to security."
+                        </div>
+
+                        <form id="form-tool5">
+                            <div class="form-group">
+                                <label class="form-label">What was hidden / compromised?</label>
+                                <select id="t5_hidden_type">
+                                    <option value="Spending">Secret spending or debt</option>
+                                    <option value="Communication">Hidden communication / emotional affair</option>
+                                    <option value="Addiction">Hidden habit, gambling, or addiction</option>
+                                    <option value="Past">Major lie about past background</option>
+                                    <option value="Current relationship">Physical infidelity / affair</option>
+                                    <option value="Nothing specific">No single rupture, general distance and mistrust</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">How was it discovered?</label>
+                                <select id="t5_discovery_method">
+                                    <option value="Confession">Voluntary confession by partner</option>
+                                    <option value="Accidental discovery">Accidental discovery (found bill, text popped up)</option>
+                                    <option value="Investigation">Active investigation / catching them</option>
+                                    <option value="They told me indirectly">Third party told me / indirect hint</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Current Trust Level (1 = Completely Broken, 10 = Solid)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t5_trust_level" min="1" max="10" value="3" oninput="document.getElementById('trust_val').innerText = this.value">
+                                    <span class="slider-value" id="trust_val">3</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What the hurt partner needs right now:</label>
+                                <textarea id="t5_hurt_needs" placeholder="e.g., Full answers to questions, total financial access, heartfelt apology, patience with mood shifts..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What the transparent partner can offer right now:</label>
+                                <textarea id="t5_trans_offer" placeholder="e.g., Open access to bank app, weekly check-ins, location sharing for 90 days, cutting off contact..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Willingness to engage couples work:</label>
+                                <select id="t5_couples_work">
+                                    <option value="Yes">Yes, both fully committed</option>
+                                    <option value="Open to it">Open to it, but hesitant</option>
+                                    <option value="No">No, working on it privately only</option>
+                                    <option value="Already doing it">Already working with a therapist</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool5()">Generate Roadmap</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool5" class="output-container">
+                        <div class="card">
+                            <h3 class="hero-title" style="font-size: 1.4rem;">Trust Rebuild Roadmap</h3>
+                            
+                            <div class="result-block rose">
+                                <div class="section-header-pill"><i class="fa-solid fa-heart-crack"></i> Damage Assessment</div>
+                                <p id="t5-out-damage">Impact overview...</p>
+                            </div>
+
+                            <div class="result-block success">
+                                <div class="section-header-pill"><i class="fa-solid fa-certificate"></i> The Transparency Offer</div>
+                                <p id="t5-out-offer">Commitments for accountability...</p>
+                            </div>
+
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-eye"></i> The Verification System</div>
+                                <p id="t5-out-verification">How to verify without policing...</p>
+                            </div>
+
+                            <div class="result-block">
+                                <div class="section-header-pill"><i class="fa-solid fa-chart-line"></i> The Graduation Plan</div>
+                                <p id="t5-out-graduation">Moving back toward healthy privacy...</p>
+                            </div>
+
+                            <div class="result-block rose">
+                                <div class="section-header-pill"><i class="fa-solid fa-triangle-exclamation"></i> Relapse Protocol</div>
+                                <p id="t5-out-relapse">Action steps if secrecy recurs...</p>
+                            </div>
+
+                            <div class="result-block success">
+                                <div class="section-header-pill"><i class="fa-solid fa-clock"></i> Rebuild Timeline</div>
+                                <p id="t5-out-timeline">Realistic recovery horizon...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section" id="t5-history-wrapper">
+                        <div class="history-header">
+                            <span class="history-title">Previous Plans</span>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool5')">Clear History</button>
+                        </div>
+                        <div id="t5-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- FOOTER -->
+                <footer class="footer">
+                    For entertainment and reflection purposes only. Not therapy or professional advice. If there is active deception, infidelity, or financial abuse, seek professional support.
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Component -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-check-circle" style="color: #2A9D8F;"></i>
+        <span id="toast-message">Copied!</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- NAVIGATION & UI STATE ---
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const target = this.getAttribute('data-target');
+                switchTab(target);
+                closeMobileMenu();
+            });
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                if(nav.getAttribute('data-target') === tabId) {
+                    nav.classList.add('active');
+                } else {
+                    nav.classList.remove('active');
+                }
+            });
+
+            document.querySelectorAll('.view-section').forEach(section => {
+                if(section.id === tabId) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            renderHistory(tabId);
+        }
+
+        // Mobile Sidebar Controls
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('mobile-open');
+        });
+
+        sidebarOverlay.addEventListener('click', closeMobileMenu);
+
+        function closeMobileMenu() {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('mobile-open');
+        }
+
+        // Toast Helper
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        // --- LOCAL STORAGE HELPERS ---
+        function saveToHistory(toolId, title, data) {
+            const key = `trustprivacy_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                title: title,
+                data: data
+            };
+            history.unshift(newItem);
+            if(history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function getHistory(toolId) {
+            const key = `trustprivacy_history_${toolId}`;
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+
+        function clearHistory(toolId) {
+            const key = `trustprivacy_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function renderHistory(toolId) {
+            if(!['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].includes(toolId)) return;
+            const container = document.getElementById(`${toolId === 'tool1' ? 't1' : toolId === 'tool2' ? 't2' : toolId === 'tool3' ? 't3' : toolId === 'tool4' ? 't4' : 't5'}-history-list`);
+            if(!container) return;
+
+            const history = getHistory(toolId);
+            if(history.length === 0) {
+                container.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">No saved analysis history.</p>';
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="history-item-header" onclick="toggleHistoryItem(${item.id})">
+                        <span><strong>${item.title}</strong> — <small style="color:var(--text-muted);">${item.timestamp}</small></span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="history-item-body" id="hist-body-${item.id}">
+                        ${item.data}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistoryItem(id) {
+            const body = document.getElementById(`hist-body-${id}`);
+            if(body) body.classList.toggle('open');
+        }
+
+
+        // ==========================================
+        // TOOL 1 LOGIC — BOUNDARY AUDIT
+        // ==========================================
+        function loadSampleTool1() {
+            document.getElementById('t1_p1_phone').value = 'Willing to share';
+            document.getElementById('t1_p1_location').value = 'Available if asked';
+            document.getElementById('t1_p1_social').value = 'Follow each other';
+            document.getElementById('t1_p1_spending').value = 'Big purchases discussed';
+            document.getElementById('t1_p1_friends').value = 'Mention close friends';
+            document.getElementById('t1_p1_past').value = 'Overview only';
+
+            document.getElementById('t1_p2_phone').value = 'Absolutely private';
+            document.getElementById('t1_p2_location').value = 'Invasive';
+            document.getElementById('t1_p2_social').value = 'Private';
+            document.getElementById('t1_p2_spending').value = 'Separate finances';
+            document.getElementById('t1_p2_friends').value = 'Completely private';
+            document.getElementById('t1_p2_past').value = 'Completely private';
+
+            showToast("Sample loaded: Privacy vs. Openness clash");
+        }
+
+        function analyzeTool1() {
+            const p1 = {
+                phone: document.getElementById('t1_p1_phone').value,
+                location: document.getElementById('t1_p1_location').value,
+                social: document.getElementById('t1_p1_social').value,
+                spending: document.getElementById('t1_p1_spending').value,
+                friends: document.getElementById('t1_p1_friends').value,
+                past: document.getElementById('t1_p1_past').value,
+            };
+
+            const p2 = {
+                phone: document.getElementById('t1_p2_phone').value,
+                location: document.getElementById('t1_p2_location').value,
+                social: document.getElementById('t1_p2_social').value,
+                spending: document.getElementById('t1_p2_spending').value,
+                friends: document.getElementById('t1_p2_friends').value,
+                past: document.getElementById('t1_p2_past').value,
+            };
+
+            let alignments = [];
+            let conflicts = [];
+
+            const categories = [
+                { id: 'phone', label: 'Phone Access' },
+                { id: 'location', label: 'Location Tracking' },
+                { id: 'social', label: 'Social Media' },
+                { id: 'spending', label: 'Financial Spending' },
+                { id: 'friends', label: 'Friend Communications' },
+                { id: 'past', label: 'Past Relationships' }
+            ];
+
+            categories.forEach(cat => {
+                if(p1[cat.id] === p2[cat.id]) {
+                    alignments.push(`<strong>${cat.label}:</strong> Both agreed on "${p1[cat.id]}".`);
+                } else {
+                    conflicts.push(`<strong>${cat.label}:</strong> Partner 1 prefers "${p1[cat.id]}", whereas Partner 2 prefers "${p2[cat.id]}".`);
+                }
+            });
+
+            // Map
+            const mapHTML = `Partner 1 approaches boundaries with a preference for open access and mutual visibility, while Partner 2 emphasizes individual boundary lines and autonomy across several categories.`;
+
+            // Alignments
+            const alignHTML = alignments.length > 0 ? `<ul>${alignments.map(a => `<li>${a}</li>`).join('')}</ul>` : 'No exact matches found. Your boundary styles differ significantly across most categories.';
+
+            // Conflicts
+            const conflictHTML = conflicts.length > 0 ? `<ul>${conflicts.map(c => `<li>${c}</li>`).join('')}</ul>` : 'Zero major conflicts! Your stated boundary preferences are smoothly aligned.';
+
+            // Normalizer
+            const normalizerHTML = `Relationships thrive under various styles—from total open-door visibility to high individual autonomy. Clashes in preferences do not mean incompatibility; they simply indicate that you grew up with different definitions of relational safety.`;
+
+            // Red Flag Check
+            let redFlags = [];
+            if(p1.spending === 'Some hidden spending' || p2.spending === 'Some hidden spending') {
+                redFlags.push("Hidden discretionary spending can lead to financial secrecy rupture.");
+            }
+            if(p1.phone === 'Absolutely private' && p2.phone === 'Already shared') {
+                redFlags.push("Extreme asymmetry in phone privacy can trigger ongoing surveillance vs. evasion dynamics.");
+            }
+            const redFlagHTML = redFlags.length > 0 ? `<ul>${redFlags.map(r => `<li>${r}</li>`).join('')}</ul>` : "No immediate systemic red flags detected in stated choices. Keep an eye on financial hiddenness.";
+
+            // Green Flag Check
+            let greenFlags = [];
+            if(p1.spending === 'Big purchases discussed' || p2.spending === 'Big purchases discussed') {
+                greenFlags.push("Commitment to discussing major financial decisions establishes core stability.");
+            }
+            if(alignments.length >= 2) {
+                greenFlags.push("You possess a natural consensus baseline in at least two operational life areas.");
+            }
+            const greenFlagHTML = greenFlags.length > 0 ? `<ul>${greenFlags.map(g => `<li>${g}</li>`).join('')}</ul>` : "Core openness exists whenever both partners are willing to explicitly state their preferences without fear.";
+
+            // Render Output
+            document.getElementById('t1-out-map').innerHTML = mapHTML;
+            document.getElementById('t1-out-alignment').innerHTML = alignHTML;
+            document.getElementById('t1-out-conflict').innerHTML = conflictHTML;
+            document.getElementById('t1-out-normalizer').innerText = normalizerHTML;
+            document.getElementById('t1-out-redflag').innerHTML = redFlagHTML;
+            document.getElementById('t1-out-greenflag').innerHTML = greenFlagHTML;
+
+            document.getElementById('output-tool1').classList.add('active');
+
+            // Save to history
+            const summary = `Found ${alignments.length} alignment zone(s) and ${conflicts.length} conflict zone(s).`;
+            saveToHistory('tool1', 'Boundary Audit Summary', `<p>${mapHTML}</p><br><strong>Conflicts:</strong> ${conflictHTML}`);
+        }
+
+
+        // ==========================================
+        // TOOL 2 LOGIC — THE TRANSPARENCY TALK
+        // ==========================================
+        function loadSampleTool2() {
+            document.getElementById('t2_want_transparency').value = "I want real-time location sharing and open phone passwords.";
+            document.getElementById('t2_rep_transparency').value = "Safety";
+            document.getElementById('t2_want_privacy').value = "I want unmonitored private chats with my close friends and personal space.";
+            document.getElementById('t2_rep_privacy').value = "Autonomy";
+            document.querySelector('input[name="t2_trust_broken"][value="Yes, by partner"]').checked = true;
+
+            showToast("Sample loaded: Post-betrayal transparency request");
+        }
+
+        function analyzeTool2() {
+            const wantTrans = document.getElementById('t2_want_transparency').value || "General openness";
+            const repTrans = document.getElementById('t2_rep_transparency').value;
+            const wantPriv = document.getElementById('t2_want_privacy').value || "Personal space";
+            const repPriv = document.getElementById('t2_rep_privacy').value;
+            const trustBroken = document.querySelector('input[name="t2_trust_broken"]:checked').value;
+
+            const transNeedText = `The request for "<em>${wantTrans}</em>" is fundamentally not about control—it is an attempt to cultivate <strong>${repTrans.toUpperCase()}</strong>. When anxiety is high, visibility acts as emotional grounding.`;
+
+            const privNeedText = `The resistance around "<em>${wantPriv}</em>" is rarely about having something illicit to hide—it is a protection of <strong>${repPriv.toUpperCase()}</strong>. When visibility feels forced, it registers as a loss of identity.`;
+
+            const frameText = `<strong>Reframe for the conversation:</strong> "We are not fighting over a phone or a location app. We are trying to balance partner A's legitimate need for ${repTrans} with partner B's legitimate need for ${repPriv}." Both needs can coexist.`;
+
+            const compromiseHTML = `
+                <ul>
+                    <li><strong>Time-Bound Openness:</strong> Agree to temporary transparency around "${wantTrans}" for 30-90 days, with a scheduled review date to step down.</li>
+                    <li><strong>Context-Based Sharing:</strong> Share summary updates (e.g., "I'm heading out with Alex") without requiring micro-location tracking or phone monitoring.</li>
+                    <li><strong>Protected Vaults:</strong> Keep personal friend chats private while offering full visibility into shared calendar events and financial records.</li>
+                </ul>
+            `;
+
+            let gradualText = "";
+            if(trustBroken.includes("Yes")) {
+                gradualText = "Because trust has experienced a rupture, start at Level 1 (High Transparency): Voluntary updates and shared access to rebuild emotional safety. Plan a monthly calibration to assess if anxiety has dropped sufficiently to move to Level 2.";
+            } else {
+                gradualText = "Since trust is structurally intact, focus on proactive communication rather than monitoring. Build trust through consistent word-action alignment rather than digital surveillance.";
+            }
+
+            const guaranteeText = `Partner B retains absolute rights to unmonitored therapy notes, private family confidences, and individual creative outlets. Transparency does not mean total erasure of personal boundaries.`;
+
+            document.getElementById('t2-out-trans-need').innerHTML = transNeedText;
+            document.getElementById('t2-out-priv-need').innerHTML = privNeedText;
+            document.getElementById('t2-out-frame').innerHTML = frameText;
+            document.getElementById('t2-out-compromise').innerHTML = compromiseHTML;
+            document.getElementById('t2-out-gradual').innerText = gradualText;
+            document.getElementById('t2-out-guarantee').innerText = guaranteeText;
+
+            document.getElementById('output-tool2').classList.add('active');
+
+            saveToHistory('tool2', `Talk: ${repTrans} vs ${repPriv}`, `<p>${frameText}</p><br>${compromiseHTML}`);
+        }
+
+
+        // ==========================================
+        // TOOL 3 LOGIC — PHONE / ACCOUNT PROTOCOL
+        // ==========================================
+        function loadSampleTool3() {
+            document.getElementById('t3_phone_rule').value = 'One snoops';
+            document.getElementById('t3_trigger').value = 'Found deleted messages with an ex-coworker late at night.';
+            document.getElementById('t3_safe_without_check').value = 'Proactive verbal check-ins when plans change and phone left face-up on counter.';
+            document.getElementById('t3_trusted_if_checked').value = 'Partner asking permission before looking, and listening to my explanation calmly.';
+            document.getElementById('t3_financial_access').value = 'Separate but visible';
+
+            showToast("Sample loaded: Deleted messages & snooping pattern");
+        }
+
+        function analyzeTool3() {
+            const rule = document.getElementById('t3_phone_rule').value;
+            const trigger = document.getElementById('t3_trigger').value || "Unclear digital friction";
+            const safeWithout = document.getElementById('t3_safe_without_check').value || "Open communication";
+            const trustedIf = document.getElementById('t3_trusted_if_checked').value || "Respectful inquiries";
+            const financial = document.getElementById('t3_financial_access').value;
+
+            const battleText = `The device conflict triggered by "<em>${trigger}</em>" has turned smartphones into a proxy battleground for emotional safety versus personal autonomy. Current pattern: "${rule}".`;
+
+            const optionsHTML = `
+                <ul>
+                    <li><strong>Level 1 — Full Transparency (Recovery Mode):</strong> Passwords shared. Open access permitted, but MUST be accompanied by a verbal notification ("Hey, grabbing your phone to check x").</li>
+                    <li><strong>Level 2 — Request & Show (Standard Trust):</strong> Passwords private, but if a partner feels anxious, they can ask: "Can you show me your recent messages?" and it is shown together on the spot.</li>
+                    <li><strong>Level 3 — Complete Digital Independence:</strong> Phones strictly private. Safety is maintained through real-world behavioral transparency rather than device access.</li>
+                </ul>
+            `;
+
+            const checkinText = `Schedule a 15-minute weekly "Digital Check-In" on Sunday evenings. Use this dedicated space to ask questions or discuss device anxieties, preventing daily spontaneous policing or secretive checking.`;
+
+            const snoopingText = `Unagreed snooping violates dignity and generates guilt, while secret deletion of messages destroys safety. Rule: If either partner feels the urge to snoop, it is an automatic trigger to request a Level 2 "Show Together" session within 12 hours.`;
+
+            const financialText = `For financial structure ("${financial}"): Ensure joint household obligations are fully automated and visible. Retain personal discretionary allowances without need for individual line-item auditing.`;
+
+            const ritualText = `<strong>The Daily Rebuild Ritual:</strong> Practice the 'Phone-Free Reunion.' Spend the first 20 minutes after arriving home with all devices placed in a drawer, engaging in direct eye contact and verbal connection.`;
+
+            document.getElementById('t3-out-battle').innerHTML = battleText;
+            document.getElementById('t3-out-options').innerHTML = optionsHTML;
+            document.getElementById('t3-out-checkin').innerText = checkinText;
+            document.getElementById('t3-out-snooping').innerText = snoopingText;
+            document.getElementById('t3-out-financial').innerText = financialText;
+            document.getElementById('t3-out-ritual').innerHTML = ritualText;
+
+            document.getElementById('output-tool3').classList.add('active');
+
+            saveToHistory('tool3', `Protocol: ${rule}`, `<p>${battleText}</p><br>${optionsHTML}`);
+        }
+
+
+        // ==========================================
+        // TOOL 4 LOGIC — SUSPICION DECODER
+        // ==========================================
+        function loadSampleTool4() {
+            document.getElementById('t4_off_description').value = "Partner seems distant, takes phone to bathroom every time, and got defensive when asked about work hours.";
+            document.getElementById('t4_evidence_real').value = "";
+            document.getElementById('t4_evidence_feared').value = "Fearing an affair with a new coworker or secret messaging apps.";
+            document.getElementById('t4_past_history').value = "Cheated on before";
+            document.getElementById('t4_stress_level').value = "8";
+            document.getElementById('stress_val').innerText = "8";
+            document.getElementById('t4_talked').value = "No, I'm investigating";
+
+            showToast("Sample loaded: Vague anxiety with trauma history");
+        }
+
+        function analyzeTool4() {
+            const off = document.getElementById('t4_off_description').value || "Vague shift in energy";
+            const realEv = document.getElementById('t4_evidence_real').value.trim();
+            const fearedEv = document.getElementById('t4_evidence_feared').value;
+            const history = document.getElementById('t4_past_history').value;
+            const stress = parseInt(document.getElementById('t4_stress_level').value);
+
+            let typeTitle = "";
+            let typeDesc = "";
+
+            if(realEv.length > 5) {
+                typeTitle = "Intuition / Fact-Grounded Suspicion";
+                typeDesc = "Your assessment is anchored in concrete, observable indicators rather than pure internal projection. This warrants direct, clear conversation.";
+            } else if(history.includes("Cheated on") || history.includes("betrayals")) {
+                typeTitle = "Trauma-Activated / Hypervigilance Response";
+                typeDesc = "Because of past betrayal history combined with high stress, your nervous system is scanning for danger cues. Unexplained behaviors are automatically being categorized as catastrophic threats.";
+            } else if(stress >= 7) {
+                typeTitle = "Stress-Induced Anxiety Projection";
+                typeDesc = "High baseline stress reduces emotional tolerance, causing normal partner withdrawal or exhaustion to feel like intentional deception.";
+            } else {
+                typeTitle = "Ambiguous Relational Disconnect";
+                typeDesc = "You are sensing real emotional distance, but jumping ahead to conclusions regarding secrecy. The primary issue may be burnout or emotional disconnection.";
+            }
+
+            const evAuditText = realEv.length > 5 
+                ? `<strong>Real Evidence:</strong> "${realEv}". <br><strong>Feared Scenario:</strong> "${fearedEv}". <br><em>Focus your conversation exclusively on the verifiable real evidence rather than speculating on feared scenarios.</em>`
+                : `<strong>Real Evidence:</strong> None submitted. <br><strong>Feared Scenario:</strong> "${fearedEv}". <br><em>Notice that your distress is currently driven by feared outcomes rather than tangible proof.</em>`;
+
+            const scriptText = `"I've been feeling some emotional distance between us recently, and when I notice things like ${off.substring(0, 30)}..., my anxiety flares up. I don't want to make unfair assumptions or snoop. Can we talk about how things are feeling between us right now?"`;
+
+            const stopText = `Investigation stops being healthy the moment you cross into secret searching, installation of tracking tech, or continuous phone monitoring. Investigating builds an addictive cycle of hypervigilance that damages self-respect.`;
+
+            const selfCheckHTML = `
+                <li>Is my reaction proportional to what is actually in front of me today?</li>
+                <li>Am I responding to my current partner, or to the person who hurt me in my past?</li>
+                <li>If I check their phone right now, will it truly cure my doubt, or will I just search for the next thing?</li>
+            `;
+
+            let profText = "";
+            if(history.includes("Cheated on") || stress >= 8) {
+                profText = "Strongly recommended: Individual therapy to process past betrayal trauma, or couples counseling if direct dialogue leads to immediate stonewalling or intense defensiveness.";
+            } else {
+                profText = "If direct conversations continue to produce anxiety or panic without resolution, schedule 2-3 sessions with a relational therapist to facilitate structured dialogue.";
+            }
+
+            document.getElementById('t4-out-type').innerHTML = `<strong>${typeTitle}:</strong> ${typeDesc}`;
+            document.getElementById('t4-out-evidence').innerHTML = evAuditText;
+            document.getElementById('t4-out-script').innerText = scriptText;
+            document.getElementById('t4-out-stop').innerText = stopText;
+            document.getElementById('t4-out-selfcheck').innerHTML = selfCheckHTML;
+            document.getElementById('t4-out-professional').innerText = profText;
+
+            document.getElementById('output-tool4').classList.add('active');
+
+            saveToHistory('tool4', `Decoder: ${typeTitle}`, `<p><strong>${typeTitle}</strong></p><p>${typeDesc}</p><br><code>${scriptText}</code>`);
+        }
+
+
+        // ==========================================
+        // TOOL 5 LOGIC — REBUILD PLAN
+        // ==========================================
+        function loadSampleTool5() {
+            document.getElementById('t5_hidden_type').value = 'Spending';
+            document.getElementById('t5_discovery_method').value = 'Accidental discovery';
+            document.getElementById('t5_trust_level').value = '3';
+            document.getElementById('trust_val').innerText = '3';
+            document.getElementById('t5_hurt_needs').value = "Full bank statements for last 6 months, honest explanation of debt, and control over joint budget.";
+            document.getElementById('t5_trans_offer').value = "Showing all accounts, weekly budget reviews, and taking a financial literacy course.";
+            document.getElementById('t5_couples_work').value = 'Yes';
+
+            showToast("Sample loaded: Secret financial spending repair");
+        }
+
+        function analyzeTool5() {
+            const hidden = document.getElementById('t5_hidden_type').value;
+            const discovery = document.getElementById('t5_discovery_method').value;
+            const trustLevel = document.getElementById('t5_trust_level').value;
+            const hurtNeeds = document.getElementById('t5_hurt_needs').value || "Reassurance and honesty";
+            const transOffer = document.getElementById('t5_trans_offer').value || "Full openness";
+            const couplesWork = document.getElementById('t5_couples_work').value;
+
+            const damageText = `Rupture area: <strong>${hidden}</strong> (Discovered via ${discovery}). Current Trust Level: <strong>${trustLevel}/10</strong>. Discovery via ${discovery.toLowerCase()} creates an extra layer of shock compared to direct confession. Repair requires deliberate, transparent action over time.`;
+
+            const offerText = `The transparent partner must move from passive answers to active transparency around: "<em>${transOffer}</em>". Commitment: Provide accurate information before being asked, taking full ownership without minimizing or counter-accusing.`;
+
+            const verificationText = `To meet the hurt partner's need ("<em>${hurtNeeds}</em>") without creating a permanent parent-child dynamic: Implement scheduled weekly verification windows. The hurt partner reviews relevant accounts/logs once a week during this designated time, avoiding daily unpredictable policing.`;
+
+            const graduationText = `
+                <strong>Phase 1 (Months 1-3): High Visibility.</strong> Maximum transparency, active check-ins, shared logs.<br>
+                <strong>Phase 2 (Months 4-6): Conditional Privacy.</strong> Routine check-ins drop to bi-weekly; individual accounts regain basic privacy provided all commitments are met.<br>
+                <strong>Phase 3 (Months 6+): Restored Autonomy.</strong> Transition from active verification back to standard baseline trust and mutual respect.
+            `;
+
+            const relapseText = `If secrecy recurs (e.g., deleted logs, hidden transactions): The rebuild process resets to Phase 1 immediately, and formal professional intervention (couples therapy) becomes mandatory to evaluate relationship viability.`;
+
+            const timelineText = `Rebuilding trust from a ${trustLevel}/10 level typically requires <strong>6 to 18 months</strong> of consistent, predictable behavioral alignment. Quick fixes do not exist, but steady small actions yield deep lasting security.`;
+
+            document.getElementById('t5-out-damage').innerHTML = damageText;
+            document.getElementById('t5-out-offer').innerHTML = offerText;
+            document.getElementById('t5-out-verification').innerHTML = verificationText;
+            document.getElementById('t5-out-graduation').innerHTML = graduationText;
+            document.getElementById('t5-out-relapse').innerText = relapseText;
+            document.getElementById('t5-out-timeline').innerHTML = timelineText;
+
+            document.getElementById('output-tool5').classList.add('active');
+
+            saveToHistory('tool5', `Rebuild Plan: ${hidden} (${trustLevel}/10)`, `<p>${damageText}</p><br><p>${graduationText}</p>`);
+        }
+
+        // Initialize history views on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistory('tool1');
+        });
+    </script>
+</body>
+</html>

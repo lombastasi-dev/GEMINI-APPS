@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BackToWorkReset — Re-entry Toolkit</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- CSS VARIABLES & BASE STYLES --- */
+        :root {
+            --dusty-rose: #CDB4DB;
+            --dusty-rose-dark: #b592c7;
+            --dusty-rose-light: #f3eaf7;
+            --warm-gray: #6C757D;
+            --warm-gray-light: #f8f9fa;
+            --text-dark: #2b2d42;
+            --text-muted: #6c757d;
+            --bg-gradient: linear-gradient(135deg, #FDF2F8 0%, #F8F9FA 100%);
+            --sidebar-width: 260px;
+            --radius-xl: 1rem;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.2s ease-in-out;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* --- LAYOUT --- */
+        #app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* --- SIDEBAR --- */
+        #sidebar {
+            width: var(--sidebar-width);
+            background: #ffffff;
+            border-right: 1px solid rgba(0,0,0,0.05);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--dusty-rose-dark);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 1rem 0.75rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            color: var(--warm-gray);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.925rem;
+            border-radius: 0.5rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background-color: var(--dusty-rose-light);
+            color: var(--text-dark);
+        }
+
+        .nav-link.active {
+            background-color: var(--dusty-rose);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* --- MOBILE HEADER & HAMBURGER --- */
+        .mobile-header {
+            display: none;
+            background: #ffffff;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-header .logo-text {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--warm-gray);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 95;
+        }
+
+        /* --- MAIN CONTENT AREA --- */
+        #main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- CARDS & COMPONENTS --- */
+        .card {
+            background: #ffffff;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .problem-statement {
+            background-color: var(--dusty-rose-light);
+            border-left: 4px solid var(--dusty-rose-dark);
+            padding: 0.75rem 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            color: #4a3e52;
+            font-size: 0.95rem;
+            font-style: italic;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- DASHBOARD --- */
+        .hero-banner {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, var(--dusty-rose-light) 100%);
+            border: 1px solid rgba(205, 180, 219, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .hero-banner h2 {
+            font-size: 2.2rem;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .hero-banner p {
+            color: var(--warm-gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .dash-card {
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--dusty-rose);
+        }
+
+        .dash-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--dusty-rose-light);
+            color: var(--dusty-rose-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .dash-card p {
+            font-size: 0.875rem;
+            color: var(--warm-gray);
+            line-height: 1.4;
+        }
+
+        /* --- FORMS --- */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            background-color: #fdfdfd;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--dusty-rose-dark);
+            box-shadow: 0 0 0 3px rgba(205, 180, 219, 0.3);
+            background-color: #fff;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.925rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--dusty-rose);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dusty-rose-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--warm-gray-light);
+            color: var(--warm-gray);
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+            color: var(--text-dark);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.825rem;
+        }
+
+        .btn-copy {
+            background-color: #f1f5f9;
+            color: var(--text-dark);
+            border: 1px solid #cbd5e1;
+            margin-top: 0.5rem;
+        }
+
+        .btn-copy:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* --- OUTPUT SECTIONS --- */
+        .output-container {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+        }
+
+        .output-card {
+            border-left: 4px solid var(--dusty-rose-dark);
+            margin-bottom: 1.25rem;
+        }
+
+        .output-card h4 {
+            font-size: 1.05rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .output-card h4 i {
+            color: var(--dusty-rose-dark);
+        }
+
+        .output-card p, .output-card ul {
+            font-size: 0.95rem;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .output-card ul {
+            padding-left: 1.25rem;
+        }
+
+        .output-card li {
+            margin-bottom: 0.4rem;
+        }
+
+        .script-box {
+            background-color: #f8fafc;
+            border: 1px border #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-style: italic;
+            color: #334155;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+
+        /* --- HISTORY ACCORDION --- */
+        .history-section {
+            margin-top: 2.5rem;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            padding: 0.5rem 0;
+        }
+
+        .history-header h3 {
+            font-size: 1.1rem;
+            color: var(--warm-gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .history-content {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .history-content.active {
+            display: block;
+        }
+
+        .history-item {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item-info {
+            font-size: 0.875rem;
+        }
+
+        .history-item-date {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            background: #ffffff;
+            border-top: 1px solid #f0f0f0;
+            padding: 1.25rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--warm-gray);
+            margin-top: auto;
+            width: 100%;
+        }
+
+        footer .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* --- TOAST NOTIFICATION --- */
+        #toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: var(--text-dark);
+            color: #fff;
+            text-align: center;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            position: fixed;
+            z-index: 1000;
+            bottom: 30px;
+            right: 30px;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* --- RESPONSIVE MOBILE MEDIA QUERIES --- */
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+            }
+
+            #sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            #main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 1.5rem 1rem;
+            }
+
+            .hero-banner h2 {
+                font-size: 1.75rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MOBILE HEADER -->
+    <header class="mobile-header">
+        <div class="logo-text">
+            <i class="fa-solid fa-seedling" style="color: var(--dusty-rose-dark);"></i>
+            BackToWorkReset
+        </div>
+        <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- SIDEBAR OVERLAY FOR MOBILE -->
+    <div class="overlay" id="overlay"></div>
+
+    <div id="app-container">
+        <!-- SIDEBAR NAV -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-seedling"></i>
+                <h1>BackToWorkReset</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a class="nav-link active" data-target="dashboard">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool1">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <span>The Re-Entry Plan</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool2">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i>
+                        <span>What Changed Audit</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool3">
+                        <i class="fa-solid fa-award"></i>
+                        <span>Credibility Rebuilder</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool4">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Boundary Setter</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool5">
+                        <i class="fa-solid fa-compass"></i>
+                        <span>The Long View</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- MAIN CONTENT AREA -->
+        <main id="main-content">
+            <div class="content-wrapper">
+
+                <!-- DASHBOARD VIEW -->
+                <section id="dashboard" class="view-section active">
+                    <div class="card hero-banner">
+                        <h2>Back-to-Work Reset</h2>
+                        <p>You changed while you were away. So did work. Let's bridge the gap thoughtfully, sustainably, and at your own pace.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card dash-card" onclick="navigateTo('tool1')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                            <h3>The Re-Entry Plan</h3>
+                            <p>Build a structured day-by-day and week-by-week schedule to reduce overwhelm upon returning.</p>
+                        </div>
+                        <div class="card dash-card" onclick="navigateTo('tool2')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                            <h3>What Changed Audit</h3>
+                            <p>Map structural, cultural, and tool updates to catch up efficiently without missing a beat.</p>
+                        </div>
+                        <div class="card dash-card" onclick="navigateTo('tool3')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-award"></i></div>
+                            <h3>Credibility Rebuilder</h3>
+                            <p>Craft your narrative, identify early quick wins, and reframe internal return fears.</p>
+                        </div>
+                        <div class="card dash-card" onclick="navigateTo('tool4')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h3>Boundary Setter</h3>
+                            <p>Establish clear communication scripts and calendar setups to protect your non-negotiables.</p>
+                        </div>
+                        <div class="card dash-card" onclick="navigateTo('tool5')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-compass"></i></div>
+                            <h3>The Long View</h3>
+                            <p>Define your unwritten new work contract and set evaluation checkpoints for your career future.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: THE RE-ENTRY PLAN -->
+                <section id="tool1" class="view-section">
+                    <div class="section-header">
+                        <h2>The Re-Entry Plan</h2>
+                    </div>
+                    <div class="problem-statement">
+                        "I'm overwhelmed thinking about my first day back."
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool1">
+                            <div class="form-group">
+                                <label for="t1-type">Type of leave:</label>
+                                <select id="t1-type" class="form-control" required>
+                                    <option value="Parental">Parental Leave</option>
+                                    <option value="Medical">Medical Leave</option>
+                                    <option value="Caregiving">Caregiving Leave</option>
+                                    <option value="Sabbatical">Sabbatical</option>
+                                    <option value="Mental health">Mental Health Leave</option>
+                                    <option value="Other">Other Extended Absence</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-length">Length of leave:</label>
+                                <select id="t1-length" class="form-control" required>
+                                    <option value="<3mo">Less than 3 months</option>
+                                    <option value="3-6mo">3 to 6 months</option>
+                                    <option value="6mo-1yr">6 months to 1 year</option>
+                                    <option value="1yr+">More than 1 year</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-date">Return date:</label>
+                                <input type="date" id="t1-date" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-energy">Your current energy level:</label>
+                                <select id="t1-energy" class="form-control" required>
+                                    <option value="Ready">Ready & Energized</option>
+                                    <option value="Anxious">Anxious / Apprehensive</option>
+                                    <option value="Exhausted">Exhausted / Low Capacity</option>
+                                    <option value="Excited">Excited</option>
+                                    <option value="Mixed">Mixed Emotions</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-work">Work arrangement on return:</label>
+                                <select id="t1-work" class="form-control" required>
+                                    <option value="Full-time">Full-time (Standard)</option>
+                                    <option value="Part-time">Part-time</option>
+                                    <option value="Phased">Phased / Gradual Ramp-up</option>
+                                    <option value="Remote">Fully Remote</option>
+                                    <option value="Hybrid">Hybrid</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gears"></i> Generate Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool1" class="output-container"></div>
+                    <div id="history-tool1" class="history-section"></div>
+                </section>
+
+                <!-- TOOL 2: WHAT CHANGED AUDIT -->
+                <section id="tool2" class="view-section">
+                    <div class="section-header">
+                        <h2>What Changed Audit</h2>
+                    </div>
+                    <div class="problem-statement">
+                        "Everything feels different and I don't know what I missed."
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool2">
+                            <div class="form-group">
+                                <label for="t2-changes">What do you know changed? (Known shifts):</label>
+                                <textarea id="t2-changes" class="form-control" placeholder="e.g. New project management tool, shift in company targets..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-team">Your team composition:</label>
+                                <select id="t2-team" class="form-control" required>
+                                    <option value="Same">Same - No changes</option>
+                                    <option value="Some new people">Some new people</option>
+                                    <option value="Mostly new">Mostly new members</option>
+                                    <option value="Completely new">Completely new team</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-systems">Systems / Tools:</label>
+                                <select id="t2-systems" class="form-control" required>
+                                    <option value="Same">Same software/tools</option>
+                                    <option value="Minor updates">Minor software updates</option>
+                                    <option value="Major changes">Major tool migrations</option>
+                                    <option value="Completely new">Completely new tech stack</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-strategy">Company strategy:</label>
+                                <select id="t2-strategy" class="form-control" required>
+                                    <option value="Same">Same direction</option>
+                                    <option value="Evolved">Evolved / Refined</option>
+                                    <option value="Pivot">Major Pivot</option>
+                                    <option value="Don't know">Unclear / Don't know yet</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-role">Your role scope:</label>
+                                <select id="t2-role" class="form-control" required>
+                                    <option value="Same">Same responsibilities</option>
+                                    <option value="Expanded">Expanded scope</option>
+                                    <option value="Reduced">Reduced scope</option>
+                                    <option value="Unclear">Unclear / Shifted</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gears"></i> Generate Audit</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool2" class="output-container"></div>
+                    <div id="history-tool2" class="history-section"></div>
+                </section>
+
+                <!-- TOOL 3: CREDIBILITY REBUILDER -->
+                <section id="tool3" class="view-section">
+                    <div class="section-header">
+                        <h2>Credibility Rebuilder</h2>
+                    </div>
+                    <div class="problem-statement">
+                        "I feel like I have to prove myself all over again."
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool3">
+                            <div class="form-group">
+                                <label for="t3-fears">What are you afraid people think about your leave?</label>
+                                <textarea id="t3-fears" class="form-control" placeholder="e.g., They think I'm no longer committed or that I've fallen behind on industry trends..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-skills">What skills or connections did you maintain during leave?</label>
+                                <textarea id="t3-skills" class="form-control" placeholder="e.g., Kept touch with core clients, maintained organizational calm under pressure..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-perspective">What new perspective do you bring now?</label>
+                                <textarea id="t3-perspective" class="form-control" placeholder="e.g., Stronger focus on prioritization, clearer view on long-term strategy..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-perception">How do you want to be seen?</label>
+                                <select id="t3-perception" class="form-control" required>
+                                    <option value="Same as before">Same capable professional as before</option>
+                                    <option value="Stronger">Stronger and more focused</option>
+                                    <option value="Different">Evolved into a new perspective/role</option>
+                                    <option value="Still figuring it out">Still figuring it out</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gears"></i> Generate Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool3" class="output-container"></div>
+                    <div id="history-tool3" class="history-section"></div>
+                </section>
+
+                <!-- TOOL 4: BOUNDARY SETTER -->
+                <section id="tool4" class="view-section">
+                    <div class="section-header">
+                        <h2>Boundary Setter</h2>
+                    </div>
+                    <div class="problem-statement">
+                        "I need to protect the boundaries I established during leave."
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool4">
+                            <div class="form-group">
+                                <label for="t4-boundary">What boundary do you want to keep?</label>
+                                <select id="t4-boundary" class="form-control" required>
+                                    <option value="No after-hours email">No after-hours emails/Slack</option>
+                                    <option value="Hard stop time">Hard stop time at end of day</option>
+                                    <option value="Lunch break protected">Protected, uninterrupted lunch break</option>
+                                    <option value="No weekend work">Strictly no weekend work</option>
+                                    <option value="Flexible hours">Flexible start/end hours</option>
+                                    <option value="Other">Custom Boundary</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Was this boundary respected before leave?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t4-respected" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t4-respected" value="Sometimes" checked> Sometimes</label>
+                                    <label class="radio-label"><input type="radio" name="t4-respected" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t4-respected" value="Not applicable"> Not applicable</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-fear">Your fear about enforcing it:</label>
+                                <textarea id="t4-fear" class="form-control" placeholder="e.g., I fear appearing less committed or missing out on key updates..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-audience">Who needs to know about this boundary?</label>
+                                <select id="t4-audience" class="form-control" required>
+                                    <option value="Boss">Direct Manager / Boss</option>
+                                    <option value="Team">Immediate Team Members</option>
+                                    <option value="Clients">External Clients / Partners</option>
+                                    <option value="Everyone">Everyone I interact with</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gears"></i> Build Boundary Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool4" class="output-container"></div>
+                    <div id="history-tool4" class="history-section"></div>
+                </section>
+
+                <!-- TOOL 5: THE LONG VIEW -->
+                <section id="tool5" class="view-section">
+                    <div class="section-header">
+                        <h2>The Long View</h2>
+                    </div>
+                    <div class="problem-statement">
+                        "This return feels like a fresh start. What do I actually want now?"
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool5">
+                            <div class="form-group">
+                                <label for="t5-learned">What did you learn about yourself during leave?</label>
+                                <textarea id="t5-learned" class="form-control" placeholder="e.g., Realized my health and family come first; I need clear structure to thrive..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-different">What do you want differently at work?</label>
+                                <textarea id="t5-different" class="form-control" placeholder="e.g., More autonomy, less focus on vanity metrics, more flexible scheduling..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-intolerable">What are you no longer willing to tolerate?</label>
+                                <textarea id="t5-intolerable" class="form-control" placeholder="e.g., Daily unpaid overtime, chaotic last-minute fire drills..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-goals">Your career goals now:</label>
+                                <select id="t5-goals" class="form-control" required>
+                                    <option value="Accelerate">Accelerate & Push for Growth</option>
+                                    <option value="Maintain">Maintain & Stabilize Current Role</option>
+                                    <option value="Pivot">Pivot to New Responsibilities</option>
+                                    <option value="Downshift">Downshift / Reduce Scope</option>
+                                    <option value="Explore">Explore New Options Quietly</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-timeline">Timeline for next big decision:</label>
+                                <select id="t5-timeline" class="form-control" required>
+                                    <option value="3mo">Within 3 months</option>
+                                    <option value="6mo">Within 6 months</option>
+                                    <option value="1yr">Within 1 year</option>
+                                    <option value="No rush">No rush / Taking it as it comes</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gears"></i> Frame Your Long View</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool5" class="output-container"></div>
+                    <div id="history-tool5" class="history-section"></div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            For career re-entry planning only. Not medical, legal, or therapeutic advice. For health-related return-to-work accommodations, consult your healthcare provider and HR department.
+        </div>
+    </footer>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast">Copied to clipboard!</div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* --- NAVIGATION & UI TOGGLES --- */
+        const sidebar = document.getElementById('sidebar');
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const overlay = document.getElementById('overlay');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const viewSections = document.querySelectorAll('.view-section');
+
+        function toggleMobileMenu() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        hamburgerBtn.addEventListener('click', toggleMobileMenu);
+        overlay.addEventListener('click', toggleMobileMenu);
+
+        function navigateTo(targetId) {
+            navLinks.forEach(link => {
+                if(link.getAttribute('data-target') === targetId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            viewSections.forEach(section => {
+                if(section.id === targetId) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+
+            if (sidebar.classList.contains('open')) {
+                toggleMobileMenu();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = link.getAttribute('data-target');
+                navigateTo(target);
+            });
+        });
+
+        /* --- TOAST & UTILITIES --- */
+        function showToast(message = "Copied!") {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy");
+            });
+        }
+
+        /* --- LOCAL STORAGE MANAGEMENT --- */
+        function getHistory(toolId) {
+            const key = `backtowork_history_${toolId}`;
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+
+        function saveHistory(toolId, data) {
+            const key = `backtowork_history_${toolId}`;
+            let history = getHistory(toolId);
+            history.unshift({
+                timestamp: new Date().toLocaleString(),
+                data: data
+            });
+            if(history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistoryUI(toolId);
+        }
+
+        function clearHistory(toolId) {
+            const key = `backtowork_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistoryUI(toolId);
+            showToast("History cleared");
+        }
+
+        function renderHistoryUI(toolId) {
+            const container = document.getElementById(`history-${toolId}`);
+            if(!container) return;
+
+            const history = getHistory(toolId);
+            if(history.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <div class="history-header" onclick="toggleHistoryContent('${toolId}')">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Entries (${history.length})</h3>
+                    <i class="fa-solid fa-chevron-down" id="history-arrow-${toolId}"></i>
+                </div>
+                <div class="history-content" id="history-list-${toolId}">
+                    <button class="btn btn-secondary btn-sm" style="margin-bottom: 0.75rem;" onclick="clearHistory('${toolId}')">
+                        <i class="fa-solid fa-trash"></i> Clear History
+                    </button>
+            `;
+
+            history.forEach((item, index) => {
+                html += `
+                    <div class="history-item">
+                        <div class="history-item-info">
+                            <strong>Entry #${history.length - index}</strong>
+                            <div class="history-item-date">${item.timestamp}</div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick='loadHistoryEntry("${toolId}", ${index})'>
+                            <i class="fa-solid fa-folder-open"></i> Load
+                        </button>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function toggleHistoryContent(toolId) {
+            const content = document.getElementById(`history-list-${toolId}`);
+            const arrow = document.getElementById(`history-arrow-${toolId}`);
+            if(content) {
+                content.classList.toggle('active');
+                if(arrow) arrow.classList.toggle('fa-rotate-180');
+            }
+        }
+
+        function loadHistoryEntry(toolId, index) {
+            const history = getHistory(toolId);
+            if(history[index]) {
+                const item = history[index].data;
+                if(toolId === 'tool1') renderTool1Output(item);
+                if(toolId === 'tool2') renderTool2Output(item);
+                if(toolId === 'tool3') renderTool3Output(item);
+                if(toolId === 'tool4') renderTool4Output(item);
+                if(toolId === 'tool5') renderTool5Output(item);
+                showToast("Historical plan loaded!");
+            }
+        }
+
+        /* --- TOOL 1 LOGIC --- */
+        function loadSampleTool1() {
+            document.getElementById('t1-type').value = 'Parental';
+            document.getElementById('t1-length').value = '3-6mo';
+            
+            const returnDate = new Date();
+            returnDate.setDate(returnDate.getDate() + 14);
+            document.getElementById('t1-date').value = returnDate.toISOString().split('T')[0];
+            
+            document.getElementById('t1-energy').value = 'Anxious';
+            document.getElementById('t1-work').value = 'Phased';
+        }
+
+        document.getElementById('form-tool1').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = {
+                type: document.getElementById('t1-type').value,
+                length: document.getElementById('t1-length').value,
+                date: document.getElementById('t1-date').value,
+                energy: document.getElementById('t1-energy').value,
+                work: document.getElementById('t1-work').value
+            };
+            renderTool1Output(formData);
+            saveHistory('tool1', formData);
+        });
+
+        function renderTool1Output(data) {
+            const container = document.getElementById('output-tool1');
+            
+            let paceNote = data.energy === 'Anxious' || data.energy === 'Exhausted' 
+                ? "Given your current energy levels, protect your calendar strictly during week 1 and defer major strategic commitments."
+                : "You have positive momentum; channel it into focused catch-ups while maintaining steady pacing.";
+
+            let html = `
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-calendar-day"></i> The First Week: Day-by-Day Gentle Re-Entry</h4>
+                    <ul>
+                        <li><strong>Day 1 (Systems & Welcome):</strong> Focus on password resets, email inbox scanning (from newest to oldest), and a casual 1-on-1 with your direct manager. No heavy deliverables.</li>
+                        <li><strong>Day 2 (Context Gathering):</strong> Review top 3 priority project updates. Limit meetings to 30 mins. Take a dedicated lunch break.</li>
+                        <li><strong>Day 3 (Reverse Handoffs):</strong> Connect with whoever covered your key tasks during your ${data.length} ${data.type.toLowerCase()} leave. Listen rather than act.</li>
+                        <li><strong>Day 4 (Calendar Cleanup):</strong> Decline optional meetings for next week. Group ongoing tasks into clear focus blocks.</li>
+                        <li><strong>Day 5 (Reflect & Reset):</strong> Wrap up early if possible. Write down 3 small wins from your first week back. ${paceNote}</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-chart-line"></i> The First Month: Ramp-Up Plan (${data.work} Schedule)</h4>
+                    <ul>
+                        <li><strong>Week 1:</strong> Observation & Reconnaissance. Re-establish basic routine and access.</li>
+                        <li><strong>Week 2:</strong> Active Listening & 1-on-1s. Reconnect with key cross-functional partners.</li>
+                        <li><strong>Week 3:</strong> Taking Ownership. Resume primary core ownership of 1-2 major responsibilities.</li>
+                        <li><strong>Week 4:</strong> Full Operational Rhythm. Review your ${data.work} flow with your manager and adjust where needed.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-handshake-simple"></i> The Handoff Reverse</h4>
+                    <p>Schedule 20-minute catch-ups with key coverage personnel. Focus on these questions:</p>
+                    <ul>
+                        <li>"What changed in client/project priorities while I was away?"</li>
+                        <li>"Which decisions were delayed waiting for my return?"</li>
+                        <li>"What processes worked better during cover that we should keep?"</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-battery-half"></i> Energy Management Strategy</h4>
+                    <p>Since returning under a <strong>${data.work}</strong> arrangement feeling <strong>${data.energy}</strong>:</p>
+                    <ul>
+                        <li>Set a non-negotiable hard stop time at the end of each working day.</li>
+                        <li>Schedule 15-minute "transition buffers" between back-to-back meetings.</li>
+                        <li>Keep personal commitments light in evenings during the first fortnight.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-bullseye"></i> Reality Check: Reasonable 30-Day Goal</h4>
+                    <p>Success in your first 30 days is <strong>NOT</strong> solving every backlog item. Success is re-establishing relationships, understanding the current context, and finding a sustainable cadence without burning out.</p>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            container.classList.add('active');
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* --- TOOL 2 LOGIC --- */
+        function loadSampleTool2() {
+            document.getElementById('t2-changes').value = 'Migrated to new project management tool, shifted quarterly focus to enterprise clients.';
+            document.getElementById('t2-team').value = 'Some new people';
+            document.getElementById('t2-systems').value = 'Minor updates';
+            document.getElementById('t2-strategy').value = 'Evolved';
+            document.getElementById('t2-role').value = 'Same';
+        }
+
+        document.getElementById('form-tool2').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = {
+                changes: document.getElementById('t2-changes').value || 'Standard organizational evolution',
+                team: document.getElementById('t2-team').value,
+                systems: document.getElementById('t2-systems').value,
+                strategy: document.getElementById('t2-strategy').value,
+                role: document.getElementById('t2-role').value
+            };
+            renderTool2Output(formData);
+            saveHistory('tool2', formData);
+        });
+
+        function renderTool2Output(data) {
+            const container = document.getElementById('output-tool2');
+
+            let html = `
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-list-check"></i> The Catch-Up List</h4>
+                    <p>Based on known changes: "<em>${data.changes}</em>"</p>
+                    <ul>
+                        <li><strong>Strategy Briefings:</strong> Request recent quarterly deck/recordings to understand why strategy is ${data.strategy.toLowerCase()}.</li>
+                        <li><strong>Documentation Review:</strong> Skim top project hubs created during your absence.</li>
+                        <li><strong>Key Metric Shifts:</strong> Ask for the current dashboard tracking team KPIs.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-users-viewfinder"></i> The People Map (${data.team} team)</h4>
+                    <ul>
+                        <li><strong>New Team Members:</strong> Schedule 15-min introductory coffee/virtual chats focusing on getting to know them.</li>
+                        <li><strong>Departures & Role Shifts:</strong> Confirm who took over legacy responsibilities so you address requests correctly.</li>
+                        <li><strong>Stakeholder Alignment:</strong> Send a quick friendly note to key partner teams letting them know you are back.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-laptop-code"></i> System & Tool Gaps (${data.systems})</h4>
+                    <ul>
+                        <li>Request access or permission reinstatements for updated tool suites immediately.</li>
+                        <li>Ask a peer for a 15-minute screen-share demo of any altered workflows rather than trying to figure it out alone.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-masks-theater"></i> Culture Shift & Norms</h4>
+                    <p>With strategy being <strong>${data.strategy}</strong> and role remaining <strong>${data.role}</strong>:</p>
+                    <ul>
+                        <li>Observe meeting dynamics in your first week: Are teams meeting less or more? Remote or hybrid focus?</li>
+                        <li>Check updated Slack/Teams communication norms (e.g. core working hours, channel usage).</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-circle-question"></i> Questions to Ask Without Sounding "Out of the Loop"</h4>
+                    <ul>
+                        <li>"Could you walk me through how we arrived at this current priority?"</li>
+                        <li>"What was the main driver behind adopting this new process/tool?"</li>
+                        <li>"What's the single most important thing I can help unblock this month?"</li>
+                    </ul>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            container.classList.add('active');
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* --- TOOL 3 LOGIC --- */
+        function loadSampleTool3() {
+            document.getElementById('t3-fears').value = 'I fear people think I am behind on industry trends and less committed to long hours.';
+            document.getElementById('t3-skills').value = 'Maintained strong client relationships remotely and deepened crisis-management skills.';
+            document.getElementById('t3-perspective').value = 'Fresh perspective on ruthless prioritization and clear boundaries.';
+            document.getElementById('t3-perception').value = 'Stronger';
+        }
+
+        document.getElementById('form-tool3').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = {
+                fears: document.getElementById('t3-fears').value || 'Uncertainty about standing',
+                skills: document.getElementById('t3-skills').value || 'Core professional competencies',
+                perspective: document.getElementById('t3-perspective').value || 'Clearer strategic focus',
+                perception: document.getElementById('t3-perception').value
+            };
+            renderTool3Output(formData);
+            saveHistory('tool3', formData);
+        });
+
+        function renderTool3Output(data) {
+            const container = document.getElementById('output-tool3');
+
+            const scriptText = "It was a meaningful period away, and I'm really glad to be back! I feel energized and focused, with a fresh perspective on how we approach our priorities this quarter.";
+
+            let html = `
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-comment-dots"></i> The Narrative</h4>
+                    <p>Frame your return around presence and renewed focus rather than apologizing for absence. You wish to be seen as <strong>${data.perception}</strong>.</p>
+                    <p>Emphasize: <em>"My time away allowed me to step back and sharpen my perspective on ${data.perspective}."</em></p>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-bolt"></i> The Quick Win</h4>
+                    <p>Identify one small, low-stress contribution within 14 days to rebuild momentum:</p>
+                    <ul>
+                        <li>Audit an existing confusing doc/process and streamline it.</li>
+                        <li>Unblock one specific colleague on a task leveraging your background in <em>${data.skills}</em>.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-message"></i> The Update Script</h4>
+                    <p>When colleagues ask, <em>"How was your time off / leave?"</em> keep it warm, brief, and forward-looking:</p>
+                    <div class="script-box" id="script-tool3">${scriptText}</div>
+                    <button class="btn btn-copy btn-sm" onclick="copyToClipboard('${scriptText.replace(/'/g, "\\'")}')">
+                        <i class="fa-regular fa-copy"></i> Copy Script
+                    </button>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-bridge"></i> The Skill Bridge</h4>
+                    <p>Translating leave skills into workplace value:</p>
+                    <ul>
+                        <li><strong>Maintained:</strong> ${data.skills} &rarr; <em>Demonstrates continuity and relationship stability.</em></li>
+                        <li><strong>New Mindset:</strong> ${data.perspective} &rarr; <em>Demonstrates efficiency, strategic clarity, and resilience.</em></li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-heart-pulse"></i> The Self-Talk Reframe</h4>
+                    <p><strong>Fear:</strong> "<em>${data.fears}</em>"</p>
+                    <p><strong>Reframed Truth:</strong> Professional expertise doesn't evaporate during leave. Stepping away provides valuable distance that makes your problem-solving clearer and more intentional.</p>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            container.classList.add('active');
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* --- TOOL 4 LOGIC --- */
+        function loadSampleTool4() {
+            document.getElementById('t4-boundary').value = 'Hard stop time';
+            
+            const radios = document.getElementsByName('t4-respected');
+            radios.forEach(r => { if(r.value === 'Sometimes') r.checked = true; });
+
+            document.getElementById('t4-fear').value = 'Fear that setting a hard stop will make me seem less dedicated than before leave.';
+            document.getElementById('t4-audience').value = 'Boss';
+        }
+
+        document.getElementById('form-tool4').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let respectedVal = 'Sometimes';
+            const radios = document.getElementsByName('t4-respected');
+            radios.forEach(r => { if(r.checked) respectedVal = r.value; });
+
+            const formData = {
+                boundary: document.getElementById('t4-boundary').value,
+                respected: respectedVal,
+                fear: document.getElementById('t4-fear').value || 'Appearing less committed',
+                audience: document.getElementById('t4-audience').value
+            };
+            renderTool4Output(formData);
+            saveHistory('tool4', formData);
+        });
+
+        function renderTool4Output(data) {
+            const container = document.getElementById('output-tool4');
+
+            const scriptText = `To ensure I maintain maximum focus and quality during working hours, I'm establishing a firm routine with a ${data.boundary.toLowerCase()}. My goal is to make my time at work as high-impact as possible while maintaining this boundary.`;
+
+            let html = `
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-quote-left"></i> The Boundary Statement</h4>
+                    <p>Professional phrasing tailored for your <strong>${data.audience}</strong> regarding <strong>${data.boundary}</strong>:</p>
+                    <div class="script-box" id="script-tool4">${scriptText}</div>
+                    <button class="btn btn-copy btn-sm" onclick="copyToClipboard('${scriptText.replace(/'/g, "\\'")}')">
+                        <i class="fa-regular fa-copy"></i> Copy Boundary Statement
+                    </button>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-bullhorn"></i> Setting Expectations Proactively</h4>
+                    <ul>
+                        <li>Communicate this during an early 1-on-1 rather than waiting for a deadline crunch.</li>
+                        <li>Focus on outputs: <em>"By protecting this boundary, I ensure my energy and focus remain top-tier during core hours."</em></li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-sliders"></i> Calendar & Technical Setup</h4>
+                    <ul>
+                        <li>Block your official working hours directly in Outlook / Google Calendar.</li>
+                        <li>Set automatic Slack/Teams status or 'Do Not Disturb' rules at your chosen stop time.</li>
+                        <li>Remove work chat apps from personal devices if feasible.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-shield"></i> If Tested (Holding the Line)</h4>
+                    <p>When requests cross your boundary:</p>
+                    <div class="script-box">"I see this came in after hours. I will make this item my top priority first thing tomorrow morning."</div>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-key"></i> Self-Permission & Reframe</h4>
+                    <p><strong>Fear:</strong> "<em>${data.fear}</em>"</p>
+                    <p><strong>Truth:</strong> Boundaries are guardrails for sustainable productivity. You are teaching colleagues how to work with you effectively for the long run.</p>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            container.classList.add('active');
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* --- TOOL 5 LOGIC --- */
+        function loadSampleTool5() {
+            document.getElementById('t5-learned').value = 'I learned that my health and family time are paramount, and stress affects me more than I admitted.';
+            document.getElementById('t5-different').value = 'I want a more predictable schedule and clear, manageable key deliverables.';
+            document.getElementById('t5-intolerable').value = 'Unpaid overtime and last-minute panic deadlines.';
+            document.getElementById('t5-goals').value = 'Maintain';
+            document.getElementById('t5-timeline').value = '6mo';
+        }
+
+        document.getElementById('form-tool5').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = {
+                learned: document.getElementById('t5-learned').value || 'Self-awareness about priorities',
+                different: document.getElementById('t5-different').value || 'Better work-life balance',
+                intolerable: document.getElementById('t5-intolerable').value || 'Unreasonable workload',
+                goals: document.getElementById('t5-goals').value,
+                timeline: document.getElementById('t5-timeline').value
+            };
+            renderTool5Output(formData);
+            saveHistory('tool5', formData);
+        });
+
+        function renderTool5Output(data) {
+            const container = document.getElementById('output-tool5');
+
+            let html = `
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-file-contract"></i> The New Contract (With Yourself)</h4>
+                    <p>An internal pact based on your leave insights:</p>
+                    <ul>
+                        <li><strong>I promise to remember that:</strong> ${data.learned}</li>
+                        <li><strong>I am working towards:</strong> ${data.different}</li>
+                        <li><strong>I refuse to tolerate:</strong> ${data.intolerable}</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-flag"></i> Career Checkpoints (${data.timeline} Evaluation)</h4>
+                    <ul>
+                        <li><strong>30 Days:</strong> Check physical & emotional stamina. Are boundaries holding?</li>
+                        <li><strong>90 Days:</strong> Evaluate if the workplace culture aligns with your new goals to <em>${data.goals.toLowerCase()}</em>.</li>
+                        <li><strong>${data.timeline}:</strong> Major Decision Point. Determine if this environment supports your long-term needs.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-vial"></i> Exploration Plan</h4>
+                    <p>Since your goal is to <strong>${data.goals}</strong>:</p>
+                    <ul>
+                        <li>Test small shifts in daily responsibilities before seeking major role changes.</li>
+                        <li>Network internally with groups or teams that model the culture you desire.</li>
+                        <li>Keep an updated list of your weekly wins and personal satisfaction levels.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-door-open"></i> The Exit Door Criteria</h4>
+                    <p>It's healthy to know when a role no longer fits. Consider exploring outside opportunities if:</p>
+                    <ul>
+                        <li>Your non-negotiables (${data.intolerable}) are repeatedly ignored after clear communication.</li>
+                        <li>Your health or well-being deteriorates despite boundary setting.</li>
+                        <li>There is zero alignment with your desire to <em>${data.goals.toLowerCase()}</em>.</li>
+                    </ul>
+                </div>
+
+                <div class="card output-card">
+                    <h4><i class="fa-solid fa-feather"></i> The Grace Period</h4>
+                    <p>Give yourself permission to not have every detail figured out today. Re-entry is a continuous calibration process. Focus on today's step, not the next decade.</p>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            container.classList.add('active');
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* --- INITIALIZATION --- */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Render history headers if history exists
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(id => {
+                renderHistoryUI(id);
+            });
+        });
+    </script>
+</body>
+</html>

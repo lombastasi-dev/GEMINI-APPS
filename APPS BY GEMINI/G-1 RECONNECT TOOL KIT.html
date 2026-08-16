@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReconnectToolkit - A Repair & Reflection Tool for Long-Term Couples</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --rosewood: #6B2D5C;
+            --rosewood-light: #853A73;
+            --rosewood-soft: #F4EBF2;
+            --gold: #C9A227;
+            --gold-light: #F9F3E3;
+            --bg-start: #FAF7F5;
+            --bg-end: #F5EEEB;
+            --text-main: #2D262B;
+            --text-muted: #6E656B;
+            --border-color: #E6DDD8;
+            --white: #FFFFFF;
+            --shadow-sm: 0 2px 8px rgba(107, 45, 92, 0.06);
+            --shadow-md: 0 4px 16px rgba(107, 45, 92, 0.1);
+            --radius-xl: 1rem;
+            --radius-lg: 0.75rem;
+            --radius-md: 0.5rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px;
+            background: var(--white);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .brand {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--rosewood);
+        }
+
+        .brand i {
+            font-size: 1.5rem;
+            color: var(--gold);
+        }
+
+        .brand h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--rosewood);
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.925rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background: var(--rosewood-soft);
+            color: var(--rosewood);
+        }
+
+        .nav-item.active {
+            background: var(--rosewood);
+            color: var(--white);
+        }
+
+        .nav-item.active i {
+            color: var(--gold);
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.25rem;
+            z-index: 90;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-title {
+            font-weight: 700;
+            color: var(--rosewood);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--rosewood);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(45, 38, 43, 0.4);
+            z-index: 95;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 2.5rem 1.5rem;
+            max-width: 850px;
+            width: 100%;
+            margin-right: auto;
+            margin-left: calc(260px + max(0px, (100% - 260px - 850px) / 2));
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Component Styles */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(230, 221, 216, 0.6);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--rosewood);
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-control, .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: var(--white);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--rosewood);
+            box-shadow: 0 0 0 3px rgba(107, 45, 92, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        /* Options Grids & Inputs */
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .option-btn {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--white);
+            font-size: 0.95rem;
+        }
+
+        .option-btn:hover {
+            border-color: var(--rosewood);
+            background: var(--rosewood-soft);
+        }
+
+        .option-btn input {
+            margin-right: 0.75rem;
+            accent-color: var(--rosewood);
+        }
+
+        /* Grid Tasks (Tool 2) */
+        .task-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .task-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            background: #FCFAFA;
+        }
+
+        .task-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--rosewood);
+            margin-bottom: 0.5rem;
+        }
+
+        .task-options {
+            display: flex;
+            gap: 0.25rem;
+            background: #EFEBE9;
+            padding: 0.25rem;
+            border-radius: 0.375rem;
+        }
+
+        .task-opt {
+            flex: 1;
+            text-align: center;
+            padding: 0.35rem 0.2rem;
+            font-size: 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            user-select: none;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.15s ease;
+        }
+
+        .task-opt.selected {
+            background: var(--rosewood);
+            color: var(--white);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--rosewood);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--rosewood-light);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--gold-light);
+            color: #8C6F12;
+            border: 1px solid rgba(201, 162, 39, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: #F4EAD2;
+            color: #735B0E;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background: #F0ECE9;
+            color: var(--text-main);
+        }
+
+        /* Results / Output Sections */
+        .results-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px dashed var(--border-color);
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .score-badge-container {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: var(--rosewood-soft);
+            padding: 1.25rem 1.5rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 1.5rem;
+        }
+
+        .score-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--rosewood);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            box-shadow: 0 0 0 4px rgba(107, 45, 92, 0.15);
+        }
+
+        .score-meta h4 {
+            color: var(--rosewood);
+            font-size: 1.1rem;
+            margin-bottom: 0.15rem;
+        }
+
+        .score-meta p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .result-box {
+            background: #FAF8F6;
+            border-left: 4px solid var(--rosewood);
+            padding: 1.25rem;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin-bottom: 1.25rem;
+        }
+
+        .result-box.gold {
+            border-left-color: var(--gold);
+            background: #FCFAEF;
+        }
+
+        .result-title {
+            font-weight: 700;
+            color: var(--rosewood);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .result-title.gold {
+            color: #8C6F12;
+        }
+
+        .result-content ul {
+            padding-left: 1.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .result-content li {
+            margin-bottom: 0.35rem;
+        }
+
+        /* Script Box & Copy */
+        .script-box {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            position: relative;
+            font-style: italic;
+            color: #4A4046;
+            margin-top: 0.5rem;
+        }
+
+        .btn-copy {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.75rem;
+            background: var(--rosewood-soft);
+            color: var(--rosewood);
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .btn-copy:hover {
+            background: var(--rosewood);
+            color: var(--white);
+        }
+
+        /* Percentage Bar */
+        .progress-split {
+            height: 24px;
+            width: 100%;
+            background: #EFEBE9;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            margin: 1rem 0;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .split-segment {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            transition: width 0.5s ease;
+        }
+
+        .segment-you { background: var(--rosewood); }
+        .segment-partner { background: var(--gold); }
+        .segment-shared { background: #8E7C93; }
+
+        .split-legend {
+            display: flex;
+            gap: 1.25rem;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* History Section */
+        .history-section {
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .history-list {
+            display: none;
+            margin-top: 0.75rem;
+            gap: 0.75rem;
+            flex-direction: column;
+        }
+
+        .history-list.open {
+            display: flex;
+        }
+
+        .history-item {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-meta {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .dash-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            border: 1px solid rgba(230, 221, 216, 0.8);
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.25 ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--rosewood);
+        }
+
+        .dash-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: var(--rosewood-soft);
+            color: var(--rosewood);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .dash-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--rosewood);
+        }
+
+        .dash-desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Footer Disclaimer */
+        .app-footer {
+            margin-top: auto;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--rosewood);
+            color: var(--white);
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+            .mobile-header {
+                display: flex;
+            }
+            .main-content {
+                margin-left: 0;
+                margin-right: 0;
+                padding: 1.25rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="mobile-title">
+            <i class="fa-solid fa-heart-crack"></i> ReconnectToolkit
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-compass"></i>
+                <h1>ReconnectToolkit</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a class="nav-item active" data-tool="dashboard"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+                <li><a class="nav-item" data-tool="tool1"><i class="fa-solid fa-couch"></i> Roommate Check</a></li>
+                <li><a class="nav-item" data-tool="tool2"><i class="fa-solid fa-scale-balanced"></i> Chore Peace</a></li>
+                <li><a class="nav-item" data-tool="tool3"><i class="fa-solid fa-fire"></i> Intimacy Bridge</a></li>
+                <li><a class="nav-item" data-tool="tool4"><i class="fa-solid fa-hand-holding-heart"></i> Appreciation Reset</a></li>
+                <li><a class="nav-item" data-tool="tool5"><i class="fa-solid fa-code-fork"></i> The Crossroads</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content" id="mainContent">
+            
+            <!-- DASHBOARD VIEW -->
+            <section id="dashboardView" class="view-panel">
+                <div class="card" style="background: linear-gradient(135deg, var(--rosewood) 0%, #4A1E40 100%); color: white;">
+                    <h2 style="font-size: 2rem; margin-bottom: 0.5rem; color: #FFF;">Reconnect Toolkit</h2>
+                    <p style="font-size: 1.05rem; opacity: 0.9; font-weight: 300;">For couples who used to be lovers and aren't sure what they are now.</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dash-card" onclick="switchTool('tool1')">
+                        <div class="dash-icon"><i class="fa-solid fa-couch"></i></div>
+                        <div class="dash-title">The Roommate Check</div>
+                        <div class="dash-desc">Assess distance, faded rituals, and check if underlying romantic sparks remain.</div>
+                    </div>
+                    <div class="dash-card" onclick="switchTool('tool2')">
+                        <div class="dash-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+                        <div class="dash-title">Chore Peace</div>
+                        <div class="dash-desc">Map household work, reveal invisible labor, and stop petty scorekeeping.</div>
+                    </div>
+                    <div class="dash-card" onclick="switchTool('tool3')">
+                        <div class="dash-icon"><i class="fa-solid fa-fire"></i></div>
+                        <div class="dash-title">Intimacy Bridge</div>
+                        <div class="dash-desc">Unpack physical disconnection and build a safe, pressure-free path back.</div>
+                    </div>
+                    <div class="dash-card" onclick="switchTool('tool4')">
+                        <div class="dash-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                        <div class="dash-title">Appreciation Reset</div>
+                        <div class="dash-desc">Break the cycle of feeling invisible and rebuild genuine gratitude.</div>
+                    </div>
+                    <div class="dash-card" onclick="switchTool('tool5')">
+                        <div class="dash-icon"><i class="fa-solid fa-code-fork"></i></div>
+                        <div class="dash-title">The Crossroads</div>
+                        <div class="dash-desc">Clarify whether to commit to rebuilding or gracefully choose to separate.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 1: ROOMMATE CHECK -->
+            <section id="tool1View" class="view-panel" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-couch"></i> The Roommate Check</div>
+                        <div class="card-subtitle">Problem: "We live together but we feel like roommates."</div>
+                    </div>
+
+                    <form id="formTool1">
+                        <div class="form-group">
+                            <label class="form-label">When did you last have a real conversation (not about logistics, bills, or schedules)?</label>
+                            <select class="form-select" id="t1_conv">
+                                <option value="today">Today</option>
+                                <option value="week">This week</option>
+                                <option value="2-4weeks">2-4 weeks ago</option>
+                                <option value="1-3months">1-3 months ago</option>
+                                <option value="cant_remember">I can't remember</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">How do you spend most evenings?</label>
+                            <select class="form-select" id="t1_evenings">
+                                <option value="together_active">Together doing something intentional</option>
+                                <option value="together_phones">Together on separate phones / screens</option>
+                                <option value="rarely_same_room">Rarely in the same room</option>
+                                <option value="opposite_schedules">We have opposite schedules</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">When did you last laugh together?</label>
+                            <select class="form-select" id="t1_laugh">
+                                <option value="recently">Recently (past few days)</option>
+                                <option value="weeks">Weeks ago</option>
+                                <option value="months">Months ago</option>
+                                <option value="cant_remember">I can't remember</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Non-sexual touch (hugs, hand-holding, sitting close):</label>
+                            <select class="form-select" id="t1_touch">
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="rarely">Rarely</option>
+                                <option value="never">Never</option>
+                                <option value="forced">It feels forced or unnatural</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Do you still feel attracted to them?</label>
+                            <div class="radio-group">
+                                <label class="option-btn"><input type="radio" name="t1_attract" value="yes" checked> Yes</label>
+                                <label class="option-btn"><input type="radio" name="t1_attract" value="sometimes"> Sometimes</label>
+                                <label class="option-btn"><input type="radio" name="t1_attract" value="rarely"> Rarely</label>
+                                <label class="option-btn"><input type="radio" name="t1_attract" value="no"> No</label>
+                                <label class="option-btn"><input type="radio" name="t1_attract" value="not_sure"> I'm not sure</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">If you imagine your life 5 years from now with them, you feel:</label>
+                            <div class="radio-group">
+                                <label class="option-btn"><input type="radio" name="t1_future" value="hopeful" checked> Hopeful</label>
+                                <label class="option-btn"><input type="radio" name="t1_future" value="tired"> Tired</label>
+                                <label class="option-btn"><input type="radio" name="t1_future" value="anxious"> Anxious</label>
+                                <label class="option-btn"><input type="radio" name="t1_future" value="empty"> Empty</label>
+                                <label class="option-btn"><input type="radio" name="t1_future" value="cant_picture"> I can't picture it</label>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" onclick="analyzeTool1()"><i class="fa-solid fa-chart-line"></i> Analyze Assessment</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+
+                    <div id="t1_results" class="results-section" style="display:none;"></div>
+                    
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool1')">
+                            <span><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Assessments</span>
+                            <i class="fa-solid fa-chevron-down" id="t1_hist_icon"></i>
+                        </div>
+                        <div class="history-list" id="t1_history_list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 2: CHORE PEACE -->
+            <section id="tool2View" class="view-panel" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-scale-balanced"></i> Chore Peace</div>
+                        <div class="card-subtitle">Problem: "We keep score over who does what."</div>
+                    </div>
+
+                    <form id="formTool2">
+                        <label class="form-label">Select who handles each household responsibility:</label>
+                        <div class="task-grid" id="t2_tasks">
+                            <!-- Tasks populated via JavaScript -->
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Biggest resentment about household work:</label>
+                            <textarea class="form-control" id="t2_resentment" placeholder="e.g., I feel like I'm the default project manager for our entire life..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Have you discussed the split directly?</label>
+                            <div class="radio-group">
+                                <label class="option-btn"><input type="radio" name="t2_discussed" value="resolved" checked> Yes, and it resolved things</label>
+                                <label class="option-btn"><input type="radio" name="t2_discussed" value="unresolved"> Yes, but it led to arguments / unresolved</label>
+                                <label class="option-btn"><input type="radio" name="t2_discussed" value="hint"> No, I mostly drop subtle hints</label>
+                                <label class="option-btn"><input type="radio" name="t2_discussed" value="just_do"> No, I just swallow it and do it myself</label>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" onclick="analyzeTool2()"><i class="fa-solid fa-chart-pie"></i> Map Division & Split</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+
+                    <div id="t2_results" class="results-section" style="display:none;"></div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool2')">
+                            <span><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Audits</span>
+                            <i class="fa-solid fa-chevron-down" id="t2_hist_icon"></i>
+                        </div>
+                        <div class="history-list" id="t2_history_list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 3: INTIMACY BRIDGE -->
+            <section id="tool3View" class="view-panel" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-fire"></i> Intimacy Bridge</div>
+                        <div class="card-subtitle">Problem: "We haven't been intimate in a while and it feels awkward."</div>
+                    </div>
+
+                    <form id="formTool3">
+                        <div class="form-group">
+                            <label class="form-label">Last intimate moment (physical closeness or deep emotional connection):</label>
+                            <select class="form-select" id="t3_last">
+                                <option value="<1week">&lt; 1 week ago</option>
+                                <option value="1-4weeks">1-4 weeks ago</option>
+                                <option value="1-3months">1-3 months ago</option>
+                                <option value="3-6months">3-6 months ago</option>
+                                <option value="6-12months">6-12 months ago</option>
+                                <option value="1yr+">1+ year ago</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What stopped it or got in the way? (Check all that apply):</label>
+                            <div class="checkbox-group">
+                                <label class="option-btn"><input type="checkbox" value="Stress" class="t3_reasons"> Chronic stress / Work pressure</label>
+                                <label class="option-btn"><input type="checkbox" value="Exhaustion" class="t3_reasons"> Physical exhaustion / Kids</label>
+                                <label class="option-btn"><input type="checkbox" value="Resentment" class="t3_reasons"> Unspoken resentment / Grudges</label>
+                                <label class="option-btn"><input type="checkbox" value="No desire" class="t3_reasons"> Low or mismatched physical desire</label>
+                                <label class="option-btn"><input type="checkbox" value="Feeling distant" class="t3_reasons"> Feeling emotionally distant</label>
+                                <label class="option-btn"><input type="checkbox" value="Body shame" class="t3_reasons"> Body insecurity or shame</label>
+                                <label class="option-btn"><input type="checkbox" value="Medical" class="t3_reasons"> Medical / Physical health issues</label>
+                                <label class="option-btn"><input type="checkbox" value="Felt wrong" class="t3_reasons"> We tried recently and it felt awkward/forced</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Do you want to reconnect physically?</label>
+                            <div class="radio-group">
+                                <label class="option-btn"><input type="radio" name="t3_want" value="yes_deeply" checked> Yes, deeply</label>
+                                <label class="option-btn"><input type="radio" name="t3_want" value="yes_scared"> Yes, but I'm scared / hesitant</label>
+                                <label class="option-btn"><input type="radio" name="t3_want" value="not_now"> Not right now</label>
+                                <label class="option-btn"><input type="radio" name="t3_want" value="not_sure"> I'm not sure</label>
+                                <label class="option-btn"><input type="radio" name="t3_want" value="no"> No</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What are you afraid will happen if you initiate?</label>
+                            <textarea class="form-control" id="t3_afraid" placeholder="e.g., I'm terrified of being rejected or made to feel like a whisper of pressure..."></textarea>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" onclick="analyzeTool3()"><i class="fa-solid fa-heart-circle-bolt"></i> Generate Reconnection Plan</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+
+                    <div id="t3_results" class="results-section" style="display:none;"></div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool3')">
+                            <span><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Plans</span>
+                            <i class="fa-solid fa-chevron-down" id="t3_hist_icon"></i>
+                        </div>
+                        <div class="history-list" id="t3_history_list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 4: APPRECIATION RESET -->
+            <section id="tool4View" class="view-panel" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-hand-holding-heart"></i> Appreciation Reset</div>
+                        <div class="card-subtitle">Problem: "We take each other completely for granted."</div>
+                    </div>
+
+                    <form id="formTool4">
+                        <div class="form-group">
+                            <label class="form-label">Last time you felt genuinely appreciated by them:</label>
+                            <textarea class="form-control" id="t4_felt" placeholder="When was it, and what did they say or do?"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Last time you expressed genuine appreciation to them:</label>
+                            <textarea class="form-control" id="t4_expressed" placeholder="When was it, and how did you show it?"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What do they do for the household that you rarely acknowledge?</label>
+                            <textarea class="form-control" id="t4_rarely_ack" placeholder="e.g., Managing financial statements, keeping track of home upkeep..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What do you wish they noticed about your efforts?</label>
+                            <textarea class="form-control" id="t4_wish_noticed" placeholder="e.g., How much mental energy goes into planning meals and keeping peace..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">If they disappeared tomorrow, what would you miss most?</label>
+                            <textarea class="form-control" id="t4_miss" placeholder="e.g., Their sense of humor, how safe I feel around them..."></textarea>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" onclick="analyzeTool4()"><i class="fa-solid fa-sparkles"></i> Build Appreciation Plan</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+
+                    <div id="t4_results" class="results-section" style="display:none;"></div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool4')">
+                            <span><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Resets</span>
+                            <i class="fa-solid fa-chevron-down" id="t4_hist_icon"></i>
+                        </div>
+                        <div class="history-list" id="t4_history_list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 5: THE CROSSROADS -->
+            <section id="tool5View" class="view-panel" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-code-fork"></i> The Crossroads</div>
+                        <div class="card-subtitle">Problem: "Do we stay and fix this, or is it over?"</div>
+                    </div>
+
+                    <form id="formTool5">
+                        <div class="form-group">
+                            <label class="form-label">How long have you felt disconnected?</label>
+                            <select class="form-select" id="t5_duration">
+                                <option value="<6mo">&lt; 6 months</option>
+                                <option value="6mo-1yr">6 months - 1 year</option>
+                                <option value="1-2yr">1 - 2 years</option>
+                                <option value="2-5yr">2 - 5 years</option>
+                                <option value="5yr+">5+ years</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What have you already tried to fix this?</label>
+                            <textarea class="form-control" id="t5_tried" placeholder="e.g., Couples therapy for 3 months, date nights that fizzled out, quiet patience..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What would need to change for you to want to stay?</label>
+                            <textarea class="form-control" id="t5_needed" placeholder="e.g., Active emotional engagement, genuine effort on intimacy, equal effort..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Are there dealbreakers present? (abuse, active unmanaged addiction, chronic deceit, etc.)</label>
+                            <div class="radio-group">
+                                <label class="option-btn"><input type="radio" name="t5_dealbreaker" value="yes"> Yes</label>
+                                <label class="option-btn"><input type="radio" name="t5_dealbreaker" value="no" checked> No</label>
+                                <label class="option-btn"><input type="radio" name="t5_dealbreaker" value="not_sure"> I'm not sure</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Do you still love them?</label>
+                            <div class="radio-group">
+                                <label class="option-btn"><input type="radio" name="t5_love" value="deeply" checked> Deeply</label>
+                                <label class="option-btn"><input type="radio" name="t5_love" value="friend"> As a companion / friend</label>
+                                <label class="option-btn"><input type="radio" name="t5_love" value="sometimes"> Sometimes</label>
+                                <label class="option-btn"><input type="radio" name="t5_love" value="rarely"> Rarely</label>
+                                <label class="option-btn"><input type="radio" name="t5_love" value="no"> No</label>
+                                <label class="option-btn"><input type="radio" name="t5_love" value="dont_know"> I don't know</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What scares you more: staying as-is, or leaving?</label>
+                            <div class="radio-group">
+                                <label class="option-btn"><input type="radio" name="t5_scared" value="staying" checked> Staying as-is forever</label>
+                                <label class="option-btn"><input type="radio" name="t5_scared" value="leaving"> Leaving and starting over</label>
+                                <label class="option-btn"><input type="radio" name="t5_scared" value="both"> Both options terrify me equally</label>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" onclick="analyzeTool5()"><i class="fa-solid fa-compass"></i> Map Decision Clarity</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+
+                    <div id="t5_results" class="results-section" style="display:none;"></div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool5')">
+                            <span><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Reflections</span>
+                            <i class="fa-solid fa-chevron-down" id="t5_hist_icon"></i>
+                        </div>
+                        <div class="history-list" id="t5_history_list"></div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle"></i> <span id="toastText">Copied to clipboard!</span>
+    </div>
+
+    <!-- Universal Disclaimer Footer -->
+    <footer class="app-footer">
+        <div style="max-width: 800px; margin: 0 auto;">
+            <strong>Disclaimer:</strong> For entertainment and reflection purposes only. Not therapy, clinical evaluation, or professional legal advice. If your relationship involves domestic violence, emotional abuse, or safety risks, please contact a local support helpline or professional counselor immediately.
+        </div>
+    </footer>
+
+    <script>
+        /* --- TASK LIST DEFINITION FOR TOOL 2 --- */
+        const CHORE_TASKS = [
+            "Cooking & Meal Prep",
+            "Cleaning & Vacuuming",
+            "Laundry & Folding",
+            "Grocery Shopping",
+            "Bill Paying & Finances",
+            "Appointment Scheduling",
+            "Home Repairs & Upkeep",
+            "Social Planning & Dates",
+            "Car Maintenance",
+            "Emotional Check-ins",
+            "Gift-giving / Dates",
+            "Parenting Tasks (if applicable)"
+        ];
+
+        /* --- DOM INITIALIZATION --- */
+        document.addEventListener('DOMContentLoaded', () => {
+            setupNavigation();
+            renderChoreGrid();
+            loadAllHistories();
+        });
+
+        /* --- NAVIGATION & SIDEBAR LOGIC --- */
+        function setupNavigation() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const navItems = document.querySelectorAll('.nav-item');
+
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            }
+
+            menuToggle.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const toolId = item.getAttribute('data-tool');
+                    switchTool(toolId);
+                    if (window.innerWidth <= 900) {
+                        toggleSidebar();
+                    }
+                });
+            });
+        }
+
+        function switchTool(toolId) {
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.toggle('active', el.getAttribute('data-tool') === toolId);
+            });
+
+            document.querySelectorAll('.view-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+
+            if (toolId === 'dashboard') {
+                document.getElementById('dashboardView').style.display = 'block';
+            } else {
+                document.getElementById(toolId + 'View').style.display = 'block';
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* --- RENDER CHORE GRID (TOOL 2) --- */
+        function renderChoreGrid() {
+            const container = document.getElementById('t2_tasks');
+            container.innerHTML = '';
+            
+            CHORE_TASKS.forEach((task, index) => {
+                const card = document.createElement('div');
+                card.className = 'task-card';
+                card.innerHTML = `
+                    <div class="task-title">${task}</div>
+                    <div class="task-options" data-task-idx="${index}">
+                        <div class="task-opt selected" onclick="selectChoreOpt(this, 'Me')">Me</div>
+                        <div class="task-opt" onclick="selectChoreOpt(this, 'Partner')">Partner</div>
+                        <div class="task-opt" onclick="selectChoreOpt(this, 'Shared')">Shared</div>
+                        <div class="task-opt" onclick="selectChoreOpt(this, 'Nobody')">Nobody</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectChoreOpt(element, value) {
+            const parent = element.parentElement;
+            parent.querySelectorAll('.task-opt').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        /* --- COPY TO CLIPBOARD HELPER --- */
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied script to clipboard!");
+            }).catch(err => {
+                showToast("Failed to copy text.");
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        /* --- LOCAL STORAGE HISTORY MANAGER --- */
+        function saveToHistory(toolId, dataSummary, fullData) {
+            const key = `reconnect_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const entry = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                summary: dataSummary,
+                data: fullData
+            };
+
+            history.unshift(entry);
+            if (history.length > 30) history = history.slice(0, 30);
+
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistoryUI(toolId);
+        }
+
+        function loadAllHistories() {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistoryUI);
+        }
+
+        function renderHistoryUI(toolId) {
+            const key = `reconnect_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const listEl = document.getElementById(`${toolId.replace('tool', 't')}_history_list`);
+            
+            if (!listEl) return;
+
+            if (history.length === 0) {
+                listEl.innerHTML = '<div style="font-size:0.85rem; color: var(--text-muted); padding: 0.5rem 0;">No saved reflections yet.</div>';
+                return;
+            }
+
+            listEl.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div>
+                        <strong>${item.summary}</strong>
+                        <div class="history-meta">${item.date}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistory(toolId) {
+            const shortId = toolId.replace('tool', 't');
+            const listEl = document.getElementById(`${shortId}_history_list`);
+            const iconEl = document.getElementById(`${shortId}_hist_icon`);
+            
+            listEl.classList.toggle('open');
+            if (listEl.classList.contains('open')) {
+                iconEl.className = 'fa-solid fa-chevron-up';
+            } else {
+                iconEl.className = 'fa-solid fa-chevron-down';
+            }
+        }
+
+        /* ==========================================================================
+           TOOL 1: THE ROOMMATE CHECK (LOGIC & SAMPLES)
+           ========================================================================== */
+        function loadSampleTool1() {
+            document.getElementById('t1_conv').value = '1-3months';
+            document.getElementById('t1_evenings').value = 'together_phones';
+            document.getElementById('t1_laugh').value = 'months';
+            document.getElementById('t1_touch').value = 'rarely';
+            document.querySelector('input[name="t1_attract"][value="sometimes"]').checked = true;
+            document.querySelector('input[name="t1_future"][value="tired"]').checked = true;
+            showToast("Sample 'Long-Term Drift' scenario loaded.");
+        }
+
+        function analyzeTool1() {
+            const conv = document.getElementById('t1_conv').value;
+            const evenings = document.getElementById('t1_evenings').value;
+            const laugh = document.getElementById('t1_laugh').value;
+            const touch = document.getElementById('t1_touch').value;
+            const attract = document.querySelector('input[name="t1_attract"]:checked').value;
+            const future = document.querySelector('input[name="t1_future"]:checked').value;
+
+            // Calculate Score (1-10)
+            let score = 10;
+            if (conv === '2-4weeks') score -= 1;
+            if (conv === '1-3months') score -= 2;
+            if (conv === 'cant_remember') score -= 3;
+
+            if (evenings === 'together_phones') score -= 1.5;
+            if (evenings === 'rarely_same_room') score -= 2;
+            if (evenings === 'opposite_schedules') score -= 1.5;
+
+            if (laugh === 'weeks') score -= 1;
+            if (laugh === 'months') score -= 2;
+            if (laugh === 'cant_remember') score -= 2.5;
+
+            if (touch === 'rarely') score -= 1.5;
+            if (touch === 'never') score -= 2.5;
+            if (touch === 'forced') score -= 2;
+
+            if (attract === 'sometimes') score -= 1;
+            if (attract === 'rarely') score -= 2;
+            if (attract === 'no') score -= 3;
+
+            if (future === 'tired') score -= 1.5;
+            if (future === 'anxious') score -= 2;
+            if (future === 'empty') score -= 2.5;
+            if (future === 'cant_picture') score -= 3;
+
+            score = Math.max(1, Math.min(10, Math.round(score)));
+
+            // Color badge logic
+            let badgeColor = "var(--rosewood)";
+            let badgeLabel = "Moderate Drift";
+            if (score <= 3) { badgeColor = "#B00020"; badgeLabel = "Severe Distance"; }
+            else if (score <= 6) { badgeColor = "#C9A227"; badgeLabel = "Roommate Pattern"; }
+            else { badgeColor = "#2E7D32"; badgeLabel = "Functional Connection"; }
+
+            // Dynamic Text Logic
+            let faded = [];
+            if (conv === '1-3months' || conv === 'cant_remember') faded.push("Intellectual & emotional curiosity — conversations have devolved almost purely into household management.");
+            if (touch === 'rarely' || touch === 'never' || touch === 'forced') faded.push("Physical warmth — touch has either dried up or feels tied solely to sexual expectations.");
+            if (evenings === 'together_phones' || evenings === 'rarely_same_room') faded.push("Shared focus — evenings are spent in parallel play rather than co-presence.");
+            if (faded.length < 2) faded.push("Spontaneous lightness and humor during ordinary moments.");
+
+            let stillThere = [];
+            if (attract === 'yes' || attract === 'sometimes') stillThere.push("A baseline physical attraction remains present under the surface.");
+            if (future === 'hopeful') stillThere.push("A genuine underlying hope and desire for things to get better.");
+            if (stillThere.length === 0) stillThere.push("Shared history and stability — you still manage a functional domestic environment together.");
+
+            const html = `
+                <div class="score-badge-container">
+                    <div class="score-circle" style="background: ${badgeColor};">${score}</div>
+                    <div class="score-meta">
+                        <h4>Connection Score: ${score}/10 (${badgeLabel})</h4>
+                        <p>Based on your current emotional frequency, touch, and joint presence.</p>
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-battery-quarter"></i> WHAT'S FADED</div>
+                    <div class="result-content">
+                        <ul>${faded.map(i => `<li>${i}</li>`).join('')}</ul>
+                    </div>
+                </div>
+
+                <div class="result-box gold">
+                    <div class="result-title gold"><i class="fa-solid fa-gem"></i> WHAT'S STILL THERE</div>
+                    <div class="result-content">
+                        <ul>${stillThere.map(i => `<li>${i}</li>`).join('')}</ul>
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-arrows-spin"></i> THE PATTERN</div>
+                    <div class="result-content">
+                        Long-term drift rarely happens because couples stop loving each other; it happens because efficiency replaces intimacy. When life gets busy, domestic partnership requires logistics, which naturally crowds out unstructured curiosity and risk-taking.
+                    </div>
+                </div>
+
+                <div class="result-box gold">
+                    <div class="result-title gold"><i class="fa-solid fa-lightbulb"></i> ONE SMALL SPARK</div>
+                    <div class="result-content">
+                        <strong>Tonight's 10-Minute Micro-Action:</strong> Sit next to each other on the couch for 10 minutes without phones. Do not talk about chores, money, or scheduling. Ask one non-logistical question: <em>"What was the most surprising thing that happened in your head today?"</em>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('t1_results').innerHTML = html;
+            document.getElementById('t1_results').style.display = 'block';
+
+            saveToHistory('tool1', `Score ${score}/10 (${badgeLabel})`, { score, faded, stillThere });
+        }
+
+        /* ==========================================================================
+           TOOL 2: CHORE PEACE (LOGIC & SAMPLES)
+           ========================================================================== */
+        function loadSampleTool2() {
+            renderChoreGrid();
+            const opts = document.querySelectorAll('#t2_tasks .task-options');
+            
+            // Set an imbalanced sample (Me does scheduling/emotional/cleaning, Partner does car/repairs)
+            const sampleDistribution = ['Me', 'Me', 'Me', 'Me', 'Shared', 'Me', 'Partner', 'Me', 'Partner', 'Me', 'Me', 'Me'];
+            opts.forEach((group, idx) => {
+                const targetVal = sampleDistribution[idx];
+                group.querySelectorAll('.task-opt').forEach(opt => {
+                    if (opt.innerText === targetVal) {
+                        selectChoreOpt(opt, targetVal);
+                    }
+                });
+            });
+
+            document.getElementById('t2_resentment').value = "I am exhausted by carrying the entire emotional and administrative load. If I don't schedule or organize, nothing happens.";
+            document.querySelector('input[name="t2_discussed"][value="unresolved"]').checked = true;
+            showToast("Sample 'Invisible Labor Imbalance' loaded.");
+        }
+
+        function analyzeTool2() {
+            const taskElements = document.querySelectorAll('#t2_tasks .task-options');
+            let counts = { Me: 0, Partner: 0, Shared: 0, Nobody: 0 };
+            
+            taskElements.forEach(group => {
+                const selected = group.querySelector('.task-opt.selected');
+                if (selected) {
+                    counts[selected.innerText]++;
+                }
+            });
+
+            const total = CHORE_TASKS.length;
+            const mePct = Math.round((counts.Me / total) * 100);
+            const partnerPct = Math.round((counts.Partner / total) * 100);
+            const sharedPct = Math.round(((counts.Shared + counts.Nobody) / total) * 100);
+
+            const resentment = document.getElementById('t2_resentment').value.trim();
+            const discussed = document.querySelector('input[name="t2_discussed"]:checked').value;
+
+            // Script Generation
+            const scriptText = `"Hey, I noticed we've fallen into some automatic habits around household work, and I feel myself getting resentful. I don't want us keeping score. Can we sit down this Sunday for 20 minutes with a cup of tea and look at how we hand off whole tasks so neither of us has to manage the other?"`;
+
+            const html = `
+                <div class="result-title"><i class="fa-solid fa-chart-bar"></i> THE SPLIT OVERVIEW</div>
+                <div class="progress-split">
+                    <div class="split-segment segment-you" style="width: ${mePct}%">${mePct}%</div>
+                    <div class="split-segment segment-partner" style="width: ${partnerPct}%">${partnerPct}%</div>
+                    <div class="split-segment segment-shared" style="width: ${sharedPct}%">${sharedPct}%</div>
+                </div>
+                <div class="split-legend">
+                    <div class="legend-item"><div class="legend-dot" style="background:var(--rosewood)"></div> You (${mePct}%)</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div> Partner (${partnerPct}%)</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#8E7C93"></div> Shared/None (${sharedPct}%)</div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-eye"></i> INVISIBLE LOAD REVEALED</div>
+                    <div class="result-content">
+                        Notice the difference between <em>executing</em> a task (e.g., taking out the trash) and <em>managing</em> it (noticing it's full, buying bags, scheduling routines). When one partner holds the administrative and emotional tracking, burnout occurs regardless of execution balance.
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-fire-flame-curled"></i> THE RESENTMENT SOURCE</div>
+                    <div class="result-content">
+                        ${resentment ? `<em>"${resentment}"</em><br><br>` : ''}
+                        Scorekeeping happens when contributions feel unacknowledged or when nagging becomes the primary project-management tool in the relationship.
+                    </div>
+                </div>
+
+                <div class="result-box gold">
+                    <div class="result-title gold"><i class="fa-solid fa-handshake"></i> NEW AGREEMENT PRINCIPLE</div>
+                    <div class="result-content">
+                        Stop asking for "help." Help implies one person owns the home and the other is a volunteer. Shift to <strong>Full Ownership Handoffs</strong>: assign entire domains (e.g., Partner owns 100% of Dinners from planning to groceries to cleaning on Tue/Thu).
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-comment-dots"></i> CHECK-IN SCRIPT</div>
+                    <div class="script-box">
+                        ${scriptText}
+                        <button class="btn-copy" onclick="copyText(${JSON.stringify(scriptText)})"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('t2_results').innerHTML = html;
+            document.getElementById('t2_results').style.display = 'block';
+
+            saveToHistory('tool2', `Split: You ${mePct}% | Partner ${partnerPct}%`, { mePct, partnerPct, sharedPct });
+        }
+
+        /* ==========================================================================
+           TOOL 3: INTIMACY BRIDGE (LOGIC & SAMPLES)
+           ========================================================================== */
+        function loadSampleTool3() {
+            document.getElementById('t3_last').value = '3-6months';
+            
+            document.querySelectorAll('.t3_reasons').forEach(cb => {
+                cb.checked = (cb.value === 'Stress' || cb.value === 'Resentment' || cb.value === 'Felt wrong');
+            });
+
+            document.querySelector('input[name="t3_want"][value="yes_scared"]').checked = true;
+            document.getElementById('t3_afraid').value = "I'm worried that if I touch them, they will think I'm expecting sex and pull away, or that it will feel awkward and performative.";
+            showToast("Sample 'Intimacy Pause' scenario loaded.");
+        }
+
+        function analyzeTool3() {
+            const last = document.getElementById('t3_last').value;
+            const checkedReasons = Array.from(document.querySelectorAll('.t3_reasons:checked')).map(c => c.value);
+            const want = document.querySelector('input[name="t3_want"]:checked').value;
+            const afraid = document.getElementById('t3_afraid').value.trim();
+
+            const scriptText = `"I miss closeness with you, but I also know things have felt awkward and pressured lately. I'd love to take sex off the table for a couple of weeks and just practice physical closeness without any expectations. How does that feel to you?"`;
+
+            const html = `
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-bridge-lock"></i> THE GAP</div>
+                    <div class="result-content">
+                        The gap between you isn't a lack of love; it's the accumulation of <strong>${checkedReasons.length > 0 ? checkedReasons.join(', ') : 'unspoken barriers'}</strong>. When intimacy breaks down, the friction of starting again can feel like climbing a mountain.
+                    </div>
+                </div>
+
+                <div class="result-box gold">
+                    <div class="result-title gold"><i class="fa-solid fa-shield-heart"></i> NON-PHYSICAL FIRST STEPS</div>
+                    <div class="result-content">
+                        <ul>
+                            <li><strong>De-escalate expectation:</strong> Explicitly agree to temporarily take performance and sexual expectations off the table.</li>
+                            <li><strong>Micro-touches:</strong> Reintroduce 6-second hugs or holding hands in the car with zero escalation clause.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-list-check"></i> THE 3-WEEK BRIDGE PLAN</div>
+                    <div class="result-content">
+                        <p><strong>Week 1 (Safety):</strong> Focus on verbal vulnerability and 15 seconds of non-sexual touch daily (back rub, hand holding).</p>
+                        <p style="margin-top:0.5rem;"><strong>Week 2 (Presence):</strong> 10 minutes of intentional closeness (cuddling while listening to music or a podcast) with zero sexual expectation.</p>
+                        <p style="margin-top:0.5rem;"><strong>Week 3 (Exploration):</strong> Open-ended conversation about desires and boundaries without pressure to perform.</p>
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-comment"></i> CONVERSATION STARTER</div>
+                    <div class="script-box">
+                        ${scriptText}
+                        <button class="btn-copy" onclick="copyText(${JSON.stringify(scriptText)})"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+
+                <div class="result-box gold">
+                    <div class="result-title gold"><i class="fa-solid fa-heart-crack"></i> IF THEY'RE NOT READY</div>
+                    <div class="result-content">
+                        Respond with dignity: <em>"I completely understand. I don't want to rush this. I just wanted you to know my heart is open to reconnecting whenever you're ready to talk."</em>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('t3_results').innerHTML = html;
+            document.getElementById('t3_results').style.display = 'block';
+
+            saveToHistory('tool3', `Last Intimacy: ${last} | Desires Reconnection`, { last, checkedReasons });
+        }
+
+        /* ==========================================================================
+           TOOL 4: APPRECIATION RESET (LOGIC & SAMPLES)
+           ========================================================================== */
+        function loadSampleTool4() {
+            document.getElementById('t4_felt').value = "I genuinely can't remember the last time they thanked me for something specific.";
+            document.getElementById('t4_expressed').value = "I occasionally say 'thanks' for dinner, but it feels routine.";
+            document.getElementById('t4_rarely_ack').value = "They handle all home insurance, trash logistics, and vehicle servicing without complaining.";
+            document.getElementById('t4_wish_noticed').value = "How much mental strain I carry organizing family calendars and keeping emotional peace.";
+            document.getElementById('t4_miss').value = "Their steady presence, quiet reliability, and the feeling of home when they enter the room.";
+            showToast("Sample 'Taking Each Other for Granted' scenario loaded.");
+        }
+
+        function analyzeTool4() {
+            const felt = document.getElementById('t4_felt').value.trim();
+            const expressed = document.getElementById('t4_expressed').value.trim();
+            const rarelyAck = document.getElementById('t4_rarely_ack').value.trim();
+            const wishNoticed = document.getElementById('t4_wish_noticed').value.trim();
+            const miss = document.getElementById('t4_miss').value.trim();
+
+            const scriptText = `"I was reflecting today and realized I've taken a lot of what you do for granted lately — especially ${rarelyAck || 'the daily efforts you make for our home'}. I just wanted to say thank you for being you, and I really appreciate you."`;
+
+            const html = `
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-eye-slash"></i> YOUR BLIND SPOTS</div>
+                    <div class="result-content">
+                        When partners live together for years, background stability becomes invisible. You stop noticing the small infrastructure acts that keep your daily life running smoothly.
+                    </div>
+                </div>
+
+                <div class="result-box gold">
+                    <div class="result-title gold"><i class="fa-solid fa-gift"></i> THEIR HIDDEN CONTRIBUTIONS</div>
+                    <div class="result-content">
+                        ${rarelyAck ? `You identified: <em>"${rarelyAck}"</em><br><br>` : ''}
+                        Acknowledging these specific behind-the-scenes actions shifts the dynamic from mutual tolerance to active gratitude.
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-arrows-to-dot"></i> 3 APPRECIATION PRACTICES</div>
+                    <div class="result-content">
+                        <ul>
+                            <li><strong>The Specific Thank You:</strong> Replace general "thanks" with "Thank you for doing X because it made Y easier for me."</li>
+                            <li><strong>Public Praise:</strong> Compliment your partner in front of friends or family.</li>
+                            <li><strong>Unprompted Text:</strong> Send one middle-of-the-day text thanking them for a character trait.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-message"></i> ACKNOWLEDGMENT SCRIPT</div>
+                    <div class="script-box">
+                        ${scriptText}
+                        <button class="btn-copy" onclick="copyText(${JSON.stringify(scriptText)})"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+
+                <div class="result-box gold">
+                    <div class="result-title gold"><i class="fa-solid fa-calendar-check"></i> ONE-WEEK CHALLENGE</div>
+                    <div class="result-content">
+                        For 7 consecutive days, express one genuine, non-repeated item of appreciation per day. Do not demand or expect a response back — let it be a gift.
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('t4_results').innerHTML = html;
+            document.getElementById('t4_results').style.display = 'block';
+
+            saveToHistory('tool4', `Appreciation Audit Completed`, { rarelyAck, wishNoticed });
+        }
+
+        /* ==========================================================================
+           TOOL 5: THE CROSSROADS (LOGIC & SAMPLES)
+           ========================================================================== */
+        function loadSampleTool5() {
+            document.getElementById('t5_duration').value = '2-5yr';
+            document.getElementById('t5_tried').value = "We tried couples therapy for 2 months last year, had multiple circular late-night talks, but always fall back into old patterns.";
+            document.getElementById('t5_needed').value = "Emotional vulnerability, a willing partner in solving intimacy issues, and real effort in household teamwork.";
+            document.querySelector('input[name="t5_dealbreaker"][value="no"]').checked = true;
+            document.querySelector('input[name="t5_love"][value="friend"]').checked = true;
+            document.querySelector('input[name="t5_scared"][value="both"]').checked = true;
+            showToast("Sample 'Long-Term Crossroads' scenario loaded.");
+        }
+
+        function analyzeTool5() {
+            const duration = document.getElementById('t5_duration').value;
+            const tried = document.getElementById('t5_tried').value.trim();
+            const needed = document.getElementById('t5_needed').value.trim();
+            const dealbreaker = document.querySelector('input[name="t5_dealbreaker"]:checked').value;
+            const love = document.querySelector('input[name="t5_love"]:checked').value;
+            const scared = document.querySelector('input[name="t5_scared"]:checked').value;
+
+            const scriptText = `"I love you and respect our history, but I feel like we are at a crossroads. I can't keep living in this distant space. I want us to either honestly commit to repairing our relationship together or thoughtfully talk about how we can separate with kindness."`;
+
+            const html = `
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-compass"></i> YOUR POSITION</div>
+                    <div class="result-content">
+                        You have experienced distance for <strong>${duration}</strong>. Love currently feels like <strong>${love}</strong>, and you are feeling trapped between the fear of staying unchanged and the fear of ending things.
+                    </div>
+                </div>
+
+                ${dealbreaker === 'yes' ? `
+                <div class="result-box" style="border-left-color: #B00020; background: #FFF5F5;">
+                    <div class="result-title" style="color: #B00020;"><i class="fa-solid fa-triangle-exclamation"></i> SAFETY & DEALBREAKERS</div>
+                    <div class="result-content">
+                        You indicated the presence of potential dealbreakers (abuse, active addiction, chronic deceit). In these situations, standard relationship repair tools are ineffective. Prioritize safety and seek guidance from individual professionals.
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="result-box gold">
+                    <div class="result-title gold"><i class="fa-solid fa-wrench"></i> WHAT'S REPAIRABLE</div>
+                    <div class="result-content">
+                        <ul>
+                            <li>Communication patterns, chore splits, and sexual intimacy routines can be rebuilt <em>if both partners show up with equal curiosity and commitment</em>.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-ban"></i> WHAT'S NOT REPAIRABLE UNILATERALLY</div>
+                    <div class="result-content">
+                        <ul>
+                            <li>You cannot fix a relationship alone. One-sided effort creates deep resentment and prolongs grief.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="result-box gold">
+                    <div class="result-title gold"><i class="fa-solid fa-road"></i> THE STAY PATH (If choosing to rebuild)</div>
+                    <div class="result-content">
+                        1. Set a clear, time-bound decision horizon (e.g., 3 to 6 months).<br>
+                        2. Engage a licensed marriage & family therapist (LMFT).<br>
+                        3. Focus on small daily re-connection efforts.
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-door-open"></i> THE LEAVE PATH (If choosing to separate)</div>
+                    <div class="result-content">
+                        1. Acknowledge that ending a relationship that no longer serves either partner can be an act of courage, not failure.<br>
+                        2. Consult legal/financial advisors calmly before raising the topic.<br>
+                        3. Prioritize dignity, clarity, and respect throughout the transition.
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-title"><i class="fa-solid fa-comments"></i> THE CONVERSATION SCRIPT</div>
+                    <div class="script-box">
+                        ${scriptText}
+                        <button class="btn-copy" onclick="copyText(${JSON.stringify(scriptText)})"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('t5_results').innerHTML = html;
+            document.getElementById('t5_results').style.display = 'block';
+
+            saveToHistory('tool5', `Crossroads: Disconnected ${duration}`, { duration, love });
+        }
+    </script>
+</body>
+</html>

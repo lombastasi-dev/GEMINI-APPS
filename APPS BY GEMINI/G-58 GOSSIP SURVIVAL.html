@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gossip Survival Guide — Workplace Navigation Toolkit</title>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --plum: #6D597A;
+            --plum-dark: #564462;
+            --plum-light: #8A7398;
+            --plum-subtle: #F3EFEF;
+            --warm-beige: #F2E9E4;
+            --beige-dark: #E2D4CD;
+            --bg-gradient: linear-gradient(135deg, #F5F0F7 0%, #FDF6EC 100%);
+            --text-main: #33272A;
+            --text-muted: #6C5A65;
+            --card-bg: #FFFFFF;
+            --border-color: #EAE3EA;
+            --success: #4A7C59;
+            --warning: #D97706;
+            --danger: #C53030;
+            --info: #2B6CB0;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --shadow-sm: 0 4px 12px rgba(109, 89, 122, 0.06);
+            --shadow-md: 0 8px 24px rgba(109, 89, 122, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Layout Architecture */
+        .app-container {
+            display: flex;
+            flex: 1;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Fixed Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: #FFFFFF;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--plum);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--plum);
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.92rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background-color: var(--warm-beige);
+            color: var(--plum-dark);
+        }
+
+        .nav-item.active {
+            background-color: var(--plum);
+            color: #FFFFFF;
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Mobile Header & Overlay */
+        .mobile-header {
+            display: none;
+            height: 60px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 16px;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .mobile-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: var(--plum);
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: var(--plum);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 95;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            margin-left: 260px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 860px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Card System */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--plum);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .card-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.92rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .form-control, select.form-control {
+            width: 100%;
+            padding: 12px 14px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background-color: #FFFFFF;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, select.form-control:focus {
+            outline: none;
+            border-color: var(--plum);
+            box-shadow: 0 0 0 3px rgba(109, 89, 122, 0.12);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        /* Custom Radio Groups */
+        .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #FFFFFF;
+            font-size: 0.92rem;
+            font-weight: 500;
+        }
+
+        .radio-label:hover {
+            border-color: var(--plum-light);
+            background-color: #FAF7F9;
+        }
+
+        .radio-label input[type="radio"] {
+            accent-color: var(--plum);
+            width: 16px;
+            height: 16px;
+        }
+
+        .radio-label:has(input[type="radio"]:checked) {
+            border-color: var(--plum);
+            background-color: var(--warm-beige);
+            color: var(--plum-dark);
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn-toolbar {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--plum);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--plum-dark);
+            box-shadow: 0 4px 12px rgba(109, 89, 122, 0.25);
+        }
+
+        .btn-secondary {
+            background-color: var(--warm-beige);
+            color: var(--plum-dark);
+            border: 1px solid var(--beige-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #EAE0D8;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--plum-light);
+            color: var(--plum);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.82rem;
+            border-radius: 6px;
+        }
+
+        /* Results / Output Panel */
+        .results-panel {
+            display: none;
+            margin-top: 32px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .output-card {
+            background: #FFFFFF;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+
+        .output-header {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            color: var(--plum);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-body {
+            color: var(--text-main);
+            font-size: 0.98rem;
+            line-height: 1.6;
+        }
+
+        /* Script Box with Copy Button */
+        .script-box {
+            background: #FAF8F9;
+            border-left: 4px solid var(--plum);
+            padding: 16px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin-top: 10px;
+            font-family: inherit;
+            position: relative;
+            color: #2D2529;
+            font-style: italic;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--plum);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .copy-btn:hover {
+            background: var(--warm-beige);
+            border-color: var(--plum-light);
+        }
+
+        /* Badges & Pills */
+        .severity-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .badge-low { background: #E6F4EA; color: #137333; }
+        .badge-medium { background: #FEF7E0; color: #B06000; }
+        .badge-high { background: #FCE8E6; color: #C5221F; }
+        .badge-critical { background: #7C0000; color: #FFFFFF; }
+
+        /* History Section */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .history-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--plum);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-item {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+            background: #FFFFFF;
+            overflow: hidden;
+        }
+
+        .history-item-header {
+            padding: 12px 16px;
+            background: #FAF7F9;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--plum-dark);
+        }
+
+        .history-item-body {
+            padding: 16px;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            background: #FFFFFF;
+        }
+
+        .history-item-body.open {
+            display: block;
+        }
+
+        /* Dashboard View */
+        .dashboard-hero {
+            text-align: center;
+            padding: 36px 20px;
+            margin-bottom: 32px;
+            background: linear-gradient(130deg, #FFFFFF 0%, var(--warm-beige) 100%);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .dashboard-hero h2 {
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: var(--plum);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .dashboard-hero p {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            max-width: 540px;
+            margin: 0 auto;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-card {
+            background: #FFFFFF;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--plum-light);
+        }
+
+        .tool-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--warm-beige);
+            color: var(--plum);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+        }
+
+        .tool-card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--plum);
+            margin-bottom: 8px;
+        }
+
+        .tool-card-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+            margin-bottom: 16px;
+        }
+
+        .tool-card-action {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--plum);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Universal Footer */
+        .footer {
+            padding: 24px;
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.6);
+            margin-top: auto;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--plum-dark);
+            color: #FFFFFF;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Helper Classes */
+        .hidden { display: none !important; }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+            .mobile-header {
+                display: flex;
+            }
+            .main-wrapper {
+                margin-left: 0;
+            }
+            .main-content {
+                padding: 20px 16px;
+            }
+            .card {
+                padding: 20px;
+            }
+            .dashboard-hero h2 {
+                font-size: 1.6rem;
+            }
+            .radio-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="brand">
+            <i class="fa-solid font-shield-halved fa-shield-halved"></i>
+            <span>Gossip Survival</span>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h1>Gossip Survival</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-target="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-item" data-target="tool1">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                    <span>1. Situation Audit</span>
+                </button>
+                <button class="nav-item" data-target="tool2">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>2. Direct Response</span>
+                </button>
+                <button class="nav-item" data-target="tool3">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>3. Non-Participation</span>
+                </button>
+                <button class="nav-item" data-target="tool4">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>4. Target Protection</span>
+                </button>
+                <button class="nav-item" data-target="tool5">
+                    <i class="fa-solid fa-door-open"></i>
+                    <span>5. System Escape</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-wrapper">
+            <main class="main-content">
+
+                <!-- VIEW: DASHBOARD -->
+                <section id="dashboard" class="view-section">
+                    <div class="dashboard-hero">
+                        <h2>Gossip Survival Guide</h2>
+                        <p>Rumors travel fast. Your reputation doesn't have to suffer. A street-smart, non-reactive navigation toolkit for workplace dynamics.</p>
+                    </div>
+
+                    <div class="tool-grid">
+                        <div class="tool-card" onclick="switchTab('tool1')">
+                            <div>
+                                <div class="tool-card-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                                <div class="tool-card-title">Situation Audit</div>
+                                <div class="tool-card-desc">Evaluate rumor severity, spread, exposure, and determine if engagement is required.</div>
+                            </div>
+                            <div class="tool-card-action">Launch Audit <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTab('tool2')">
+                            <div>
+                                <div class="tool-card-icon"><i class="fa-solid fa-comments"></i></div>
+                                <div class="tool-card-title">Direct Response</div>
+                                <div class="tool-card-desc">Get exact scripts to address rumor sources, correct records, and activate allies safely.</div>
+                            </div>
+                            <div class="tool-card-action">Get Scripts <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTab('tool3')">
+                            <div>
+                                <div class="tool-card-icon"><i class="fa-solid fa-user-shield"></i></div>
+                                <div class="tool-card-title">Non-Participation</div>
+                                <div class="tool-card-desc">Master graceful exits, topic pivots, and building a reputational shield against drama.</div>
+                            </div>
+                            <div class="tool-card-action">Build Defenses <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTab('tool4')">
+                            <div>
+                                <div class="tool-card-icon"><i class="fa-solid fa-lock"></i></div>
+                                <div class="tool-card-title">Target Protection</div>
+                                <div class="tool-card-desc">Proactive measures: info lockdown, controlling narrative, and establishing documentation.</div>
+                            </div>
+                            <div class="tool-card-action">Protect Yourself <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTab('tool5')">
+                            <div>
+                                <div class="tool-card-icon"><i class="fa-solid fa-door-open"></i></div>
+                                <div class="tool-card-title">System Escape</div>
+                                <div class="tool-card-desc">Diagnose systemic toxicity, decide whether to stay, and evaluate exit timelines.</div>
+                            </div>
+                            <div class="tool-card-action">Evaluate System <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: THE SITUATION AUDIT -->
+                <section id="tool1" class="view-section hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fa-solid fa-magnifying-glass-chart"></i> Tool 1 — The Situation Audit</h2>
+                            <p class="card-subtitle">Problem: "There's gossip around me and I need to understand what I'm dealing with."</p>
+                        </div>
+
+                        <form id="form-tool1" onsubmit="event.preventDefault(); runTool1();">
+                            <div class="form-group">
+                                <label class="form-label" for="t1-said">What is being said?</label>
+                                <textarea id="t1-said" class="form-control" placeholder="Describe the rumor or statement..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="t1-who">Who is saying it?</label>
+                                <select id="t1-who" class="form-control" required>
+                                    <option value="One person">One person</option>
+                                    <option value="A small group">A small group</option>
+                                    <option value="Widespread">Widespread</option>
+                                    <option value="Anonymous/online">Anonymous/online</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Is it about you, someone else, or the company?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t1-target" value="About me" checked> About me</label>
+                                    <label class="radio-label"><input type="radio" name="t1-target" value="About a colleague"> About a colleague</label>
+                                    <label class="radio-label"><input type="radio" name="t1-target" value="About leadership"> About leadership</label>
+                                    <label class="radio-label"><input type="radio" name="t1-target" value="General culture"> General culture</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="t1-how">How did you find out?</label>
+                                <select id="t1-how" class="form-control" required>
+                                    <option value="Directly told">Directly told</option>
+                                    <option value="Overheard">Overheard</option>
+                                    <option value="Saw online">Saw online</option>
+                                    <option value="Rumor reached me">Rumor reached me</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Is there any truth to it?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t1-truth" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t1-truth" value="Partially"> Partially</label>
+                                    <label class="radio-label"><input type="radio" name="t1-truth" value="No" checked> No</label>
+                                    <label class="radio-label"><input type="radio" name="t1-truth" value="Not sure"> Not sure</label>
+                                </div>
+                            </div>
+
+                            <div class="btn-toolbar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Audit Situation</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSample1()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Panel -->
+                    <div id="results-tool1" class="results-panel">
+                        <div class="output-card">
+                            <div class="output-header">The Severity Assessment <span id="out1-severity-badge" class="severity-badge"></span></div>
+                            <div class="output-body" id="out1-severity"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Spread Map</div>
+                            <div class="output-body" id="out1-spread"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Motive Guess</div>
+                            <div class="output-body" id="out1-motive"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">Your Exposure</div>
+                            <div class="output-body" id="out1-exposure"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The First Rule</div>
+                            <div class="output-body" id="out1-rule"></div>
+                        </div>
+                    </div>
+
+                    <!-- History Accordion -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Audit History</div>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool1')"><i class="fa-solid fa-trash"></i> Clear History</button>
+                        </div>
+                        <div id="history-tool1"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: THE DIRECT RESPONSE -->
+                <section id="tool2" class="view-section hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fa-solid fa-comments"></i> Tool 2 — The Direct Response</h2>
+                            <p class="card-subtitle">Problem: "Someone is gossiping about me and I need to address it without making it worse."</p>
+                        </div>
+
+                        <form id="form-tool2" onsubmit="event.preventDefault(); runTool2();">
+                            <div class="form-group">
+                                <label class="form-label" for="t2-source">Who is the source?</label>
+                                <select id="t2-source" class="form-control" required>
+                                    <option value="Peer">Peer</option>
+                                    <option value="Junior">Junior</option>
+                                    <option value="Senior">Senior</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Your relationship with them:</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2-rel" value="Friendly"> Friendly</label>
+                                    <label class="radio-label"><input type="radio" name="t2-rel" value="Neutral" checked> Neutral</label>
+                                    <label class="radio-label"><input type="radio" name="t2-rel" value="Strained"> Strained</label>
+                                    <label class="radio-label"><input type="radio" name="t2-rel" value="They have power over me"> Power Over Me</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What do you want?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2-want" value="Stop the rumor" checked> Stop the rumor</label>
+                                    <label class="radio-label"><input type="radio" name="t2-want" value="Correct the record"> Correct the record</label>
+                                    <label class="radio-label"><input type="radio" name="t2-want" value="Protect my reputation"> Protect reputation</label>
+                                    <label class="radio-label"><input type="radio" name="t2-want" value="Confront them"> Confront them</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Do you have allies who know the truth?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2-allies" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t2-allies" value="A few" checked> A few</label>
+                                    <label class="radio-label"><input type="radio" name="t2-allies" value="No"> No</label>
+                                </div>
+                            </div>
+
+                            <div class="btn-toolbar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Response Strategy</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSample2()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Panel -->
+                    <div id="results-tool2" class="results-panel">
+                        <div class="output-card">
+                            <div class="output-header">The Private Conversation</div>
+                            <div class="output-body">
+                                <p id="out2-private-desc"></p>
+                                <div class="script-box">
+                                    <span id="out2-private-script"></span>
+                                    <button class="copy-btn" onclick="copyText('out2-private-script')"><i class="fa-solid fa-copy"></i> Copy</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Public Correction</div>
+                            <div class="output-body" id="out2-public"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Ally Activation</div>
+                            <div class="output-body" id="out2-ally"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">If They Deny It</div>
+                            <div class="output-body" id="out2-deny"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">If It Escalates</div>
+                            <div class="output-body" id="out2-escalate"></div>
+                        </div>
+                    </div>
+
+                    <!-- History Accordion -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Response History</div>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool2')"><i class="fa-solid fa-trash"></i> Clear History</button>
+                        </div>
+                        <div id="history-tool2"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: THE NON-PARTICIPATION STRATEGY -->
+                <section id="tool3" class="view-section hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fa-solid fa-user-shield"></i> Tool 3 — The Non-Participation Strategy</h2>
+                            <p class="card-subtitle">Problem: "I'm tired of being drawn into gossip conversations and I want out."</p>
+                        </div>
+
+                        <form id="form-tool3" onsubmit="event.preventDefault(); runTool3();">
+                            <div class="form-group">
+                                <label class="form-label" for="t3-current">How do you currently respond?</label>
+                                <select id="t3-current" class="form-control" required>
+                                    <option value="Listen silently">Listen silently</option>
+                                    <option value="Participate">Participate</option>
+                                    <option value="Try to change subject">Try to change subject</option>
+                                    <option value="Leave">Leave</option>
+                                    <option value="Push back">Push back</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="t3-draws">Who draws you in?</label>
+                                <select id="t3-draws" class="form-control" required>
+                                    <option value="One person">One person</option>
+                                    <option value="A group">A group</option>
+                                    <option value="My boss">My boss</option>
+                                    <option value="Everyone">Everyone</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="t3-fear">What do you fear will happen if you stop?</label>
+                                <textarea id="t3-fear" class="form-control" placeholder="e.g. Seeming aloof, judged, excluded..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Do you want to maintain these relationships?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t3-rel" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t3-rel" value="Some" checked> Some</label>
+                                    <label class="radio-label"><input type="radio" name="t3-rel" value="No"> No</label>
+                                </div>
+                            </div>
+
+                            <div class="btn-toolbar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-shield-halved"></i> Generate Exit Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSample3()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Panel -->
+                    <div id="results-tool3" class="results-panel">
+                        <div class="output-card">
+                            <div class="output-header">The Graceful Exit (5 Neutral Scripts)</div>
+                            <div class="output-body">
+                                <p style="margin-bottom: 12px;">Use these disarming, neutral phrases to extract yourself immediately:</p>
+                                <div id="out3-exit-phrases"></div>
+                            </div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Topic Pivot</div>
+                            <div class="output-body" id="out3-pivot"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Reputation Shift</div>
+                            <div class="output-body" id="out3-reputation"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">If Pressured</div>
+                            <div class="output-body" id="out3-pressured"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Social Cost vs. Gain</div>
+                            <div class="output-body" id="out3-cost"></div>
+                        </div>
+                    </div>
+
+                    <!-- History Accordion -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Strategy History</div>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool3')"><i class="fa-solid fa-trash"></i> Clear History</button>
+                        </div>
+                        <div id="history-tool3"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: THE TARGET PROTECTION -->
+                <section id="tool4" class="view-section hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fa-solid fa-lock"></i> Tool 4 — The Target Protection</h2>
+                            <p class="card-subtitle">Problem: "I'm afraid I'm going to be the next person everyone talks about."</p>
+                        </div>
+
+                        <form id="form-tool4" onsubmit="event.preventDefault(); runTool4();">
+                            <div class="form-group">
+                                <label class="form-label" for="t4-target">What makes you a potential target?</label>
+                                <select id="t4-target" class="form-control" required>
+                                    <option value="Recent mistake">Recent mistake</option>
+                                    <option value="Promotion">Promotion</option>
+                                    <option value="Conflict">Conflict</option>
+                                    <option value="New">New</option>
+                                    <option value="Different">Different</option>
+                                    <option value="Nothing specific, just anxious">Nothing specific, just anxious</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="t4-who">Who is most likely to target you?</label>
+                                <textarea id="t4-who" class="form-control" placeholder="Describe the individual or role..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="t4-vuln">What information about you is vulnerable?</label>
+                                <textarea id="t4-vuln" class="form-control" placeholder="Personal details, past mistakes, career plans..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Do you trust your team?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t4-trust" value="Most"> Most</label>
+                                    <label class="radio-label"><input type="radio" name="t4-trust" value="Some" checked> Some</label>
+                                    <label class="radio-label"><input type="radio" name="t4-trust" value="Few"> Few</label>
+                                    <label class="radio-label"><input type="radio" name="t4-trust" value="None"> None</label>
+                                </div>
+                            </div>
+
+                            <div class="btn-toolbar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-user-lock"></i> Build Defense Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSample4()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Panel -->
+                    <div id="results-tool4" class="results-panel">
+                        <div class="output-card">
+                            <div class="output-header">The Information Lockdown</div>
+                            <div class="output-body" id="out4-lockdown"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Narrative Control</div>
+                            <div class="output-body" id="out4-narrative"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Ally Buffer</div>
+                            <div class="output-body" id="out4-buffer"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Documentation Protocol</div>
+                            <div class="output-body" id="out4-doc"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Early Warning Signs</div>
+                            <div class="output-body" id="out4-warning"></div>
+                        </div>
+                    </div>
+
+                    <!-- History Accordion -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Protection History</div>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool4')"><i class="fa-solid fa-trash"></i> Clear History</button>
+                        </div>
+                        <div id="history-tool4"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: THE SYSTEM ESCAPE -->
+                <section id="tool5" class="view-section hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fa-solid fa-door-open"></i> Tool 5 — The System Escape</h2>
+                            <p class="card-subtitle">Problem: "The gossip culture here is toxic and I need to decide if I can stay."</p>
+                        </div>
+
+                        <form id="form-tool5" onsubmit="event.preventDefault(); runTool5();">
+                            <div class="form-group">
+                                <label class="form-label" for="t5-pervasive">How pervasive is the gossip?</label>
+                                <select id="t5-pervasive" class="form-control" required>
+                                    <option value="One person">One person</option>
+                                    <option value="One clique">One clique</option>
+                                    <option value="Department-wide">Department-wide</option>
+                                    <option value="Company culture">Company culture</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Has it affected work outcomes?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5-outcomes" value="Yes, significantly"> Significantly</label>
+                                    <label class="radio-label"><input type="radio" name="t5-outcomes" value="Somewhat" checked> Somewhat</label>
+                                    <label class="radio-label"><input type="radio" name="t5-outcomes" value="Not yet"> Not yet</label>
+                                    <label class="radio-label"><input type="radio" name="t5-outcomes" value="No"> No</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Has leadership addressed it?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5-leadership" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t5-leadership" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t5-leadership" value="They participate" checked> They participate</label>
+                                    <label class="radio-label"><input type="radio" name="t5-leadership" value="Not sure"> Not sure</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="t5-tenure">How long have you been here?</label>
+                                <select id="t5-tenure" class="form-control" required>
+                                    <option value="<6mo">&lt; 6 months</option>
+                                    <option value="6mo-1yr">6 months - 1 year</option>
+                                    <option value="1-2yr" selected>1 - 2 years</option>
+                                    <option value="2yr+">2+ years</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Are you willing to be the one who changes the culture?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5-agent" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t5-agent" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t5-agent" value="Only if supported" checked> Only if supported</label>
+                                </div>
+                            </div>
+
+                            <div class="btn-toolbar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-compass"></i> Diagnose System</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSample5()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Panel -->
+                    <div id="results-tool5" class="results-panel">
+                        <div class="output-card">
+                            <div class="output-header">The Culture Diagnosis</div>
+                            <div class="output-body" id="out5-diagnosis"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Change Agent Path</div>
+                            <div class="output-body" id="out5-path"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Protection Plan</div>
+                            <div class="output-body" id="out5-protection"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Exit Timeline</div>
+                            <div class="output-body" id="out5-timeline"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <div class="output-header">The Interview Filter</div>
+                            <div class="output-body" id="out5-filter"></div>
+                        </div>
+                    </div>
+
+                    <!-- History Accordion -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> System History</div>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool5')"><i class="fa-solid fa-trash"></i> Clear History</button>
+                        </div>
+                        <div id="history-tool5"></div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Mandatory Footer -->
+            <footer class="footer">
+                For workplace social navigation only. Not legal, HR, or therapeutic advice. For harassment, bullying, or defamation, consult HR or appropriate authorities.
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // DOM Elements & Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            initMobileMenu();
+            renderAllHistories();
+        });
+
+        // Navigation Controller
+        function switchTab(targetId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            const targetSection = document.getElementById(targetId);
+            if (targetSection) targetSection.classList.remove('hidden');
+
+            const activeNav = document.querySelector(`.nav-item[data-target="${targetId}"]`);
+            if (activeNav) activeNav.classList.add('active');
+
+            // Close mobile menu if open
+            closeMobileMenu();
+
+            // Scroll top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function initNavigation() {
+            document.querySelectorAll('.nav-item').forEach(button => {
+                button.addEventListener('click', () => {
+                    const target = button.getAttribute('data-target');
+                    switchTab(target);
+                });
+            });
+        }
+
+        // Mobile Menu Toggle
+        function initMobileMenu() {
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            hamburgerBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('active');
+            });
+
+            overlay.addEventListener('click', closeMobileMenu);
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('sidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        // Toast Notification System
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Copy Text Utility
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(err => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast("Copied!");
+            });
+        }
+
+        // LocalStorage History Handler
+        function saveToHistory(toolId, summary, fullData) {
+            const key = `gossip_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                summary: summary,
+                data: fullData
+            };
+
+            history.unshift(newItem);
+            if (history.length > 30) history = history.slice(0, 30); // Max 30 items
+            
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = `gossip_history_${toolId}`;
+            const container = document.getElementById(`history-${toolId}`);
+            if (!container) return;
+
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            if (history.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.88rem; font-style: italic;">No history recorded yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="history-item-header" onclick="toggleHistoryItem(${item.id})">
+                        <span><i class="fa-regular fa-calendar-check" style="margin-right: 6px; color: var(--plum);"></i> ${item.summary}</span>
+                        <small style="color: var(--text-muted);">${item.timestamp}</small>
+                    </div>
+                    <div class="history-item-body" id="history-body-${item.id}">
+                        ${item.data}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistoryItem(id) {
+            const el = document.getElementById(`history-body-${id}`);
+            if (el) el.classList.toggle('open');
+        }
+
+        function clearHistory(toolId) {
+            if (confirm("Are you sure you want to clear history for this tool?")) {
+                localStorage.removeItem(`gossip_history_${toolId}`);
+                renderHistory(toolId);
+                showToast("History cleared");
+            }
+        }
+
+        function renderAllHistories() {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistory);
+        }
+
+        // ==================== TOOL 1 LOGIC ====================
+        function loadSample1() {
+            document.getElementById('t1-said').value = "I heard that I am actively interviewing and preparing to leave for a direct competitor next month.";
+            document.getElementById('t1-who').value = "A small group";
+            document.querySelector('input[name="t1-target"][value="About me"]').checked = true;
+            document.getElementById('t1-how').value = "Overheard";
+            document.querySelector('input[name="t1-truth"][value="No"]').checked = true;
+            showToast("Sample scenario loaded");
+        }
+
+        function runTool1() {
+            const said = document.getElementById('t1-said').value;
+            const who = document.getElementById('t1-who').value;
+            const target = document.querySelector('input[name="t1-target"]:checked').value;
+            const how = document.getElementById('t1-how').value;
+            const truth = document.querySelector('input[name="t1-truth"]:checked').value;
+
+            // Severity Assessment
+            let severity = "Medium";
+            let badgeClass = "badge-medium";
+            let severityDesc = "";
+
+            if (target === "About me" && (who === "Widespread" || truth === "Yes")) {
+                severity = "Critical"; badgeClass = "badge-critical";
+            } else if (target === "About me" || who === "Widespread") {
+                severity = "High"; badgeClass = "badge-high";
+            } else if (target === "General culture" || who === "One person") {
+                severity = "Low"; badgeClass = "badge-low";
+            }
+
+            if (severity === "Critical") {
+                severityDesc = "This situation poses an immediate threat to your professional credibility, role security, or core trust within the team. Prompt, strategic intervention is required.";
+            } else if (severity === "High") {
+                severityDesc = "Significant exposure. Left unaddressed, this narrative could shape executive perception or distort project accountability.";
+            } else if (severity === "Medium") {
+                severityDesc = "Moderate risk. It is localized or early-stage, but has the potential to gain traction if fueled or mismanaged.";
+            } else {
+                severityDesc = "Low organizational impact. This is standard background noise or low-level social chatter. Minimal threat level.";
+            }
+
+            // Spread Map
+            let spread = "";
+            if (who === "One person") spread = "Currently localized to a single origin node. High probability of containment if not given fuel or emotional reaction.";
+            else if (who === "A small group") spread = "Circulating within an isolated pocket or peer cluster. Risk of leaking into cross-functional channels if a major decision point arises.";
+            else if (who === "Widespread") spread = "Multidirectional transmission across departments. Narratives at this stage are usually distorted from original facts.";
+            else spread = "Unanchored spread across informal/digital channels. Difficult to trace, requiring official transparency rather than individual confrontation.";
+
+            // Motive Guess
+            let motive = "";
+            if (truth === "Yes" || truth === "Partially") {
+                motive = "Information Leak / Social Currency: The rumor stems from partial real data being traded as social capital to demonstrate insider access.";
+            } else if (target === "About me") {
+                motive = "Positional Preemption or Anxiety: Sowers often spread rumors about high performers to create artificial uncertainty before performance reviews or project assignments.";
+            } else if (target === "About leadership") {
+                motive = "Institutional Venting: Signifies high uncertainty, poor executive communication, or fear of restructuring.";
+            } else {
+                motive = "Boredom & Bonding: Low-stakes social friction used by disengaged team members to create cohesion through shared drama.";
+            }
+
+            // Exposure
+            let exposure = "";
+            if (target === "About me") {
+                exposure = "Key stakeholders, direct managers, and peers evaluating your dependability. Focus on keeping your direct supervisor grounded in facts.";
+            } else {
+                exposure = "Team morale and your personal reputation for discretion. Your exposure comes primarily from being perceived as a node in the chain.";
+            }
+
+            // First Rule
+            let rule = "";
+            if (severity === "Critical" || severity === "High") {
+                rule = "ENGAGE WITH PRECISION. Do not ignore. Formulate a calm, factual direct response or clarify the record with key decision-makers immediately.";
+            } else {
+                rule = "IGNORE & STARVE. Do not react, address publicly, or show emotional impact. Starve the rumor of attention and let it die of irrelevance.";
+            }
+
+            // Display Results
+            const badgeEl = document.getElementById('out1-severity-badge');
+            badgeEl.textContent = severity;
+            badgeEl.className = `severity-badge ${badgeClass}`;
+
+            document.getElementById('out1-severity').innerHTML = `<p>${severityDesc}</p>`;
+            document.getElementById('out1-spread').innerHTML = `<p>${spread}</p>`;
+            document.getElementById('out1-motive').innerHTML = `<p>${motive}</p>`;
+            document.getElementById('out1-exposure').innerHTML = `<p>${exposure}</p>`;
+            document.getElementById('out1-rule').innerHTML = `<p><strong>${rule}</strong></p>`;
+
+            document.getElementById('results-tool1').style.display = 'block';
+
+            // History Save
+            const summary = `[${severity}] ${target} — "${said.substring(0, 30)}..."`;
+            const fullHtml = `
+                <p><strong>Severity:</strong> ${severity}</p>
+                <p><strong>Rumor:</strong> ${said}</p>
+                <p><strong>Recommendation:</strong> ${rule}</p>
+            `;
+            saveToHistory('tool1', summary, fullHtml);
+        }
+
+        // ==================== TOOL 2 LOGIC ====================
+        function loadSample2() {
+            document.getElementById('t2-source').value = "Peer";
+            document.querySelector('input[name="t2-rel"][value="Neutral"]').checked = true;
+            document.querySelector('input[name="t2-want"][value="Stop the rumor"]').checked = true;
+            document.querySelector('input[name="t2-allies"][value="A few"]').checked = true;
+            showToast("Sample scenario loaded");
+        }
+
+        function runTool2() {
+            const source = document.getElementById('t2-source').value;
+            const rel = document.querySelector('input[name="t2-rel"]:checked').value;
+            const want = document.querySelector('input[name="t2-want"]:checked').value;
+            const allies = document.querySelector('input[name="t2-allies"]:checked').value;
+
+            // Private Conversation Script
+            let script = "";
+            let scriptDesc = "Request a 1-on-1 private sync. Keep your tone neutral, inquisitive, and completely non-defensive:";
+
+            if (source === "Senior" || rel === "They have power over me") {
+                script = `"Hi [Name], it came to my attention that there might be some confusion floating around regarding [Topic/Situation]. Since I value clear alignment and direct communication with you, I wanted to make sure you have the exact facts straight from me."`;
+            } else if (source === "Junior") {
+                script = `"Hey [Name], I heard a rumor circulating about [Topic]. As a leader/senior team member, I want to ensure our communication is transparent. If you ever have questions about my work or decisions, come directly to me."`;
+            } else {
+                script = `"Hey [Name], someone mentioned that you had questions or concerns regarding [Topic/Situation]. I wanted to bring it up directly so we can clear up any miscommunication right away."`;
+            }
+
+            // Public Correction
+            let publicCorr = "";
+            if (want === "Correct the record") {
+                publicCorr = "When brought up in group settings, address it with light casualness: <em>'Oh, I heard that rumor too—turns out the actual reality is X. Glad we can clear that up!'</em> Do not get emotional or over-explain.";
+            } else {
+                publicCorr = "Use the 'Boring Truth' method: Deliver facts dryly in 15 seconds or less, then immediately pivot back to the meeting agenda or task at hand.";
+            }
+
+            // Ally Activation
+            let allyAct = "";
+            if (allies === "Yes" || allies === "A few") {
+                allyAct = "Brief 1-2 trusted allies privately: <em>'If you hear people discussing [rumor], feel free to politely mention that [simple factual truth]. I’d appreciate you keeping things grounded.'</em> Never ask them to fight your battle.";
+            } else {
+                allyAct = "You currently lack active allies on this topic. Focus on direct engagement or demonstrating unshakeable consistency in performance to let work speak for itself.";
+            }
+
+            // If They Deny It
+            let deny = `If they claim <em>"I never said that"</em> or act surprised, accept it calmly without debate: <strong>"I'm glad to hear that wasn't the case. I just wanted to clear the air directly. Thanks for clarifying."</strong> This signals you are watchful while allowing them an honorable exit.`;
+
+            // If It Escalates
+            let escalate = "";
+            if (source === "Senior" || rel === "They have power over me") {
+                escalate = "If the rumors continue and impact project assignments, performance ratings, or psychological safety, document date/time/witnesses and arrange a formal consultation with HR or senior management.";
+            } else {
+                escalate = "If informal resolution fails and the individual continues spreading false claims, bring documented instances to your direct manager focusing on 'impact on team productivity and operational output.'";
+            }
+
+            document.getElementById('out2-private-desc').innerHTML = scriptDesc;
+            document.getElementById('out2-private-script').innerText = script;
+            document.getElementById('out2-public').innerHTML = `<p>${publicCorr}</p>`;
+            document.getElementById('out2-ally').innerHTML = `<p>${allyAct}</p>`;
+            document.getElementById('out2-deny').innerHTML = `<p>${deny}</p>`;
+            document.getElementById('out2-escalate').innerHTML = `<p>${escalate}</p>`;
+
+            document.getElementById('results-tool2').style.display = 'block';
+
+            // History Save
+            const summary = `Source: ${source} (${rel}) — Goal: ${want}`;
+            const fullHtml = `
+                <p><strong>Script:</strong> ${script}</p>
+                <p><strong>Escalation Strategy:</strong> ${escalate}</p>
+            `;
+            saveToHistory('tool2', summary, fullHtml);
+        }
+
+        // ==================== TOOL 3 LOGIC ====================
+        function loadSample3() {
+            document.getElementById('t3-current').value = "Listen silently";
+            document.getElementById('t3-draws').value = "A group";
+            document.getElementById('t3-fear').value = "Fear of seeming aloof, judgmental, or being excluded from social circles.";
+            document.querySelector('input[name="t3-rel"][value="Some"]').checked = true;
+            showToast("Sample scenario loaded");
+        }
+
+        function runTool3() {
+            const current = document.getElementById('t3-current').value;
+            const draws = document.getElementById('t3-draws').value;
+            const fear = document.getElementById('t3-fear').value;
+            const rel = document.querySelector('input[name="t3-rel"]:checked').value;
+
+            // 5 Graceful Exit Phrases
+            const phrases = [
+                `"Oh wow, I'm out of the loop on that one! Anyway, I need to finish this report before 3 PM."`,
+                `"I try not to speculate on office stuff—I've got enough on my plate today."`,
+                `"You know me, I'm terrible with office news. Hey, did anyone see the latest update on Project X?"`,
+                `"I don't know enough about that to comment. Excuse me, I need to grab more coffee."`,
+                `"Sounds like something they need to work out directly. How's your afternoon looking?"`
+            ];
+
+            let phrasesHtml = phrases.map((p, idx) => `
+                <div class="script-box" style="margin-bottom: 10px;">
+                    <span id="script-t3-${idx}">${p}</span>
+                    <button class="copy-btn" onclick="copyText('script-t3-${idx}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+            `).join('');
+
+            // Topic Pivot
+            let pivot = `When someone drops gossip bait, acknowledge with a neutral 1-word reaction (<em>"Ah", "Got it", "I see"</em>) and immediately ask a work question: <strong>"Speaking of which, did you get a chance to review that slide deck?"</strong>`;
+
+            // Reputation Shift
+            let rep = `To establish yourself as a 'gossip dead-end': Always speak positively or neutrally about absent colleagues. When people realize gossip dies with you and isn't amplified, they will stop using you as a sounding board while respecting your integrity.`;
+
+            // If Pressured
+            let pressured = "";
+            if (draws === "My boss") {
+                pressured = "When a manager gossips, focus on professional curiosity: <em>'That sounds complex. How would you like us to adjust our team priorities around it?'</em> Keep answers centered strictly on operations.";
+            } else {
+                pressured = "If pushed (<em>'Why are you being so quiet?'</em>), smile and say calmly: <em>'I'm just low-energy on social stuff today, focusing on getting through my task list.'</em>";
+            }
+
+            // Social Cost vs Gain
+            let cost = `
+                <p><strong style="color: var(--danger);">Possible Cost:</strong> You may lose access to superficial 'insider' social chatter or be excluded from breakroom venting sessions.</p>
+                <p style="margin-top: 6px;"><strong style="color: var(--success);">Definite Gain:</strong> Absolute protection from drama backfires, total trust from executives, peace of mind, and an unblemished reputation for professionalism.</p>
+            `;
+
+            document.getElementById('out3-exit-phrases').innerHTML = phrasesHtml;
+            document.getElementById('out3-pivot').innerHTML = `<p>${pivot}</p>`;
+            document.getElementById('out3-reputation').innerHTML = `<p>${rep}</p>`;
+            document.getElementById('out3-pressured').innerHTML = `<p>${pressured}</p>`;
+            document.getElementById('out3-cost').innerHTML = cost;
+
+            document.getElementById('results-tool3').style.display = 'block';
+
+            // History Save
+            const summary = `Drawn in by: ${draws} — Current: ${current}`;
+            const fullHtml = `<p>Generated 5 exit scripts and non-participation strategy for handling ${draws}.</p>`;
+            saveToHistory('tool3', summary, fullHtml);
+        }
+
+        // ==================== TOOL 4 LOGIC ====================
+        function loadSample4() {
+            document.getElementById('t4-target').value = "Promotion";
+            document.getElementById('t4-who').value = "One competitive peer who was also up for the same role.";
+            document.getElementById('t4-vuln').value = "Personal life details shared during casual happy hours in the past.";
+            document.querySelector('input[name="t4-trust"][value="Some"]').checked = true;
+            showToast("Sample scenario loaded");
+        }
+
+        function runTool4() {
+            const targetReason = document.getElementById('t4-target').value;
+            const who = document.getElementById('t4-who').value;
+            const vuln = document.getElementById('t4-vuln').value;
+            const trust = document.querySelector('input[name="t4-trust"]:checked').value;
+
+            // Information Lockdown
+            let lockdown = `
+                Immediate protocol: Put your personal life and career ambitions on strict information lockdown. 
+                Stop sharing weekend plans, personal stressors, or informal opinions with non-vetted peers. 
+                Keep interactions centered around deliverables, shared goals, and pleasant generalities.
+            `;
+
+            // Narrative Control
+            let narrative = "";
+            if (targetReason === "Promotion") {
+                narrative = "Pre-empt envy by sharing credit generously. Publicly highlight team contributions to your recent success: <em>'This outcome was possible because of the solid groundwork laid by everyone on the team.'</em>";
+            } else if (targetReason === "Recent mistake") {
+                narrative = "Own the error cleanly and publicly before others frame it: <em>'We encountered a mistake on Project X, here is the root cause and the corrective plan we've already executed.'</em> Vulnerability starves rumors.";
+            } else {
+                narrative = "Maintain total clarity on your current work objectives. Ensure your manager receives brief, regular status updates so third-party narratives cannot fill information voids.";
+            }
+
+            // Ally Buffer
+            let buffer = `Identify 1-2 respected, stable colleagues or cross-functional leads. Cultivate professional rapport with them through reliable execution. A strong reputation with external stakeholders acts as a natural buffer against internal smear campaigns.`;
+
+            // Documentation Protocol
+            let doc = `Start a private, secure offline log (MOMO - Moment, Outcome, Meaning, Observation): Record dates, times, exact quotes, and witnesses whenever you observe undermining behavior or targeted comments. Never store this on work devices.`;
+
+            // Early Warning Signs
+            let warning = `
+                <ul style="padding-left: 20px; line-height: 1.8;">
+                    <li>Conversations suddenly stopping or changing when you enter the room.</li>
+                    <li>Subtle passive-aggressive 'jokes' about your output or standing.</li>
+                    <li>Key decision-makers asking unusually detailed questions about routine tasks.</li>
+                    <li>Slight exclusion from informal pre-meeting huddles.</li>
+                </ul>
+            `;
+
+            document.getElementById('out4-lockdown').innerHTML = `<p>${lockdown}</p>`;
+            document.getElementById('out4-narrative').innerHTML = `<p>${narrative}</p>`;
+            document.getElementById('out4-buffer').innerHTML = `<p>${buffer}</p>`;
+            document.getElementById('out4-doc').innerHTML = `<p>${doc}</p>`;
+            document.getElementById('out4-warning').innerHTML = warning;
+
+            document.getElementById('results-tool4').style.display = 'block';
+
+            // History Save
+            const summary = `Target Risk: ${targetReason} — Risk level: ${trust} trust`;
+            const fullHtml = `<p><strong>Vulnerability:</strong> ${vuln}</p><p><strong>Lockdown Protocol:</strong> Established.</p>`;
+            saveToHistory('tool4', summary, fullHtml);
+        }
+
+        // ==================== TOOL 5 LOGIC ====================
+        function loadSample5() {
+            document.getElementById('t5-pervasive').value = "Department-wide";
+            document.querySelector('input[name="t5-outcomes"][value="Somewhat"]').checked = true;
+            document.querySelector('input[name="t5-leadership"][value="They participate"]').checked = true;
+            document.getElementById('t5-tenure').value = "1-2yr";
+            document.querySelector('input[name="t5-agent"][value="Only if supported"]').checked = true;
+            showToast("Sample scenario loaded");
+        }
+
+        function runTool5() {
+            const pervasive = document.getElementById('t5-pervasive').value;
+            const outcomes = document.querySelector('input[name="t5-outcomes"]:checked').value;
+            const leadership = document.querySelector('input[name="t5-leadership"]:checked').value;
+            const tenure = document.getElementById('t5-tenure').value;
+            const agent = document.querySelector('input[name="t5-agent"]:checked').value;
+
+            // Culture Diagnosis
+            let diag = "";
+            if (leadership === "They participate" || pervasive === "Company culture") {
+                diag = "<strong style='color: var(--danger);'>BAKED-IN SYSTEMIC TOXICITY.</strong> When leadership actively participates in gossip, non-participation is treated as dissent. This culture is structural and cannot be fixed from below.";
+            } else if (pervasive === "Department-wide") {
+                diag = "<strong style='color: var(--warning);'>LOCALIZED CULTURAL ROT.</strong> The department has poor boundary enforcement, though company-wide leadership may still be sane. High risk of burnout.";
+            } else {
+                diag = "<strong style='color: var(--success);'>CONTAINABLE FRICTION.</strong> The issue is isolated to specific bad actors or a single clique. The broader culture is salvageable.";
+            }
+
+            // Change Agent Path
+            let path = "";
+            if (leadership === "They participate" || agent === "No") {
+                path = "Do NOT attempt to fix this culture. You will become a lightning rod for targeted backlash. Protect your mental energy and focus on clean execution.";
+            } else {
+                path = "Focus on micro-culture: Model transparent communication, refuse to pass on unverified info, and praise team members publicly. Influence the culture of your immediate radius only.";
+            }
+
+            // Protection Plan
+            let prot = `
+                1. <strong>Strict Boundary Enforcement:</strong> Disengage emotionally. Treat the workplace purely as a professional transaction.<br>
+                2. <strong>Paper Trail:</strong> Confirm all decisions, approvals, and assignments via follow-up emails.<br>
+                3. <strong>External Sanity Check:</strong> Discuss work stress only with non-work friends or mentors outside the organization.
+            `;
+
+            // Exit Timeline
+            let timeline = "";
+            if (leadership === "They participate" && outcomes.includes("Yes")) {
+                timeline = "<strong>Immediate Plan (30-90 Days):</strong> Update resume, quietly reach out to external network, and prepare exit strategy. The long-term career risk here is high.";
+            } else if (pervasive === "Department-wide") {
+                timeline = "<strong>Medium Plan (3-6 Months):</strong> Explore internal transfer options to healthier teams, or evaluate external opportunities.";
+            } else {
+                timeline = "<strong>Monitor (6+ Months):</strong> Maintain healthy personal boundaries. Re-evaluate only if leadership begins participating or performance is impacted.";
+            }
+
+            // Interview Filter
+            let filter = `
+                In future job interviews, ask these subtle questions to detect toxic gossip cultures:<br>
+                • <em>"How does the team handle conflicting priorities or disagreements during projects?"</em><br>
+                • <em>"How is feedback communicated between leadership and team members?"</em><br>
+                • Observe if interviewers make subtle negative remarks about current or former employees.
+            `;
+
+            document.getElementById('out5-diagnosis').innerHTML = `<p>${diag}</p>`;
+            document.getElementById('out5-path').innerHTML = `<p>${path}</p>`;
+            document.getElementById('out5-protection').innerHTML = `<p>${prot}</p>`;
+            document.getElementById('out5-timeline').innerHTML = `<p>${timeline}</p>`;
+            document.getElementById('out5-filter').innerHTML = `<p>${filter}</p>`;
+
+            document.getElementById('results-tool5').style.display = 'block';
+
+            // History Save
+            const summary = `System: ${pervasive} — Leadership: ${leadership}`;
+            const fullHtml = `<p><strong>Diagnosis:</strong> ${diag}</p><p><strong>Timeline:</strong> ${timeline}</p>`;
+            saveToHistory('tool5', summary, fullHtml);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#F5F7F4]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AfterLossTogether — Couple's Recovery Toolkit</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sage: {
+                            DEFAULT: '#81B29A',
+                            50: '#F2F7F4',
+                            100: '#E2EEE8',
+                            600: '#64957D',
+                            700: '#4D7863'
+                        },
+                        stone: {
+                            DEFAULT: '#D4A373',
+                            50: '#FAF5EF',
+                            100: '#F3E7D8',
+                            600: '#B88250',
+                            700: '#946335'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #F5F7F4 0%, #FDF8F3 100%);
+            min-height: 100vh;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c5c5c5;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        /* Range slider customization */
+        input[type=range] {
+            accent-color: #81B29A;
+        }
+    </style>
+</head>
+<body class="h-full text-slate-700 flex flex-col md:flex-row antialiased">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 ease-in-out bg-slate-800 text-white px-5 py-3 rounded-lg shadow-lg flex items-center space-x-2 text-sm">
+        <i class="fa-solid fa-circle-check text-sage"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-white border-b border-slate-200 p-4 flex justify-between items-center sticky top-0 z-30">
+        <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center text-sage font-semibold">
+                <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+            <span class="font-semibold text-slate-800">AfterLossTogether</span>
+        </div>
+        <button id="mobile-menu-btn" class="text-slate-600 hover:text-slate-900 focus:outline-none p-2" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 z-40 hidden md:hidden transition-opacity"></div>
+
+    <!-- Fixed Left Sidebar -->
+    <aside id="sidebar" class="fixed top-0 bottom-0 left-0 w-64 bg-white border-r border-slate-200/80 shadow-sm z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between">
+        <div>
+            <!-- Brand -->
+            <div class="p-6 border-b border-slate-100 flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-sage/20 flex items-center justify-center text-sage text-lg">
+                    <i class="fa-solid fa-heart-circle-bolt"></i>
+                </div>
+                <div>
+                    <h1 class="font-semibold text-slate-800 leading-tight text-base">AfterLossTogether</h1>
+                    <p class="text-xs text-slate-400">Recovery Toolkit</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="p-4 space-y-1.5 text-sm">
+                <button onclick="switchTool('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg font-medium transition-colors text-sage bg-sage/10">
+                    <i class="fa-solid fa-house w-5 text-center"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button onclick="switchTool('grief-map')" id="nav-grief-map" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fa-solid fa-[#81B29A] fa-compass w-5 text-center"></i>
+                    <span>Grief Map</span>
+                </button>
+                <button onclick="switchTool('next-step')" id="nav-next-step" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fa-solid fa-route w-5 text-center"></i>
+                    <span>The Next Step</span>
+                </button>
+                <button onclick="switchTool('intimacy-repair')" id="nav-intimacy-repair" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fa-solid fa-hand-holding-heart w-5 text-center"></i>
+                    <span>Intimacy Repair</span>
+                </button>
+                <button onclick="switchTool('social-shield')" id="nav-social-shield" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fa-solid fa-shield-halved w-5 text-center"></i>
+                    <span>Social Shield</span>
+                </button>
+                <button onclick="switchTool('connection-check')" id="nav-connection-check" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fa-solid fa-sliders w-5 text-center"></i>
+                    <span>Connection Check</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Sidebar Info Box -->
+        <div class="p-4 m-4 rounded-xl bg-stone-50 border border-stone-100 text-xs text-stone-700">
+            <p class="font-medium mb-1"><i class="fa-solid fa-lock mr-1 text-stone font-normal"></i> Private & Offline</p>
+            <p class="text-stone-600/80 leading-relaxed">Your entries stay entirely in your browser. No accounts or internet required.</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Container -->
+    <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
+        <main class="flex-1 p-4 md:p-8 max-w-4xl w-full mx-auto space-y-8">
+
+            <!-- DASHBOARD SECTION -->
+            <section id="tool-dashboard" class="tool-screen space-y-8">
+                <!-- Hero Banner -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 md:p-8 text-center space-y-3 relative overflow-hidden">
+                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-sage/10 rounded-full blur-2xl"></div>
+                    <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-stone/10 rounded-full blur-2xl"></div>
+                    <span class="inline-block px-3 py-1 bg-sage/10 text-sage text-xs font-semibold rounded-full tracking-wide">A PRACTICAL RECOVERY TOOLKIT</span>
+                    <h1 class="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">After Loss Together</h1>
+                    <p class="text-slate-600 text-base max-w-lg mx-auto leading-relaxed">Grieve together so you don't grow apart. Practical structure for navigating life, decisions, and intimacy after pregnancy loss.</p>
+                </div>
+
+                <!-- Tools Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Tool 1 Card -->
+                    <div onclick="switchTool('grief-map')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-sage/40 transition-all cursor-pointer group flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-lg bg-sage/10 text-sage flex items-center justify-center text-xl mb-4 group-hover:scale-105 transition-transform">
+                                <i class="fa-solid fa-compass"></i>
+                            </div>
+                            <h2 class="text-lg font-semibold text-slate-800 mb-1 group-hover:text-sage transition-colors">Grief Map</h2>
+                            <p class="text-sm text-slate-500 leading-relaxed">Understand conflicting grief styles, translate unspoken feelings, and find small ways to stay connected without changing how each other hurts.</p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-50 flex items-center text-xs font-medium text-sage">
+                            <span>Open Tool</span>
+                            <i class="fa-solid fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tool 2 Card -->
+                    <div onclick="switchTool('next-step')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-sage/40 transition-all cursor-pointer group flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-lg bg-stone/10 text-stone flex items-center justify-center text-xl mb-4 group-hover:scale-105 transition-transform">
+                                <i class="fa-solid fa-route"></i>
+                            </div>
+                            <h2 class="text-lg font-semibold text-slate-800 mb-1 group-hover:text-stone transition-colors">The Next Step</h2>
+                            <p class="text-sm text-slate-500 leading-relaxed">Decide whether to try again, pause, or stop without panic or ultimatum. Translate fear into protection.</p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-50 flex items-center text-xs font-medium text-stone">
+                            <span>Open Tool</span>
+                            <i class="fa-solid fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tool 3 Card -->
+                    <div onclick="switchTool('intimacy-repair')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-sage/40 transition-all cursor-pointer group flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-lg bg-sage/10 text-sage flex items-center justify-center text-xl mb-4 group-hover:scale-105 transition-transform">
+                                <i class="fa-solid fa-hand-holding-heart"></i>
+                            </div>
+                            <h2 class="text-lg font-semibold text-slate-800 mb-1 group-hover:text-sage transition-colors">Intimacy Repair</h2>
+                            <p class="text-sm text-slate-500 leading-relaxed">Rebuild non-clinical physical connection when sex feels terrifying, mechanical, or triggering.</p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-50 flex items-center text-xs font-medium text-sage">
+                            <span>Open Tool</span>
+                            <i class="fa-solid fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tool 4 Card -->
+                    <div onclick="switchTool('social-shield')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-sage/40 transition-all cursor-pointer group flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-lg bg-stone/10 text-stone flex items-center justify-center text-xl mb-4 group-hover:scale-105 transition-transform">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <h2 class="text-lg font-semibold text-slate-800 mb-1 group-hover:text-stone transition-colors">Social Shield</h2>
+                            <p class="text-sm text-slate-500 leading-relaxed">Respond to well-meaning but painful comments, set clear boundaries, and protect your energy as a couple.</p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-50 flex items-center text-xs font-medium text-stone">
+                            <span>Open Tool</span>
+                            <i class="fa-solid fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tool 5 Card (Full width on md) -->
+                    <div onclick="switchTool('connection-check')" class="md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-sage/40 transition-all cursor-pointer group flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-lg bg-sage/10 text-sage flex items-center justify-center text-xl mb-4 group-hover:scale-105 transition-transform">
+                                <i class="fa-solid fa-sliders"></i>
+                            </div>
+                            <h2 class="text-lg font-semibold text-slate-800 mb-1 group-hover:text-sage transition-colors">Connection Check</h2>
+                            <p class="text-sm text-slate-500 leading-relaxed">Assess relationship alignment across six core domains with color-coded tracking to catch silent drifting early.</p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-50 flex items-center text-xs font-medium text-sage">
+                            <span>Open Tool</span>
+                            <i class="fa-solid fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 1: GRIEF MAP -->
+            <section id="tool-grief-map" class="tool-screen hidden space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 text-xs font-semibold text-sage uppercase tracking-wider mb-1">
+                            <i class="fa-solid fa-compass"></i>
+                            <span>Tool 1</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">Grief Map</h2>
+                        <p class="text-sm text-slate-500 mt-1">Navigate different grieving styles without feeling isolated from each other.</p>
+                    </div>
+                    <button onclick="loadSample('grief-map')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors flex items-center space-x-1.5 self-start md:self-auto">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sage"></i>
+                        <span>Load Sample Scenario</span>
+                    </button>
+                </div>
+
+                <!-- Form -->
+                <form id="form-grief-map" onsubmit="handleFormSubmit(event, 'grief-map')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Partner A Grief Style -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Partner A's Grief Style</label>
+                            <select id="gm-styleA" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage/50">
+                                <option value="" disabled selected>Select style...</option>
+                                <option value="Openly emotional">Openly emotional (crying, talking, showing pain)</option>
+                                <option value="Privately emotional">Privately emotional (grieving alone, hiding tears)</option>
+                                <option value="Practical/action-oriented">Practical / action-oriented (cleaning, researching, fixing)</option>
+                                <option value="Silent">Silent (internalizing, quiet, withdrawn)</option>
+                                <option value="Angry">Angry (frustrated, reactive, sharp)</option>
+                                <option value="Numb">Numb (feeling disconnected or blank)</option>
+                                <option value="Cycles rapidly">Cycles rapidly (shifting emotions hour to hour)</option>
+                            </select>
+                        </div>
+                        <!-- Partner B Grief Style -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Partner B's Grief Style</label>
+                            <select id="gm-styleB" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage/50">
+                                <option value="" disabled selected>Select style...</option>
+                                <option value="Openly emotional">Openly emotional (crying, talking, showing pain)</option>
+                                <option value="Privately emotional">Privately emotional (grieving alone, hiding tears)</option>
+                                <option value="Practical/action-oriented">Practical / action-oriented (cleaning, researching, fixing)</option>
+                                <option value="Silent">Silent (internalizing, quiet, withdrawn)</option>
+                                <option value="Angry">Angry (frustrated, reactive, sharp)</option>
+                                <option value="Numb">Numb (feeling disconnected or blank)</option>
+                                <option value="Cycles rapidly">Cycles rapidly (shifting emotions hour to hour)</option>
+                            </select>
+                        </div>
+                        <!-- Partner A Feeling -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Partner A's Primary Feeling</label>
+                            <select id="gm-feelingA" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage/50">
+                                <option value="" disabled selected>Select feeling...</option>
+                                <option value="Sadness">Sadness</option>
+                                <option value="Anger">Anger</option>
+                                <option value="Guilt">Guilt</option>
+                                <option value="Emptiness">Emptiness</option>
+                                <option value="Fear">Fear</option>
+                                <option value="Loneliness">Loneliness</option>
+                                <option value="Relief mixed with grief">Relief mixed with grief</option>
+                            </select>
+                        </div>
+                        <!-- Partner B Feeling -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Partner B's Primary Feeling</label>
+                            <select id="gm-feelingB" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage/50">
+                                <option value="" disabled selected>Select feeling...</option>
+                                <option value="Sadness">Sadness</option>
+                                <option value="Anger">Anger</option>
+                                <option value="Guilt">Guilt</option>
+                                <option value="Emptiness">Emptiness</option>
+                                <option value="Fear">Fear</option>
+                                <option value="Loneliness">Loneliness</option>
+                                <option value="Relief mixed with grief">Relief mixed with grief</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Communication frequency -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Do you talk about the loss?</label>
+                        <select id="gm-talk" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage/50">
+                            <option value="" disabled selected>Select communication frequency...</option>
+                            <option value="Often">Often (daily or several times a week)</option>
+                            <option value="Sometimes">Sometimes (when brought up)</option>
+                            <option value="Rarely">Rarely (we avoid it)</option>
+                            <option value="Never">Never (feels too painful or off-limits)</option>
+                            <option value="One wants to, one doesn't">One wants to talk, the other shuts down</option>
+                        </select>
+                    </div>
+
+                    <!-- Wish partner understood -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">What do you wish your partner understood about your grief?</label>
+                        <textarea id="gm-wish" rows="3" required placeholder="e.g., I wish they knew that when I jump into chores, I'm trying not to fall apart..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage/50"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-sage hover:bg-sage-600 text-white font-medium py-3 rounded-lg shadow-sm transition-colors text-sm flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <span>Generate Grief Map</span>
+                    </button>
+                </form>
+
+                <!-- Output Area -->
+                <div id="output-grief-map" class="hidden space-y-6"></div>
+
+                <!-- History Accordion -->
+                <div id="history-container-grief-map" class="pt-4"></div>
+            </section>
+
+            <!-- TOOL 2: THE NEXT STEP -->
+            <section id="tool-next-step" class="tool-screen hidden space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 text-xs font-semibold text-stone uppercase tracking-wider mb-1">
+                            <i class="fa-solid fa-route"></i>
+                            <span>Tool 2</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">The Next Step</h2>
+                        <p class="text-sm text-slate-500 mt-1">Navigate differing visions on trying again, pausing, or stopping without panic.</p>
+                    </div>
+                    <button onclick="loadSample('next-step')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors flex items-center space-x-1.5 self-start md:self-auto">
+                        <i class="fa-solid fa-wand-magic-sparkles text-stone"></i>
+                        <span>Load Sample Scenario</span>
+                    </button>
+                </div>
+
+                <form id="form-next-step" onsubmit="handleFormSubmit(event, 'next-step')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Loss count -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">How many losses have you experienced?</label>
+                            <select id="ns-losses" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-stone/50">
+                                <option value="" disabled selected>Select count...</option>
+                                <option value="1">1 loss</option>
+                                <option value="2">2 losses</option>
+                                <option value="3">3 losses</option>
+                                <option value="4+">4 or more losses</option>
+                            </select>
+                        </div>
+                        <!-- Medical guidance -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Medical Guidance Received</label>
+                            <select id="ns-medical" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-stone/50">
+                                <option value="" disabled selected>Select status...</option>
+                                <option value="Clear path forward">Clear medical path forward</option>
+                                <option value="Uncertain">Uncertain / pending testing</option>
+                                <option value="No answers">Unexplained / no clear answers</option>
+                                <option value="Conflicting advice">Conflicting advice from doctors</option>
+                                <option value="Haven't sought yet">Haven't sought specialist advice yet</option>
+                            </select>
+                        </div>
+                        <!-- Partner A Leaning -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Partner A's Current Leaning</label>
+                            <select id="ns-leanA" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-stone/50">
+                                <option value="" disabled selected>Select leaning...</option>
+                                <option value="Try again soon">Try again as soon as possible</option>
+                                <option value="Try again later">Try again after taking some time</option>
+                                <option value="Pause indefinitely">Pause indefinitely / take a break</option>
+                                <option value="Stop trying">Stop trying permanently</option>
+                                <option value="Unsure">Completely unsure / torn</option>
+                            </select>
+                        </div>
+                        <!-- Partner B Leaning -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Partner B's Current Leaning</label>
+                            <select id="ns-leanB" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-stone/50">
+                                <option value="" disabled selected>Select leaning...</option>
+                                <option value="Try again soon">Try again as soon as possible</option>
+                                <option value="Try again later">Try again after taking some time</option>
+                                <option value="Pause indefinitely">Pause indefinitely / take a break</option>
+                                <option value="Stop trying">Stop trying permanently</option>
+                                <option value="Unsure">Completely unsure / torn</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">What scares you most about trying again?</label>
+                        <textarea id="ns-scaredTry" rows="2" required placeholder="e.g., Going through another loss, hospital visits, body trauma..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-stone/50"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">What scares you most about NOT trying?</label>
+                        <textarea id="ns-scaredNot" rows="2" required placeholder="e.g., Regret, giving up on the baby we hoped for, time running out..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-stone/50"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-stone hover:bg-stone-600 text-white font-medium py-3 rounded-lg shadow-sm transition-colors text-sm flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-compass-drafting"></i>
+                        <span>Generate Next Step Framework</span>
+                    </button>
+                </form>
+
+                <div id="output-next-step" class="hidden space-y-6"></div>
+                <div id="history-container-next-step" class="pt-4"></div>
+            </section>
+
+            <!-- TOOL 3: INTIMACY REPAIR -->
+            <section id="tool-intimacy-repair" class="tool-screen hidden space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 text-xs font-semibold text-sage uppercase tracking-wider mb-1">
+                            <i class="fa-solid fa-hand-holding-heart"></i>
+                            <span>Tool 3</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">Intimacy Repair</h2>
+                        <p class="text-sm text-slate-500 mt-1">Rebuild physical and emotional warmth when connection feels clinical or overwhelming.</p>
+                    </div>
+                    <button onclick="loadSample('intimacy-repair')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors flex items-center space-x-1.5 self-start md:self-auto">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sage"></i>
+                        <span>Load Sample Scenario</span>
+                    </button>
+                </div>
+
+                <form id="form-intimacy-repair" onsubmit="handleFormSubmit(event, 'intimacy-repair')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Current Physical Intimacy State</label>
+                        <select id="ir-current" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage/50">
+                            <option value="" disabled selected>Select current state...</option>
+                            <option value="Avoided entirely">Avoided entirely (we barely touch)</option>
+                            <option value="Mechanical/timed">Mechanical / timed around ovulation</option>
+                            <option value="Occasional but joyless">Occasional but feels heavy or joyless</option>
+                            <option value="Rare">Rare (occasional affection, no sex)</option>
+                            <option value="We haven't discussed it">We haven't discussed it and feel distant</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">What intimacy used to feel like</label>
+                            <textarea id="ir-past" rows="2" required placeholder="e.g., Playful, spontaneous, safe, affectionate..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage/50"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">What it feels like now</label>
+                            <textarea id="ir-present" rows="2" required placeholder="e.g., A reminder of the loss, clinical duty, high pressure..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage/50"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Partner A's Feeling About Sex</label>
+                            <select id="ir-feelA" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage/50">
+                                <option value="" disabled selected>Select feeling...</option>
+                                <option value="Fear">Fear (afraid of another loss or body pain)</option>
+                                <option value="Guilt">Guilt (feeling like body failed)</option>
+                                <option value="Obligation">Obligation (doing it just for partner)</option>
+                                <option value="Grief">Grief (triggers sadness during sex)</option>
+                                <option value="Numb">Numb (disconnected from body)</option>
+                                <option value="Still want connection">Still want connection (longing for warmth)</option>
+                                <option value="Aversion">Aversion (strong urge to pull away)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Partner B's Feeling About Sex</label>
+                            <select id="ir-feelB" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage/50">
+                                <option value="" disabled selected>Select feeling...</option>
+                                <option value="Fear">Fear (afraid of triggering partner)</option>
+                                <option value="Guilt">Guilt (feeling selfish for wanting sex)</option>
+                                <option value="Obligation">Obligation (pressure to perform)</option>
+                                <option value="Grief">Grief (miss closeness, feel loss)</option>
+                                <option value="Numb">Numb (feeling disconnected)</option>
+                                <option value="Still want connection">Still want connection (craving closeness)</option>
+                                <option value="Aversion">Aversion (shutting down)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Medical / Fertility Requirements (Optional)</label>
+                        <input id="ir-medical" type="text" placeholder="e.g., Ovulation tracking, scheduled intercourse, pelivic rest..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage/50">
+                    </div>
+
+                    <button type="submit" class="w-full bg-sage hover:bg-sage-600 text-white font-medium py-3 rounded-lg shadow-sm transition-colors text-sm flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-heart-circle-check"></i>
+                        <span>Generate Intimacy Roadmap</span>
+                    </button>
+                </form>
+
+                <div id="output-intimacy-repair" class="hidden space-y-6"></div>
+                <div id="history-container-intimacy-repair" class="pt-4"></div>
+            </section>
+
+            <!-- TOOL 4: SOCIAL SHIELD -->
+            <section id="tool-social-shield" class="tool-screen hidden space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 text-xs font-semibold text-stone uppercase tracking-wider mb-1">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>Tool 4</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">Social Shield</h2>
+                        <p class="text-sm text-slate-500 mt-1">Protect your emotional peace against harmful remarks and set clear boundaries.</p>
+                    </div>
+                    <button onclick="loadSample('social-shield')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors flex items-center space-x-1.5 self-start md:self-auto">
+                        <i class="fa-solid fa-wand-magic-sparkles text-stone"></i>
+                        <span>Load Sample Scenario</span>
+                    </button>
+                </div>
+
+                <form id="form-social-shield" onsubmit="handleFormSubmit(event, 'social-shield')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Most Painful Comment Received</label>
+                        <textarea id="ss-comment" rows="2" required placeholder="e.g., 'At least you know you can get pregnant!' or 'Everything happens for a reason...'" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-stone/50"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Who Said It</label>
+                            <select id="ss-who" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-stone/50">
+                                <option value="" disabled selected>Select relationship...</option>
+                                <option value="Family">Immediate / Extended Family</option>
+                                <option value="Friend">Close or Casual Friend</option>
+                                <option value="Colleague">Colleague or Manager</option>
+                                <option value="Stranger">Acquaintance / Stranger</option>
+                                <option value="Medical provider">Medical Provider</option>
+                                <option value="Social media">Social Media Comment</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Current Social Tolerance</label>
+                            <select id="ss-tolerance" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-stone/50">
+                                <option value="" disabled selected>Select current capacity...</option>
+                                <option value="Avoiding everyone">Avoiding everyone (staying home)</option>
+                                <option value="Only seeing safe people">Only seeing 1-2 safe people</option>
+                                <option value="Acting normal">Forcing ourselves to act normal</option>
+                                <option value="Open about loss">Being open about our loss</option>
+                                <option value="Mixed">Mixed (varies day to day)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">What you WANTED to say</label>
+                            <textarea id="ss-wanted" rows="2" placeholder="e.g., That was incredibly hurtful and insensitive..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-stone/50"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">What you ACTUALLY said</label>
+                            <textarea id="ss-actual" rows="2" placeholder="e.g., Smiled politely and walked away..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-stone/50"></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-stone hover:bg-stone-600 text-white font-medium py-3 rounded-lg shadow-sm transition-colors text-sm flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-shield"></i>
+                        <span>Generate Social Response Scripts</span>
+                    </button>
+                </form>
+
+                <div id="output-social-shield" class="hidden space-y-6"></div>
+                <div id="history-container-social-shield" class="pt-4"></div>
+            </section>
+
+            <!-- TOOL 5: CONNECTION CHECK -->
+            <section id="tool-connection-check" class="tool-screen hidden space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 text-xs font-semibold text-sage uppercase tracking-wider mb-1">
+                            <i class="fa-solid fa-sliders"></i>
+                            <span>Tool 5</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">Connection Check</h2>
+                        <p class="text-sm text-slate-500 mt-1">Assess your relationship health across key grief domains and take targeted action.</p>
+                    </div>
+                    <button onclick="loadSample('connection-check')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors flex items-center space-x-1.5 self-start md:self-auto">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sage"></i>
+                        <span>Load Sample Scenario</span>
+                    </button>
+                </div>
+
+                <form id="form-connection-check" onsubmit="handleFormSubmit(event, 'connection-check')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-6">
+                    <p class="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg">Rate each area honestly on a scale of 1 (Not at all) to 10 (Completely / Very High).</p>
+
+                    <div class="space-y-5">
+                        <!-- Q1 -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-semibold text-slate-700">1. I feel like my partner understands my grief</label>
+                                <span id="val-q1" class="text-xs font-bold text-sage">5 / 10</span>
+                            </div>
+                            <input type="range" id="cc-q1" min="1" max="10" value="5" oninput="document.getElementById('val-q1').innerText = this.value + ' / 10'" class="w-full">
+                        </div>
+
+                        <!-- Q2 -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-semibold text-slate-700">2. I feel supported by my partner</label>
+                                <span id="val-q2" class="text-xs font-bold text-sage">5 / 10</span>
+                            </div>
+                            <input type="range" id="cc-q2" min="1" max="10" value="5" oninput="document.getElementById('val-q2').innerText = this.value + ' / 10'" class="w-full">
+                        </div>
+
+                        <!-- Q3 -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-semibold text-slate-700">3. We are on the same page about next steps</label>
+                                <span id="val-q3" class="text-xs font-bold text-sage">5 / 10</span>
+                            </div>
+                            <input type="range" id="cc-q3" min="1" max="10" value="5" oninput="document.getElementById('val-q3').innerText = this.value + ' / 10'" class="w-full">
+                        </div>
+
+                        <!-- Q4 -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-semibold text-slate-700">4. I feel hopeful about our relationship</label>
+                                <span id="val-q4" class="text-xs font-bold text-sage">5 / 10</span>
+                            </div>
+                            <input type="range" id="cc-q4" min="1" max="10" value="5" oninput="document.getElementById('val-q4').innerText = this.value + ' / 10'" class="w-full">
+                        </div>
+
+                        <!-- Q5 -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-semibold text-slate-700">5. I feel hopeful about our future family</label>
+                                <span id="val-q5" class="text-xs font-bold text-sage">5 / 10</span>
+                            </div>
+                            <input type="range" id="cc-q5" min="1" max="10" value="5" oninput="document.getElementById('val-q5').innerText = this.value + ' / 10'" class="w-full">
+                        </div>
+
+                        <!-- Q6 -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-semibold text-slate-700">6. I am taking care of myself individually</label>
+                                <span id="val-q6" class="text-xs font-bold text-sage">5 / 10</span>
+                            </div>
+                            <input type="range" id="cc-q6" min="1" max="10" value="5" oninput="document.getElementById('val-q6').innerText = this.value + ' / 10'" class="w-full">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-sage hover:bg-sage-600 text-white font-medium py-3 rounded-lg shadow-sm transition-colors text-sm flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-chart-bar"></i>
+                        <span>Calculate Alignment Dashboard</span>
+                    </button>
+                </form>
+
+                <div id="output-connection-check" class="hidden space-y-6"></div>
+                <div id="history-container-connection-check" class="pt-4"></div>
+            </section>
+
+        </main>
+
+        <!-- Persistent Global Footer -->
+        <footer class="bg-white border-t border-slate-200 mt-auto py-6 px-4 md:px-8">
+            <div class="max-w-4xl mx-auto text-center space-y-2">
+                <div class="flex items-center justify-center space-x-2 text-slate-400 text-xs">
+                    <i class="fa-solid fa-heart text-stone/60"></i>
+                    <span>AfterLossTogether Toolkit</span>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed max-w-2xl mx-auto">
+                    For emotional support and reflection purposes only. Not therapy or medical advice. If you are in crisis, contact your healthcare provider or a mental health professional.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        // --- NAVIGATION & UI TOGGLES ---
+        function switchTool(toolId) {
+            document.querySelectorAll('.tool-screen').forEach(el => el.classList.add('hidden'));
+            const targetScreen = document.getElementById(`tool-${toolId}`);
+            if (targetScreen) targetScreen.classList.remove('hidden');
+
+            // Nav link styling
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-sage/10', 'text-sage');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`nav-${toolId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-sage/10', 'text-sage');
+                activeBtn.classList.remove('text-slate-600');
+            }
+
+            // Close mobile menu if open
+            closeMobileMenu();
+
+            // Load tool history
+            if (toolId !== 'dashboard') {
+                renderHistory(toolId);
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Mobile Sidebar Controls
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        function openMobileMenu() {
+            sidebar.classList.remove('-translate-x-full');
+            sidebarOverlay.classList.remove('hidden');
+        }
+
+        function closeMobileMenu() {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        }
+
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openMobileMenu);
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeMobileMenu);
+
+        // Toast Notification System
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.innerText = message || 'Copied to clipboard!';
+            toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-[-100px]', 'opacity-0');
+            }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Text copied to clipboard!');
+            }).catch(err => {
+                showToast('Failed to copy');
+            });
+        }
+
+        // --- SAMPLE SCENARIOS DATA & LOADERS ---
+        const SAMPLE_SCENARIOS = {
+            'grief-map': {
+                styleA: 'Openly emotional',
+                styleB: 'Practical/action-oriented',
+                feelingA: 'Sadness',
+                feelingB: 'Guilt',
+                talk: 'One wants to, one doesn\'t',
+                wish: 'I wish they understood that when I cry, I don\'t need them to fix it or make it stop—I just need them to hold my hand and let me miss our baby.'
+            },
+            'next-step': {
+                losses: '2',
+                medical: 'No answers',
+                leanA: 'Try again soon',
+                leanB: 'Pause indefinitely',
+                scaredTry: 'I am terrified of going through another loss, lying in that quiet ultrasound room, and feeling like my body failed us again.',
+                scaredNot: 'I am scared that if we stop now, we will live with a quiet regret forever and feel like we gave up on the baby we hoped for.'
+            },
+            'intimacy-repair': {
+                current: 'Mechanical/timed',
+                past: 'Intimacy used to feel playful, warm, and a safe place to unwind together without any pressure or targets.',
+                present: 'Now sex feels like a clinical task tied to calendars and ovulation strips, bringing back memories of the pregnancy loss.',
+                feelA: 'Grief',
+                feelB: 'Fear',
+                medical: 'Ovulation tracking required by fertility clinic'
+            },
+            'social-shield': {
+                comment: 'At least you know you can get pregnant! You\'re still young, you\'ll have another one soon.',
+                who: 'Family',
+                tolerance: 'Avoiding everyone',
+                wanted: 'That doesn\'t replace the baby we just lost. Getting pregnant isn\'t the problem—we miss THIS baby.',
+                actual: 'Yeah... we hope so. (Then quietly excused myself to the bathroom)'
+            },
+            'connection-check': {
+                q1: 4, q2: 7, q3: 3, q4: 6, q5: 2, q6: 5
+            }
+        };
+
+        function loadSample(toolId) {
+            const data = SAMPLE_SCENARIOS[toolId];
+            if (!data) return;
+
+            if (toolId === 'grief-map') {
+                document.getElementById('gm-styleA').value = data.styleA;
+                document.getElementById('gm-styleB').value = data.styleB;
+                document.getElementById('gm-feelingA').value = data.feelingA;
+                document.getElementById('gm-feelingB').value = data.feelingB;
+                document.getElementById('gm-talk').value = data.talk;
+                document.getElementById('gm-wish').value = data.wish;
+            } else if (toolId === 'next-step') {
+                document.getElementById('ns-losses').value = data.losses;
+                document.getElementById('ns-medical').value = data.medical;
+                document.getElementById('ns-leanA').value = data.leanA;
+                document.getElementById('ns-leanB').value = data.leanB;
+                document.getElementById('ns-scaredTry').value = data.scaredTry;
+                document.getElementById('ns-scaredNot').value = data.scaredNot;
+            } else if (toolId === 'intimacy-repair') {
+                document.getElementById('ir-current').value = data.current;
+                document.getElementById('ir-past').value = data.past;
+                document.getElementById('ir-present').value = data.present;
+                document.getElementById('ir-feelA').value = data.feelA;
+                document.getElementById('ir-feelB').value = data.feelB;
+                document.getElementById('ir-medical').value = data.medical;
+            } else if (toolId === 'social-shield') {
+                document.getElementById('ss-comment').value = data.comment;
+                document.getElementById('ss-who').value = data.who;
+                document.getElementById('ss-tolerance').value = data.tolerance;
+                document.getElementById('ss-wanted').value = data.wanted;
+                document.getElementById('ss-actual').value = data.actual;
+            } else if (toolId === 'connection-check') {
+                for (let i = 1; i <= 6; i++) {
+                    const val = data[`q${i}`];
+                    document.getElementById(`cc-q${i}`).value = val;
+                    document.getElementById(`val-q${i}`).innerText = val + ' / 10';
+                }
+            }
+
+            showToast('Sample scenario loaded');
+        }
+
+        // --- LOCAL STORAGE HISTORY MANAGEMENT ---
+        function getHistory(toolId) {
+            try {
+                const data = localStorage.getItem(`afterloss_history_${toolId}`);
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveHistory(toolId, item) {
+            try {
+                let list = getHistory(toolId);
+                list.unshift(item); // Add to top
+                if (list.length > 30) list = list.slice(0, 30); // Max 30
+                localStorage.setItem(`afterloss_history_${toolId}`, JSON.stringify(list));
+                renderHistory(toolId);
+            } catch (e) {
+                console.error('LocalStorage error', e);
+            }
+        }
+
+        function clearHistory(toolId) {
+            if (confirm('Are you sure you want to clear history for this tool?')) {
+                localStorage.removeItem(`afterloss_history_${toolId}`);
+                renderHistory(toolId);
+                showToast('History cleared');
+            }
+        }
+
+        function renderHistory(toolId) {
+            const container = document.getElementById(`history-container-${toolId}`);
+            if (!container) return;
+
+            const list = getHistory(toolId);
+            if (list.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-semibold text-slate-800 flex items-center space-x-2">
+                            <i class="fa-solid fa-clock-rotate-left text-slate-400"></i>
+                            <span>Saved Analysis History (${list.length})</span>
+                        </h3>
+                        <button onclick="clearHistory('${toolId}')" class="text-xs text-rose-600 hover:text-rose-700 font-medium">Clear History</button>
+                    </div>
+                    <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+            `;
+
+            list.forEach((entry, idx) => {
+                const dateStr = new Date(entry.timestamp).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
+                html += `
+                    <details class="bg-slate-50 rounded-lg border border-slate-200/80 text-xs text-slate-700">
+                        <summary class="p-3 font-medium cursor-pointer flex justify-between items-center hover:bg-slate-100/80 rounded-lg">
+                            <span>${entry.summary || `Entry #${list.length - idx}`}</span>
+                            <span class="text-slate-400 text-[10px]">${dateStr}</span>
+                        </summary>
+                        <div class="p-4 border-t border-slate-200/60 bg-white rounded-b-lg space-y-3">
+                            ${entry.outputHtml}
+                        </div>
+                    </details>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        // --- FORM HANDLING & TEMPLATE GENERATORS ---
+        function handleFormSubmit(e, toolId) {
+            e.preventDefault();
+            let outputHtml = '';
+            let summary = '';
+
+            if (toolId === 'grief-map') {
+                const styleA = document.getElementById('gm-styleA').value;
+                const styleB = document.getElementById('gm-styleB').value;
+                const feelingA = document.getElementById('gm-feelingA').value;
+                const feelingB = document.getElementById('gm-feelingB').value;
+                const talk = document.getElementById('gm-talk').value;
+                const wish = document.getElementById('gm-wish').value;
+
+                summary = `Map: Partner A (${styleA}) & Partner B (${styleB})`;
+
+                outputHtml = `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-6">
+                        <div class="border-b border-slate-100 pb-4">
+                            <span class="text-xs font-semibold text-sage uppercase tracking-wider">Analysis Complete</span>
+                            <h3 class="text-xl font-bold text-slate-800">Your Shared Grief Map</h3>
+                        </div>
+
+                        <!-- 1. The Grief Styles -->
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-[#81B29A] fa-layer-group text-sage"></i>
+                                <span>THE GRIEF STYLES: How Each Partner Processes</span>
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200/80">
+                                    <span class="font-semibold text-slate-800 block mb-1">Partner A (${styleA})</span>
+                                    <p class="text-slate-600 leading-relaxed">${getStyleDescription(styleA)} Expressing primarily <strong>${feelingA}</strong>.</p>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200/80">
+                                    <span class="font-semibold text-slate-800 block mb-1">Partner B (${styleB})</span>
+                                    <p class="text-slate-600 leading-relaxed">${getStyleDescription(styleB)} Expressing primarily <strong>${feelingB}</strong>.</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 italic mt-1">Remember: Neither grieving style is flawed. Grief is as individual as a fingerprint, and differing coping styles are not a measure of how much either partner cares about the baby you hoped for.</p>
+                        </div>
+
+                        <!-- 2. The Misalignment -->
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-code-compare text-stone"></i>
+                                <span>THE MISALIGNMENT: Where Distance Can Form</span>
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed bg-stone-50/50 p-4 rounded-lg border border-stone-100">
+                                ${getMisalignmentText(styleA, styleB, talk)}
+                            </p>
+                        </div>
+
+                        <!-- 3 & 4. What Partner A & B Need -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                            <div class="bg-sage-50/40 p-4 rounded-lg border border-sage-100">
+                                <h5 class="font-bold text-sage-700 mb-1">WHAT PARTNER A NEEDS</h5>
+                                <p class="text-slate-600 leading-relaxed">${getNeedsText(styleA, feelingA)}</p>
+                            </div>
+                            <div class="bg-sage-50/40 p-4 rounded-lg border border-sage-100">
+                                <h5 class="font-bold text-sage-700 mb-1">WHAT PARTNER B NEEDS</h5>
+                                <p class="text-slate-600 leading-relaxed">${getNeedsText(styleB, feelingB)}</p>
+                            </div>
+                        </div>
+
+                        <!-- 5. The Bridge -->
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-bridge text-sage"></i>
+                                <span>THE BRIDGE: Witnessing Without Matching</span>
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-200/80">
+                                You do not need to feel the exact same emotion at the exact same hour to remain connected. Try saying: <em>"I can see you are carrying a heavy weight right now. I am right here with you, even if I am processing it differently."</em>
+                            </p>
+                            ${wish ? `<div class="p-3 bg-amber-50/60 border border-amber-200/60 rounded-lg text-xs text-amber-900"><strong>Unspoken Wish Honored:</strong> "${escapeHtml(wish)}"</div>` : ''}
+                        </div>
+
+                        <!-- 6. Shared Ritual -->
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-candle-holder text-stone"></i>
+                                <span>THE SHARED RITUAL: Brief Remembrance Practice</span>
+                            </h4>
+                            <div class="bg-stone-50/60 p-4 rounded-lg border border-stone-200/60 text-xs text-slate-700 space-y-1">
+                                <p class="font-semibold text-stone-700">10-Minute Quiet Candle Ritual:</p>
+                                <p class="leading-relaxed">Light a single candle together at night for 10 minutes. Sit together without any obligation to talk about logistics, medical steps, or the future. You may hold hands, cry, or just sit in shared silence to honor the baby you hoped for.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (toolId === 'next-step') {
+                const losses = document.getElementById('ns-losses').value;
+                const medical = document.getElementById('ns-medical').value;
+                const leanA = document.getElementById('ns-leanA').value;
+                const leanB = document.getElementById('ns-leanB').value;
+                const scaredTry = document.getElementById('ns-scaredTry').value;
+                const scaredNot = document.getElementById('ns-scaredNot').value;
+
+                summary = `Next Step: ${losses} losses | Partner A (${leanA}) vs Partner B (${leanB})`;
+
+                outputHtml = `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-6">
+                        <div class="border-b border-slate-100 pb-4">
+                            <span class="text-xs font-semibold text-stone uppercase tracking-wider">Decision Support Framework</span>
+                            <h3 class="text-xl font-bold text-slate-800">Navigating The Next Step</h3>
+                        </div>
+
+                        <!-- 1. The Leaning Gap -->
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-code-fork text-stone"></i>
+                                <span>THE LEANING GAP</span>
+                            </h4>
+                            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200/80 text-xs space-y-2">
+                                <p class="text-slate-700"><strong>Partner A leans toward:</strong> ${leanA}</p>
+                                <p class="text-slate-700"><strong>Partner B leans toward:</strong> ${leanB}</p>
+                                <p class="text-slate-600 leading-relaxed mt-2">${getLeaningGapAnalysis(leanA, leanB)}</p>
+                            </div>
+                        </div>
+
+                        <!-- 2. Medical Reality Check -->
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-stethoscope text-sage"></i>
+                                <span>THE MEDICAL REALITY CHECK</span>
+                            </h4>
+                            <div class="p-4 bg-sage-50/40 rounded-lg border border-sage-100 text-xs text-slate-700 leading-relaxed">
+                                ${getMedicalAdviceText(medical, losses)}
+                            </div>
+                        </div>
+
+                        <!-- 3. The Fear Translation -->
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-shield-heart text-stone"></i>
+                                <span>THE FEAR TRANSLATION: What Each Partner Is Protecting</span>
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200/80">
+                                    <span class="font-semibold text-slate-800 block mb-1">Fear of Trying Again</span>
+                                    <p class="text-slate-600 leading-relaxed">"${escapeHtml(scaredTry)}"</p>
+                                    <p class="text-slate-500 italic mt-2">Underneath: Protecting the heart and body from unbearable recurring trauma.</p>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200/80">
+                                    <span class="font-semibold text-slate-800 block mb-1">Fear of Not Trying</span>
+                                    <p class="text-slate-600 leading-relaxed">"${escapeHtml(scaredNot)}"</p>
+                                    <p class="text-slate-500 italic mt-2">Underneath: Protecting the hope, meaning, and future vision of family.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4 & 5. Protocols -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                            <div class="bg-stone-50/50 p-4 rounded-lg border border-stone-200/60">
+                                <h5 class="font-bold text-stone-700 mb-1">THE PAUSE PROTOCOL</h5>
+                                <p class="text-slate-600 leading-relaxed">Agree on a fixed, finite period (e.g., 60 or 90 days) where all medical talks and decisions are completely paused. A pause is not giving up; it is giving your body and nervous system a protected sanctuary to heal.</p>
+                            </div>
+                            <div class="bg-sage-50/40 p-4 rounded-lg border border-sage-100">
+                                <h5 class="font-bold text-sage-700 mb-1">THE TRY-AGAIN PROTOCOL</h5>
+                                <p class="text-slate-600 leading-relaxed">If moving forward, schedule a joint specialist consult first. Establish clear emotional boundaries: agreeing on maximum treatment limits, safety checks, and personal mental health support before beginning.</p>
+                            </div>
+                        </div>
+
+                        <!-- 6. Decision Frame -->
+                        <div class="p-4 bg-amber-50/60 border border-amber-200/60 rounded-lg text-xs text-amber-900 leading-relaxed">
+                            <strong class="font-semibold block mb-1"><i class="fa-solid fa-anchor mr-1"></i> THE DECISION FRAMEwork:</strong>
+                            Remember: No decision made today has to be permanent forever. Deciding to pause for two months is not deciding to stop forever. Take decisions in small, digestible timeframes rather than carrying the weight of eternity.
+                        </div>
+                    </div>
+                `;
+            } else if (toolId === 'intimacy-repair') {
+                const current = document.getElementById('ir-current').value;
+                const past = document.getElementById('ir-past').value;
+                const present = document.getElementById('ir-present').value;
+                const feelA = document.getElementById('ir-feelA').value;
+                const feelB = document.getElementById('ir-feelB').value;
+                const medical = document.getElementById('ir-medical').value;
+
+                summary = `Intimacy: State (${current}) | Feelings (${feelA} / ${feelB})`;
+
+                outputHtml = `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-6">
+                        <div class="border-b border-slate-100 pb-4">
+                            <span class="text-xs font-semibold text-sage uppercase tracking-wider">Physical & Emotional Connection</span>
+                            <h3 class="text-xl font-bold text-slate-800">Intimacy Repair Roadmap</h3>
+                        </div>
+
+                        <!-- 1. The Intimacy Gap -->
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-heart-crack text-stone"></i>
+                                <span>THE INTIMACY GAP: What Was Lost & Why</span>
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200/80">
+                                    <span class="font-semibold text-slate-700 block mb-1">What It Used To Feel Like</span>
+                                    <p class="text-slate-600 leading-relaxed font-light">"${escapeHtml(past)}"</p>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200/80">
+                                    <span class="font-semibold text-slate-700 block mb-1">What It Feels Like Now</span>
+                                    <p class="text-slate-600 leading-relaxed font-light">"${escapeHtml(present)}"</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-600 leading-relaxed bg-sage-50/30 p-3 rounded-lg border border-sage-100/60 mt-2">
+                                Partner A is carrying <strong>${feelA}</strong> while Partner B is carrying <strong>${feelB}</strong>. Pregnancy loss frequently shifts sex from a place of joy and comfort to a clinical reminder of trauma or failure. Reclaiming intimacy requires separating touch from reproduction.
+                            </p>
+                        </div>
+
+                        <!-- 2. The Pressure Release -->
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-[#81B29A] fa-feather text-sage"></i>
+                                <span>THE PRESSURE RELEASE</span>
+                            </h4>
+                            <div class="p-4 bg-stone-50/60 rounded-lg border border-stone-200/60 text-xs text-slate-700 leading-relaxed">
+                                <p class="font-semibold text-stone-700 mb-1">Explicit Permission to Pause Goal-Oriented Sex:</p>
+                                Take sexual intercourse off the table completely for the next 2 to 3 weeks. Remove the pressure to perform or conceive. ${medical ? `(If medical procedures are active: <em>"${escapeHtml(medical)}"</em>, keep clinical requirements strictly separate from personal intimacy time).` : ''}
+                            </div>
+                        </div>
+
+                        <!-- 3. The Reentry Plan -->
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-list-ol text-sage"></i>
+                                <span>THE REENTRY PLAN: 3 Non-Sexual Touch Steps</span>
+                            </h4>
+                            <div class="space-y-2 text-xs">
+                                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200/80 flex items-start space-x-3">
+                                    <span class="font-bold text-sage bg-sage/10 w-6 h-6 rounded-full flex items-center justify-center shrink-0">1</span>
+                                    <div>
+                                        <p class="font-semibold text-slate-800">5-Minute Prolonged Hug</p>
+                                        <p class="text-slate-600">Stand or sit together and hold a calm, supportive hug for 5 full minutes without talking. Let your breathing harmonize.</p>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200/80 flex items-start space-x-3">
+                                    <span class="font-bold text-sage bg-sage/10 w-6 h-6 rounded-full flex items-center justify-center shrink-0">2</span>
+                                    <div>
+                                        <p class="font-semibold text-slate-800">Low-Stakes Physical Comfort</p>
+                                        <p class="text-slate-600">Offer a 10-minute shoulder, hand, or foot massage where sexual touch is explicitly off-limits for both partners.</p>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200/80 flex items-start space-x-3">
+                                    <span class="font-bold text-sage bg-sage/10 w-6 h-6 rounded-full flex items-center justify-center shrink-0">3</span>
+                                    <div>
+                                        <p class="font-semibold text-slate-800">Clothed Cuddling & Check-In</p>
+                                        <p class="text-slate-600">Lie down together while fully clothed. Share one thing you appreciate about each other's presence today.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. The Non-Negotiable Safe Word Script -->
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-shield-cat text-stone"></i>
+                                <span>THE NON-NEGOTIABLE PAUSE SCRIPT</span>
+                            </h4>
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200/80 flex justify-between items-center text-xs">
+                                <p class="text-slate-700 italic pr-4">"I love you and want to be close, but I am feeling overwhelmed right now. Can we just hold each other quietly instead?"</p>
+                                <button onclick="copyToClipboard('I love you and want to be close, but I am feeling overwhelmed right now. Can we just hold each other quietly instead?')" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 rounded text-slate-700 font-medium shrink-0 flex items-center space-x-1">
+                                    <i class="fa-regular fa-copy"></i>
+                                    <span>Copy Script</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 5 & 6. Connection & Therapy Guidance -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                            <div class="bg-sage-50/40 p-4 rounded-lg border border-sage-100">
+                                <h5 class="font-bold text-sage-700 mb-1">NON-INTERCOURSE CONNECTION</h5>
+                                <p class="text-slate-600 leading-relaxed">Cook a meal together, go for a quiet walk in nature holding hands, or read a book out loud to one another in bed.</p>
+                            </div>
+                            <div class="bg-stone-50/50 p-4 rounded-lg border border-stone-200/60">
+                                <h5 class="font-bold text-stone-700 mb-1">WHEN TO SEEK SPECIALIZED HELP</h5>
+                                <p class="text-slate-600 leading-relaxed">If touch causes panic attacks, severe physical pain, or feelings of intense revulsion, consider seeing a licensed sex therapist or reproductive grief counselor.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (toolId === 'social-shield') {
+                const comment = document.getElementById('ss-comment').value;
+                const who = document.getElementById('ss-who').value;
+                const tolerance = document.getElementById('ss-tolerance').value;
+                const wanted = document.getElementById('ss-wanted').value;
+                const actual = document.getElementById('ss-actual').value;
+
+                summary = `Social Shield: Remark by ${who} | Capacity (${tolerance})`;
+
+                const scripts = getSocialScripts(who, comment);
+
+                outputHtml = `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-6">
+                        <div class="border-b border-slate-100 pb-4">
+                            <span class="text-xs font-semibold text-stone uppercase tracking-wider">Social Protection Strategy</span>
+                            <h3 class="text-xl font-bold text-slate-800">Your Social Shield</h3>
+                        </div>
+
+                        <!-- 1. The Comment Decoder -->
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-key text-stone"></i>
+                                <span>THE COMMENT DECODER: Intention vs. Impact</span>
+                            </h4>
+                            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200/80 text-xs space-y-2">
+                                <p class="text-slate-800"><strong>Comment Received:</strong> "${escapeHtml(comment)}" (${who})</p>
+                                <p class="text-slate-600 leading-relaxed">${getCommentDecoderText(who)}</p>
+                            </div>
+                        </div>
+
+                        <!-- 2. The Response Menu -->
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-comment-dots text-sage"></i>
+                                <span>THE RESPONSE MENU: 3 Prepared Options</span>
+                            </h4>
+
+                            <!-- Script 1: Educational -->
+                            <div class="p-4 bg-sage-50/40 rounded-lg border border-sage-100 space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-bold text-sage-700 uppercase">Option A: Gentle / Educational</span>
+                                    <button onclick="copyToClipboard('${escapeJsString(scripts.educational)}')" class="px-2.5 py-1 bg-white border border-sage-200 hover:bg-sage-50 rounded text-xs text-sage-700 font-medium flex items-center space-x-1">
+                                        <i class="fa-regular fa-copy"></i>
+                                        <span>Copy</span>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-slate-700 italic">"${escapeHtml(scripts.educational)}"</p>
+                            </div>
+
+                            <!-- Script 2: Boundary -->
+                            <div class="p-4 bg-stone-50/50 rounded-lg border border-stone-200/60 space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-bold text-stone-700 uppercase">Option B: Firm Boundary</span>
+                                    <button onclick="copyToClipboard('${escapeJsString(scripts.boundary)}')" class="px-2.5 py-1 bg-white border border-stone-200 hover:bg-stone-50 rounded text-xs text-stone-700 font-medium flex items-center space-x-1">
+                                        <i class="fa-regular fa-copy"></i>
+                                        <span>Copy</span>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-slate-700 italic">"${escapeHtml(scripts.boundary)}"</p>
+                            </div>
+
+                            <!-- Script 3: Deflection -->
+                            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200/80 space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-bold text-slate-700 uppercase">Option C: Quick Deflection</span>
+                                    <button onclick="copyToClipboard('${escapeJsString(scripts.deflection)}')" class="px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-100 rounded text-xs text-slate-700 font-medium flex items-center space-x-1">
+                                        <i class="fa-regular fa-copy"></i>
+                                        <span>Copy</span>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-slate-700 italic">"${escapeHtml(scripts.deflection)}"</p>
+                            </div>
+                        </div>
+
+                        <!-- 3. Safe Person List & Self-Care Exit -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200/80">
+                                <h5 class="font-bold text-slate-800 mb-1"><i class="fa-solid fa-user-shield text-sage mr-1"></i> SAFE PERSON LIST</h5>
+                                <p class="text-slate-600 leading-relaxed">Current Capacity: <strong>${tolerance}</strong>. Protect your social bandwidth. Identify 1 or 2 safe friends who can listen without offering unsolicited silver linings.</p>
+                            </div>
+                            <div class="bg-stone-50/50 p-4 rounded-lg border border-stone-200/60">
+                                <h5 class="font-bold text-stone-700 mb-1"><i class="fa-solid fa-door-open text-stone mr-1"></i> THE SELF-CARE EXIT</h5>
+                                <p class="text-slate-600 leading-relaxed">Establish a signal between partners (e.g., a squeeze of the hand). When given, you leave the gathering within 5 minutes without needing an elaborate excuse.</p>
+                            </div>
+                        </div>
+
+                        <!-- 4. Partner Debrief -->
+                        <div class="p-4 bg-sage-50/30 rounded-lg border border-sage-100 text-xs text-slate-700 space-y-1">
+                            <span class="font-semibold text-sage-700 block mb-1">THE PARTNER DEBRIEF (On the drive home):</span>
+                            <p class="leading-relaxed">Ask each other: <em>"Did any comments hit hard today? Do you want to vent about it or distract ourselves with a movie?"</em></p>
+                        </div>
+                    </div>
+                `;
+            } else if (toolId === 'connection-check') {
+                const q1 = parseInt(document.getElementById('cc-q1').value);
+                const q2 = parseInt(document.getElementById('cc-q2').value);
+                const q3 = parseInt(document.getElementById('cc-q3').value);
+                const q4 = parseInt(document.getElementById('cc-q4').value);
+                const q5 = parseInt(document.getElementById('cc-q5').value);
+                const q6 = parseInt(document.getElementById('cc-q6').value);
+
+                const avg = ((q1 + q2 + q3 + q4 + q5 + q6) / 6).toFixed(1);
+                summary = `Check-In Score: ${avg}/10 (${getScoreLabel(avg)})`;
+
+                outputHtml = `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-6">
+                        <div class="border-b border-slate-100 pb-4 flex justify-between items-end">
+                            <div>
+                                <span class="text-xs font-semibold text-sage uppercase tracking-wider">Relationship Alignment</span>
+                                <h3 class="text-xl font-bold text-slate-800">Connection Dashboard</h3>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-bold text-slate-800">${avg}</span>
+                                <span class="text-xs text-slate-400 block">Overall Score / 10</span>
+                            </div>
+                        </div>
+
+                        <!-- 1. The Grief Dashboard Bars -->
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-chart-simple text-sage"></i>
+                                <span>THE GRIEF DASHBOARD</span>
+                            </h4>
+                            <div class="space-y-2.5 text-xs">
+                                ${renderScoreBar('1. Partner understands grief', q1)}
+                                ${renderScoreBar('2. Feel supported by partner', q2)}
+                                ${renderScoreBar('3. Same page on next steps', q3)}
+                                ${renderScoreBar('4. Hopeful about relationship', q4)}
+                                ${renderScoreBar('5. Hopeful about future family', q5)}
+                                ${renderScoreBar('6. Individual self-care', q6)}
+                            </div>
+                        </div>
+
+                        <!-- 2 & 3. Alignment vs Risk Zones -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                            <div class="bg-emerald-50/60 p-4 rounded-lg border border-emerald-200/60">
+                                <h5 class="font-bold text-emerald-800 mb-1.5 flex items-center space-x-1">
+                                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                                    <span>ALIGNMENT ZONES (Connected)</span>
+                                </h5>
+                                <p class="text-emerald-900/80 leading-relaxed">${getAlignmentZonesText([q1, q2, q3, q4, q5, q6])}</p>
+                            </div>
+                            <div class="bg-rose-50/60 p-4 rounded-lg border border-rose-200/60">
+                                <h5 class="font-bold text-rose-800 mb-1.5 flex items-center space-x-1">
+                                    <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+                                    <span>RISK ZONES (Distance Forming)</span>
+                                </h5>
+                                <p class="text-rose-900/80 leading-relaxed">${getRiskZonesText([q1, q2, q3, q4, q5, q6])}</p>
+                            </div>
+                        </div>
+
+                        <!-- 4. One Conversation Topic -->
+                        <div class="p-4 bg-slate-50 rounded-lg border border-slate-200/80 text-xs space-y-1">
+                            <span class="font-bold text-slate-800 block mb-1"><i class="fa-solid fa-comments text-sage mr-1"></i> ONE CONVERSATION FOR THIS WEEK:</span>
+                            <p class="text-slate-600 leading-relaxed">${getWeeklyConversationTopic([q1, q2, q3, q4, q5, q6])}</p>
+                        </div>
+
+                        <!-- 5 & 6. Individual vs Shared Action -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                            <div class="bg-sage-50/40 p-4 rounded-lg border border-sage-100">
+                                <h5 class="font-bold text-sage-700 mb-1">ONE SELF-CARE ACTION (Individual)</h5>
+                                <p class="text-slate-600 leading-relaxed">Block out 1 hour this week for an individual activity that has nothing to do with fertility, doctor visits, or household chores (e.g., solo walk, journal, coffee with a friend).</p>
+                            </div>
+                            <div class="bg-stone-50/50 p-4 rounded-lg border border-stone-200/60">
+                                <h5 class="font-bold text-stone-700 mb-1">ONE SHARED ACTION (Couple)</h5>
+                                <p class="text-slate-600 leading-relaxed">Schedule a 30-minute "No-Loss Zone" date—a coffee or walk where talking about fertility, medical steps, or family planning is completely forbidden.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Render output to screen
+            const outputContainer = document.getElementById(`output-${toolId}`);
+            if (outputContainer) {
+                outputContainer.innerHTML = outputHtml;
+                outputContainer.classList.remove('hidden');
+            }
+
+            // Save to localStorage
+            saveHistory(toolId, {
+                timestamp: new Date().toISOString(),
+                summary: summary,
+                outputHtml: outputHtml
+            });
+
+            // Scroll down to results
+            outputContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // --- HELPER LOGIC FOR TEMPLATES ---
+        function getStyleDescription(style) {
+            const map = {
+                'Openly emotional': 'Needs to express grief outwardly through tears, talking, and verbalizing pain.',
+                'Privately emotional': 'Feels grief deeply but feels safer processing tears and heavy emotions in solitude.',
+                'Practical/action-oriented': 'Channels grief into doing—cleaning, researching, organizing, or staying busy.',
+                'Silent': 'Internalizes pain, taking time to process quietly before put into words.',
+                'Angry': 'Experiences grief as frustration or anger at the unfairness of the loss.',
+                'Numb': 'Protects self through emotional numbness or feeling disconnected temporarily.',
+                'Cycles rapidly': 'Experiences rapid emotional shifts from sadness to calm to anger.'
+            };
+            return map[style] || 'Processes grief in a unique personal rhythm.';
+        }
+
+        function getMisalignmentText(styleA, styleB, talk) {
+            if (styleA === styleB) {
+                return `Both partners share a similar grief style (${styleA}). While this creates mutual understanding, beware of amplifying each other's emotional heavy states or both pulling back at the same time. Talking frequency: ${talk}.`;
+            }
+            return `Partner A tends toward an ${styleA} style, while Partner B leans toward a ${styleB} style. When an emotional processor meets a practical or silent processor, one may feel unsupported while the other feels overwhelmed by emotional demands. Talking status: ${talk}.`;
+        }
+
+        function getNeedsText(style, feeling) {
+            return `Feeling <strong>${feeling}</strong>. Needs validation rather than fixing. Allow space to process in their own way without pushing them to change their rhythm.`;
+        }
+
+        function getLeaningGapAnalysis(leanA, leanB) {
+            if (leanA === leanB) {
+                return `Both partners are aligned on <strong>${leanA}</strong>. Your primary focus should be building mutual emotional safety and ensuring clear medical guidance as you move forward together.`;
+            }
+            return `Partner A leans toward <strong>${leanA}</strong>, while Partner B leans toward <strong>${leanB}</strong>. This difference is normal and common. One partner is often focused on moving forward to heal, while the other needs to stop moving to feel safe.`;
+        }
+
+        function getMedicalAdviceText(medical, losses) {
+            const map = {
+                'Clear path forward': 'You have a clear medical plan. Ensure both partners feel comfortable asking questions during doctor visits.',
+                'Uncertain': 'Pending medical tests can cause high anxiety. Focus on taking small steps while waiting for clear test results.',
+                'No answers': 'Unexplained loss is deeply frustrating. Consider seeking a second opinion from a dedicated Recurrent Pregnancy Loss (RPL) specialist.',
+                'Conflicting advice': 'Conflicting medical opinions add unnecessary stress. Focus on finding one trusted reproductive specialist to lead your care.',
+                'Haven\'t sought yet': 'Given your loss history, consulting a reproductive endocrinologist or RPL specialist can provide needed clarity.'
+            };
+            return map[medical] || 'Medical clarity helps ground emotional decisions. Seek compassionate, specialist-led guidance.';
+        }
+
+        function getCommentDecoderText(who) {
+            return `Comments from ${who} often come from a place of helplessness or social awkwardness. People frequently offer platitudes or silver linings because sitting with raw grief makes them uncomfortable, not because your loss does not matter.`;
+        }
+
+        function getSocialScripts(who, comment) {
+            return {
+                educational: `When you say that, I know you mean well, but it hurts. We are grieving the loss of this specific baby and need time to heal.`,
+                boundary: `Thank you for caring about us, but we aren't discussing our family planning or loss right now. We appreciate your understanding.`,
+                deflection: `It's been a challenging time, but we're taking it one day at a time. How have things been with you?`
+            };
+        }
+
+        function renderScoreBar(label, score) {
+            let colorBg = 'bg-rose-500';
+            if (score >= 7) colorBg = 'bg-emerald-500';
+            else if (score >= 4) colorBg = 'bg-amber-500';
+
+            const widthPercent = (score / 10) * 100;
+
+            return `
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-slate-700 font-medium">${label}</span>
+                        <span class="font-bold ${score >= 7 ? 'text-emerald-700' : (score >= 4 ? 'text-amber-700' : 'text-rose-700')}">${score}/10</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                        <div class="${colorBg} h-2 rounded-full transition-all duration-500" style="width: ${widthPercent}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getScoreLabel(score) {
+            if (score >= 7) return 'Strong Alignment';
+            if (score >= 4) return 'Moderate Alignment';
+            return 'Needs Gentle Attention';
+        }
+
+        function getAlignmentZonesText(scores) {
+            const high = scores.filter(s => s >= 7).length;
+            if (high === 0) return 'You are currently carrying heavy weight in all areas. Focus on small, gentle interactions without expecting quick fixes.';
+            return `You have ${high} area(s) scoring in the healthy green zone (7-10). Lean into these areas of strength to stay grounded as a couple.`;
+        }
+
+        function getRiskZonesText(scores) {
+            const low = scores.filter(s => s <= 3).length;
+            if (low === 0) return 'No severe risk zones (1-3) detected right now. Keep communicating gently to maintain this connection.';
+            return `You have ${low} area(s) scoring in the lower red zone (1-3). These reflect spots where exhaustion or emotional distance is forming.`;
+        }
+
+        function getWeeklyConversationTopic(scores) {
+            const minIndex = scores.indexOf(Math.min(...scores));
+            const topics = [
+                'How can I help you feel more understood in your grief this week?',
+                'What is one small way I can make you feel more supported today?',
+                'Can we talk calmly about our next steps without trying to reach a final decision today?',
+                'What is one thing we can do together this weekend that brings us quiet joy?',
+                'How are you holding hope for our family, and what fears are in the way?',
+                'How are your energy levels holding up, and how can we support each other\'s rest?'
+            ];
+            return topics[minIndex] || 'How can we create a quiet space to connect without talking about loss or doctors?';
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+        }
+
+        function escapeJsString(str) {
+            if (!str) return '';
+            return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
+
+        // Initialize App Dashboard on Load
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTool('dashboard');
+        });
+    </script>
+</body>
+</html>

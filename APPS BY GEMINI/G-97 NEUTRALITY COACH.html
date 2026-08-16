@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workplace Neutrality Coach</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --slate-gray: #495057;
+            --slate-dark: #343a40;
+            --slate-light: #6c757d;
+            --soft-sage: #A3B18A;
+            --sage-dark: #588157;
+            --sage-light: #DAD7CD;
+            --bg-start: #F8F9FA;
+            --bg-end: #F1F8F5;
+            --text-main: #212529;
+            --text-muted: #6c757d;
+            --card-bg: #FFFFFF;
+            --sidebar-width: 260px;
+            --border-color: #E9ECEF;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --radius-xl: 16px;
+            --radius-md: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #FFFFFF;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-header i {
+            font-size: 24px;
+            color: var(--sage-dark);
+        }
+
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--slate-dark);
+            line-height: 1.2;
+        }
+
+        .sidebar-nav {
+            padding: 20px 12px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            color: var(--slate-gray);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background-color: #F8F9FA;
+            color: var(--slate-dark);
+        }
+
+        .nav-item.active {
+            background-color: var(--slate-gray);
+            color: #FFFFFF;
+        }
+
+        .nav-item.active i {
+            color: var(--soft-sage);
+        }
+
+        .nav-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            color: var(--slate-light);
+        }
+
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-toggle {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--slate-gray);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 95;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            flex-grow: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .main-content {
+            padding: 32px 24px;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            flex-grow: 1;
+        }
+
+        /* Views */
+        .view {
+            display: none;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hero / Header Section */
+        .hero-banner {
+            background: #FFFFFF;
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background-color: var(--soft-sage);
+        }
+
+        .hero-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--slate-dark);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hero-subtitle {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        /* Grid for Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--soft-sage);
+        }
+
+        .dash-card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .dash-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background-color: #F1F8F5;
+            color: var(--sage-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .dash-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--slate-dark);
+        }
+
+        .dash-card-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .dash-card-btn {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--sage-dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: auto;
+        }
+
+        /* Form Components */
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .problem-statement {
+            background-color: #F8F9FA;
+            border-left: 4px solid var(--slate-gray);
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--slate-dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--slate-dark);
+            margin-bottom: 8px;
+        }
+
+        .form-control, select.form-control, textarea.form-control {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 14px;
+            border: 1px solid #CED4DA;
+            border-radius: var(--radius-md);
+            background-color: #FFFFFF;
+            color: var(--text-main);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus, select.form-control:focus, textarea.form-control:focus {
+            outline: none;
+            border-color: var(--soft-sage);
+            box-shadow: 0 0 0 3px rgba(163, 177, 138, 0.25);
+        }
+
+        textarea.form-control {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--slate-dark);
+            cursor: pointer;
+            background: #F8F9FA;
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .radio-label:hover {
+            border-color: var(--soft-sage);
+            background: #F1F8F5;
+        }
+
+        .radio-label input[type="radio"] {
+            accent-color: var(--sage-dark);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background-color: var(--slate-gray);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--slate-dark);
+        }
+
+        .btn-secondary {
+            background-color: #E9ECEF;
+            color: var(--slate-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #DEE2E6;
+        }
+
+        .btn-outline {
+            border-color: var(--soft-sage);
+            color: var(--sage-dark);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background-color: #F1F8F5;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Results / Output Cards */
+        .output-container {
+            display: none;
+            margin-top: 28px;
+        }
+
+        .output-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .output-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .output-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--slate-dark);
+        }
+
+        .output-card {
+            background: #FFFFFF;
+            border-radius: var(--radius-xl);
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+
+        .output-card-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--sage-dark);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .output-card-body {
+            font-size: 14px;
+            color: var(--text-main);
+            white-space: pre-line;
+        }
+
+        .copy-box {
+            background-color: #F8F9FA;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-top: 10px;
+            font-family: inherit;
+            font-size: 13.5px;
+            line-height: 1.5;
+            position: relative;
+            color: #2B2D42;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: var(--slate-gray);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #E9ECEF;
+            color: var(--slate-dark);
+        }
+
+        /* SVG Triangle Diagram Styling */
+        .diagram-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+            background: #FAFBFB;
+            border-radius: var(--radius-md);
+            border: 1px dashed var(--border-color);
+            margin-top: 10px;
+        }
+
+        /* Accordion / History */
+        .history-section {
+            margin-top: 32px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .history-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--slate-dark);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .history-item-header {
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: #F8F9FA;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--slate-dark);
+        }
+
+        .history-item-header:hover {
+            background: #E9ECEF;
+        }
+
+        .history-item-body {
+            padding: 16px;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 13px;
+            background: #FFFFFF;
+        }
+
+        .history-item-body.active {
+            display: block;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--slate-dark);
+            color: #FFFFFF;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.25s ease;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        .app-footer {
+            background: #FFFFFF;
+            border-top: 1px solid var(--border-color);
+            padding: 16px 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-top: auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 60px;
+            }
+
+            .main-content {
+                padding: 16px;
+            }
+
+            .hero-banner {
+                padding: 20px;
+            }
+
+            .tool-card {
+                padding: 20px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Mobile Top Bar -->
+    <div class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-scale-balanced" style="color: var(--sage-dark);"></i>
+            <span style="font-weight: 700; font-size: 16px; color: var(--slate-dark);">Neutrality Coach</span>
+        </div>
+        <button class="mobile-toggle" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-scale-balanced"></i>
+            <div>
+                <h1>Neutrality Coach</h1>
+                <span style="font-size: 11px; color: var(--text-muted);">Workplace Survival Toolkit</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="nav-item active" onclick="switchView('dashboard')">
+                <i class="fa-solid fa-house"></i>
+                Dashboard
+            </button>
+            <button class="nav-item" onclick="switchView('tool1')">
+                <i class="fa-solid fa-diagram-project"></i>
+                1. Triangle Map
+            </button>
+            <button class="nav-item" onclick="switchView('tool2')">
+                <i class="fa-solid fa-comment-dots"></i>
+                2. Neutral Response
+            </button>
+            <button class="nav-item" onclick="switchView('tool3')">
+                <i class="fa-solid fa-user-shield"></i>
+                3. Info Shield
+            </button>
+            <button class="nav-item" onclick="switchView('tool4')">
+                <i class="fa-solid fa-briefcase"></i>
+                4. Work Protection
+            </button>
+            <button class="nav-item" onclick="switchView('tool5')">
+                <i class="fa-solid fa-person-walking-arrow-right"></i>
+                5. Extraction Plan
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <main class="main-content">
+
+            <!-- DASHBOARD VIEW -->
+            <div id="dashboard-view" class="view active">
+                <div class="hero-banner">
+                    <div class="hero-title">
+                        <i class="fa-solid fa-shield-halved" style="color: var(--sage-dark);"></i>
+                        Workplace Neutrality Coach
+                    </div>
+                    <p class="hero-subtitle">Caught in the middle? Stay clean while the dust settles.</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dash-card" onclick="switchView('tool1')">
+                        <div>
+                            <div class="dash-card-header">
+                                <div class="dash-card-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                                <div class="dash-card-title">The Triangle Map</div>
+                            </div>
+                            <div class="dash-card-desc">Understand how you got pulled in, analyze dynamic risks, and identify your position.</div>
+                        </div>
+                        <div class="dash-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+
+                    <div class="dash-card" onclick="switchView('tool2')">
+                        <div>
+                            <div class="dash-card-header">
+                                <div class="dash-card-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                                <div class="dash-card-title">The Neutral Response</div>
+                            </div>
+                            <div class="dash-card-desc">Generate diplomatic scripts to validate feelings without taking sides or burning bridges.</div>
+                        </div>
+                        <div class="dash-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+
+                    <div class="dash-card" onclick="switchView('tool3')">
+                        <div>
+                            <div class="dash-card-header">
+                                <div class="dash-card-icon"><i class="fa-solid fa-user-shield"></i></div>
+                                <div class="dash-card-title">Information Shield</div>
+                            </div>
+                            <div class="dash-card-desc">Manage confidential knowledge, handle accidental leaks, and stop playing messenger.</div>
+                        </div>
+                        <div class="dash-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+
+                    <div class="dash-card" onclick="switchView('tool4')">
+                        <div>
+                            <div class="dash-card-header">
+                                <div class="dash-card-icon"><i class="fa-solid fa-briefcase"></i></div>
+                                <div class="dash-card-title">Work Protection</div>
+                            </div>
+                            <div class="dash-card-desc">Keep projects moving, protect deadlines, and escalate friction to management professionally.</div>
+                        </div>
+                        <div class="dash-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+
+                    <div class="dash-card" onclick="switchView('tool5')">
+                        <div>
+                            <div class="dash-card-header">
+                                <div class="dash-card-icon"><i class="fa-solid fa-person-walking-arrow-right"></i></div>
+                                <div class="dash-card-title">The Extraction Plan</div>
+                            </div>
+                            <div class="dash-card-desc">A structured 4-week roadmap to disengage completely and avoid future triangulation.</div>
+                        </div>
+                        <div class="dash-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOOL 1 VIEW: TRIANGLE MAP -->
+            <div id="tool1-view" class="view">
+                <div class="hero-banner">
+                    <div class="hero-title"><i class="fa-solid fa-diagram-project" style="color: var(--sage-dark);"></i> Tool 1: The Triangle Map</div>
+                    <p class="hero-subtitle">Map the conflict dynamics and identify your exact structural position.</p>
+                </div>
+
+                <div class="tool-card">
+                    <div class="problem-statement">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span><strong>Problem:</strong> "I need to understand exactly how I got pulled into this and what my position is."</span>
+                    </div>
+
+                    <form id="form-tool1" onsubmit="event.preventDefault(); analyzeTool1();">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
+                                <label class="form-label" for="t1-personA">Person A Name / Role</label>
+                                <input type="text" id="t1-personA" class="form-control" placeholder="e.g. Alex (Lead Designer)" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="t1-personB">Person B Name / Role</label>
+                                <input type="text" id="t1-personB" class="form-control" placeholder="e.g. Jordan (Product Manager)" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t1-conflict">What is their conflict about?</label>
+                            <textarea id="t1-conflict" class="form-control" placeholder="Describe the core disagreement..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t1-involved">How did you get involved?</label>
+                            <select id="t1-involved" class="form-control" required>
+                                <option value="">Select option...</option>
+                                <option value="Asked for opinion">Asked for opinion</option>
+                                <option value="Witnessed something">Witnessed something</option>
+                                <option value="Assigned to fix it">Assigned to fix it</option>
+                                <option value="Gossip reached me">Gossip reached me</option>
+                                <option value="Forced to work with both">Forced to work with both</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t1-demands">What does each person want from you?</label>
+                            <textarea id="t1-demands" class="form-control" placeholder="What are Person A and Person B trying to get you to do or say?" required></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" onclick="loadSampleTool1()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-magnifying-glass"></i> Analyze Triangle
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool1" class="output-container">
+                    <div class="output-header">
+                        <div class="output-title">Triangle Mapping Analysis</div>
+                    </div>
+                    <div id="results-tool1"></div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <div class="history-title">History & Saved Assessments</div>
+                        <button class="btn btn-sm btn-secondary" onclick="clearToolHistory('tool1')">Clear History</button>
+                    </div>
+                    <div id="history-tool1" class="history-list"></div>
+                </div>
+            </div>
+
+            <!-- TOOL 2 VIEW: NEUTRAL RESPONSE -->
+            <div id="tool2-view" class="view">
+                <div class="hero-banner">
+                    <div class="hero-title"><i class="fa-solid fa-comment-dots" style="color: var(--sage-dark);"></i> Tool 2: The Neutral Response</div>
+                    <p class="hero-subtitle">Generate verbatim scripts to defuse pressure and refuse side-taking gracefully.</p>
+                </div>
+
+                <div class="tool-card">
+                    <div class="problem-statement">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span><strong>Problem:</strong> "Both sides want me to agree with them. I need scripts that don't pick sides."</span>
+                    </div>
+
+                    <form id="form-tool2" onsubmit="event.preventDefault(); analyzeTool2();">
+                        <div class="form-group">
+                            <label class="form-label" for="t2-asked">What are you being asked / pushed to do?</label>
+                            <textarea id="t2-asked" class="form-control" placeholder="e.g. 'Don't you think Alex is being completely unreasonable?'" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t2-who">Who is asking?</label>
+                            <select id="t2-who" class="form-control" required>
+                                <option value="Person A">Person A</option>
+                                <option value="Person B">Person B</option>
+                                <option value="Both">Both</option>
+                                <option value="A third party">A third party</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Your relationship with the asker:</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t2-rel" value="Close" required> Close</label>
+                                <label class="radio-label"><input type="radio" name="t2-rel" value="Friendly"> Friendly</label>
+                                <label class="radio-label"><input type="radio" name="t2-rel" value="Neutral"> Neutral</label>
+                                <label class="radio-label"><input type="radio" name="t2-rel" value="They have power"> They have power</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What do you actually think privately?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t2-think" value="A is right" required> Person A is right</label>
+                                <label class="radio-label"><input type="radio" name="t2-think" value="B is right"> Person B is right</label>
+                                <label class="radio-label"><input type="radio" name="t2-think" value="Both have points"> Both have points</label>
+                                <label class="radio-label"><input type="radio" name="t2-think" value="Neither is right"> Neither is right</label>
+                                <label class="radio-label"><input type="radio" name="t2-think" value="Don't know enough"> Don't know enough</label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" onclick="loadSampleTool2()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-comment-medical"></i> Generate Scripts
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool2" class="output-container">
+                    <div class="output-header">
+                        <div class="output-title">Neutral Communication Response Suite</div>
+                    </div>
+                    <div id="results-tool2"></div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <div class="history-title">History & Saved Scripts</div>
+                        <button class="btn btn-sm btn-secondary" onclick="clearToolHistory('tool2')">Clear History</button>
+                    </div>
+                    <div id="history-tool2" class="history-list"></div>
+                </div>
+            </div>
+
+            <!-- TOOL 3 VIEW: INFORMATION SHIELD -->
+            <div id="tool3-view" class="view">
+                <div class="hero-banner">
+                    <div class="hero-title"><i class="fa-solid fa-user-shield" style="color: var(--sage-dark);"></i> Tool 3: The Information Shield</div>
+                    <p class="hero-subtitle">Protect sensitive knowledge, stop leakages, and step out of the middleman role.</p>
+                </div>
+
+                <div class="tool-card">
+                    <div class="problem-statement">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span><strong>Problem:</strong> "I know things about both sides and I need to make sure nothing leaks through me."</span>
+                    </div>
+
+                    <form id="form-tool3" onsubmit="event.preventDefault(); analyzeTool3();">
+                        <div class="form-group">
+                            <label class="form-label" for="t3-info">What confidential information do you hold?</label>
+                            <textarea id="t3-info" class="form-control" placeholder="Describe the sensitive details or secrets you know..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t3-who">Who wants to know it?</label>
+                            <select id="t3-who" class="form-control" required>
+                                <option value="Person A">Person A</option>
+                                <option value="Person B">Person B</option>
+                                <option value="Boss">Boss</option>
+                                <option value="Team">Team</option>
+                                <option value="HR">HR</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t3-sharing">How do you typically share information?</label>
+                            <select id="t3-sharing" class="form-control" required>
+                                <option value="Open book">Open book</option>
+                                <option value="Selective">Selective</option>
+                                <option value="Guarded">Guarded</option>
+                                <option value="Paranoid">Paranoid</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Have you already said something you regret?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t3-regret" value="Yes" required> Yes</label>
+                                <label class="radio-label"><input type="radio" name="t3-regret" value="No"> No</label>
+                                <label class="radio-label"><input type="radio" name="t3-regret" value="Not sure"> Not sure</label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" onclick="loadSampleTool3()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-shield-halved"></i> Build Info Shield
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool3" class="output-container">
+                    <div class="output-header">
+                        <div class="output-title">Information Containment Protocol</div>
+                    </div>
+                    <div id="results-tool3"></div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <div class="history-title">History & Saved Assessments</div>
+                        <button class="btn btn-sm btn-secondary" onclick="clearToolHistory('tool3')">Clear History</button>
+                    </div>
+                    <div id="history-tool3" class="history-list"></div>
+                </div>
+            </div>
+
+            <!-- TOOL 4 VIEW: WORK PROTECTION -->
+            <div id="tool4-view" class="view">
+                <div class="hero-banner">
+                    <div class="hero-title"><i class="fa-solid fa-briefcase" style="color: var(--sage-dark);"></i> Tool 4: The Work Protection</div>
+                    <p class="hero-subtitle">Isolate operational deliverables from personal friction and safeguard performance.</p>
+                </div>
+
+                <div class="tool-card">
+                    <div class="problem-statement">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span><strong>Problem:</strong> "This conflict is making it hard to get my own work done."</span>
+                    </div>
+
+                    <form id="form-tool4" onsubmit="event.preventDefault(); analyzeTool4();">
+                        <div class="form-group">
+                            <label class="form-label" for="t4-work">What work requires both of them?</label>
+                            <textarea id="t4-work" class="form-control" placeholder="Describe the joint deliverables or workflow dependencies..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t4-stalled">What decisions are stalled?</label>
+                            <textarea id="t4-stalled" class="form-control" placeholder="List bottlenecks, pending approvals, or blocked choices..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t4-boss">Who is your boss and what do they know?</label>
+                            <textarea id="t4-boss" class="form-control" placeholder="Describe boss awareness level and management context..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Can you work around them?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t4-around" value="Yes" required> Yes</label>
+                                <label class="radio-label"><input type="radio" name="t4-around" value="Partially"> Partially</label>
+                                <label class="radio-label"><input type="radio" name="t4-around" value="No"> No</label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" onclick="loadSampleTool4()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-gears"></i> Protect Workflow
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool4" class="output-container">
+                    <div class="output-header">
+                        <div class="output-title">Operational Protection Plan</div>
+                    </div>
+                    <div id="results-tool4"></div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <div class="history-title">History & Saved Plans</div>
+                        <button class="btn btn-sm btn-secondary" onclick="clearToolHistory('tool4')">Clear History</button>
+                    </div>
+                    <div id="history-tool4" class="history-list"></div>
+                </div>
+            </div>
+
+            <!-- TOOL 5 VIEW: EXTRACTION PLAN -->
+            <div id="tool5-view" class="view">
+                <div class="hero-banner">
+                    <div class="hero-title"><i class="fa-solid fa-person-walking-arrow-right" style="color: var(--sage-dark);"></i> Tool 5: The Extraction Plan</div>
+                    <p class="hero-subtitle">Execute a controlled withdrawal to permanently exit the crossfire.</p>
+                </div>
+
+                <div class="tool-card">
+                    <div class="problem-statement">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span><strong>Problem:</strong> "I want out of the middle permanently."</span>
+                    </div>
+
+                    <form id="form-tool5" onsubmit="event.preventDefault(); analyzeTool5();">
+                        <div class="form-group">
+                            <label class="form-label" for="t5-duration">How long has this been going on?</label>
+                            <select id="t5-duration" class="form-control" required>
+                                <option value="<1mo">&lt; 1 month</option>
+                                <option value="1-3mo">1 - 3 months</option>
+                                <option value="3-6mo">3 - 6 months</option>
+                                <option value="6mo+">6+ months</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Have you tried to step back?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t5-tried" value="Yes and failed" required> Yes and failed</label>
+                                <label class="radio-label"><input type="radio" name="t5-tried" value="Not yet"> Not yet</label>
+                                <label class="radio-label"><input type="radio" name="t5-tried" value="They keep pulling me back"> They keep pulling me back</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Is there a resolution in sight?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t5-resolution" value="Yes" required> Yes</label>
+                                <label class="radio-label"><input type="radio" name="t5-resolution" value="Maybe"> Maybe</label>
+                                <label class="radio-label"><input type="radio" name="t5-resolution" value="No"> No</label>
+                                <label class="radio-label"><input type="radio" name="t5-resolution" value="Getting worse"> Getting worse</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Your primary priority:</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t5-priority" value="Preserve both relationships" required> Preserve both relationships</label>
+                                <label class="radio-label"><input type="radio" name="t5-priority" value="Preserve one"> Preserve one</label>
+                                <label class="radio-label"><input type="radio" name="t5-priority" value="Just protect myself"> Just protect myself</label>
+                                <label class="radio-label"><input type="radio" name="t5-priority" value="Find an exit"> Find an exit</label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" onclick="loadSampleTool5()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-door-open"></i> Generate Extraction Strategy
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-tool5" class="output-container">
+                    <div class="output-header">
+                        <div class="output-title">Complete Disengagement Protocol</div>
+                    </div>
+                    <div id="results-tool5"></div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <div class="history-title">History & Saved Plans</div>
+                        <button class="btn btn-sm btn-secondary" onclick="clearToolHistory('tool5')">Clear History</button>
+                    </div>
+                    <div id="history-tool5" class="history-list"></div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Global Footer -->
+        <footer class="app-footer">
+            <p>For workplace conflict navigation only. Not mediation, legal, or therapeutic advice. For harassment or bullying, consult HR or appropriate authorities.</p>
+        </footer>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast">
+    <i class="fa-solid fa-check-circle" style="color: var(--soft-sage);"></i>
+    <span id="toast-msg">Copied to clipboard!</span>
+</div>
+
+<script>
+    // --- NAVIGATION & UI TOGGLES ---
+    function switchView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        
+        const targetView = document.getElementById(viewId + '-view');
+        if (targetView) targetView.classList.add('active');
+
+        const navBtns = document.querySelectorAll('.nav-item');
+        navBtns.forEach(btn => {
+            if (btn.getAttribute('onclick').includes(viewId)) {
+                btn.classList.add('active');
+            }
+        });
+
+        // Close sidebar on mobile
+        document.getElementById('sidebar').classList.remove('mobile-open');
+        document.getElementById('sidebarOverlay').classList.remove('mobile-open');
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        loadHistoryForTool(viewId);
+    }
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('mobile-open');
+        document.getElementById('sidebarOverlay').classList.toggle('mobile-open');
+    }
+
+    function showToast(text) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-msg').innerText = text;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2000);
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('Copied to clipboard!');
+        }).catch(err => {
+            showToast('Failed to copy');
+        });
+    }
+
+    // --- LOCALSTORAGE HISTORY HANDLERS ---
+    function getHistory(toolId) {
+        const key = `neutrality_history_${toolId}`;
+        try {
+            return JSON.parse(localStorage.getItem(key)) || [];
+        } catch(e) {
+            return [];
+        }
+    }
+
+    function saveHistory(toolId, title, data) {
+        const key = `neutrality_history_${toolId}`;
+        let history = getHistory(toolId);
+        const newItem = {
+            id: Date.now(),
+            date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            title: title,
+            data: data
+        };
+        history.unshift(newItem);
+        if (history.length > 30) history = history.slice(0, 30);
+        localStorage.setItem(key, JSON.stringify(history));
+        loadHistoryForTool(toolId);
+    }
+
+    function clearToolHistory(toolId) {
+        if (confirm('Are you sure you want to clear saved history for this tool?')) {
+            localStorage.removeItem(`neutrality_history_${toolId}`);
+            loadHistoryForTool(toolId);
+            showToast('History cleared');
+        }
+    }
+
+    function loadHistoryForTool(toolId) {
+        if (toolId === 'dashboard') return;
+        const listContainer = document.getElementById(`history-${toolId}`);
+        if (!listContainer) return;
+
+        const history = getHistory(toolId);
+        if (history.length === 0) {
+            listContainer.innerHTML = '<p style="font-size:13px; color:var(--text-muted); font-style:italic;">No saved entries yet.</p>';
+            return;
+        }
+
+        let html = '';
+        history.forEach((item, index) => {
+            html += `
+                <div class="history-item">
+                    <div class="history-item-header" onclick="toggleHistoryItem('${toolId}', ${index})">
+                        <span><i class="fa-regular fa-clock"></i> ${item.date} — ${escapeHtml(item.title)}</span>
+                        <i class="fa-solid fa-chevron-down" id="hist-icon-${toolId}-${index}"></i>
+                    </div>
+                    <div class="history-item-body" id="hist-body-${toolId}-${index}">
+                        ${item.data}
+                    </div>
+                </div>
+            `;
+        });
+        listContainer.innerHTML = html;
+    }
+
+    function toggleHistoryItem(toolId, index) {
+        const body = document.getElementById(`hist-body-${toolId}-${index}`);
+        const icon = document.getElementById(`hist-icon-${toolId}-${index}`);
+        if (body.classList.contains('active')) {
+            body.classList.remove('active');
+            icon.className = 'fa-solid fa-chevron-down';
+        } else {
+            body.classList.add('active');
+            icon.className = 'fa-solid fa-chevron-up';
+        }
+    }
+
+    function escapeHtml(str) {
+        return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : '';
+    }
+
+    // --- TOOL 1 LOGIC & SAMPLE ---
+    function loadSampleTool1() {
+        document.getElementById('t1-personA').value = 'Alex (Lead Designer)';
+        document.getElementById('t1-personB').value = 'Jordan (Product Manager)';
+        document.getElementById('t1-conflict').value = 'Disagreement over project ownership, feature roadmap priorities, and who gets final executive credit.';
+        document.getElementById('t1-involved').value = 'Asked for opinion';
+        document.getElementById('t1-demands').value = 'Alex wants me to validate that Jordan is difficult and unreasonable. Jordan wants me to tell our boss that Alex is incompetent and stalling deliverables.';
+        showToast('Sample scenario loaded');
+    }
+
+    function analyzeTool1() {
+        const personA = document.getElementById('t1-personA').value || 'Person A';
+        const personB = document.getElementById('t1-personB').value || 'Person B';
+        const conflict = document.getElementById('t1-conflict').value;
+        const involved = document.getElementById('t1-involved').value;
+        const demands = document.getElementById('t1-demands').value;
+
+        // Role Analysis logic
+        let role = 'Witness';
+        let roleDesc = 'You are an observer accidentally drawn in. Your main objective is staying off the radar.';
+        if (involved === 'Asked for opinion') {
+            role = 'Sounding Board / Potential Ally';
+            roleDesc = 'Both parties are attempting to recruit you into a coalition to validate their narrative.';
+        } else if (involved === 'Assigned to fix it') {
+            role = 'Fixer / Unofficial Mediator';
+            roleDesc = 'You have been saddled with responsibility without authority. High vulnerability area.';
+        } else if (involved === 'Gossip reached me') {
+            role = 'Channel / Info Relay';
+            roleDesc = 'You are being used as a secondary conduit for indirect communication and venting.';
+        } else if (involved === 'Forced to work with both') {
+            role = 'Collateral Target / Operational Buffer';
+            roleDesc = 'You are caught in crossfire where their friction directly impedes your daily outputs.';
+        }
+
+        // SVG Diagram Generation
+        const svgDiagram = `
+            <div class="diagram-box">
+                <svg width="320" height="200" viewBox="0 0 320 200" style="max-width:100%;">
+                    <!-- Lines -->
+                    <line x1="80" y1="50" x2="240" y2="50" stroke="#E63946" stroke-width="2" stroke-dasharray="4" />
+                    <line x1="80" y1="50" x2="160" y2="150" stroke="#495057" stroke-width="2" />
+                    <line x1="240" y1="50" x2="160" y2="150" stroke="#495057" stroke-width="2" />
+                    
+                    <!-- Nodes -->
+                    <circle cx="80" cy="50" r="28" fill="#495057" />
+                    <text x="80" y="54" font-size="11" fill="#fff" text-anchor="middle" font-weight="bold">${escapeHtml(personA.split(' ')[0])}</text>
+
+                    <circle cx="240" cy="50" r="28" fill="#495057" />
+                    <text x="240" y="54" font-size="11" fill="#fff" text-anchor="middle" font-weight="bold">${escapeHtml(personB.split(' ')[0])}</text>
+
+                    <circle cx="160" cy="150" r="30" fill="#A3B18A" />
+                    <text x="160" y="154" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">YOU</text>
+
+                    <!-- Friction Label -->
+                    <rect x="120" y="38" width="80" height="22" rx="4" fill="#FFE5E5" />
+                    <text x="160" y="53" font-size="10" fill="#D90429" text-anchor="middle" font-weight="bold">CONFLICT ZONE</text>
+                </svg>
+            </div>
+        `;
+
+        const HTMLResult = `
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-sitemap"></i> The Triangle Diagram</div>
+                <div class="output-card-body">
+                    ${svgDiagram}
+                    <p style="text-align:center; font-size:12px; color:var(--text-muted); margin-top:8px;">
+                        Structural dynamic between <strong>${escapeHtml(personA)}</strong>, <strong>${escapeHtml(personB)}</strong>, and <strong>You</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-user-tag"></i> Your Structural Role</div>
+                <div class="output-card-body">
+                    <p style="font-size:15px; font-weight:700; color:var(--slate-dark);">${role}</p>
+                    <p style="margin-top:4px;">${roleDesc}</p>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-compress"></i> Pressure Points</div>
+                <div class="output-card-body">
+                    <ul style="padding-left: 18px; margin-top: 4px;">
+                        <li><strong>${escapeHtml(personA)}:</strong> Attempting to extract emotional consensus and validation from you regarding their stance.</li>
+                        <li><strong>${escapeHtml(personB)}:</strong> Seeking operational leveraging or escalation through your position.</li>
+                        <li><strong>The Core Trap:</strong> Answering "Who is right?" transfers accountability of the outcome onto your shoulders.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-triangle-exclamation"></i> The Risk Map</div>
+                <div class="output-card-body">
+                    <p>• <strong>Reputational Spillover:</strong> If you validate either side, you will be cited as a co-conspirator ("Even [Your Name] agrees with me!").</p>
+                    <p>• <strong>Loss of Neutrality:</strong> Rebuffing one side aggressively will push them into viewing you as an active opponent.</p>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-route"></i> The Exit Lane</div>
+                <div class="output-card-body">
+                    <p><strong>Recommended Strategy: Immediate Neutral Decoupling</strong></p>
+                    <p>Refuse emotional intake. Redirect every conversation back to process, written documentation, or formal channel escalations. Do not discuss either person when they are not in the room.</p>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('results-tool1').innerHTML = HTMLResult;
+        document.getElementById('output-tool1').classList.add('active');
+
+        saveHistory('tool1', `${personA} vs ${personB}`, HTMLResult);
+    }
+
+    // --- TOOL 2 LOGIC & SAMPLE ---
+    function loadSampleTool2() {
+        document.getElementById('t2-asked').value = "Don't you think Jordan is being completely unreasonable with these project timelines and holding back our delivery?";
+        document.getElementById('t2-who').value = 'Person A';
+        document.querySelector('input[name="t2-rel"][value="Friendly"]').checked = true;
+        document.querySelector('input[name="t2-think"][value="Both have points"]').checked = true;
+        showToast('Sample scenario loaded');
+    }
+
+    function analyzeTool2() {
+        const asked = document.getElementById('t2-asked').value;
+        const who = document.getElementById('t2-who').value;
+        const rel = document.querySelector('input[name="t2-rel"]:checked')?.value || 'Neutral';
+        const think = document.querySelector('input[name="t2-think"]:checked')?.value || 'Both have points';
+
+        const valScript = `"I can completely see how frustrating this timeline situation feels for you, and I know how much you care about hitting our delivery target."`;
+        const redirectScript = `"My primary focus right now is making sure the core deliverables get completed on time. What specific workflow step do we need to resolve to keep moving forward?"`;
+        const boundaryScript = `"I value working with both of you, so I'm making it a personal rule not to get in the middle of disagreements or discuss team members privately."`;
+        const deflectionScript = `"I don't have enough visibility into all the background conversations to give a fair evaluation, so I'd rather stay focused on executing my part."`;
+        const pressureScript = `"I hear you, but taking sides won't solve the core issue and will only make collaborating harder. I need to remain neutral so we can keep the work moving."`;
+
+        const HTMLResult = `
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-heart-pulse"></i> The Validation Script</div>
+                <div class="output-card-body">
+                    <p style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">Acknowledge emotional stress without validating opinions or facts:</p>
+                    <div class="copy-box">
+                        ${valScript}
+                        <button class="copy-btn" onclick="copyToClipboard('${valScript.replace(/'/g, "\'")}')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-arrows-spin"></i> The Redirect</div>
+                <div class="output-card-body">
+                    <p style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">Pivot away from personal grievances to objective work outcomes:</p>
+                    <div class="copy-box">
+                        ${redirectScript}
+                        <button class="copy-btn" onclick="copyToClipboard('${redirectScript.replace(/'/g, "\'")}')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-hand"></i> The Boundary</div>
+                <div class="output-card-body">
+                    <p style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">Clear, firm boundary language to establish non-involvement:</p>
+                    <div class="copy-box">
+                        ${boundaryScript}
+                        <button class="copy-btn" onclick="copyToClipboard('${boundaryScript.replace(/'/g, "\'")}')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-shield"></i> The Deflection</div>
+                <div class="output-card-body">
+                    <p style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">Refuse evaluation without appearing secretive or evasive:</p>
+                    <div class="copy-box">
+                        ${deflectionScript}
+                        <button class="copy-btn" onclick="copyToClipboard('${deflectionScript.replace(/'/g, "\'")}')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-anchor"></i> If They Pressure</div>
+                <div class="output-card-body">
+                    <p style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">When they push repeatedly ("Come on, you can tell me"):</p>
+                    <div class="copy-box">
+                        ${pressureScript}
+                        <button class="copy-btn" onclick="copyToClipboard('${pressureScript.replace(/'/g, "\'")}')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('results-tool2').innerHTML = HTMLResult;
+        document.getElementById('output-tool2').classList.add('active');
+
+        saveHistory('tool2', `Response to ${who} (${rel})`, HTMLResult);
+    }
+
+    // --- TOOL 3 LOGIC & SAMPLE ---
+    function loadSampleTool3() {
+        document.getElementById('t3-info').value = "I know that Alex is interviewing for another job, and I also know that Jordan missed a critical compliance deadline last week.";
+        document.getElementById('t3-who').value = 'Person A';
+        document.getElementById('t3-sharing').value = 'Selective';
+        document.querySelector('input[name="t3-regret"][value="Yes"]').checked = true;
+        showToast('Sample scenario loaded');
+    }
+
+    function analyzeTool3() {
+        const info = document.getElementById('t3-info').value;
+        const who = document.getElementById('t3-who').value;
+        const sharing = document.getElementById('t3-sharing').value;
+        const regret = document.querySelector('input[name="t3-regret"]:checked')?.value || 'No';
+
+        const damageControlScript = `"Earlier I made a off-hand comment regarding stress/deadlines that I realize was unnecessary. I want to clarify that I don't speak for anyone else, and I won't be discussing team members' private matters."`;
+        const lockScript = `"If you need information regarding that item, you'll need to ask them directly. I am not comfortable being a information conduit between team members."`;
+
+        const HTMLResult = `
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-vault"></i> The Vault Rule</div>
+                <div class="output-card-body">
+                    <p>• <strong>Hold Categorically:</strong> Personal career plans, performance slip-ups, off-the-record comments, and private emotional rants.</p>
+                    <p>• <strong>Share Only:</strong> Published project specs, official meeting action items, and clear task deadlines.</p>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-bandage"></i> Damage Control (Accidental Leak)</div>
+                <div class="output-card-body">
+                    <p style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">Recovery script since regret is noted (${regret}):</p>
+                    <div class="copy-box">
+                        ${damageControlScript}
+                        <button class="copy-btn" onclick="copyToClipboard('${damageControlScript.replace(/'/g, "\'")}')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-lock"></i> The Conversation Lock</div>
+                <div class="output-card-body">
+                    <p style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">Use when asked: "What did they say about me?":</p>
+                    <div class="copy-box">
+                        ${lockScript}
+                        <button class="copy-btn" onclick="copyToClipboard('${lockScript.replace(/'/g, "\'")}')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-file-contract"></i> Documentation for Self-Protection</div>
+                <div class="output-card-body">
+                    <p>Maintain a private, factual, non-emotional log (outside company servers if appropriate) recording dates, times, objective facts, and explicit work requests in case of escalation.</p>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-handshake-simple"></i> Trust Repair Plan</div>
+                <div class="output-card-body">
+                    <p>Adopt strict consistency. Zero comment policy across all parties for 30 days. Reliability in total silence restores perceived neutrality faster than explanations.</p>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('results-tool3').innerHTML = HTMLResult;
+        document.getElementById('output-tool3').classList.add('active');
+
+        saveHistory('tool3', `Shield against ${who}`, HTMLResult);
+    }
+
+    // --- TOOL 4 LOGIC & SAMPLE ---
+    function loadSampleTool4() {
+        document.getElementById('t4-work').value = 'Q3 Product feature launch specification document and design assets.';
+        document.getElementById('t4-stalled').value = 'Final approval on user interface guidelines and architecture sign-off blocked for 2 weeks.';
+        document.getElementById('t4-boss').value = 'Manager knows there is interpersonal friction but is unaware of the severity and project delays.';
+        document.querySelector('input[name="t4-around"][value="Partially"]').checked = true;
+        showToast('Sample scenario loaded');
+    }
+
+    function analyzeTool4() {
+        const work = document.getElementById('t4-work').value;
+        const stalled = document.getElementById('t4-stalled').value;
+        const boss = document.getElementById('t4-boss').value;
+        const around = document.querySelector('input[name="t4-around"]:checked')?.value || 'Partially';
+
+        const escalationScript = `"Hi [Manager], I'm working to keep [Project] on track. However, we're currently blocked on [Stalled Item] due to differing structural approaches. I need your guidance on the path forward to hit our target date."`;
+
+        const HTMLResult = `
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-diagram-next"></i> The Workaround Plan</div>
+                <div class="output-card-body">
+                    <p>• <strong>Decouple Sub-tasks:</strong> Split work into asynchronous modular components so neither party holds up your individual delivery.</p>
+                    <p>• <strong>Asynchronous Approval:</strong> Shift from live debate meetings to shared document feedback with clear expiration timestamps.</p>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-bell"></i> The Escalation Decision</div>
+                <div class="output-card-body">
+                    <p><strong>Trigger Condition:</strong> Work is delayed by >48 hours due to unresolvable friction.</p>
+                    <p style="margin-top:6px;"><strong>Neutral Escalation Script to Manager:</strong></p>
+                    <div class="copy-box">
+                        ${escalationScript}
+                        <button class="copy-btn" onclick="copyToClipboard('${escalationScript.replace(/'/g, "\'")}')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-file-lines"></i> Neutral Documentation</div>
+                <div class="output-card-body">
+                    <p>Frame all updates purely around <strong>Project Milestones</strong>, not personal behavior. Use phrases like: <em>"Pending design spec confirmation"</em> rather than <em>"Alex won't reply to Jordan."</em></p>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-code-branch"></i> Alternative Path</div>
+                <div class="output-card-body">
+                    <p>Propose working on parallel drafts or establishing a designated tie-breaker role (e.g., Tech Lead / Product Manager) to decide stalled points immediately.</p>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-clock-rotate-left"></i> Deadline Protection</div>
+                <div class="output-card-body">
+                    <p>Send weekly written status updates highlighting completed sub-items, explicitly logging open dependencies and owner assignments.</p>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('results-tool4').innerHTML = HTMLResult;
+        document.getElementById('output-tool4').classList.add('active');
+
+        saveHistory('tool4', `Protection: ${work.substring(0, 20)}...`, HTMLResult);
+    }
+
+    // --- TOOL 5 LOGIC & SAMPLE ---
+    function loadSampleTool5() {
+        document.getElementById('t5-duration').value = '1-3mo';
+        document.querySelector('input[name="t5-tried"][value="They keep pulling me back"]').checked = true;
+        document.querySelector('input[name="t5-resolution"][value="No"]').checked = true;
+        document.querySelector('input[name="t5-priority"][value="Just protect myself"]').checked = true;
+        showToast('Sample scenario loaded');
+    }
+
+    function analyzeTool5() {
+        const duration = document.getElementById('t5-duration').value;
+        const tried = document.querySelector('input[name="t5-tried"]:checked')?.value || 'Not yet';
+        const resolution = document.querySelector('input[name="t5-resolution"]:checked')?.value || 'No';
+        const priority = document.querySelector('input[name="t5-priority"]:checked')?.value || 'Just protect myself';
+
+        const exitScript = `"I value our working relationship, but I've realized that getting involved in discussions about team dynamics is taking focus away from my core work. Going forward, I'm stepping back from these conversations so I can focus 100% on deliverables."`;
+        const bossScript = `"I want to make sure my productivity remains high. The ongoing conflict between team members is consuming significant project time, so I am stepping back from mediation and focusing strictly on my assigned tasks."`;
+
+        const HTMLResult = `
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-calendar-days"></i> The Gradual Extraction (4-Week Plan)</div>
+                <div class="output-card-body">
+                    <p><strong>Week 1 (Immediate Silence):</strong> Stop offering spontaneous comments or advice. Limit interactions to brief, polite direct answers.</p>
+                    <p><strong>Week 2 (Physical / Communication Distance):</strong> Shift interactions to email or public Slack channels. Avoid 1-on-1 venting sessions.</p>
+                    <p><strong>Week 3 (Explicit Boundary):</strong> Deliver the step-back conversation script if pulled in directly.</p>
+                    <p><strong>Week 4 (New Baseline):</strong> Maintain full professional civility without emotional engagement.</p>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-bullhorn"></i> The Stepping-Back Script</div>
+                <div class="output-card-body">
+                    <p style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">Exact wording to disengage completely:</p>
+                    <div class="copy-box">
+                        ${exitScript}
+                        <button class="copy-btn" onclick="copyToClipboard('${exitScript.replace(/'/g, "\'")}')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-user-gear"></i> The Boss Conversation</div>
+                <div class="output-card-body">
+                    <p style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">Framing for manager protection or reassignment:</p>
+                    <div class="copy-box">
+                        ${bossScript}
+                        <button class="copy-btn" onclick="copyToClipboard('${bossScript.replace(/'/g, "\'")}')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-shield-halved"></i> Reputation Guard</div>
+                <div class="output-card-body">
+                    <p>Be equally polite and distant to both parties. Never speak favorably about one to the other, ensuring neither can accuse you of favoritism.</p>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-compass"></i> The New Normal</div>
+                <div class="output-card-body">
+                    <p>Interact purely on a transactional, task-focused basis. Treat all future interactions like formal client communications.</p>
+                </div>
+            </div>
+
+            <div class="output-card">
+                <div class="output-card-title"><i class="fa-solid fa-lightbulb"></i> The Triangulation Lesson</div>
+                <div class="output-card-body">
+                    <p>In the future, immediately apply the <strong>"Direct Line" rule:</strong> When someone complains about a peer, respond immediately with: <em>"Have you brought this directly to them?"</em></p>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('results-tool5').innerHTML = HTMLResult;
+        document.getElementById('output-tool5').classList.add('active');
+
+        saveHistory('tool5', `Extraction Plan (${priority})`, HTMLResult);
+    }
+
+    // Initialize history on load
+    document.addEventListener('DOMContentLoaded', () => {
+        ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(id => loadHistoryForTool(id));
+    });
+</script>
+
+</body>
+</html>

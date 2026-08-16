@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BurnoutEscape - Practical Career & Burnout Toolkit</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --deep-forest: #2D6A4F;
+            --deep-forest-hover: #1B4332;
+            --burnt-orange: #E76F51;
+            --burnt-orange-hover: #D85A3B;
+            --bg-start: #F8F9FA;
+            --bg-end: #FFF5F0;
+            --text-main: #2B2D42;
+            --text-muted: #6C757D;
+            --card-bg: #FFFFFF;
+            --border-color: #E9ECEF;
+            --sidebar-width: 260px;
+            --toast-bg: #2B2D42;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            min-height: 100vh;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* App Container */
+        .app-container {
+            display: flex;
+            flex: 1;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #FFFFFF;
+            border-right: 1px solid var(--border-color);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-brand i {
+            font-size: 1.5rem;
+            color: var(--burnt-orange);
+        }
+
+        .sidebar-brand h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--deep-forest);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .nav-item button:hover {
+            background-color: #F8F9FA;
+            color: var(--text-main);
+        }
+
+        .nav-item button.active {
+            background-color: rgba(231, 111, 81, 0.1);
+            color: var(--burnt-orange);
+            font-weight: 600;
+        }
+
+        .nav-item button i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            height: 60px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .mobile-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: var(--deep-forest);
+            font-size: 1.1rem;
+        }
+
+        .mobile-header .brand i {
+            color: var(--burnt-orange);
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .content-area {
+            flex: 1;
+            max-width: 860px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Section Display */
+        .tool-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tool-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* General Styling Elements */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.03);
+            margin-bottom: 24px;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, var(--deep-forest) 0%, #1B4332 100%);
+            color: #FFFFFF;
+            border-radius: 20px;
+            padding: 36px 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 20px rgba(45, 106, 79, 0.15);
+        }
+
+        .hero-card h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-card p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            line-height: 1.5;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .dash-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            border-color: var(--burnt-orange);
+        }
+
+        .dash-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(231, 111, 81, 0.1);
+            color: var(--burnt-orange);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            color: var(--deep-forest);
+            font-weight: 600;
+        }
+
+        .dash-card p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Tool Headers */
+        .tool-header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .tool-header-text h2 {
+            font-size: 1.75rem;
+            color: var(--deep-forest);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .tool-problem {
+            display: inline-block;
+            background: #FFF0ED;
+            color: var(--burnt-orange);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #FAFAFA;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--burnt-orange);
+            background-color: #FFFFFF;
+        }
+
+        textarea.form-control {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        /* Checkbox & Radio Grids */
+        .checkbox-grid, .radio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: #F8F9FA;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .checkbox-label:hover, .radio-label:hover {
+            background: #F1F3F5;
+        }
+
+        .checkbox-label input, .radio-label input {
+            accent-color: var(--burnt-orange);
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Slider Controls */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .slider-container input[type="range"] {
+            flex: 1;
+            accent-color: var(--burnt-orange);
+            height: 6px;
+        }
+
+        .slider-value {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--burnt-orange);
+            min-width: 30px;
+            text-align: center;
+        }
+
+        /* Action Buttons */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--burnt-orange);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--burnt-orange-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #E9ECEF;
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background-color: #DEE2E6;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background-color: #F8F9FA;
+            color: var(--text-main);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.82rem;
+            border-radius: 6px;
+        }
+
+        /* Output Cards & Results */
+        .output-container {
+            margin-top: 32px;
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .output-container.active {
+            display: block;
+        }
+
+        .output-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .output-header h3 {
+            font-size: 1.3rem;
+            color: var(--deep-forest);
+        }
+
+        .result-box {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 5px solid var(--burnt-orange);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .result-box.forest {
+            border-left-color: var(--deep-forest);
+        }
+
+        .result-box.neutral {
+            border-left-color: #6C757D;
+        }
+
+        .result-box.alert-red {
+            border-left-color: #D90429;
+            background: #FFF5F5;
+        }
+
+        .result-box.alert-orange {
+            border-left-color: #F77F00;
+            background: #FFF9F2;
+        }
+
+        .result-box.alert-yellow {
+            border-left-color: #EAE2B7;
+            background: #FFFFF0;
+        }
+
+        .result-box.alert-green {
+            border-left-color: #2D6A4F;
+            background: #F4F9F5;
+        }
+
+        .result-title {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .result-content {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .result-desc {
+            font-size: 0.92rem;
+            font-weight: 400;
+            color: #495057;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        /* Script Box & Copy */
+        .script-box {
+            background: #F8F9FA;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #2B2D42;
+            white-space: pre-wrap;
+            position: relative;
+            margin-top: 8px;
+        }
+
+        /* Badges & Tags */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-red { background: #FFE3E3; color: #D90429; }
+        .badge-orange { background: #FFE8D6; color: #DD6B20; }
+        .badge-yellow { background: #FFF9DB; color: #B58403; }
+        .badge-green { background: #D3F9D8; color: #2B8A3E; }
+
+        /* Accordion for History */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .history-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background: #FFFFFF;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 12px 16px;
+            background: #F8F9FA;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .accordion-header:hover {
+            background: #F1F3F5;
+        }
+
+        .accordion-content {
+            padding: 16px;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            background: #FFFFFF;
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        /* Toast Message */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: var(--toast-bg);
+            color: #FFFFFF;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 24px 20px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.6);
+            line-height: 1.5;
+            margin-top: auto;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 820px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .content-area {
+                padding: 20px 16px;
+            }
+
+            .hero-card {
+                padding: 24px 20px;
+            }
+
+            .hero-card h2 {
+                font-size: 1.75rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .checkbox-grid, .radio-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="brand">
+            <i class="fa-solid fa-fire-burner"></i>
+            <span>BurnoutEscape</span>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-fire-burner"></i>
+                <h1>BurnoutEscape</h1>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <button class="active" onclick="switchTab('dashboard')">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Dashboard</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button onclick="switchTab('tool1')">
+                        <i class="fa-solid fa-stethoscope"></i>
+                        <span>Burnout Audit</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button onclick="switchTab('tool2')">
+                        <i class="fa-solid fa-calculator"></i>
+                        <span>Money Reality</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button onclick="switchTab('tool3')">
+                        <i class="fa-solid fa-compass"></i>
+                        <span>Escape Options</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button onclick="switchTab('tool4')">
+                        <i class="fa-solid fa-comments"></i>
+                        <span>The Conversation</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button onclick="switchTab('tool5')">
+                        <i class="fa-solid fa-battery-three-quarters"></i>
+                        <span>Recovery Plan</span>
+                    </button>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-wrapper">
+            <main class="content-area">
+
+                <!-- DASHBOARD -->
+                <section id="dashboard" class="tool-section active">
+                    <div class="hero-card">
+                        <h2>Burnout Escape</h2>
+                        <p>See your options clearly before you burn out completely. Practical, grounded career escape tools for exhausted young professionals.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dash-card" onclick="switchTab('tool1')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-stethoscope"></i></div>
+                            <h3>1. The Burnout Audit</h3>
+                            <p>Diagnose your exhaustion level, burnout type, and root cause objectively.</p>
+                        </div>
+                        <div class="dash-card" onclick="switchTab('tool2')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-calculator"></i></div>
+                            <h3>2. The Money Reality</h3>
+                            <p>Calculate exact financial runway and realistic exit timelines before jumping.</p>
+                        </div>
+                        <div class="dash-card" onclick="switchTab('tool3')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-compass"></i></div>
+                            <h3>3. The Escape Options</h3>
+                            <p>Map transferable skills into 3 concrete alternative career paths.</p>
+                        </div>
+                        <div class="dash-card" onclick="switchTab('tool4')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-comments"></i></div>
+                            <h3>4. The Conversation</h3>
+                            <p>Script precise conversations with your manager to negotiate relief.</p>
+                        </div>
+                        <div class="dash-card" onclick="switchTab('tool5')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-battery-three-quarters"></i></div>
+                            <h3>5. The Recovery Plan</h3>
+                            <p>Reclaim energy, establish micro-habits, and feel human again.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: THE BURNOUT AUDIT -->
+                <section id="tool1" class="tool-section">
+                    <div class="tool-header">
+                        <div class="tool-header-text">
+                            <h2>The Burnout Audit</h2>
+                            <span class="tool-problem">Problem: "I don't know if I'm burned out or just lazy."</span>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSample1()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool1" onsubmit="event.preventDefault(); processTool1();">
+                            <div class="form-group">
+                                <label for="t1-job">Your current job title / role:</label>
+                                <input type="text" id="t1-job" class="form-control" placeholder="e.g. Marketing Manager" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-hours">Average work hours per week:</label>
+                                <input type="number" id="t1-hours" class="form-control" min="10" max="120" placeholder="e.g. 50" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-duration">How long have you felt this way?</label>
+                                <select id="t1-duration" class="form-control" required>
+                                    <option value="">Select duration...</option>
+                                    <option value="weeks">A few weeks</option>
+                                    <option value="months">Several months</option>
+                                    <option value="years">1-2 years</option>
+                                    <option value="always">Since I started this job</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Check all that apply:</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-symptoms" value="exhausted"> Exhausted despite sleep</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-symptoms" value="cynical"> Cynical about work</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-symptoms" value="focus"> Can't focus / Brain fog</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-symptoms" value="dreading"> Dreading Mondays / Sundays</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-symptoms" value="physical"> Physical symptoms (headaches, gut)</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-symptoms" value="snapping"> Snapping at friends/family</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-symptoms" value="fantasizing"> Fantasizing about quitting</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-symptoms" value="numb"> Emotionally numb</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-symptoms" value="unrewarding"> Nothing feels rewarding</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-changed">What changed recently? (or catalyst):</label>
+                                <textarea id="t1-changed" class="form-control" placeholder="e.g., new boss, unexpected promotion, staff cuts, new impossible targets..."></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-line"></i> Analyze Burnout Level</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Area -->
+                    <div id="output-tool1" class="output-container">
+                        <div class="output-header">
+                            <h3>Audit Results & Analysis</h3>
+                        </div>
+
+                        <div id="t1-score-box" class="result-box">
+                            <div class="result-title">Burnout Severity Score <span id="t1-score-badge"></span></div>
+                            <div class="result-content" id="t1-score-text"></div>
+                            <div class="result-desc" id="t1-score-desc"></div>
+                        </div>
+
+                        <div class="result-box forest">
+                            <div class="result-title">Primary Burnout Archetype</div>
+                            <div class="result-content" id="t1-type-title"></div>
+                            <div class="result-desc" id="t1-type-desc"></div>
+                        </div>
+
+                        <div class="result-box neutral">
+                            <div class="result-title">Identified Root Cause</div>
+                            <div class="result-content" id="t1-root-title"></div>
+                            <div class="result-desc" id="t1-root-desc"></div>
+                        </div>
+
+                        <div class="result-box neutral">
+                            <div class="result-title">Reality Check: What Burnout Is Not</div>
+                            <div class="result-content">It is NOT laziness, personal weakness, or lack of discipline.</div>
+                            <div class="result-desc">Burnout is a chronic physiological and psychological response to sustained workplace friction and unmanaged stress. A simple 3-day vacation won't fix structural overwork or toxic culture. Stop blaming yourself for failing to adapt to an unsustainable system.</div>
+                        </div>
+
+                        <div class="result-box forest">
+                            <div class="result-title">One Immediate Protection (Do Today)</div>
+                            <div class="result-content" id="t1-action-title"></div>
+                            <div class="result-desc" id="t1-action-desc"></div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Audits</div>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool1')">Clear History</button>
+                        </div>
+                        <div id="history-tool1"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: THE MONEY REALITY -->
+                <section id="tool2" class="tool-section">
+                    <div class="tool-header">
+                        <div class="tool-header-text">
+                            <h2>The Money Reality</h2>
+                            <span class="tool-problem">Problem: "I want to quit but I can't afford to."</span>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSample2()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool2" onsubmit="event.preventDefault(); processTool2();">
+                            <div class="form-group">
+                                <label for="t2-pay">Monthly Take-Home Pay ($):</label>
+                                <input type="number" id="t2-pay" class="form-control" placeholder="e.g. 4200" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-expenses">Monthly Current Expenses ($):</label>
+                                <input type="number" id="t2-expenses" class="form-control" placeholder="e.g. 3800" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-savings">Liquid Cash Savings ($):</label>
+                                <input type="number" id="t2-savings" class="form-control" placeholder="e.g. 2000" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-min-survival">Monthly Minimum Bare-Bones Survival Expenses ($):</label>
+                                <input type="number" id="t2-min-survival" class="form-control" placeholder="e.g. 2800" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-perceived-runway">Perceived runway if you earned $0 today:</label>
+                                <select id="t2-perceived-runway" class="form-control" required>
+                                    <option value="">Select runway expectation...</option>
+                                    <option value="under1">&lt; 1 month</option>
+                                    <option value="1to3">1 - 3 months</option>
+                                    <option value="3to6">3 - 6 months</option>
+                                    <option value="6to12">6 - 12 months</option>
+                                    <option value="over12">1 year +</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-other-income">Other potential income sources / safety nets:</label>
+                                <textarea id="t2-other-income" class="form-control" placeholder="e.g., partner income, freelance side gig, family support..."></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Calculate Financial Options</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Area -->
+                    <div id="output-tool2" class="output-container">
+                        <div class="output-header">
+                            <h3>Financial Breakdown & Exit Math</h3>
+                        </div>
+
+                        <div id="t2-runway-box" class="result-box forest">
+                            <div class="result-title">Calculated Financial Runway</div>
+                            <div class="result-content" id="t2-runway-text"></div>
+                            <div class="result-desc" id="t2-runway-desc"></div>
+                        </div>
+
+                        <div class="result-box neutral">
+                            <div class="result-title">The Quit Math Assessment</div>
+                            <div class="result-content" id="t2-math-title"></div>
+                            <div class="result-desc" id="t2-math-desc"></div>
+                        </div>
+
+                        <div class="result-box forest">
+                            <div class="result-title">Strategic Action Plan</div>
+                            <div class="result-content" id="t2-plan-title"></div>
+                            <div class="result-desc" id="t2-plan-desc"></div>
+                        </div>
+
+                        <div class="result-box neutral">
+                            <div class="result-title">Non-Negotiable Safety Net Criteria</div>
+                            <div class="result-content">What must be true before handing in your notice:</div>
+                            <div class="result-desc" id="t2-safetynet-desc"></div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Financial Calculations</div>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool2')">Clear History</button>
+                        </div>
+                        <div id="history-tool2"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: THE ESCAPE OPTIONS -->
+                <section id="tool3" class="tool-section">
+                    <div class="tool-header">
+                        <div class="tool-header-text">
+                            <h2>The Escape Options</h2>
+                            <span class="tool-problem">Problem: "I don't know what else I could do."</span>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSample3()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool3" onsubmit="event.preventDefault(); processTool3();">
+                            <div class="form-group">
+                                <label for="t3-current">What do you do now? (role, industry, daily tasks):</label>
+                                <textarea id="t3-current" class="form-control" placeholder="e.g. Corporate Finance Manager, analyzing spreadsheets, preparing deck presentations..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-hate">What do you hate most about it?</label>
+                                <textarea id="t3-hate" class="form-control" placeholder="e.g. Meaningless bureaucracy, endless alignment meetings, micromanagement..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-like">What parts (if any) do you actually like?</label>
+                                <textarea id="t3-like" class="form-control" placeholder="e.g. Solving complex data problems, mentoring junior team members, clear structured tasks..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-age20">What did you want to be at age 20?</label>
+                                <textarea id="t3-age20" class="form-control" placeholder="e.g. Teacher, journalist, documentary filmmaker, creative director..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-surprised">What are people surprised you know how to do?</label>
+                                <textarea id="t3-surprised" class="form-control" placeholder="e.g. Advanced Excel automation, organizing events, graphic design, troubleshooting tech..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Your financial risk tolerance right now:</label>
+                                <div class="radio-grid">
+                                    <label class="radio-label"><input type="radio" name="t3-risk" value="identical" checked> Need identical income</label>
+                                    <label class="radio-label"><input type="radio" name="t3-risk" value="cut20"> Can take 20% pay cut</label>
+                                    <label class="radio-label"><input type="radio" name="t3-risk" value="cut50"> Can take 50% cut temporarily</label>
+                                    <label class="radio-label"><input type="radio" name="t3-risk" value="nomatter"> Money doesn't matter, need out</label>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-map-location-dot"></i> Map Escape Paths</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Area -->
+                    <div id="output-tool3" class="output-container">
+                        <div class="output-header">
+                            <h3>Alternative Career Roadmap</h3>
+                        </div>
+
+                        <div class="result-box forest">
+                            <div class="result-title">Your Unlocked Transferable Skills</div>
+                            <div class="result-content" id="t3-skills-title"></div>
+                            <div class="result-desc" id="t3-skills-desc"></div>
+                        </div>
+
+                        <div class="result-box neutral">
+                            <div class="result-title">3 Strategic Escape Paths</div>
+                            <div style="margin-top:10px;">
+                                <strong style="color:var(--burnt-orange);">Path A (Same Industry, Different Role):</strong>
+                                <p class="result-desc" id="t3-path-a" style="margin-bottom:12px;"></p>
+                                
+                                <strong style="color:var(--burnt-orange);">Path B (Different Industry, Same Core Skills):</strong>
+                                <p class="result-desc" id="t3-path-b" style="margin-bottom:12px;"></p>
+                                
+                                <strong style="color:var(--burnt-orange);">Path C (Radical Pivot / Early Passion):</strong>
+                                <p class="result-desc" id="t3-path-c"></p>
+                            </div>
+                        </div>
+
+                        <div class="result-box forest">
+                            <div class="result-title">Recommended Realistic Path & Timeline</div>
+                            <div class="result-content" id="t3-rec-title"></div>
+                            <div class="result-desc" id="t3-rec-desc"></div>
+                        </div>
+
+                        <div class="result-box neutral">
+                            <div class="result-title">One Research Task For This Week</div>
+                            <div class="result-content" id="t3-task-title"></div>
+                            <div class="result-desc" id="t3-task-desc"></div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Career Maps</div>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool3')">Clear History</button>
+                        </div>
+                        <div id="history-tool3"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: THE CONVERSATION -->
+                <section id="tool4" class="tool-section">
+                    <div class="tool-header">
+                        <div class="tool-header-text">
+                            <h2>The Conversation Scripting</h2>
+                            <span class="tool-problem">Problem: "I need to talk to my boss about my workload or I'm going to snap."</span>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSample4()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool4" onsubmit="event.preventDefault(); processTool4();">
+                            <div class="form-group">
+                                <label for="t4-want">What primary outcome do you want?</label>
+                                <select id="t4-want" class="form-control" required>
+                                    <option value="">Select target outcome...</option>
+                                    <option value="Reduced hours">Reduced hours / Workload cap</option>
+                                    <option value="Different projects">Different projects / Task reassignment</option>
+                                    <option value="Remote days">Remote days / Hybrid flexibility</option>
+                                    <option value="Deadline extension">Deadline extensions / Scope reduction</option>
+                                    <option value="Raise">Pay raise / Fair compensation</option>
+                                    <option value="Clarity on role">Clarity on role expectations</option>
+                                    <option value="Time off">Immediate sabbatical / Unpaid time off</option>
+                                    <option value="Venting">Nothing specific, just venting</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-fear">What are you afraid they will say or do?</label>
+                                <textarea id="t4-fear" class="form-control" placeholder="e.g. They'll say everyone is working hard, call me not a team player, or pass me over..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-proof">What concrete proof/data do you have?</label>
+                                <textarea id="t4-proof" class="form-control" placeholder="e.g., Logged 60hr weeks for 3 months, top rating in Q2, market rate for role..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-if-no">What will you do if they say NO?</label>
+                                <textarea id="t4-if-no" class="form-control" placeholder="e.g. Quiet quit to 40 hours, start actively applying elsewhere, request internal transfer..." required></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-comment-dots"></i> Generate Negotiation Script</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Area -->
+                    <div id="output-tool4" class="output-container">
+                        <div class="output-header">
+                            <h3>Manager Dialogue Strategy</h3>
+                        </div>
+
+                        <div class="result-box forest">
+                            <div class="result-title">Refined Core Request</div>
+                            <div class="result-content" id="t4-ask-title"></div>
+                        </div>
+
+                        <div class="result-box neutral">
+                            <div class="result-title">
+                                <span>Verbatim Opening Script</span>
+                                <button class="btn btn-outline btn-sm" onclick="copyToClipboard('t4-script-text')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                            </div>
+                            <div class="script-box" id="t4-script-text"></div>
+                        </div>
+
+                        <div class="result-box alert-green">
+                            <div class="result-title">If They Say YES (Confirmation Protocol)</div>
+                            <div class="result-desc" id="t4-yes-desc"></div>
+                        </div>
+
+                        <div class="result-box alert-orange">
+                            <div class="result-title">If They Say NO (Immediate Pivot)</div>
+                            <div class="result-desc" id="t4-no-desc"></div>
+                        </div>
+
+                        <div class="result-box alert-red">
+                            <div class="result-title">Retaliation & Backlash Protocol</div>
+                            <div class="result-desc" id="t4-retaliation-desc"></div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Scripts</div>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool4')">Clear History</button>
+                        </div>
+                        <div id="history-tool4"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: THE RECOVERY PLAN -->
+                <section id="tool5" class="tool-section">
+                    <div class="tool-header">
+                        <div class="tool-header-text">
+                            <h2>The Recovery Plan</h2>
+                            <span class="tool-problem">Problem: "Even if I change jobs, I don't know how to feel human again."</span>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSample5()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool5" onsubmit="event.preventDefault(); processTool5();">
+                            <div class="form-group">
+                                <label for="t5-fun">What did you do for fun before this job took over?</label>
+                                <textarea id="t5-fun" class="form-control" placeholder="e.g. Hiking, cooking complex dinners, playing guitar, reading fiction..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-excited">When did you last feel genuinely excited about something?</label>
+                                <textarea id="t5-excited" class="form-control" placeholder="e.g. 2 years ago on a road trip, completing a creative project..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-person">Who in your life makes you feel like your true self?</label>
+                                <textarea id="t5-person" class="form-control" placeholder="e.g. College roommate, my sister, old friend group..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-someday">What is one thing you've been saying "someday" to?</label>
+                                <textarea id="t5-someday" class="form-control" placeholder="e.g. Taking a photography workshop, learning pottery, weekend camping trip..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-energy">Current Overall Energy Level (1 = Completely Drain, 10 = Fully Restored):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t5-energy" min="1" max="10" value="2" oninput="document.getElementById('t5-energy-val').innerText = this.value">
+                                    <span class="slider-value" id="t5-energy-val">2</span>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-heart-pulse"></i> Generate Recovery Protocol</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Area -->
+                    <div id="output-tool5" class="output-container">
+                        <div class="output-header">
+                            <h3>Personal Recovery Protocol</h3>
+                        </div>
+
+                        <div class="result-box forest">
+                            <div class="result-title">The You That Got Paused</div>
+                            <div class="result-content" id="t5-paused-title"></div>
+                            <div class="result-desc" id="t5-paused-desc"></div>
+                        </div>
+
+                        <div class="result-box neutral">
+                            <div class="result-title">15-Minute Micro-Recovery Action (Today)</div>
+                            <div class="result-content" id="t5-micro-title"></div>
+                            <div class="result-desc" id="t5-micro-desc"></div>
+                        </div>
+
+                        <div class="result-box neutral">
+                            <div class="result-title">One Social Reconnection (This Week)</div>
+                            <div class="result-content" id="t5-social-title"></div>
+                            <div class="result-desc" id="t5-social-desc"></div>
+                        </div>
+
+                        <div class="result-box forest">
+                            <div class="result-title">Low-Commitment "Someday" Experiment</div>
+                            <div class="result-content" id="t5-experiment-title"></div>
+                            <div class="result-desc" id="t5-experiment-desc"></div>
+                        </div>
+
+                        <div class="result-box alert-orange">
+                            <div class="result-title">The Energy Rule</div>
+                            <div class="result-content" id="t5-energyrule-title"></div>
+                            <div class="result-desc" id="t5-energyrule-desc"></div>
+                        </div>
+
+                        <div class="result-box neutral">
+                            <div class="result-title">30-Day Gentle Checkpoint</div>
+                            <div class="result-content">What to notice, NOT achieve:</div>
+                            <div class="result-desc">
+                                <ul>
+                                    <li>Did your physical tension drop during non-work hours?</li>
+                                    <li>Were you able to disconnect mentally after 7 PM at least 3 days a week?</li>
+                                    <li>Did you feel even 5% curiosity about something outside work?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Recovery Plans</div>
+                            <button class="btn btn-outline btn-sm" onclick="clearHistory('tool5')">Clear History</button>
+                        </div>
+                        <div id="history-tool5"></div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Sticky Footer -->
+            <footer>
+                For self-guided reflection and career planning only. Not medical or therapeutic advice. For mental health concerns, consult a qualified professional.
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check" style="color: #2D6A4F;"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <script>
+        // --- NAVIGATION & SIDEBAR LOGIC ---
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('mobile-open');
+        }
+
+        hamburgerBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        function switchTab(tabId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.tool-section');
+            sections.forEach(sec => sec.classList.remove('active'));
+
+            // Show selected section
+            const targetSection = document.getElementById(tabId);
+            if (targetSection) targetSection.classList.add('active');
+
+            // Update nav buttons
+            const navButtons = document.querySelectorAll('.nav-item button');
+            navButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('onclick').includes(`'${tabId}'`)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Close mobile menu if open
+            if (sidebar.classList.contains('mobile-open')) {
+                toggleSidebar();
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- TOAST NOTIFICATION ---
+        function showToast(message = "Copied to clipboard!") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Script copied to clipboard!");
+            }).catch(err => {
+                console.error("Copy failed", err);
+            });
+        }
+
+        // --- LOCAL STORAGE HISTORY MANAGEMENT ---
+        function saveToHistory(toolId, data) {
+            const key = `burnout_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            history.unshift({
+                timestamp: new Date().toLocaleString(),
+                data: data
+            });
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function getHistory(toolId) {
+            const key = `burnout_history_${toolId}`;
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+
+        function clearHistory(toolId) {
+            const key = `burnout_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            content.classList.toggle('active');
+        }
+
+        function renderHistory(toolId) {
+            const container = document.getElementById(`history-${toolId}`);
+            if (!container) return;
+            const history = getHistory(toolId);
+            if (history.length === 0) {
+                container.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">No saved history yet.</p>';
+                return;
+            }
+
+            let html = '';
+            history.forEach((item, idx) => {
+                let summaryTitle = item.data.summary || `Saved Entry #${history.length - idx}`;
+                html += `
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>${summaryTitle}</span>
+                            <span style="font-size:0.75rem; color: var(--text-muted);">${item.timestamp} <i class="fa-solid fa-chevron-down" style="margin-left:6px;"></i></span>
+                        </div>
+                        <div class="accordion-content">
+                            ${item.data.detailsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // Initialize history on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistory);
+        });
+
+        // --- SAMPLE SCENARIO LOADERS ---
+
+        function loadSample1() {
+            document.getElementById('t1-job').value = "Marketing Manager";
+            document.getElementById('t1-hours').value = 55;
+            document.getElementById('t1-duration').value = "months";
+            
+            const checks = ['exhausted', 'cynical', 'dreading', 'fantasizing'];
+            document.querySelectorAll('input[name="t1-symptoms"]').forEach(cb => {
+                cb.checked = checks.includes(cb.value);
+            });
+            
+            document.getElementById('t1-changed').value = "New impossible sales targets assigned after half the team was laid off.";
+            showToast("Sample 1 loaded");
+        }
+
+        function loadSample2() {
+            document.getElementById('t2-pay').value = 4200;
+            document.getElementById('t2-expenses').value = 3800;
+            document.getElementById('t2-savings').value = 2000;
+            document.getElementById('t2-min-survival').value = 2800;
+            document.getElementById('t2-perceived-runway').value = "under1";
+            document.getElementById('t2-other-income').value = "None. Living single, no side gigs or family backup.";
+            showToast("Sample 2 loaded");
+        }
+
+        function loadSample3() {
+            document.getElementById('t3-current').value = "Corporate Finance Analyst, managing budgets, compiling routine executive decks.";
+            document.getElementById('t3-hate').value = "Meaningless endless reporting, office politics, lack of tangible impact.";
+            document.getElementById('t3-like').value = "Deep focus financial modeling, training junior staff, solving complex puzzles.";
+            document.getElementById('t3-age20').value = "High school teacher or university instructor.";
+            document.getElementById('t3-surprised').value = "Creating automated Excel tools, simplifying complex data for non-technical people.";
+            document.querySelector('input[name="t3-risk"][value="identical"]').checked = true;
+            showToast("Sample 3 loaded");
+        }
+
+        function loadSample4() {
+            document.getElementById('t4-want').value = "Reduced hours";
+            document.getElementById('t4-fear').value = "They'll say 'everyone is busy right now' and mark me as not a team player.";
+            document.getElementById('t4-proof').value = "Logged 60+ hour weeks for past 4 months, delivered top campaign ROI on time.";
+            document.getElementById('t4-if-no').value = "Immediately start interviewing outside and strictly cap work hours at 40.";
+            showToast("Sample 4 loaded");
+        }
+
+        function loadSample5() {
+            document.getElementById('t5-fun').value = "Weekend trail hiking, cooking elaborate pasta dishes from scratch.";
+            document.getElementById('t5-excited').value = "About 2 years ago on a road trip with friends.";
+            document.getElementById('t5-person').value = "My college roommate Sam, who doesn't care about corporate titles.";
+            document.getElementById('t5-someday').value = "Take a 4-week intro photography course.";
+            document.getElementById('t5-energy').value = 2;
+            document.getElementById('t5-energy-val').innerText = "2";
+            showToast("Sample 5 loaded");
+        }
+
+
+        // --- TOOL 1 ANALYSIS LOGIC ---
+        function processTool1() {
+            const job = document.getElementById('t1-job').value;
+            const hours = parseInt(document.getElementById('t1-hours').value) || 40;
+            const duration = document.getElementById('t1-duration').value;
+            const changed = document.getElementById('t1-changed').value.toLowerCase();
+            
+            const checkedSymptoms = Array.from(document.querySelectorAll('input[name="t1-symptoms"]:checked')).map(cb => cb.value);
+            const symptomCount = checkedSymptoms.length;
+
+            // Score Logic
+            let scoreLevel = "Green";
+            let scoreClass = "alert-green";
+            let badgeClass = "badge-green";
+            let scoreDesc = "Your stress levels are elevated, but you are currently in a manageable range. Focus on maintaining boundaries.";
+
+            let points = symptomCount * 1.5;
+            if (hours > 50) points += 2;
+            if (hours > 60) points += 2;
+            if (duration === "months") points += 2;
+            if (duration === "years" || duration === "always") points += 4;
+
+            if (points >= 11) {
+                scoreLevel = "Red - Critical Burnout";
+                scoreClass = "alert-red";
+                badgeClass = "badge-red";
+                scoreDesc = "You are in severe crisis. Your nervous system is operating on emergency reserve power. Continuing at this pace carries high risk of physical illness or acute mental breakdown.";
+            } else if (points >= 7) {
+                scoreLevel = "Orange - High Burnout Risk";
+                scoreClass = "alert-orange";
+                badgeClass = "badge-orange";
+                scoreDesc = "You are operating in active burnout territory. Cynicism and physical exhaustion are setting in. Urgent boundary adjustments are needed.";
+            } else if (points >= 4) {
+                scoreLevel = "Yellow - Moderate Strain";
+                scoreClass = "alert-yellow";
+                badgeClass = "badge-yellow";
+                scoreDesc = "Early warning signs present. You are experiencing chronic friction that will degrade into severe burnout if unaddressed.";
+            }
+
+            // Archetype Logic
+            let typeTitle = "Overload Burnout";
+            let typeDesc = "You work furiously, striving to achieve results despite diminishing returns. You sacrifice sleep and personal health to satisfy unsustainable expectations.";
+
+            if (checkedSymptoms.includes('cynical') && checkedSymptoms.includes('unrewarding')) {
+                typeTitle = "Values Conflict Burnout";
+                typeDesc = "Your burnout isn't just about workload; it's a deep disconnection between your personal ethics/values and the reality of your company's actions or culture.";
+            } else if (checkedSymptoms.includes('numb') || checkedSymptoms.includes('focus')) {
+                typeTitle = "Neglect / Under-challenge Burnout";
+                typeDesc = "You feel helpless, unappreciated, or stuck in a chaotic environment where your efforts don't seem to produce meaningful results or growth.";
+            } else if (hours < 45 && symptomCount >= 4) {
+                typeTitle = "Wrong Fit / Cultural Mismatch";
+                typeDesc = "The core energy drain isn't sheer hours, but the constant emotional friction of masking your identity and operating in an environment that misaligns with your natural strengths.";
+            }
+
+            // Root Cause Logic
+            let rootTitle = "Structural Workload Expansion";
+            let rootDesc = "The job demands have scaled up without a proportional increase in resources, team capacity, or timeline flexibility.";
+
+            if (changed.includes('boss') || changed.includes('manager') || changed.includes('leadership')) {
+                rootTitle = "Relational / Management Dynamics";
+                rootDesc = "A shift in management style, loss of psychological safety, or unrealistic leadership expectations has disrupted your work environment.";
+            } else if (changed.includes('target') || changed.includes('layoff') || changed.includes('cut') || changed.includes('promotion')) {
+                rootTitle = "Unrealistic Target Amplification";
+                rootDesc = "Increased metrics or reduced staff have forced you to absorb the workload of multiple roles without appropriate compensation or protection.";
+            } else if (duration === "always") {
+                rootTitle = "Systemic Role Misalignment";
+                rootDesc = "The core expectations and daily environment of this role were never aligned with your working style, leading to chronic, quiet depletion from day one.";
+            }
+
+            // Immediate Protection
+            let actionTitle = "Implement strict 'Hard Stop' protocol today";
+            let actionDesc = "Select ONE specific work task to leave unfinished today at 5:00 PM (or your target end time). Turn off notifications on mobile email/Slack immediately upon stepping away. Do not offer explanation.";
+
+            // UI Rendering
+            const box = document.getElementById('t1-score-box');
+            box.className = `result-box ${scoreClass}`;
+            document.getElementById('t1-score-badge').className = `badge ${badgeClass}`;
+            document.getElementById('t1-score-badge').innerText = scoreLevel.split('-')[0].trim();
+            document.getElementById('t1-score-text').innerText = scoreLevel;
+            document.getElementById('t1-score-desc').innerText = scoreDesc;
+
+            document.getElementById('t1-type-title').innerText = typeTitle;
+            document.getElementById('t1-type-desc').innerText = typeDesc;
+
+            document.getElementById('t1-root-title').innerText = rootTitle;
+            document.getElementById('t1-root-desc').innerText = rootDesc;
+
+            document.getElementById('t1-action-title').innerText = actionTitle;
+            document.getElementById('t1-action-desc').innerText = actionDesc;
+
+            document.getElementById('output-tool1').classList.add('active');
+
+            // Save to LocalStorage
+            saveToHistory('tool1', {
+                summary: `${job} - ${scoreLevel.split('-')[0].trim()} Score`,
+                detailsHtml: `
+                    <strong>Role:</strong> ${job} (${hours} hrs/wk)<br>
+                    <strong>Severity:</strong> ${scoreLevel}<br>
+                    <strong>Archetype:</strong> ${typeTitle}<br>
+                    <strong>Root Cause:</strong> ${rootTitle}<br>
+                    <strong>Action:</strong> ${actionTitle}
+                `
+            });
+        }
+
+
+        // --- TOOL 2 ANALYSIS LOGIC ---
+        function processTool2() {
+            const pay = parseFloat(document.getElementById('t2-pay').value) || 0;
+            const expenses = parseFloat(document.getElementById('t2-expenses').value) || 0;
+            const savings = parseFloat(document.getElementById('t2-savings').value) || 0;
+            const minSurvival = parseFloat(document.getElementById('t2-min-survival').value) || 0;
+
+            const currentMonthsRunway = expenses > 0 ? (savings / expenses).toFixed(1) : 0;
+            const survivalMonthsRunway = minSurvival > 0 ? (savings / minSurvival).toFixed(1) : 0;
+            const netSavingsMonthly = pay - expenses;
+
+            let mathTitle = "";
+            let mathDesc = "";
+            let planTitle = "";
+            let planDesc = "";
+            let safetyDesc = "";
+
+            if (survivalMonthsRunway < 1.5) {
+                // NO RUNWAY
+                mathTitle = "CRITICAL: Do NOT Quit Immediately Without Income";
+                mathDesc = `You currently have approximately ${survivalMonthsRunway} months (${Math.round(survivalMonthsRunway * 4.3)} weeks) of bare-bones survival runway. Quitting today would trigger severe financial panic within 30 days, replacing workplace burnout with extreme survival anxiety.`;
+                
+                planTitle = "3 Immediate Ways to Create Breathing Room";
+                planDesc = `
+                    1. <strong>Quiet Boundary Enforcement:</strong> Reduce effort to strictly 100% of core duties during contractual hours. Stop volunteering for extra projects.<br>
+                    2. <strong>Trim Current Overhead to Bare-Bones Level:</strong> Temporarily cut non-essential recurring subscriptions and discretionary spending to build cash fast.<br>
+                    3. <strong>Take Short-Term Sick Leave / PTO:</strong> Use accumulated paid time off or medical leave to create 1-2 weeks of total mental space without sacrificing income.
+                `;
+
+                safetyDesc = "Before giving notice: You must secure at least 3 months of survival expenses ($" + (minSurvival * 3).toLocaleString() + ") OR have an offer letter signed.";
+
+            } else if (survivalMonthsRunway >= 1.5 && survivalMonthsRunway < 5) {
+                // SHORT RUNWAY
+                mathTitle = "MODERATE: Bridge Plan Required (3-6 Months)";
+                mathDesc = `Your cash reserve affords you ${survivalMonthsRunway} months of bare-bones expenses (or ${currentMonthsRunway} months at current standard of living). You have a minor cushion, but a blind quit remains risky in slower hiring markets.`;
+
+                planTitle = "The 90-Day Bridge Strategy";
+                planDesc = `
+                    1. <strong>Targeted Savings Sprint:</strong> Switch to bare-bones survival budget ($${minSurvival}/mo) immediately while still working. Save the extra $${(pay - minSurvival).toFixed(0)}/month into an untouchable exit fund.<br>
+                    2. <strong>Low-Friction Job Search:</strong> Dedicate 4 hours every weekend to applying for lateral roles. Do not apply during work hours.<br>
+                    3. <strong>Contract / Part-Time Backup:</strong> Identify 2 freelance or temporary roles that could cover minimum expenses if you need to leave in emergency.
+                `;
+
+                safetyDesc = "Before giving notice: Build liquid savings to minimum $"+ (minSurvival * 4).toLocaleString() +" (4 months minimum) and map out at least one side/part-time revenue stream.";
+
+            } else {
+                // LONG RUNWAY
+                mathTitle = "HIGH FLEXIBILITY: You Have Financial Freedom";
+                mathDesc = `You have ${survivalMonthsRunway} months of bare-bones runway (${currentMonthsRunway} months at current living standards). You possess genuine financial power and safety.`;
+
+                planTitle = "Strategic Exit or Sabbatical Execution";
+                planDesc = `
+                    1. <strong>Firm Deadline Strategy:</strong> Set a hard exit date 30-60 days out regardless of whether you have another job lined up.<br>
+                    2. <strong>Planned Career Pause:</strong> Consider taking a deliberate 1-2 month sabbatical to clear brain fog before rushing into another high-stress interviews.<br>
+                    3. <strong>Selective Career Pivoting:</strong> Leverage your runway to accept lower-paying, lower-stress positions or switch industries without panic.
+                `;
+
+                safetyDesc = "Before giving notice: Health insurance transition plan, clear budget for the break period, and an agreed start date for career exploration.";
+            }
+
+            // UI Rendering
+            document.getElementById('t2-runway-text').innerText = `${survivalMonthsRunway} Months Runway (Survival Level)`;
+            document.getElementById('t2-runway-desc').innerText = `Based on $${savings.toLocaleString()} liquid cash vs $${minSurvival.toLocaleString()}/mo bare-bones survival expenses (or ${currentMonthsRunway} months at current $${expenses.toLocaleString()}/mo spend). Net monthly cash flow: $${netSavingsMonthly >= 0 ? '+' : ''}${netSavingsMonthly.toLocaleString()}/mo.`;
+
+            document.getElementById('t2-math-title').innerText = mathTitle;
+            document.getElementById('t2-math-desc').innerText = mathDesc;
+
+            document.getElementById('t2-plan-title').innerText = planTitle;
+            document.getElementById('t2-plan-desc').innerHTML = planDesc;
+
+            document.getElementById('t2-safetynet-desc').innerText = safetyDesc;
+
+            document.getElementById('output-tool2').classList.add('active');
+
+            // Save to LocalStorage
+            saveToHistory('tool2', {
+                summary: `$${savings} Cash - ${survivalMonthsRunway} mo Runway`,
+                detailsHtml: `
+                    <strong>Take-Home:</strong> $${pay}/mo | <strong>Expenses:</strong> $${expenses}/mo<br>
+                    <strong>Survival Runway:</strong> ${survivalMonthsRunway} months ($${minSurvival}/mo min)<br>
+                    <strong>Assessment:</strong> ${mathTitle}<br>
+                    <strong>Safety Net Goal:</strong> ${safetyDesc}
+                `
+            });
+        }
+
+
+        // --- TOOL 3 ANALYSIS LOGIC ---
+        function processTool3() {
+            const current = document.getElementById('t3-current').value;
+            const hate = document.getElementById('t3-hate').value;
+            const like = document.getElementById('t3-like').value;
+            const age20 = document.getElementById('t3-age20').value;
+            const surprised = document.getElementById('t3-surprised').value;
+            const risk = document.querySelector('input[name="t3-risk"]:checked').value;
+
+            // Extract core skill keywords
+            let skillsTitle = "Structured Analysis, Operations, and Stakeholder Communication";
+            let skillsDesc = "Regardless of job title, your combination of problem-solving, reporting, and specialized domain knowledge is highly transferable across sectors.";
+
+            if (surprised.toLowerCase().includes('excel') || current.toLowerCase().includes('finance') || current.toLowerCase().includes('data')) {
+                skillsTitle = "Analytical Modeling, Data Translation & Efficiency Automation";
+                skillsDesc = "You possess the rare ability to bridge raw data complexity with clear business insights — valuable in operations, product management, and consulting.";
+            }
+
+            // Path Definitions
+            let pathA = `<strong>Lateral Internal / Adjacent Role:</strong> Transition into Operations, Strategic Planning, or Internal Enablement within your current industry. Eliminates domain retraining while escaping daily burnout triggers.`;
+            let pathB = `<strong>Cross-Industry Translation:</strong> Move your core skills into Tech, Higher Education, Non-profit management, or specialized B2B Consulting. Your background translates directly to Client Success or Operations Management.`;
+            let pathC = `<strong>Radical Pivot / Early Calling:</strong> Explore corporate training, vocational teaching, specialized coaching, or opening an independent consultancy built around '${age20 || "your early interests"}'.`;
+
+            let recTitle = "Path A (Internal / Lateral Transition)";
+            let recDesc = "Given your requirement for stable income, a direct industry switch or lateral internal role offers immediate relief with 0% pay disruption. Timeline: 1-3 months.";
+
+            if (risk === "cut20") {
+                recTitle = "Path B (Cross-Industry Transition)";
+                recDesc = "You have enough cushion to accept a mild salary reduction in exchange for higher autonomy and a healthier workplace culture in a new sector. Timeline: 3-5 months.";
+            } else if (risk === "cut50" || risk === "nomatter") {
+                recTitle = "Path C (Radical Pivot or Sabbatical Pivot)";
+                recDesc = "Your risk tolerance allows you to step away or take a lower-paying entry role in a completely new field aligned with your early passions. Timeline: 6-12 months.";
+            }
+
+            let taskTitle = "Conduct 2 Informational Interviews This Week";
+            let taskDesc = `Identify 2 people on LinkedIn currently holding a Path B or Path C job title. Send them a 3-sentence message: "I admire your transition into [Role]. I'm evaluating a similar move and would love 15 minutes to ask 3 questions about your transition."`;
+
+            // UI Rendering
+            document.getElementById('t3-skills-title').innerText = skillsTitle;
+            document.getElementById('t3-skills-desc').innerText = skillsDesc;
+
+            document.getElementById('t3-path-a').innerHTML = pathA;
+            document.getElementById('t3-path-b').innerHTML = pathB;
+            document.getElementById('t3-path-c').innerHTML = pathC;
+
+            document.getElementById('t3-rec-title').innerText = recTitle;
+            document.getElementById('t3-rec-desc').innerText = recDesc;
+
+            document.getElementById('t3-task-title').innerText = taskTitle;
+            document.getElementById('t3-task-desc').innerText = taskDesc;
+
+            document.getElementById('output-tool3').classList.add('active');
+
+            // Save to LocalStorage
+            saveToHistory('tool3', {
+                summary: `Escape Options for ${current.substring(0, 25)}...`,
+                detailsHtml: `
+                    <strong>Current Role:</strong> ${current}<br>
+                    <strong>Recommended Path:</strong> ${recTitle}<br>
+                    <strong>Transferable Focus:</strong> ${skillsTitle}<br>
+                    <strong>Action Task:</strong> ${taskTitle}
+                `
+            });
+        }
+
+
+        // --- TOOL 4 ANALYSIS LOGIC ---
+        function processTool4() {
+            const want = document.getElementById('t4-want').value;
+            const fear = document.getElementById('t4-fear').value;
+            const proof = document.getElementById('t4-proof').value;
+            const ifNo = document.getElementById('t4-if-no').value;
+
+            let askTitle = `Formal Request for ${want}`;
+            
+            let scriptText = 
+`"Hi [Manager Name], thanks for meeting with me. 
+
+I want to discuss my current workload capacity and project priorities to ensure I continue delivering high-quality results.
+
+Over the past few months, I've consistently delivered [mention key win/result] while averaging [mention proof/hours, e.g. 55-60 hours per week]. However, at the current volume, this workload pace is unsustainable and poses a risk to project quality.
+
+To maintain our performance standards, I am requesting [specific ask: e.g., capping my weekly project count / adjusting the timeline for Project X / implementing 2 remote focus days].
+
+Which of these priority adjustments should we implement starting next week?"`;
+
+            let yesDesc = "Immediately send a follow-up email within 2 hours: 'Thanks for supporting this adjustment today. Per our conversation, we agreed to [restate exact change] effective [date]. I will update the project tracker accordingly.'";
+            
+            let noDesc = `Stay calm. Do not argue or get emotional. Respond with: "I understand the team's constraints right now. Since we cannot adjust the workload, which of my current 3 projects should I deprioritize so I can focus on [Primary Task]?" Then activate your plan: ${ifNo}`;
+
+            let retaliationDesc = "Document everything in writing. Keep an offsite log (personal note) detailing dates, task reassignments, or hostile remarks. If you experience unwarranted negative reviews or sudden exclusion from meetings, forward relevant emails to a personal email account and consult HR or an employment advisor.";
+
+            // UI Rendering
+            document.getElementById('t4-ask-title').innerText = askTitle;
+            document.getElementById('t4-script-text').innerText = scriptText;
+            document.getElementById('t4-yes-desc').innerText = yesDesc;
+            document.getElementById('t4-no-desc').innerText = noDesc;
+            document.getElementById('t4-retaliation-desc').innerText = retaliationDesc;
+
+            document.getElementById('output-tool4').classList.add('active');
+
+            // Save to LocalStorage
+            saveToHistory('tool4', {
+                summary: `Script: Requesting ${want}`,
+                detailsHtml: `
+                    <strong>Request:</strong> ${want}<br>
+                    <strong>Anticipated Fear:</strong> ${fear}<br>
+                    <strong>Proof Used:</strong> ${proof}<br>
+                    <strong>Backup Plan:</strong> ${ifNo}
+                `
+            });
+        }
+
+
+        // --- TOOL 5 ANALYSIS LOGIC ---
+        function processTool5() {
+            const fun = document.getElementById('t5-fun').value;
+            const excited = document.getElementById('t5-excited').value;
+            const person = document.getElementById('t5-person').value;
+            const someday = document.getElementById('t5-someday').value;
+            const energy = parseInt(document.getElementById('t5-energy').value);
+
+            let pausedTitle = "The Creative & Playful Self";
+            let pausedDesc = `You have set aside key activities that previously recharged you: '${fun}'. Burnout makes you believe you don't have time for play, when in reality play is required to rebuild executive functioning.`;
+
+            let microTitle = "15 Minutes of Unstructured Free Time Today";
+            let microDesc = `Set a timer for 15 minutes tonight. Engage in a low-stakes version of what you missed: spend 15 minutes looking up recipes, stepping outside for a brief walk without headphones, or tuning an instrument. Zero expectations of outcome.`;
+
+            let socialTitle = `Send a 1-Line Text to ${person || 'a trusted friend'}`;
+            let socialDesc = `Text them today: "Hey, was thinking about you today! Work has been crazy, but I'd love to catch up for 15 mins this weekend. No worries if you're busy."`;
+
+            let experimentTitle = `The 1-Hour Low-Commitment Trial for '${someday}'`;
+            let experimentDesc = `Do not sign up for a 6-month commitment yet. Spend 30 minutes browsing a beginner video or booking a single drop-in class for '${someday}' this weekend.`;
+
+            let energyruleTitle = `Current Energy Score: ${energy}/10 — Protect Recovery First`;
+            let energyruleDesc = energy <= 3 
+                ? "CRITICAL RULE: Do NOT make major irreversible career life decisions (quitting on impulse, signing expensive leases) while your energy is below 4. Your brain is in survival mode. Protect basic sleep, nutrition, and rest for 7 days before executing big moves."
+                : "Your energy is in a manageable range to begin executing strategic career steps while maintaining daily recovery habits.";
+
+            // UI Rendering
+            document.getElementById('t5-paused-title').innerText = pausedTitle;
+            document.getElementById('t5-paused-desc').innerText = pausedDesc;
+
+            document.getElementById('t5-micro-title').innerText = microTitle;
+            document.getElementById('t5-micro-desc').innerText = microDesc;
+
+            document.getElementById('t5-social-title').innerText = socialTitle;
+            document.getElementById('t5-social-desc').innerText = socialDesc;
+
+            document.getElementById('t5-experiment-title').innerText = experimentTitle;
+            document.getElementById('t5-experiment-desc').innerText = experimentDesc;
+
+            document.getElementById('t5-energyrule-title').innerText = energyruleTitle;
+            document.getElementById('t5-energyrule-desc').innerText = energyruleDesc;
+
+            document.getElementById('output-tool5').classList.add('active');
+
+            // Save to LocalStorage
+            saveToHistory('tool5', {
+                summary: `Recovery Protocol (Energy: ${energy}/10)`,
+                detailsHtml: `
+                    <strong>Energy Level:</strong> ${energy}/10<br>
+                    <strong>Micro-Recovery:</strong> ${microTitle}<br>
+                    <strong>Social Action:</strong> ${socialTitle}<br>
+                    <strong>Someday Goal:</strong> ${someday}
+                `
+            });
+        }
+    </script>
+</body>
+</html>

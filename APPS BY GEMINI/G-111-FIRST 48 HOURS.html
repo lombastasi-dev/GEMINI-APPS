@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First48Hours — Emergency Breakup Triage</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --navy: #1D3557;
+            --navy-light: #2c4d7c;
+            --red: #E63946;
+            --red-hover: #d62837;
+            --red-soft: #fdf2f2;
+            --bg-gradient: linear-gradient(135deg, #F8F9FA 0%, #FFF0F0 100%);
+            --card-bg: #FFFFFF;
+            --text-main: #1D2A3A;
+            --text-muted: #6C757D;
+            --border-color: #E9ECEF;
+            --shadow-sm: 0 2px 8px rgba(29, 53, 87, 0.06);
+            --shadow-md: 0 4px 16px rgba(29, 53, 87, 0.1);
+            --radius-xl: 1rem;
+            --radius-lg: 0.75rem;
+            --radius-md: 0.5rem;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #FFFFFF;
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            background: var(--red);
+            color: white;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .brand-text {
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: var(--navy);
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.925rem;
+            margin-bottom: 0.25rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background: #F8F9FA;
+            color: var(--navy);
+        }
+
+        .nav-item.active {
+            background: var(--red-soft);
+            color: var(--red);
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .nav-item.active i {
+            color: var(--red);
+        }
+
+        /* Mobile Header & Overlay */
+        .mobile-header {
+            display: none;
+            background: #FFFFFF;
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 90;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .hamburger {
+            background: transparent;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--navy);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(29, 53, 87, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 95;
+        }
+
+        /* Main Content Container */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 840px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Views management */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards & UI Components */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-card {
+            background: var(--navy);
+            color: white;
+            padding: 2.25rem 2rem;
+            border-radius: var(--radius-xl);
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            box-shadow: var(--shadow-md);
+        }
+
+        .hero-card h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-card p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1.1rem;
+            font-weight: 400;
+            max-width: 600px;
+        }
+
+        .emergency-banner {
+            background: var(--red-soft);
+            border: 1px solid rgba(230, 57, 70, 0.3);
+            border-left: 4px solid var(--red);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .emergency-banner i {
+            color: var(--red);
+            font-size: 1.25rem;
+            margin-top: 0.15rem;
+        }
+
+        .emergency-banner p {
+            font-size: 0.9rem;
+            color: #801820;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* Dashboard Grid */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(230, 57, 70, 0.3);
+        }
+
+        .tool-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-lg);
+            background: var(--red-soft);
+            color: var(--red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 0.35rem;
+        }
+
+        .tool-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Form Controls */
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-header h2 {
+            font-size: 1.35rem;
+            color: var(--navy);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-sample {
+            background: #F1F3F5;
+            color: var(--navy);
+            border: 1px solid #CED4DA;
+            padding: 0.45rem 0.85rem;
+            border-radius: var(--radius-md);
+            font-size: 0.825rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .btn-sample:hover {
+            background: #E9ECEF;
+            border-color: #ADB5BD;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+        }
+
+        .checkbox-group, .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .custom-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #F8F9FA;
+            padding: 0.6rem 0.85rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .custom-option:hover {
+            background: #F1F3F5;
+        }
+
+        .custom-option input {
+            accent-color: var(--red);
+            width: 16px;
+            height: 16px;
+        }
+
+        select, textarea, input[type="text"] {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: #F8F9FA;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        select:focus, textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--navy);
+            background: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(29, 53, 87, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--red);
+            color: white;
+            border: none;
+            padding: 0.85rem;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            box-shadow: 0 2px 6px rgba(230, 57, 70, 0.3);
+        }
+
+        .btn-submit:hover {
+            background: var(--red-hover);
+        }
+
+        /* Triage Output Components */
+        .output-container {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .output-box {
+            background: #FFFFFF;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .output-header {
+            background: var(--navy);
+            color: white;
+            padding: 1rem 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-section {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .output-section:last-child {
+            border-bottom: none;
+        }
+
+        .output-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 800;
+            color: var(--red);
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .output-content {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .script-box {
+            background: #F8F9FA;
+            border: 1px dashed var(--navy);
+            border-radius: var(--radius-md);
+            padding: 0.85rem 1rem;
+            margin-top: 0.5rem;
+            font-family: monospace, monospace;
+            font-size: 0.9rem;
+            color: var(--navy);
+            position: relative;
+        }
+
+        .btn-copy {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--navy);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .btn-copy:hover {
+            background: #E9ECEF;
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 2rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .history-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        .btn-clear-history {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .btn-clear-history:hover {
+            color: var(--red);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .history-item {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .history-item:hover {
+            border-color: var(--navy);
+            background: #F8F9FA;
+        }
+
+        .history-item-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .history-item-preview {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--navy);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Footer */
+        .app-footer {
+            background: #FFFFFF;
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-top: auto;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--navy);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.2s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Styling */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                padding-top: 57px;
+            }
+
+            .main-content {
+                padding: 1.25rem 1rem;
+            }
+
+            .hero-card {
+                padding: 1.5rem;
+            }
+
+            .hero-card h1 {
+                font-size: 1.5rem;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .checkbox-group, .radio-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Top Navigation Bar -->
+    <div class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div class="brand-logo" style="width: 28px; height: 28px; font-size: 0.9rem;">
+                <i class="fa-solid fa-kit-medical"></i>
+            </div>
+            <span class="brand-text" style="font-size: 1rem;">First48Hours</span>
+        </div>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-logo">
+                <i class="fa-solid fa-kit-medical"></i>
+            </div>
+            <div>
+                <div class="brand-text">First48Hours</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Emergency Triage Kit</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="nav-item active" data-view="dashboard">
+                <i class="fa-solid fa-house"></i>
+                Dashboard
+            </button>
+            <button class="nav-item" data-view="tool1">
+                <i class="fa-solid fa-hand"></i>
+                Impulse Blocker
+            </button>
+            <button class="nav-item" data-view="tool2">
+                <i class="fa-solid fa-moon"></i>
+                Tonight's Survival Plan
+            </button>
+            <button class="nav-item" data-view="tool3">
+                <i class="fa-solid fa-shield-halved"></i>
+                The Dignity Check
+            </button>
+            <button class="nav-item" data-view="tool4">
+                <i class="fa-solid fa-sun"></i>
+                Tomorrow's First Step
+            </button>
+            <button class="nav-item" data-view="tool5">
+                <i class="fa-solid fa-bridge"></i>
+                The 7-Day Bridge
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Container -->
+    <div class="main-wrapper">
+        <main class="main-content">
+            
+            <!-- EMERGENCY CRISIS BANNER (On all tools) -->
+            <div class="emergency-banner">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <p>If you are in immediate danger of harming yourself or others, call emergency services or a crisis line right now. This app cannot replace professional medical or crisis support.</p>
+            </div>
+
+            <!-- DASHBOARD VIEW -->
+            <div id="dashboard" class="view active">
+                <div class="hero-card">
+                    <h1>The First 48 Hours</h1>
+                    <p>Don't do anything you'll regret tonight. Step away from your phone, take a deep breath, and use these emergency triage tools to survive the acute phase.</p>
+                </div>
+
+                <div class="tools-grid">
+                    <div class="tool-card" onclick="switchView('tool1')">
+                        <div class="tool-icon"><i class="fa-solid fa-hand"></i></div>
+                        <h3>Impulse Blocker</h3>
+                        <p>Stop yourself before sending that text, calling, driving over, or posting online.</p>
+                    </div>
+
+                    <div class="tool-card" onclick="switchView('tool2')">
+                        <div class="tool-icon"><i class="fa-solid fa-moon"></i></div>
+                        <h3>Tonight's Survival Plan</h3>
+                        <p>An urgent, hour-by-hour protocol to navigate panic, insomnia, and solitude tonight.</p>
+                    </div>
+
+                    <div class="tool-card" onclick="switchView('tool3')">
+                        <div class="tool-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h3>The Dignity Check</h3>
+                        <p>Already reached out or made a mistake? Assess damage and execute immediate control.</p>
+                    </div>
+
+                    <div class="tool-card" onclick="switchView('tool4')">
+                        <div class="tool-icon"><i class="fa-solid fa-sun"></i></div>
+                        <h3>Tomorrow's First Step</h3>
+                        <p>Figure out how to function tomorrow at work or school when your world feels shattered.</p>
+                    </div>
+
+                    <div class="tool-card" onclick="switchView('tool5')">
+                        <div class="tool-icon"><i class="fa-solid fa-bridge"></i></div>
+                        <h3>The 7-Day Bridge</h3>
+                        <p>A simple day-by-day map to cross the hardest week of your life without breaking down.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOOL 1: IMPULSE BLOCKER -->
+            <div id="tool1" class="view">
+                <div class="card">
+                    <div class="form-header">
+                        <h2><i class="fa-solid fa-hand" style="color: var(--red);"></i> Impulse Blocker</h2>
+                        <button class="btn-sample" onclick="loadSample('tool1')"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                    </div>
+                    <form id="form-tool1" onsubmit="handleFormSubmit(event, 'tool1')">
+                        <div class="form-group">
+                            <label class="form-label">What are you tempted to do right now?</label>
+                            <div class="checkbox-group">
+                                <label class="custom-option"><input type="checkbox" name="urge" value="Text them"> Text them</label>
+                                <label class="custom-option"><input type="checkbox" name="urge" value="Call them"> Call them</label>
+                                <label class="custom-option"><input type="checkbox" name="urge" value="Drive to their place"> Drive to their place</label>
+                                <label class="custom-option"><input type="checkbox" name="urge" value="Post on social media"> Post on social media</label>
+                                <label class="custom-option"><input type="checkbox" name="urge" value="Ask friends about them"> Ask friends about them</label>
+                                <label class="custom-option"><input type="checkbox" name="urge" value="Check their location"> Check their location</label>
+                                <label class="custom-option"><input type="checkbox" name="urge" value="Send a long message"> Send a long message</label>
+                                <label class="custom-option"><input type="checkbox" name="urge" value="Beg them to come back"> Beg them to come back</label>
+                                <label class="custom-option"><input type="checkbox" name="urge" value="Hurt myself"> Hurt myself</label>
+                                <label class="custom-option"><input type="checkbox" name="urge" value="Something else"> Something else</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">How long since the breakup?</label>
+                            <select name="timeframe" required>
+                                <option value="">Select timeframe...</option>
+                                <option value="Hours">Hours</option>
+                                <option value="1-6 hours">1-6 hours</option>
+                                <option value="6-12 hours">6-12 hours</option>
+                                <option value="12-24 hours">12-24 hours</option>
+                                <option value="1-2 days">1-2 days</option>
+                                <option value="3-7 days">3-7 days</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What triggered this urge?</label>
+                            <textarea name="trigger" placeholder="e.g. Saw a photo, silence got too loud, remembered a memory..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What do you hope will happen if you do it?</label>
+                            <textarea name="hope" placeholder="e.g. They will realize they made a mistake, reply instantly, comfort me..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit"><i class="fa-solid fa-lock"></i> Run Impulse Triage</button>
+                    </form>
+                </div>
+
+                <div id="output-tool1" class="output-container"></div>
+                <div id="history-tool1" class="history-section"></div>
+            </div>
+
+            <!-- TOOL 2: TONIGHT'S SURVIVAL PLAN -->
+            <div id="tool2" class="view">
+                <div class="card">
+                    <div class="form-header">
+                        <h2><i class="fa-solid fa-moon" style="color: var(--navy);"></i> Tonight's Survival Plan</h2>
+                        <button class="btn-sample" onclick="loadSample('tool2')"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                    </div>
+                    <form id="form-tool2" onsubmit="handleFormSubmit(event, 'tool2')">
+                        <div class="form-group">
+                            <label class="form-label">What time is it now?</label>
+                            <select name="currentTime" required>
+                                <option value="">Select time of day...</option>
+                                <option value="Morning">Morning</option>
+                                <option value="Afternoon">Afternoon</option>
+                                <option value="Evening">Evening</option>
+                                <option value="Late night">Late night</option>
+                                <option value="Middle of the night">Middle of the night</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Are you alone?</label>
+                            <div class="radio-group">
+                                <label class="custom-option"><input type="radio" name="aloneStatus" value="Yes" required> Yes</label>
+                                <label class="custom-option"><input type="radio" name="aloneStatus" value="With people but feel alone"> With people but feel alone</label>
+                                <label class="custom-option"><input type="radio" name="aloneStatus" value="With someone supportive"> With someone supportive</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What is your biggest fear tonight?</label>
+                            <select name="biggestFear" required>
+                                <option value="">Select fear...</option>
+                                <option value="Can't sleep">Can't sleep</option>
+                                <option value="I'll text them">I'll text them</option>
+                                <option value="I'll cry all night">I'll cry all night</option>
+                                <option value="I'll do something stupid">I'll do something stupid</option>
+                                <option value="Physical anxiety">Physical anxiety</option>
+                                <option value="I feel like I can't breathe">I feel like I can't breathe</option>
+                                <option value="I'll drink too much">I'll drink too much</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What usually calms you?</label>
+                            <div class="checkbox-group">
+                                <label class="custom-option"><input type="checkbox" name="calmers" value="Music"> Music</label>
+                                <label class="custom-option"><input type="checkbox" name="calmers" value="TV"> TV</label>
+                                <label class="custom-option"><input type="checkbox" name="calmers" value="Reading"> Reading</label>
+                                <label class="custom-option"><input type="checkbox" name="calmers" value="Walking"> Walking</label>
+                                <label class="custom-option"><input type="checkbox" name="calmers" value="Shower"> Shower</label>
+                                <label class="custom-option"><input type="checkbox" name="calmers" value="Talking"> Talking</label>
+                                <label class="custom-option"><input type="checkbox" name="calmers" value="Silence"> Silence</label>
+                                <label class="custom-option"><input type="checkbox" name="calmers" value="Food"> Food</label>
+                                <label class="custom-option"><input type="checkbox" name="calmers" value="Exercise"> Exercise</label>
+                                <label class="custom-option"><input type="checkbox" name="calmers" value="Nothing works"> Nothing works</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit"><i class="fa-solid fa-compass"></i> Generate Night Protocol</button>
+                    </form>
+                </div>
+
+                <div id="output-tool2" class="output-container"></div>
+                <div id="history-tool2" class="history-section"></div>
+            </div>
+
+            <!-- TOOL 3: THE DIGNITY CHECK -->
+            <div id="tool3" class="view">
+                <div class="card">
+                    <div class="form-header">
+                        <h2><i class="fa-solid fa-shield-halved" style="color: var(--red);"></i> The Dignity Check</h2>
+                        <button class="btn-sample" onclick="loadSample('tool3')"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                    </div>
+                    <form id="form-tool3" onsubmit="handleFormSubmit(event, 'tool3')">
+                        <div class="form-group">
+                            <label class="form-label">What did you do?</label>
+                            <textarea name="actionTaken" placeholder="e.g. Sent 5 texts, called crying, showed up at their apartment..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Did they respond?</label>
+                            <div class="radio-group">
+                                <label class="custom-option"><input type="radio" name="responseState" value="Yes, kindly" required> Yes, kindly</label>
+                                <label class="custom-option"><input type="radio" name="responseState" value="Yes, coldly"> Yes, coldly</label>
+                                <label class="custom-option"><input type="radio" name="responseState" value="No"> No</label>
+                                <label class="custom-option"><input type="radio" name="responseState" value="Left on read"> Left on read</label>
+                                <label class="custom-option"><input type="radio" name="responseState" value="Blocked me"> Blocked me</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">How many times have you contacted them since the breakup?</label>
+                            <select name="contactCount" required>
+                                <option value="">Select frequency...</option>
+                                <option value="Once">Once</option>
+                                <option value="2-3 times">2-3 times</option>
+                                <option value="4-10 times">4-10 times</option>
+                                <option value="I lost count">I lost count</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What do you want to do next?</label>
+                            <textarea name="nextWant" placeholder="e.g. Apologize for texting, ask if we can meet tomorrow..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit"><i class="fa-solid fa-circle-notch"></i> Assess Damage & Contain</button>
+                    </form>
+                </div>
+
+                <div id="output-tool3" class="output-container"></div>
+                <div id="history-tool3" class="history-section"></div>
+            </div>
+
+            <!-- TOOL 4: TOMORROW'S FIRST STEP -->
+            <div id="tool4" class="view">
+                <div class="card">
+                    <div class="form-header">
+                        <h2><i class="fa-solid fa-sun" style="color: var(--navy);"></i> Tomorrow's First Step</h2>
+                        <button class="btn-sample" onclick="loadSample('tool4')"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                    </div>
+                    <form id="form-tool4" onsubmit="handleFormSubmit(event, 'tool4')">
+                        <div class="form-group">
+                            <label class="form-label">What do you have to do tomorrow?</label>
+                            <div class="checkbox-group">
+                                <label class="custom-option"><input type="checkbox" name="duties" value="Work"> Work</label>
+                                <label class="custom-option"><input type="checkbox" name="duties" value="School"> School</label>
+                                <label class="custom-option"><input type="checkbox" name="duties" value="Childcare"> Childcare</label>
+                                <label class="custom-option"><input type="checkbox" name="duties" value="Social obligation"> Social obligation</label>
+                                <label class="custom-option"><input type="checkbox" name="duties" value="Nothing"> Nothing</label>
+                                <label class="custom-option"><input type="checkbox" name="duties" value="I don't know"> I don't know</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What feels impossible?</label>
+                            <textarea name="impossibleTask" placeholder="e.g. Sitting in meetings without crying, focusing on homework..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Who knows about the breakup?</label>
+                            <div class="radio-group">
+                                <label class="custom-option"><input type="radio" name="whoKnows" value="Nobody" required> Nobody</label>
+                                <label class="custom-option"><input type="radio" name="whoKnows" value="Close friends"> Close friends</label>
+                                <label class="custom-option"><input type="radio" name="whoKnows" value="Everyone"> Everyone</label>
+                                <label class="custom-option"><input type="radio" name="whoKnows" value="Family"> Family</label>
+                                <label class="custom-option"><input type="radio" name="whoKnows" value="Just one person"> Just one person</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What do you need tomorrow?</label>
+                            <select name="tomorrowNeed" required>
+                                <option value="">Select primary need...</option>
+                                <option value="To be alone">To be alone</option>
+                                <option value="To be around people">To be around people</option>
+                                <option value="To stay busy">To stay busy</option>
+                                <option value="To rest">To rest</option>
+                                <option value="To talk about it">To talk about it</option>
+                                <option value="To not talk about it">To not talk about it</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-submit"><i class="fa-solid fa-calendar-day"></i> Build Tomorrow's Strategy</button>
+                    </form>
+                </div>
+
+                <div id="output-tool4" class="output-container"></div>
+                <div id="history-tool4" class="history-section"></div>
+            </div>
+
+            <!-- TOOL 5: THE 7-DAY BRIDGE -->
+            <div id="tool5" class="view">
+                <div class="card">
+                    <div class="form-header">
+                        <h2><i class="fa-solid fa-bridge" style="color: var(--red);"></i> The 7-Day Bridge</h2>
+                        <button class="btn-sample" onclick="loadSample('tool5')"><i class="fa-solid fa-flask"></i> Load Sample Scenario</button>
+                    </div>
+                    <form id="form-tool5" onsubmit="handleFormSubmit(event, 'tool5')">
+                        <div class="form-group">
+                            <label class="form-label">Day of breakup:</label>
+                            <select name="breakupDay" required>
+                                <option value="">Select day...</option>
+                                <option value="Today">Today</option>
+                                <option value="Yesterday">Yesterday</option>
+                                <option value="2 days ago">2 days ago</option>
+                                <option value="3+ days ago">3+ days ago</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Current contact status:</label>
+                            <div class="radio-group">
+                                <label class="custom-option"><input type="radio" name="contactStatus" value="No contact" required> No contact</label>
+                                <label class="custom-option"><input type="radio" name="contactStatus" value="They texted me"> They texted me</label>
+                                <label class="custom-option"><input type="radio" name="contactStatus" value="I texted them"> I texted them</label>
+                                <label class="custom-option"><input type="radio" name="contactStatus" value="We talked"> We talked</label>
+                                <label class="custom-option"><input type="radio" name="contactStatus" value="It's complicated"> It's complicated</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What would prove to you that you can survive this?</label>
+                            <textarea name="proof" placeholder="e.g. Making it through Saturday night without calling them, going 3 days without checking Instagram..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">What are you most afraid of this week?</label>
+                            <select name="weekFear" required>
+                                <option value="">Select biggest fear...</option>
+                                <option value="The loneliness">The loneliness</option>
+                                <option value="Seeing them with someone">Seeing them with someone</option>
+                                <option value="The weekends">The weekends</option>
+                                <option value="Nights">Nights</option>
+                                <option value="Having to explain it">Having to explain it</option>
+                                <option value="I'll never feel okay again">I'll never feel okay again</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-submit"><i class="fa-solid fa-map"></i> Construct 7-Day Plan</button>
+                    </form>
+                </div>
+
+                <div id="output-tool5" class="output-container"></div>
+                <div id="history-tool5" class="history-section"></div>
+            </div>
+
+        </main>
+
+        <!-- GLOBAL FOOTER -->
+        <footer class="app-footer">
+            For emergency emotional first aid only. Not therapy or professional advice. If you're in crisis, contact a crisis helpline or mental health professional.
+        </footer>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <script>
+        /* ==========================================
+           NAVIGATION & UI LOGIC
+           ========================================== */
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const navItems = document.querySelectorAll('.nav-item');
+        const views = document.querySelectorAll('.view');
+
+        function switchView(viewId) {
+            // Update active sidebar link
+            navItems.forEach(item => {
+                if (item.getAttribute('data-view') === viewId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Update active view
+            views.forEach(view => {
+                if (view.id === viewId) {
+                    view.classList.add('active');
+                } else {
+                    view.classList.remove('active');
+                }
+            });
+
+            // Close mobile menu if open
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('open');
+
+            // Render history for the active tool
+            if (viewId !== 'dashboard') {
+                renderHistory(viewId);
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const viewId = item.getAttribute('data-view');
+                switchView(viewId);
+            });
+        });
+
+        hamburgerBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('open');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('open');
+        });
+
+        /* ==========================================
+           TOAST NOTIFICATION & COPY UTILITY
+           ========================================== */
+        function showToast(message = "Copied!") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(err => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        /* ==========================================
+           LOCAL STORAGE HISTORY MANAGEMENT
+           ========================================== */
+        function saveToHistory(toolId, inputSummary, outputHtml) {
+            const key = `first48_history_${toolId}`;
+            const existing = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                summary: inputSummary,
+                outputHtml: outputHtml
+            };
+
+            // Prepend new item, limit to max 30
+            existing.unshift(newItem);
+            if (existing.length > 30) existing.pop();
+
+            localStorage.setItem(key, JSON.stringify(existing));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const container = document.getElementById(`history-${toolId}`);
+            if (!container) return;
+
+            const key = `first48_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+            if (history.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <div class="history-header">
+                    <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Triage Sessions</div>
+                    <button class="btn-clear-history" onclick="clearHistory('${toolId}')">Clear History</button>
+                </div>
+                <div class="history-list">
+            `;
+
+            history.forEach(item => {
+                html += `
+                    <div class="history-item" onclick="loadHistoryItem('${toolId}', ${item.id})">
+                        <div class="history-item-meta">
+                            <span>${item.timestamp}</span>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                        <div class="history-item-preview">${escapeHtml(item.summary)}</div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function clearHistory(toolId) {
+            const key = `first48_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function loadHistoryItem(toolId, itemId) {
+            const key = `first48_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const item = history.find(i => i.id === itemId);
+
+            if (item) {
+                const outputContainer = document.getElementById(`output-${toolId}`);
+                outputContainer.innerHTML = item.outputHtml;
+                outputContainer.classList.add('active');
+                outputContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        /* ==========================================
+           SAMPLE SCENARIO LOADERS
+           ========================================== */
+        function loadSample(toolId) {
+            if (toolId === 'tool1') {
+                const form = document.getElementById('form-tool1');
+                // Check 'Text them' and 'Send a long message'
+                form.querySelectorAll('input[name="urge"]').forEach(cb => {
+                    cb.checked = (cb.value === 'Text them' || cb.value === 'Send a long message');
+                });
+                form.querySelector('select[name="timeframe"]').value = '1-6 hours';
+                form.querySelector('textarea[name="trigger"]').value = 'Sitting in the quiet living room, looking at old photos on my camera roll.';
+                form.querySelector('textarea[name="hope"]').value = 'Send a 3-page text explaining everything that went wrong so they realize we made a mistake and come back immediately.';
+            } 
+            else if (toolId === 'tool2') {
+                const form = document.getElementById('form-tool2');
+                form.querySelector('select[name="currentTime"]').value = 'Late night';
+                form.querySelectorAll('input[name="aloneStatus"]').forEach(radio => {
+                    radio.checked = (radio.value === 'Yes');
+                });
+                form.querySelector('select[name="biggestFear"]').value = 'Can\'t sleep';
+                form.querySelectorAll('input[name="calmers"]').forEach(cb => {
+                    cb.checked = (cb.value === 'Music' || cb.value === 'TV');
+                });
+            } 
+            else if (toolId === 'tool3') {
+                const form = document.getElementById('form-tool3');
+                form.querySelector('textarea[name="actionTaken"]').value = 'Called them 5 times in a row and left a crying voicemail asking why they gave up on us.';
+                form.querySelectorAll('input[name="responseState"]').forEach(radio => {
+                    radio.checked = (radio.value === 'No');
+                });
+                form.querySelector('select[name="contactCount"]').value = '4-10 times';
+                form.querySelector('textarea[name="nextWant"]').value = 'Text them again to apologize for calling so many times and explain I was just having a panic attack.';
+            } 
+            else if (toolId === 'tool4') {
+                const form = document.getElementById('form-tool4');
+                form.querySelectorAll('input[name="duties"]').forEach(cb => {
+                    cb.checked = (cb.value === 'Work');
+                });
+                form.querySelector('textarea[name="impossibleTask"]').value = 'Sitting in team meetings and giving my project update without bursting into tears.';
+                form.querySelectorAll('input[name="whoKnows"]').forEach(radio => {
+                    radio.checked = (radio.value === 'Nobody');
+                });
+                form.querySelector('select[name="tomorrowNeed"]').value = 'To not talk about it';
+            } 
+            else if (toolId === 'tool5') {
+                const form = document.getElementById('form-tool5');
+                form.querySelector('select[name="breakupDay"]').value = 'Yesterday';
+                form.querySelectorAll('input[name="contactStatus"]').forEach(radio => {
+                    radio.checked = (radio.value === 'No contact');
+                });
+                form.querySelector('textarea[name="proof"]').value = 'Making it through Saturday night without texting them or checking their Instagram story.';
+                form.querySelector('select[name="weekFear"]').value = 'The weekends';
+            }
+            showToast("Sample Scenario Loaded");
+        }
+
+        /* ==========================================
+           FORM SUBMISSION & PRE-WRITTEN TEMPLATE LOGIC
+           ========================================== */
+        function handleFormSubmit(event, toolId) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            let outputHtml = '';
+            let summaryText = '';
+
+            if (toolId === 'tool1') {
+                const urges = formData.getAll('urge');
+                const timeframe = formData.get('timeframe');
+                const trigger = formData.get('trigger');
+                const hope = formData.get('hope');
+
+                // Check self harm emergency condition
+                if (urges.includes('Hurt myself')) {
+                    outputHtml = `
+                        <div class="output-box" style="border-left: 4px solid var(--red);">
+                            <div class="output-header" style="background: var(--red);">
+                                <span><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY SAFETY NOTICE</span>
+                            </div>
+                            <div class="output-section">
+                                <div class="output-title">STOP EVERYTHING RIGHT NOW</div>
+                                <div class="output-content">
+                                    You indicated a desire to hurt yourself. This requires immediate human support. <strong>Do not stay alone right now.</strong>
+                                    <br><br>
+                                    • <strong>Call or Text 988</strong> (USA & Canada Crisis Lifeline) available 24/7.<br>
+                                    • <strong>Text HOME to 741741</strong> to connect with Crisis Text Line.<br>
+                                    • If outside North America, go to your nearest emergency room or dial your local emergency services immediately.<br><br>
+                                    Your brain is under extreme trauma right now. Give yourself a chance to survive this night.
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const primaryUrge = urges.join(', ') || 'Reach out';
+                    summaryText = `Urge: ${primaryUrge} (${timeframe})`;
+
+                    let phoneJailAction = "Hand your phone to a roommate, or put it inside a kitchen drawer in another room.";
+                    if (primaryUrge.includes('Drive')) {
+                        phoneJailAction = "Give your car keys to someone else or lock them inside a box. You are not operating heavy machinery in state of shock.";
+                    } else if (primaryUrge.includes('Post')) {
+                        phoneJailAction = "Log out of all social media apps immediately. Delete the apps for 24 hours. Your profile is closed.";
+                    }
+
+                    outputHtml = `
+                        <div class="output-box">
+                            <div class="output-header">
+                                <span><i class="fa-solid fa-shield-cat"></i> IMPULSE TRIAGE OUTPUT</span>
+                            </div>
+                            <div class="output-section">
+                                <div class="output-title"><i class="fa-solid fa-check-circle"></i> 1. The Urge is Normal</div>
+                                <div class="output-content">
+                                    Wanting to <strong>${escapeHtml(primaryUrge.toLowerCase())}</strong> after ${timeframe} is a physiological response. Your brain is experiencing sudden neurochemical withdrawal. It is looking for an instant fix to stop the panic. You are not crazy; you are in shock.
+                                </div>
+                            </div>
+                            <div class="output-section">
+                                <div class="output-title"><i class="fa-solid fa-eye"></i> 2. The Real Outcome</div>
+                                <div class="output-content">
+                                    You hope that: <em>"${escapeHtml(hope)}"</em><br><br>
+                                    <strong>What actually happens if you do this:</strong> They will feel overwhelmed, smothered, or validated that breaking up was the right choice. You will receive either cold silence, a blunt detachment, or an argument. It will destroy your immediate dignity and reset your panic clock back to minute zero.
+                                </div>
+                            </div>
+                            <div class="output-section">
+                                <div class="output-title"><i class="fa-solid fa-clock"></i> 3. The 2-Hour Rule</div>
+                                <div class="output-content">
+                                    <strong>If you still want to do this in 2 hours, we will revisit. Right now: NO.</strong><br>
+                                    You do not have to promise you will never text them again. You only have to hold off for the next 120 minutes. Set a timer on your oven or watch.
+                                </div>
+                            </div>
+                            <div class="output-section">
+                                <div class="output-title"><i class="fa-solid fa-person-walking"></i> 4. Alternative Action</div>
+                                <div class="output-content">
+                                    Do not "take a bath" or try to relax right now. Your adrenaline is too high.<br>
+                                    <strong>Immediate Action:</strong> Put your shoes on right now and walk to the corner store or around the block. Buy one cold drink. Come back. The physical sensory shift resets your nervous system.
+                                </div>
+                            </div>
+                            <div class="output-section">
+                                <div class="output-title"><i class="fa-solid fa-lock"></i> 5. Phone Jail</div>
+                                <div class="output-content">
+                                    ${phoneJailAction} Turn on 'Do Not Disturb' mode immediately so you aren't staring at the screen waiting for a notification that isn't coming.
+                                </div>
+                            </div>
+                            <div class="output-section">
+                                <div class="output-title"><i class="fa-solid fa-life-ring"></i> 6. If You Already Sent It (Damage Control)</div>
+                                <div class="output-content">
+                                    If you already sent a text or message, <strong>STOP NOW</strong>. Do not send "Sorry ignore that" or "My friend took my phone." Send NOTHING further.
+                                    <div class="script-box">
+                                        [NO FURTHER TEXTS]. Silence is the only message that restores baseline control.
+                                        <button class="btn-copy" onclick="copyToClipboard(' ')"><i class="fa-regular fa-copy"></i> Copy Silence Rule</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } 
+
+            else if (toolId === 'tool2') {
+                const currentTime = formData.get('currentTime');
+                const aloneStatus = formData.get('aloneStatus');
+                const biggestFear = formData.get('biggestFear');
+                const calmers = formData.getAll('calmers').join(', ') || 'Silence';
+
+                summaryText = `Time: ${currentTime} | Fear: ${biggestFear} | Alone: ${aloneStatus}`;
+
+                let hourPlan = "";
+                if (currentTime === 'Late night' || currentTime === 'Middle of the night') {
+                    hourPlan = `
+                        • <strong>Hour 1:</strong> Get out of bed. Staying in bed while panicking trains your brain that your bed is an arena. Go to the kitchen/couch.<br>
+                        • <strong>Hour 2:</strong> Sip ice water or hold an ice cube in your hand. Watch low-stakes video content (documentary, comfort show). No romance, no heavy drama.<br>
+                        • <strong>Hour 3:</strong> Lie back down ONLY when your eyes are physically heavy. If awake after 20 mins, repeat.
+                    `;
+                } else {
+                    hourPlan = `
+                        • <strong>Hour 1:</strong> Physical stabilization. Eat something basic with protein, drink two full glasses of water, wash your face.<br>
+                        • <strong>Hour 2:</strong> Change your immediate environment. Move to a different room or step outside.<br>
+                        • <strong>Hour 3:</strong> Anchor yourself to an easy task. Wash three dishes or fold 5 items of clothing. Keep hands occupied.
+                    `;
+                }
+
+                outputHtml = `
+                    <div class="output-box">
+                        <div class="output-header">
+                            <span><i class="fa-solid fa-moon"></i> NIGHT SURVIVAL PROTOCOL</span>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-list-check"></i> 1. The Next 3 Hours</div>
+                            <div class="output-content">${hourPlan}</div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-bed"></i> 2. Bedtime Protocol</div>
+                            <div class="output-content">
+                                Put your phone across the room—out of arm's reach. Turn on background noise (white noise, rain sounds, or familiar low podcast audio). Your main goal tonight isn't deep sleep; it's basic physical rest. Just lying still with eyes closed counts.
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-lightbulb"></i> 3. If You Can't Sleep</div>
+                            <div class="output-content">
+                                Do NOT open social media, photos, or messaging apps. Read a physical book, listen to a long audio story, or do a simple grounding technique: Name 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell, 1 you can taste.
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-anchor"></i> 4. The Morning Anchor</div>
+                            <div class="output-content">
+                                Tomorrow morning, as soon as you wake up, your first task is: <strong>Drink a cup of hot coffee or tea and step out into daylight for 3 minutes.</strong> That is your only morning requirement.
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-comment-dots"></i> 5. Who to Text Instead</div>
+                            <div class="output-content">
+                                Text a close friend or family member right now. <strong>Do NOT bring up the breakup.</strong> Ask them an ordinary question to anchor yourself to reality:
+                                <div class="script-box">
+                                    "Hey, random question — what's the best show or movie you've watched recently? Looking for something to stream."
+                                    <button class="btn-copy" onclick="copyToClipboard('Hey, random question — what\'s the best show or movie you\'ve watched recently? Looking for something to stream.')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            else if (toolId === 'tool3') {
+                const actionTaken = formData.get('actionTaken');
+                const responseState = formData.get('responseState');
+                const contactCount = formData.get('contactCount');
+                const nextWant = formData.get('nextWant');
+
+                summaryText = `Contacted: ${contactCount} | Response: ${responseState}`;
+
+                let stopDays = "7";
+                if (contactCount === '4-10 times' || contactCount === 'I lost count') {
+                    stopDays = "14";
+                }
+
+                let recoveryMessageHtml = "";
+                if (responseState === 'Blocked me' || responseState === 'Left on read' || responseState === 'No') {
+                    recoveryMessageHtml = `
+                        <strong>Zero follow-up text.</strong> Any text sent now will decrease your standing and escalate their desire to pull away. Absolute radio silence is your only move.
+                    `;
+                } else {
+                    const cleanText = "Hey, I was feeling overwhelmed earlier. I'm taking space to clear my head and handle my own end. Hope you're doing okay.";
+                    recoveryMessageHtml = `
+                        If you absolutely must draw a line under a messy exchange, send ONE neutral text and THEN stop completely:
+                        <div class="script-box">
+                            ${cleanText}
+                            <button class="btn-copy" onclick="copyToClipboard('${cleanText}')"><i class="fa-regular fa-copy"></i> Copy Text</button>
+                        </div>
+                    `;
+                }
+
+                const dignityScript = "If they contact you or you run into them: 'Thanks for checking in. I'm working through things on my end and focused on taking care of myself right now. Hope you're doing well.'";
+
+                outputHtml = `
+                    <div class="output-box">
+                        <div class="output-header">
+                            <span><i class="fa-solid fa-shield-halved"></i> DIGNITY DAMAGE CONTROL</span>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-heart-crack"></i> 1. Damage Assessment</div>
+                            <div class="output-content">
+                                You contacted them (${contactCount}) and got: <strong>${responseState}</strong>.<br><br>
+                                <em>Assessment:</em> You acted out of shock and distress. It is human, but it ends here. Continuing to reach out will not convince them—it will only erode your remaining dignity and reinforce their decision.
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-ban"></i> 2. The Absolute Stop Rule</div>
+                            <div class="output-content">
+                                <strong style="color: var(--red); font-size: 1.1rem;">DO NOT CONTACT THEM AGAIN FOR AT LEAST ${stopDays} DAYS.</strong><br>
+                                No "checking in," no "I left my jacket," no apologies for previous texts. Lock down your side of the court.
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-envelope"></i> 3. Recovery Message Protocol</div>
+                            <div class="output-content">${recoveryMessageHtml}</div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-comment-slash"></i> 4. Your Dignity Script</div>
+                            <div class="output-content">
+                                If they reach out to you first or ask why you went silent, use this concise response:
+                                <div class="script-box">
+                                    ${dignityScript}
+                                    <button class="btn-copy" onclick="copyToClipboard(&quot;${dignityScript.replace(/'/g, "\\'")}&quot;)"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-trash-can"></i> 5. The Delete / Contain List</div>
+                            <div class="output-content">
+                                • Mute their social media profiles (do not announce it, just mute stories and posts).<br>
+                                • Change their contact name in your phone to "DO NOT TEXT".<br>
+                                • Clear your active text chat thread so you don't stare at the old messages.
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            else if (toolId === 'tool4') {
+                const duties = formData.getAll('duties').join(', ') || 'Daily duties';
+                const impossibleTask = formData.get('impossibleTask');
+                const whoKnows = formData.get('whoKnows');
+                const tomorrowNeed = formData.get('tomorrowNeed');
+
+                summaryText = `Duties: ${duties} | Priority Need: ${tomorrowNeed}`;
+
+                const excuseScript = "I'm dealing with an unexpected personal matter today. I'm keeping my head down and focusing on essential tasks, but I might be less responsive than usual.";
+                const supportScript = "Hey, I'm going through a really tough personal situation today. I don't want to talk about details right now, but could you check in on me later or grab lunch together?";
+
+                outputHtml = `
+                    <div class="output-box">
+                        <div class="output-header">
+                            <span><i class="fa-solid fa-sun"></i> TOMORROW'S SURVIVAL STRATEGY</span>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-bullseye"></i> 1. Tomorrow's Minimum</div>
+                            <div class="output-content">
+                                You do not need to perform at 100%. Aim for <strong>20% functional capacity</strong>. Show up, complete essential mechanics for (${escapeHtml(duties)}), and go home. Nobody is judging you as closely as you think.
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-shield-halved"></i> 2. The Excuse (If You Need Air)</div>
+                            <div class="output-content">
+                                If you need to step out, miss a meeting, or leave early, use this boundary statement:
+                                <div class="script-box">
+                                    "${excuseScript}"
+                                    <button class="btn-copy" onclick="copyToClipboard('${excuseScript}')"><i class="fa-regular fa-copy"></i> Copy Line</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-hand-holding-heart"></i> 3. The Support Request</div>
+                            <div class="output-content">
+                                Send this to one trusted friend or colleague so you have a designated wingman:
+                                <div class="script-box">
+                                    "${supportScript}"
+                                    <button class="btn-copy" onclick="copyToClipboard('${supportScript}')"><i class="fa-regular fa-copy"></i> Copy Ask</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-capsules"></i> 4. The Distraction Dose</div>
+                            <div class="output-content">
+                                During breaks, <strong>do not scroll social media or photos</strong>. Walk outside for 5 minutes, listen to an intense podcast episode, or play a quick puzzle game on your phone. Keep your mind tethered to sensory reality.
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-gift"></i> 5. The End-of-Day Reward</div>
+                            <div class="output-content">
+                                Plan your reward for finishing tomorrow right now: Order your favorite comfort takeout, get into comfortable sweatpants immediately upon arriving home, and watch a favorite movie.
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            else if (toolId === 'tool5') {
+                const breakupDay = formData.get('breakupDay');
+                const contactStatus = formData.get('contactStatus');
+                const proof = formData.get('proof');
+                const weekFear = formData.get('weekFear');
+
+                summaryText = `Day: ${breakupDay} | Fear: ${weekFear}`;
+
+                const tellPersonScript = "Hey, I wanted to let you know that [Name] and I broke up. I'm in shock right now and just taking things day by day. I don't need advice, but I'd love a check-in text over the next couple of days.";
+
+                outputHtml = `
+                    <div class="output-box">
+                        <div class="output-header">
+                            <span><i class="fa-solid fa-bridge"></i> THE 7-DAY BRIDGE</span>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-map"></i> 1. The 7-Day Action Map</div>
+                            <div class="output-content">
+                                • <strong>Day 1 (Survive):</strong> Keep breathing. Basic physical triage (water, food, basic sleep). No big decisions.<br>
+                                • <strong>Day 2 (Tell One Person):</strong> Reach out to one key person so you aren't carrying the secret alone.<br>
+                                • <strong>Day 3 (Remove One Trigger):</strong> Box up photos or items in your bedroom that cause immediate visual distress.<br>
+                                • <strong>Day 4 (Do One Normal Thing):</strong> Go to a grocery store, get a haircut, or run one routine errand.<br>
+                                • <strong>Day 5 (Feel It Without Acting):</strong> Allow yourself to feel anger or sadness without converting it into a message to them.<br>
+                                • <strong>Day 6 (Plan One Small Future Thing):</strong> Book a coffee meeting, movie, or activity for next week.<br>
+                                • <strong>Day 7 (Check In With Yourself):</strong> Review this week. You survived 168 hours that felt impossible.
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-building-shield"></i> 2. Your Weekend Wall</div>
+                            <div class="output-content">
+                                Weekends are high-risk zones for relapses. <strong>Do not leave your weekend unstructured.</strong> Schedule specific blocks of time: Saturday morning workout/walk, Saturday afternoon movie/errands, Sunday meal prep. Keep your calendar occupied.
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-eye-slash"></i> 3. The Social Media Rule</div>
+                            <div class="output-content">
+                                <strong>Mute, do not block; Unfollow, do not stalk.</strong> Blocking often leads to unblocking during late-night panic. Muting hides their existence without creating drama or showing you care.
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-user-plus"></i> 4. One Person to Tell</div>
+                            <div class="output-content">
+                                Script to inform one key friend or family member without getting overwhelmed:
+                                <div class="script-box">
+                                    "${tellPersonScript}"
+                                    <button class="btn-copy" onclick="copyToClipboard('${tellPersonScript}')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title"><i class="fa-solid fa-arrow-up-right-dots"></i> 5. When to Upgrade</div>
+                            <div class="output-content">
+                                This triage kit is built for the immediate 48-hour crisis. After Day 7, shift your focus to longer-term recovery support, professional therapy, structured journaling, or heartbreak reading materials.
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Render Output
+            const outputContainer = document.getElementById(`output-${toolId}`);
+            outputContainer.innerHTML = outputHtml;
+            outputContainer.classList.add('active');
+            outputContainer.scrollIntoView({ behavior: 'smooth' });
+
+            // Save to LocalStorage History
+            saveToHistory(toolId, summaryText, outputHtml);
+        }
+
+        /* Initialize page */
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistory('tool1');
+            renderHistory('tool2');
+            renderHistory('tool3');
+            renderHistory('tool4');
+            renderHistory('tool5');
+        });
+    </script>
+</body>
+</html>

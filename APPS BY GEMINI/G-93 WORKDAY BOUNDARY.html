@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workday Boundary — Daily-Hours Protection Toolkit</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS (via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        violet: {
+                            DEFAULT: '#2B2D42',
+                            dark: '#1D1E2C',
+                            light: '#3D3F5A'
+                        },
+                        sage: {
+                            DEFAULT: '#A3B18A',
+                            dark: '#889770',
+                            light: '#CBD5C0'
+                        },
+                        bgLight: '#F8F9FA',
+                        bgSage: '#F1F8F5'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #F8F9FA 0%, #F1F8F5 100%);
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            color: #2B2D42;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #A3B18A;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #889770;
+        }
+        .toast {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased flex flex-col min-h-screen">
+
+    <!-- Mobile Header -->
+    <header class="lg:hidden bg-white border-b border-slate-200 p-4 sticky top-0 z-30 flex justify-between items-center shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="bg-violet text-white p-2 rounded-lg">
+                <i class="fa-solid fa-shield-halved text-lg"></i>
+            </div>
+            <span class="font-bold text-lg text-violet">Workday Boundary</span>
+        </div>
+        <button id="mobileMenuBtn" class="text-violet p-2 focus:outline-none text-xl" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- App Layout Container -->
+    <div class="flex-1 flex flex-col lg:flex-row relative">
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col shadow-sm">
+            <!-- Sidebar Header -->
+            <div class="p-6 border-b border-slate-100 flex items-center space-x-3">
+                <div class="bg-violet text-white p-2.5 rounded-xl shadow-sm">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-violet leading-tight">Workday Boundary</h1>
+                    <p class="text-xs text-slate-500 font-medium">Protection Toolkit</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 bg-violet text-white">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                    <span>Dashboard</span>
+                </button>
+                <div class="pt-3 pb-1 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Boundary Tools</div>
+                <button onclick="switchTab('tool1')" id="nav-tool1" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 hover:text-violet transition-all duration-150">
+                    <i class="fa-solid fa-clock w-5 text-center"></i>
+                    <span>Hours Audit</span>
+                </button>
+                <button onclick="switchTab('tool2')" id="nav-tool2" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 hover:text-violet transition-all duration-150">
+                    <i class="fa-solid fa-power-off w-5 text-center"></i>
+                    <span>End-of-Day Ritual</span>
+                </button>
+                <button onclick="switchTab('tool3')" id="nav-tool3" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 hover:text-violet transition-all duration-150">
+                    <i class="fa-solid fa-sun w-5 text-center"></i>
+                    <span>Morning Boundary</span>
+                </button>
+                <button onclick="switchTab('tool4')" id="nav-tool4" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 hover:text-violet transition-all duration-150">
+                    <i class="fa-solid fa-utensils w-5 text-center"></i>
+                    <span>Lunch Reclamation</span>
+                </button>
+                <button onclick="switchTab('tool5')" id="nav-tool5" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 hover:text-violet transition-all duration-150">
+                    <i class="fa-solid fa-users-gear w-5 text-center"></i>
+                    <span>Culture Confrontation</span>
+                </button>
+            </nav>
+
+            <!-- Sidebar Footer / Callout -->
+            <div class="p-4 m-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                <div class="flex items-center space-x-2 text-xs text-violet font-semibold mb-1">
+                    <i class="fa-solid fa-circle-info text-sage-dark"></i>
+                    <span>Contract Enforcement</span>
+                </div>
+                <p class="text-xs text-slate-500 leading-relaxed">You are paid for agreed hours. Beyond that, you are gifting your life to a corporation.</p>
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay for Mobile -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 z-30 hidden lg:hidden"></div>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-10 max-w-4xl mx-auto w-full">
+            
+            <!-- SECTION: DASHBOARD -->
+            <section id="sec-dashboard" class="space-y-8">
+                <!-- Hero Banner -->
+                <div class="bg-gradient-to-r from-violet to-violet-light text-white rounded-2xl p-8 shadow-sm relative overflow-hidden">
+                    <div class="relative z-10 space-y-3">
+                        <span class="inline-block px-3 py-1 bg-sage/20 text-sage-light text-xs font-semibold rounded-full uppercase tracking-wide border border-sage/30">Boundary Defense System</span>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Workday Boundary</h2>
+                        <p class="text-lg text-slate-200 font-medium max-w-xl">Your contract has an end time. Start honoring it.</p>
+                    </div>
+                    <div class="absolute -right-8 -bottom-10 opacity-10 text-white text-9xl pointer-events-none">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                </div>
+
+                <!-- Tools Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Tool 1 Card -->
+                    <div onclick="switchTab('tool1')" class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80 hover:shadow-md hover:border-sage transition-all duration-200 cursor-pointer flex flex-col justify-between group">
+                        <div>
+                            <div class="w-12 h-12 bg-sage/15 text-sage-dark rounded-xl flex items-center justify-center mb-4 group-hover:bg-sage group-hover:text-white transition-colors duration-200">
+                                <i class="fa-solid fa-clock text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-violet mb-1 group-hover:text-sage-dark transition-colors">The Hours Audit</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">Calculate true hours worked, hidden overtime leakage, and the annual life-cost you are giving away for free.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs font-semibold text-sage-dark group-hover:translate-x-1 transition-transform">
+                            <span>Audit Your Hours</span>
+                            <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tool 2 Card -->
+                    <div onclick="switchTab('tool2')" class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80 hover:shadow-md hover:border-sage transition-all duration-200 cursor-pointer flex flex-col justify-between group">
+                        <div>
+                            <div class="w-12 h-12 bg-sage/15 text-sage-dark rounded-xl flex items-center justify-center mb-4 group-hover:bg-sage group-hover:text-white transition-colors duration-200">
+                                <i class="fa-solid fa-power-off text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-violet mb-1 group-hover:text-sage-dark transition-colors">The End-of-Day Ritual</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">Build a 15-minute shutdown sequence, override guilt, and establish hard physical stops at the end of your shift.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs font-semibold text-sage-dark group-hover:translate-x-1 transition-transform">
+                            <span>Build Your Ritual</span>
+                            <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tool 3 Card -->
+                    <div onclick="switchTab('tool3')" class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80 hover:shadow-md hover:border-sage transition-all duration-200 cursor-pointer flex flex-col justify-between group">
+                        <div>
+                            <div class="w-12 h-12 bg-sage/15 text-sage-dark rounded-xl flex items-center justify-center mb-4 group-hover:bg-sage group-hover:text-white transition-colors duration-200">
+                                <i class="fa-solid fa-sun text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-violet mb-1 group-hover:text-sage-dark transition-colors">The Morning Boundary</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">Stop checking work before official start time. Protect your peace and set a firm daily boundary standard.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs font-semibold text-sage-dark group-hover:translate-x-1 transition-transform">
+                            <span>Protect Your Morning</span>
+                            <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tool 4 Card -->
+                    <div onclick="switchTab('tool4')" class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80 hover:shadow-md hover:border-sage transition-all duration-200 cursor-pointer flex flex-col justify-between group">
+                        <div>
+                            <div class="w-12 h-12 bg-sage/15 text-sage-dark rounded-xl flex items-center justify-center mb-4 group-hover:bg-sage group-hover:text-white transition-colors duration-200">
+                                <i class="fa-solid fa-utensils text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-violet mb-1 group-hover:text-sage-dark transition-colors">The Lunch Reclamation</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">Stop eating at your desk. Calendar-protect your midday break, craft status messages, and step away guilt-free.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs font-semibold text-sage-dark group-hover:translate-x-1 transition-transform">
+                            <span>Reclaim Lunch</span>
+                            <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tool 5 Card -->
+                    <div onclick="switchTab('tool5')" class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80 hover:shadow-md hover:border-sage transition-all duration-200 cursor-pointer flex flex-col justify-between group md:col-span-2">
+                        <div>
+                            <div class="w-12 h-12 bg-sage/15 text-sage-dark rounded-xl flex items-center justify-center mb-4 group-hover:bg-sage group-hover:text-white transition-colors duration-200">
+                                <i class="fa-solid fa-users-gear text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-violet mb-1 group-hover:text-sage-dark transition-colors">The Culture Confrontation</h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">Push back against toxic "always-on" workplace expectations, leverage output defense, and normalize leaving on time.</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs font-semibold text-sage-dark group-hover:translate-x-1 transition-transform">
+                            <span>Confront Culture Pressure</span>
+                            <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: TOOL 1 - THE HOURS AUDIT -->
+            <section id="sec-tool1" class="hidden space-y-6">
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                        <div>
+                            <div class="flex items-center space-x-2 text-sage-dark text-xs font-bold uppercase tracking-wider mb-1">
+                                <i class="fa-solid fa-clock"></i>
+                                <span>Tool 1</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-violet">The Hours Audit</h2>
+                            <p class="text-slate-500 text-sm mt-1">"I don't even know how many hours I'm actually working."</p>
+                        </div>
+                        <button onclick="loadSampleTool1()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-violet text-xs font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Load Sample Scenario</span>
+                        </button>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="form-tool1" onsubmit="handleTool1Submit(event)" class="mt-6 space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Contracted hours/day</label>
+                                <input type="number" id="t1-contracted" step="0.5" min="1" max="24" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm" placeholder="e.g. 8">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Typical Start Time</label>
+                                <input type="time" id="t1-start" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Typical End Time</label>
+                                <input type="time" id="t1-end" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Work done before/after official hours</label>
+                            <textarea id="t1-extra" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm" placeholder="e.g. Checking emails from bed at 7am, answering messages after dinner..."></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Lunch at desk?</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="radio" name="t1-lunch" value="Always" checked class="text-sage focus:ring-sage mr-2">
+                                    <span>Always</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="radio" name="t1-lunch" value="Often" class="text-sage focus:ring-sage mr-2">
+                                    <span>Often</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="radio" name="t1-lunch" value="Sometimes" class="text-sage focus:ring-sage mr-2">
+                                    <span>Sometimes</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="radio" name="t1-lunch" value="Never" class="text-sage focus:ring-sage mr-2">
+                                    <span>Never</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-violet hover:bg-violet-dark text-white font-semibold text-sm rounded-xl transition-colors shadow-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-calculator"></i>
+                            <span>Calculate Real Work Hours</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Output Container -->
+                <div id="output-tool1" class="hidden space-y-6"></div>
+
+                <!-- History Section -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-bold text-violet">Saved Audit History</h3>
+                        <button onclick="clearHistory('tool1')" class="text-xs text-rose-600 hover:text-rose-800 font-medium">Clear History</button>
+                    </div>
+                    <div id="history-tool1" class="space-y-3"></div>
+                </div>
+            </section>
+
+            <!-- SECTION: TOOL 2 - THE END-OF-DAY RITUAL -->
+            <section id="sec-tool2" class="hidden space-y-6">
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                        <div>
+                            <div class="flex items-center space-x-2 text-sage-dark text-xs font-bold uppercase tracking-wider mb-1">
+                                <i class="fa-solid fa-power-off"></i>
+                                <span>Tool 2</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-violet">The End-of-Day Ritual</h2>
+                            <p class="text-slate-500 text-sm mt-1">"I intend to leave at 5 but I never actually do."</p>
+                        </div>
+                        <button onclick="loadSampleTool2()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-violet text-xs font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Load Sample Scenario</span>
+                        </button>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="form-tool2" onsubmit="handleTool2Submit(event)" class="mt-6 space-y-5">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Why do you stay late?</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="t2-why" value="Actual workload" class="text-sage rounded focus:ring-sage mr-2.5">
+                                    <span>Actual workload volume</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="t2-why" value="Habit" class="text-sage rounded focus:ring-sage mr-2.5">
+                                    <span>Unconscious habit</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="t2-why" value="Boss still there" class="text-sage rounded focus:ring-sage mr-2.5">
+                                    <span>Boss / Manager still working</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="t2-why" value="Guilt" class="text-sage rounded focus:ring-sage mr-2.5">
+                                    <span>Guilt or internalized pressure</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="t2-why" value="Fear of backlog" class="text-sage rounded focus:ring-sage mr-2.5">
+                                    <span>Fear of tomorrow's backlog</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="t2-why" value="Nothing to go home to" class="text-sage rounded focus:ring-sage mr-2.5">
+                                    <span>Lack of evening structure</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700 sm:col-span-2">
+                                    <input type="checkbox" name="t2-why" value="Time zone issues" class="text-sage rounded focus:ring-sage mr-2.5">
+                                    <span>Time zone / Global team demands</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Ideal End Time</label>
+                            <input type="time" id="t2-ideal" required class="w-full sm:w-1/2 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">What would you do with that time?</label>
+                            <textarea id="t2-life" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm" placeholder="e.g. Cook a real dinner, exercise, read, spend time with family..."></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Current End-of-Day Routine</label>
+                            <textarea id="t2-routine" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm" placeholder="e.g. Keep answering Slack messages until 7pm, close laptop reluctantly..."></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-violet hover:bg-violet-dark text-white font-semibold text-sm rounded-xl transition-colors shadow-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-stopwatch"></i>
+                            <span>Generate Shutdown Plan</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div id="output-tool2" class="hidden space-y-6"></div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-bold text-violet">Saved Shutdown Plans</h3>
+                        <button onclick="clearHistory('tool2')" class="text-xs text-rose-600 hover:text-rose-800 font-medium">Clear History</button>
+                    </div>
+                    <div id="history-tool2" class="space-y-3"></div>
+                </div>
+            </section>
+
+            <!-- SECTION: TOOL 3 - THE MORNING BOUNDARY -->
+            <section id="sec-tool3" class="hidden space-y-6">
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                        <div>
+                            <div class="flex items-center space-x-2 text-sage-dark text-xs font-bold uppercase tracking-wider mb-1">
+                                <i class="fa-solid fa-sun"></i>
+                                <span>Tool 3</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-violet">The Morning Boundary</h2>
+                            <p class="text-slate-500 text-sm mt-1">"I start working before my official start time and it sets the tone for the whole day."</p>
+                        </div>
+                        <button onclick="loadSampleTool3()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-violet text-xs font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Load Sample Scenario</span>
+                        </button>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="form-tool3" onsubmit="handleTool3Submit(event)" class="mt-6 space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">When do you first check work?</label>
+                                <select id="t3-when" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm bg-white">
+                                    <option value="Before waking fully">Right as alarm goes off / Before getting out of bed</option>
+                                    <option value="In bed">In bed lounging</option>
+                                    <option value="Over breakfast">Over breakfast / coffee</option>
+                                    <option value="Commute">During commute</option>
+                                    <option value="At desk right on time">At desk right on official start time</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Official Start Time</label>
+                                <input type="time" id="t3-start" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">What do you check?</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="t3-what" value="Email" class="text-sage rounded focus:ring-sage mr-2.5">
+                                    <span>Work Email</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="t3-what" value="Chat" class="text-sage rounded focus:ring-sage mr-2.5">
+                                    <span>Slack / Teams Chat</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="t3-what" value="Calendar" class="text-sage rounded focus:ring-sage mr-2.5">
+                                    <span>Calendar Schedule</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="checkbox" name="t3-what" value="Work News" class="text-sage rounded focus:ring-sage mr-2.5">
+                                    <span>Company / Industry News</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700 sm:col-span-2">
+                                    <input type="checkbox" name="t3-what" value="Nothing, just habit" class="text-sage rounded focus:ring-sage mr-2.5">
+                                    <span>Nothing specific, just reflex habit</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">What would your morning look like without work?</label>
+                            <textarea id="t3-ideal" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm" placeholder="e.g. Quiet coffee, stretching, reading a chapter of a book without adrenaline..."></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-violet hover:bg-violet-dark text-white font-semibold text-sm rounded-xl transition-colors shadow-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-lock"></i>
+                            <span>Generate Morning Boundary Protocol</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div id="output-tool3" class="hidden space-y-6"></div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-bold text-violet">Saved Morning Strategies</h3>
+                        <button onclick="clearHistory('tool3')" class="text-xs text-rose-600 hover:text-rose-800 font-medium">Clear History</button>
+                    </div>
+                    <div id="history-tool3" class="space-y-3"></div>
+                </div>
+            </section>
+
+            <!-- SECTION: TOOL 4 - THE LUNCH RECLAMATION -->
+            <section id="sec-tool4" class="hidden space-y-6">
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                        <div>
+                            <div class="flex items-center space-x-2 text-sage-dark text-xs font-bold uppercase tracking-wider mb-1">
+                                <i class="fa-solid fa-utensils"></i>
+                                <span>Tool 4</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-violet">The Lunch Reclamation</h2>
+                            <p class="text-slate-500 text-sm mt-1">"I eat at my desk every day and it's killing my energy and boundaries."</p>
+                        </div>
+                        <button onclick="loadSampleTool4()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-violet text-xs font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Load Sample Scenario</span>
+                        </button>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="form-tool4" onsubmit="handleTool4Submit(event)" class="mt-6 space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Current Lunch Habit</label>
+                                <select id="t4-habit" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm bg-white">
+                                    <option value="Skip it">Skip it entirely</option>
+                                    <option value="Eat at desk">Eat at desk while responding to work</option>
+                                    <option value="Quick bite between tasks">Quick bite between urgent tasks</option>
+                                    <option value="Actual break but short">Actual break but rushed (<20 mins)</option>
+                                    <option value="Full break">Full offline break</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">How Long?</label>
+                                <select id="t4-duration" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm bg-white">
+                                    <option value="<15min">&lt; 15 minutes</option>
+                                    <option value="15-30min">15 - 30 minutes</option>
+                                    <option value="30-45min">30 - 45 minutes</option>
+                                    <option value="1hr">1 full hour</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">What stops you from taking a real break?</label>
+                            <textarea id="t4-obstacles" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm" placeholder="e.g. Heavy workload, fear of appearing lazy, constant Slack pings..."></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">What would a real lunch look like?</label>
+                            <textarea id="t4-ideal" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm" placeholder="e.g. 30 minutes walking outside without phone, eating at break room table..."></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-violet hover:bg-violet-dark text-white font-semibold text-sm rounded-xl transition-colors shadow-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-calendar-check"></i>
+                            <span>Build Lunch Reclamation Plan</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div id="output-tool4" class="hidden space-y-6"></div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-bold text-violet">Saved Lunch Plans</h3>
+                        <button onclick="clearHistory('tool4')" class="text-xs text-rose-600 hover:text-rose-800 font-medium">Clear History</button>
+                    </div>
+                    <div id="history-tool4" class="space-y-3"></div>
+                </div>
+            </section>
+
+            <!-- SECTION: TOOL 5 - THE CULTURE CONFRONTATION -->
+            <section id="sec-tool5" class="hidden space-y-6">
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                        <div>
+                            <div class="flex items-center space-x-2 text-sage-dark text-xs font-bold uppercase tracking-wider mb-1">
+                                <i class="fa-solid fa-users-gear"></i>
+                                <span>Tool 5</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-violet">The Culture Confrontation</h2>
+                            <p class="text-slate-500 text-sm mt-1">"My team or boss expects long hours and I need to push back on the norm."</p>
+                        </div>
+                        <button onclick="loadSampleTool5()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-violet text-xs font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Load Sample Scenario</span>
+                        </button>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="form-tool5" onsubmit="handleTool5Submit(event)" class="mt-6 space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Who models the long-hours culture?</label>
+                                <select id="t5-who" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm bg-white">
+                                    <option value="Boss">Direct Boss / Manager</option>
+                                    <option value="Senior people">Senior Executive Leadership</option>
+                                    <option value="Everyone">Everyone on my immediate team</option>
+                                    <option value="Just a few">Just a few visible workaholics</option>
+                                    <option value="It's unspoken">Nobody explicitly, but it's unspoken expectation</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Your Leverage / Standing</label>
+                                <select id="t5-leverage" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sage focus:outline-none text-sm bg-white">
+                                    <option value="High performer">High Performer (Strong results/ratings)</option>
+                                    <option value="Average">Average / Solid Contributor</option>
+                                    <option value="New">New Employee (Onboarding phase)</option>
+                                    <option value="Not sure">Uncertain / Unclear position</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Have you been praised for long hours?</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="radio" name="t5-praised" value="Yes" checked class="text-sage focus:ring-sage mr-2">
+                                    <span>Yes (Explicitly)</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="radio" name="t5-praised" value="Implied" class="text-sage focus:ring-sage mr-2">
+                                    <span>Implied praise</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="radio" name="t5-praised" value="No" class="text-sage focus:ring-sage mr-2">
+                                    <span>No</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="radio" name="t5-praised" value="Punished" class="text-sage focus:ring-sage mr-2">
+                                    <span>Penalized/Criticized</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Willingness to be first to leave on time?</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="radio" name="t5-ready" value="Ready" checked class="text-sage focus:ring-sage mr-2">
+                                    <span>Ready now</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="radio" name="t5-ready" value="Nervous" class="text-sage focus:ring-sage mr-2">
+                                    <span>Nervous</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="radio" name="t5-ready" value="Only if others do" class="text-sage focus:ring-sage mr-2">
+                                    <span>If peers do</span>
+                                </label>
+                                <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-xs font-medium text-slate-700">
+                                    <input type="radio" name="t5-ready" value="Not yet" class="text-sage focus:ring-sage mr-2">
+                                    <span>Not yet</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-violet hover:bg-violet-dark text-white font-semibold text-sm rounded-xl transition-colors shadow-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-chess"></i>
+                            <span>Generate Cultural Playbook</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div id="output-tool5" class="hidden space-y-6"></div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-bold text-violet">Saved Culture Strategies</h3>
+                        <button onclick="clearHistory('tool5')" class="text-xs text-rose-600 hover:text-rose-800 font-medium">Clear History</button>
+                    </div>
+                    <div id="history-tool5" class="space-y-3"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-violet text-white px-4 py-3 rounded-xl shadow-lg border border-slate-700 text-sm font-semibold flex items-center space-x-2 opacity-0 pointer-events-none transform translate-y-2 z-50 transition-all duration-200">
+        <i class="fa-solid fa-circle-check text-sage"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <!-- Universal Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 px-4 text-center mt-auto z-10">
+        <div class="max-w-4xl mx-auto space-y-2">
+            <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                For work-life boundary planning only. Not legal, therapeutic, or medical advice. For labor law questions about overtime or working hours, consult an attorney or your HR department.
+            </p>
+            <p class="text-[11px] text-slate-400">
+                Workday Boundary Toolkit &bull; Firm, Guilt-Free Contract Defense
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic embedded -->
+    <script>
+        // DOM Elements
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+
+        // Toggle Mobile Sidebar
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebarOverlay.classList.toggle('hidden');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        });
+
+        // Tab Switching Engine
+        function switchTab(tabId) {
+            // Close mobile sidebar
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+
+            // Hide all sections
+            const sections = ['dashboard', 'tool1', 'tool2', 'tool3', 'tool4', 'tool5'];
+            sections.forEach(id => {
+                const sec = document.getElementById(`sec-${id}`);
+                const nav = document.getElementById(`nav-${id}`);
+                if (sec) sec.classList.add('hidden');
+                if (nav) {
+                    nav.classList.remove('bg-violet', 'text-white');
+                    nav.classList.add('text-slate-600', 'hover:bg-slate-100');
+                }
+            });
+
+            // Show active section
+            const activeSec = document.getElementById(`sec-${tabId}`);
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeSec) activeSec.classList.remove('hidden');
+            if (activeNav) {
+                activeNav.classList.add('bg-violet', 'text-white');
+                activeNav.classList.remove('text-slate-600', 'hover:bg-slate-100');
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Load History for tool if switching to tool
+            if (tabId.startsWith('tool')) {
+                renderHistory(tabId);
+            }
+        }
+
+        // Copy Toast System
+        function showToast(msg = 'Copied!') {
+            toastMessage.textContent = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+            }, 2000);
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied to clipboard!');
+            });
+        }
+
+        // LocalStorage Engine
+        function saveToHistory(toolId, data) {
+            const key = `workday_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            history.unshift({
+                id: Date.now(),
+                timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                data: data
+            });
+            // Max 30 items
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function getHistory(toolId) {
+            const key = `workday_history_${toolId}`;
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+
+        function clearHistory(toolId) {
+            const key = `workday_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast('History cleared');
+        }
+
+        function toggleHistoryAccordion(histId) {
+            const content = document.getElementById(`hist-content-${histId}`);
+            const icon = document.getElementById(`hist-icon-${histId}`);
+            if (content) {
+                content.classList.toggle('hidden');
+                if (icon) icon.classList.toggle('rotate-180');
+            }
+        }
+
+        // Time helper functions
+        function parseTimeToMinutes(timeStr) {
+            if (!timeStr) return 0;
+            const [h, m] = timeStr.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        // ==========================================
+        // TOOL 1: THE HOURS AUDIT
+        // ==========================================
+        function loadSampleTool1() {
+            document.getElementById('t1-contracted').value = 8;
+            document.getElementById('t1-start').value = '08:30';
+            document.getElementById('t1-end').value = '19:30';
+            document.getElementById('t1-extra').value = 'Answering emails from 7:00 AM in bed and checking Slack messages after dinner until 10:00 PM.';
+            document.querySelectorAll('input[name="t1-lunch"]').forEach(radio => {
+                radio.checked = (radio.value === 'Always');
+            });
+            showToast('Sample Scenario Loaded');
+        }
+
+        function handleTool1Submit(e) {
+            e.preventDefault();
+            const contracted = parseFloat(document.getElementById('t1-contracted').value) || 8;
+            const startStr = document.getElementById('t1-start').value;
+            const endStr = document.getElementById('t1-end').value;
+            const extraDetails = document.getElementById('t1-extra').value || 'None specified';
+            const lunchHabit = document.querySelector('input[name="t1-lunch"]:checked').value;
+
+            const startMins = parseTimeToMinutes(startStr);
+            const endMins = parseTimeToMinutes(endStr);
+            
+            let elapsedMins = endMins - startMins;
+            if (elapsedMins < 0) elapsedMins += 24 * 60; // night shift edge case
+
+            let baseSpanHours = elapsedMins / 60;
+            
+            // Calculate extra estimate based on textarea / lunch
+            let extraUncounted = 0;
+            if (lunchHabit === 'Always') extraUncounted += 0.75; // 45 min desk work
+            if (lunchHabit === 'Often') extraUncounted += 0.5;
+            if (lunchHabit === 'Sometimes') extraUncounted += 0.25;
+
+            // Simple heuristic parsing for additional off-hours mentioned
+            if (extraDetails.toLowerCase().includes('7am') || extraDetails.toLowerCase().includes('bed')) extraUncounted += 0.5;
+            if (extraDetails.toLowerCase().includes('dinner') || extraDetails.toLowerCase().includes('night')) extraUncounted += 1.0;
+
+            const totalDailyWorked = Math.max(baseSpanHours, contracted) + (lunchHabit === 'Always' || lunchHabit === 'Often' ? 0.5 : 0);
+            const dailyOvertime = Math.max(0, totalDailyWorked - contracted);
+            const weeklyOvertime = dailyOvertime * 5;
+            const annualOvertimeHours = weeklyOvertime * 48; // assuming 48 working weeks
+            const extraWeeksGiven = (annualOvertimeHours / contracted).toFixed(1);
+
+            const resultData = {
+                contracted, startStr, endStr, extraDetails, lunchHabit,
+                totalDailyWorked: totalDailyWorked.toFixed(1),
+                dailyOvertime: dailyOvertime.toFixed(1),
+                weeklyOvertime: weeklyOvertime.toFixed(1),
+                annualOvertimeHours: Math.round(annualOvertimeHours),
+                extraWeeksGiven
+            };
+
+            renderTool1Output(resultData);
+            saveToHistory('tool1', resultData);
+        }
+
+        function renderTool1Output(data) {
+            const container = document.getElementById('output-tool1');
+            container.classList.remove('hidden');
+
+            container.innerHTML = `
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80 space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-violet flex items-center">
+                            <i class="fa-solid fa-calculator text-sage-dark mr-2.5"></i>
+                            The Reality Audit
+                        </h3>
+                        <span class="text-xs bg-rose-100 text-rose-800 font-bold px-3 py-1 rounded-full">
+                            +${data.dailyOvertime} hrs / day over contract
+                        </span>
+                    </div>
+
+                    <!-- Metrics Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                            <p class="text-xs font-semibold text-slate-500 uppercase">Daily Hours Worked</p>
+                            <p class="text-2xl font-extrabold text-violet mt-1">${data.totalDailyWorked} hrs</p>
+                            <p class="text-xs text-slate-500 mt-0.5">Contracted: ${data.contracted} hrs</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                            <p class="text-xs font-semibold text-slate-500 uppercase">Weekly Free Overtime</p>
+                            <p class="text-2xl font-extrabold text-amber-600 mt-1">${data.weeklyOvertime} hrs</p>
+                            <p class="text-xs text-slate-500 mt-0.5">Unpaid hours per week</p>
+                        </div>
+                        <div class="bg-rose-50 p-4 rounded-xl border border-rose-200/60">
+                            <p class="text-xs font-semibold text-rose-700 uppercase">Annual Gift to Employer</p>
+                            <p class="text-2xl font-extrabold text-rose-600 mt-1">${data.extraWeeksGiven} Weeks</p>
+                            <p class="text-xs text-rose-700 mt-0.5">${data.annualOvertimeHours} total extra hours/yr</p>
+                        </div>
+                    </div>
+
+                    <!-- Breakdown Sections -->
+                    <div class="space-y-4 pt-2">
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                            <h4 class="text-xs font-bold text-violet uppercase tracking-wide mb-1 flex items-center">
+                                <i class="fa-solid fa-magnifying-glass text-sage-dark mr-2"></i> The Leakage Map
+                            </h4>
+                            <p class="text-sm text-slate-700 leading-relaxed">
+                                Your workday spans from <strong>${data.startStr}</strong> to <strong>${data.endStr}</strong>. 
+                                ${data.lunchHabit === 'Always' || data.lunchHabit === 'Often' ? 'Eating lunch at your desk converts what should be a restful reset into paid-for labor given away free.' : ''}
+                                Additional off-hour checks (${data.extraDetails}) create continuous cognitive strain that prevents full recovery.
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-violet text-white rounded-xl">
+                            <h4 class="text-xs font-bold text-sage-light uppercase tracking-wide mb-1 flex items-center">
+                                <i class="fa-solid fa-bell text-sage mr-2"></i> The Wake-Up Call
+                            </h4>
+                            <p class="text-sm text-slate-200 leading-relaxed">
+                                You are giving away <strong>${data.extraWeeksGiven} full work weeks</strong> of your life every single year. 
+                                That is over a full month of non-stop labor without pay, rest, or recognition. 
+                                This isn't dedication—it is invisible budget subsidization for your company.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ==========================================
+        // TOOL 2: THE END-OF-DAY RITUAL
+        // ==========================================
+        function loadSampleTool2() {
+            const whys = ['Actual workload', 'Guilt', 'Fear of backlog'];
+            document.querySelectorAll('input[name="t2-why"]').forEach(cb => {
+                cb.checked = whys.includes(cb.value);
+            });
+            document.getElementById('t2-ideal').value = '17:30';
+            document.getElementById('t2-life').value = 'Cook a nutritious dinner, read 30 pages of fiction, and go for an evening walk.';
+            document.getElementById('t2-routine').value = 'Keep working continuously until everything on my list is done or I collapse from exhaustion.';
+            showToast('Sample Scenario Loaded');
+        }
+
+        function handleTool2Submit(e) {
+            e.preventDefault();
+            const whyChecked = Array.from(document.querySelectorAll('input[name="t2-why"]:checked')).map(cb => cb.value);
+            const idealEnd = document.getElementById('t2-ideal').value;
+            const lifeGoals = document.getElementById('t2-life').value || 'Reclaim personal evenings.';
+            const currentRoutine = document.getElementById('t2-routine').value || 'Unstructured dragging out of tasks.';
+
+            const resultData = {
+                whyChecked: whyChecked.length > 0 ? whyChecked : ['Unconscious extension'],
+                idealEnd,
+                lifeGoals,
+                currentRoutine
+            };
+
+            renderTool2Output(resultData);
+            saveToHistory('tool2', resultData);
+        }
+
+        function renderTool2Output(data) {
+            const container = document.getElementById('output-tool2');
+            container.classList.remove('hidden');
+
+            const idealMinutes = parseTimeToMinutes(data.idealEnd);
+            const shutdownStartMins = idealMinutes - 15;
+            const shutdownStart = `${Math.floor(shutdownStartMins/60).toString().padStart(2,'0')}:${(shutdownStartMins%60).toString().padStart(2,'0')}`;
+
+            container.innerHTML = `
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80 space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <span class="text-xs font-bold text-sage-dark uppercase tracking-wider">Shutdown System</span>
+                        <h3 class="text-xl font-bold text-violet mt-1">15-Minute End-of-Day Shutdown Sequence</h3>
+                        <p class="text-sm text-slate-500">Target Hard Stop: <strong class="text-violet">${data.idealEnd}</strong> (Begin ritual at <strong class="text-sage-dark">${shutdownStart}</strong>)</p>
+                    </div>
+
+                    <!-- Steps Timeline -->
+                    <div class="space-y-3">
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/60 flex items-start space-x-3">
+                            <span class="bg-violet text-white text-xs font-bold px-2.5 py-1 rounded-lg mt-0.5">Min 0-5</span>
+                            <div>
+                                <h4 class="text-sm font-bold text-violet">Triage & Capture (No Execution)</h4>
+                                <p class="text-xs text-slate-600 mt-1">Stop performing tasks. Brain-dump every open item onto a sticky note or digital draft for tomorrow. Clear your desktop clutter.</p>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/60 flex items-start space-x-3">
+                            <span class="bg-violet text-white text-xs font-bold px-2.5 py-1 rounded-lg mt-0.5">Min 5-10</span>
+                            <div>
+                                <h4 class="text-sm font-bold text-violet">Tomorrow's Top 2 Priorities</h4>
+                                <p class="text-xs text-slate-600 mt-1">Select maximum 2 tasks for tomorrow morning. Write them down explicitly so your brain knows they won't be forgotten.</p>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/60 flex items-start space-x-3">
+                            <span class="bg-violet text-white text-xs font-bold px-2.5 py-1 rounded-lg mt-0.5">Min 10-15</span>
+                            <div>
+                                <h4 class="text-sm font-bold text-violet">Communication Shutdown & Physical Break</h4>
+                                <p class="text-xs text-slate-600 mt-1">Set status to "Offline / Day Ended". Close Slack/Teams entirely. Close all browser tabs. Physical act: Shut laptop lid firmly or stand up from desk.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reframe Section -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                            <h4 class="text-xs font-bold text-violet uppercase tracking-wide mb-1">
+                                <i class="fa-solid fa-shield-heart text-sage-dark mr-1.5"></i> The Guilt Antidote
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Unfinished work is not a personal failure; it is proof of a continuous operational pipeline. Work will never be "done." Leaving on time is a professional skill that forces prioritization.
+                            </p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                            <h4 class="text-xs font-bold text-violet uppercase tracking-wide mb-1">
+                                <i class="fa-solid fa-person-walking-arrow-right text-sage-dark mr-1.5"></i> The Life Reward
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                You are trading empty late-day diminished productivity for: <strong>${data.lifeGoals}</strong>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Script Box -->
+                    <div class="bg-slate-900 text-slate-100 p-4 rounded-xl space-y-2">
+                        <div class="flex items-center justify-between text-xs text-slate-400">
+                            <span class="font-mono">Boundary Reframe Script</span>
+                            <button onclick="copyText('I am closing out my workspace for today to ensure high focus and sharp decision-making tomorrow morning. All open items are queued for tomorrow.')" class="hover:text-white transition-colors">
+                                <i class="fa-regular fa-copy mr-1"></i> Copy Script
+                            </button>
+                        </div>
+                        <p class="text-xs italic text-slate-300">
+                            "I am closing out my workspace for today to ensure high focus and sharp decision-making tomorrow morning. All open items are queued for tomorrow."
+                        </p>
+                    </div>
+                </div>
+            `;
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ==========================================
+        // TOOL 3: THE MORNING BOUNDARY
+        // ==========================================
+        function loadSampleTool3() {
+            document.getElementById('t3-when').value = 'Before waking fully';
+            document.getElementById('t3-start').value = '09:00';
+            const checkWhat = ['Email', 'Chat'];
+            document.querySelectorAll('input[name="t3-what"]').forEach(cb => {
+                cb.checked = checkWhat.includes(cb.value);
+            });
+            document.getElementById('t3-ideal').value = 'Wake up, make fresh coffee, stretch for 10 minutes, and read a fiction novel in total peace.';
+            showToast('Sample Scenario Loaded');
+        }
+
+        function handleTool3Submit(e) {
+            e.preventDefault();
+            const whenCheck = document.getElementById('t3-when').value;
+            const officialStart = document.getElementById('t3-start').value;
+            const whatChecked = Array.from(document.querySelectorAll('input[name="t3-what"]:checked')).map(cb => cb.value);
+            const idealMorning = document.getElementById('t3-ideal').value || 'Peaceful non-work morning.';
+
+            const resultData = { whenCheck, officialStart, whatChecked: whatChecked.length > 0 ? whatChecked : ['Email'], idealMorning };
+            renderTool3Output(resultData);
+            saveToHistory('tool3', resultData);
+        }
+
+        function renderTool3Output(data) {
+            const container = document.getElementById('output-tool3');
+            container.classList.remove('hidden');
+
+            container.innerHTML = `
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80 space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <span class="text-xs font-bold text-sage-dark uppercase tracking-wider">Morning Protection Protocol</span>
+                        <h3 class="text-xl font-bold text-violet mt-1">Zero-Work Morning Buffer Plan</h3>
+                        <p class="text-sm text-slate-500">Official Work Start: <strong class="text-violet">${data.officialStart}</strong></p>
+                    </div>
+
+                    <!-- Steps -->
+                    <div class="space-y-4">
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                            <h4 class="text-sm font-bold text-violet flex items-center">
+                                <i class="fa-solid fa-mobile-screen-button text-sage-dark mr-2"></i>
+                                1. The Physical Phone Barrier
+                            </h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                Currently checking <strong>${data.whatChecked.join(', ')}</strong> (${data.whenCheck.toLowerCase()}). 
+                                <strong>Action:</strong> Remove work email and Slack/Teams apps from your personal mobile device or keep phone outside the bedroom overnight using an offline alarm clock.
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                            <h4 class="text-sm font-bold text-violet flex items-center">
+                                <i class="fa-solid fa-mug-hot text-sage-dark mr-2"></i>
+                                2. Reclaimed Morning Life
+                            </h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                Replace pre-work stress with your ideal morning routine: <em>"${data.idealMorning}"</em>. 
+                                Your nervous system requires low-cortisol awakening to sustain long-term cognitive endurance.
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                            <h4 class="text-sm font-bold text-violet flex items-center">
+                                <i class="fa-solid fa-door-closed text-sage-dark mr-2"></i>
+                                3. Remote Commute Substitute
+                            </h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                If working remotely, do not roll straight from bed into your laptop. Establish a 15-minute fake commute (a walk outside around the block) to mark the transition before opening work tools at exactly <strong>${data.officialStart}</strong>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-violet text-white rounded-xl">
+                        <p class="text-xs text-slate-200 leading-relaxed font-medium">
+                            <strong class="text-sage">Self-Permission:</strong> You are under no contractual or moral obligation to respond to work messages during uncompensated morning hours. Early responsiveness merely trains others to invade your personal life.
+                        </p>
+                    </div>
+                </div>
+            `;
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ==========================================
+        // TOOL 4: THE LUNCH RECLAMATION
+        // ==========================================
+        function loadSampleTool4() {
+            document.getElementById('t4-habit').value = 'Eat at desk';
+            document.getElementById('t4-duration').value = '15-30min';
+            document.getElementById('t4-obstacles').value = 'Heavy task volume and fear of appearing uncommitted if Slack status goes away.';
+            document.getElementById('t4-ideal').value = '30 minutes sitting away from desk at dining table or outside, listening to a podcast without checking work.';
+            showToast('Sample Scenario Loaded');
+        }
+
+        function handleTool4Submit(e) {
+            e.preventDefault();
+            const habit = document.getElementById('t4-habit').value;
+            const duration = document.getElementById('t4-duration').value;
+            const obstacles = document.getElementById('t4-obstacles').value || 'Unconscious workflow continuation.';
+            const ideal = document.getElementById('t4-ideal').value || 'Full offline lunch reset.';
+
+            const resultData = { habit, duration, obstacles, ideal };
+            renderTool4Output(resultData);
+            saveToHistory('tool4', resultData);
+        }
+
+        function renderTool4Output(data) {
+            const container = document.getElementById('output-tool4');
+            container.classList.remove('hidden');
+
+            const statusText = `Lunch Break (Offline) — Back in 30m`;
+
+            container.innerHTML = `
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80 space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <span class="text-xs font-bold text-sage-dark uppercase tracking-wider">Midday Boundary Strategy</span>
+                        <h3 class="text-xl font-bold text-violet mt-1">The Desk-Free Lunch Reclamation</h3>
+                        <p class="text-sm text-slate-500">Transforming <strong>${data.habit} (${data.duration})</strong> into true recovery</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                            <h4 class="text-xs font-bold text-violet uppercase tracking-wide mb-1">
+                                <i class="fa-solid fa-calendar-xmark text-sage-dark mr-1"></i> Calendar Protection
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Set a recurring daily 30-45 minute calendar event titled "Focus / Hold" or "Lunch Break". Block this time automatically to prevent double-booking.
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                            <h4 class="text-xs font-bold text-violet uppercase tracking-wide mb-1">
+                                <i class="fa-solid fa-person-walking text-sage-dark mr-1"></i> Physical Displacement
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Eating at your keyboard signals to your brain that you are still on duty. Step at least 15 feet away from your desk or leave the room completely.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Away Status Box -->
+                    <div class="bg-slate-900 text-slate-100 p-4 rounded-xl space-y-2">
+                        <div class="flex items-center justify-between text-xs text-slate-400">
+                            <span class="font-mono">Professional Slack/Teams Away Status</span>
+                            <button onclick="copyText('${statusText}')" class="hover:text-white transition-colors">
+                                <i class="fa-regular fa-copy mr-1"></i> Copy Status
+                            </button>
+                        </div>
+                        <p class="text-sm font-semibold text-sage-light">🍱 ${statusText}</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                        <h4 class="text-xs font-bold text-violet uppercase tracking-wide mb-1">Your Reclaimed Lunch Vision</h4>
+                        <p class="text-xs text-slate-700 italic">"${data.ideal}"</p>
+                    </div>
+                </div>
+            `;
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ==========================================
+        // TOOL 5: THE CULTURE CONFRONTATION
+        // ==========================================
+        function loadSampleTool5() {
+            document.getElementById('t5-who').value = 'Boss';
+            document.getElementById('t5-leverage').value = 'High performer';
+            document.querySelectorAll('input[name="t5-praised"]').forEach(radio => {
+                radio.checked = (radio.value === 'Implied');
+            });
+            document.querySelectorAll('input[name="t5-ready"]').forEach(radio => {
+                radio.checked = (radio.value === 'Nervous');
+            });
+            showToast('Sample Scenario Loaded');
+        }
+
+        function handleTool5Submit(e) {
+            e.preventDefault();
+            const who = document.getElementById('t5-who').value;
+            const leverage = document.getElementById('t5-leverage').value;
+            const praised = document.querySelector('input[name="t5-praised"]:checked').value;
+            const readiness = document.querySelector('input[name="t5-ready"]:checked').value;
+
+            const resultData = { who, leverage, praised, readiness };
+            renderTool5Output(resultData);
+            saveToHistory('tool5', resultData);
+        }
+
+        function renderTool5Output(data) {
+            const container = document.getElementById('output-tool5');
+            container.classList.remove('hidden');
+
+            const script = `Hi [Manager], I want to ensure my long-term output remains high quality. To maintain optimal focus on my primary deliverables, I am adjusting my working hours to strictly align with contracted times. Here is how I plan to manage priority output...`;
+
+            container.innerHTML = `
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80 space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <span class="text-xs font-bold text-sage-dark uppercase tracking-wider">Culture Defense Playbook</span>
+                        <h3 class="text-xl font-bold text-violet mt-1">Confronting the "Always-On" Culture</h3>
+                        <p class="text-sm text-slate-500">Standing: <strong class="text-violet">${data.leverage}</strong> | Pressure Source: <strong class="text-violet">${data.who}</strong></p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                            <h4 class="text-sm font-bold text-violet flex items-center">
+                                <i class="fa-solid fa-sliders text-sage-dark mr-2"></i>
+                                1. Gradual Normalization Strategy
+                            </h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                Don't make a loud announcement. Quietly contract your schedule by 15 minutes every 3 days until you reach your contracted end time. Focus intensely on visibility of key deliverables rather than presence hours.
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                            <h4 class="text-sm font-bold text-violet flex items-center">
+                                <i class="fa-solid fa-shield-halved text-sage-dark mr-2"></i>
+                                2. Output Defense
+                            </h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                As a <strong>${data.leverage}</strong>, your leverage lies in quality execution. Whenever pushed on hours, pivot the conversation back to business impact: <em>"My focus is on delivering high-impact outcomes rather than total hours logged."</em>
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                            <h4 class="text-sm font-bold text-violet flex items-center">
+                                <i class="fa-solid fa-door-open text-sage-dark mr-2"></i>
+                                3. The Exit Reality Test
+                            </h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                If an organization penalizes high performance simply because you do not donate free hours, the culture is fundamentally broken. Protect your resume, maintain boundaries, and prepare an exit strategy if necessary.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Negotiation Script Box -->
+                    <div class="bg-slate-900 text-slate-100 p-4 rounded-xl space-y-2">
+                        <div class="flex items-center justify-between text-xs text-slate-400">
+                            <span class="font-mono">Workload Capacity Script</span>
+                            <button onclick="copyText('${script}')" class="hover:text-white transition-colors">
+                                <i class="fa-regular fa-copy mr-1"></i> Copy Script
+                            </button>
+                        </div>
+                        <p class="text-xs italic text-slate-300">
+                            "${script}"
+                        </p>
+                    </div>
+                </div>
+            `;
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ==========================================
+        // HISTORY RENDER ENGINE
+        // ==========================================
+        function renderHistory(toolId) {
+            const container = document.getElementById(`history-${toolId}`);
+            if (!container) return;
+
+            const history = getHistory(toolId);
+            if (history.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic">No saved records yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="border border-slate-200 rounded-xl p-3 bg-slate-50/50 text-xs">
+                    <div onclick="toggleHistoryAccordion(${item.id})" class="flex items-center justify-between cursor-pointer font-semibold text-slate-700">
+                        <span class="flex items-center space-x-2">
+                            <i class="fa-solid fa-clock-rotate-left text-sage-dark"></i>
+                            <span>Audit Record — ${item.timestamp}</span>
+                        </span>
+                        <i id="hist-icon-${item.id}" class="fa-solid fa-chevron-down text-slate-400 transition-transform"></i>
+                    </div>
+                    <div id="hist-content-${item.id}" class="hidden mt-3 pt-3 border-t border-slate-200 space-y-1.5 text-slate-600">
+                        <pre class="whitespace-pre-wrap font-sans text-xs bg-white p-2.5 rounded-lg border border-slate-200">${JSON.stringify(item.data, null, 2)}</pre>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initial Load Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            switchTab('dashboard');
+        });
+    </script>
+</body>
+</html>

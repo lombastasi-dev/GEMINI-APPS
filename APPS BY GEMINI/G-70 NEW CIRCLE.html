@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewCircle — Practical Social Toolkit for Relocated Adults</title>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6.4.0 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* CSS RESET & VARIABLES */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --slate: #3D5A80;
+            --slate-hover: #2c4260;
+            --slate-light: #edf2f7;
+            --gold: #E9C46A;
+            --gold-hover: #d9b255;
+            --bg-gradient: linear-gradient(135deg, #F0F4F8 0%, #FFF8E6 100%);
+            --text-dark: #2B2D42;
+            --text-muted: #6C757D;
+            --card-bg: #FFFFFF;
+            --border: #E2E8F0;
+            --radius: 1rem; /* rounded-xl */
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            --transition: all 0.2s ease-in-out;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* LAYOUT STRUCTURE */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #FFFFFF;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--slate);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--slate);
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background: var(--slate-light);
+            color: var(--slate);
+        }
+
+        .nav-item.active {
+            background: var(--slate);
+            color: #FFFFFF;
+        }
+
+        .nav-item.active i {
+            color: var(--gold);
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* MOBILE NAVBAR / HAMBURGER */
+        .mobile-header {
+            display: none;
+            background: #FFFFFF;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            box-shadow: var(--shadow);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--slate);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 95;
+            backdrop-filter: blur(2px);
+        }
+
+        /* MAIN CONTENT AREA */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+        }
+
+        /* CARDS & UI COMPONENTS */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.75rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-header {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--slate-light);
+            padding-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.35rem;
+            color: var(--slate);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* FORM CONTROLS */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control, .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            background-color: #FAFAFA;
+            transition: var(--transition);
+        }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--slate);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(61, 90, 128, 0.15);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        /* RANGE SLIDERS */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider-container input[type="range"] {
+            flex: 1;
+            accent-color: var(--slate);
+            height: 6px;
+            background: #E2E8F0;
+            border-radius: 3px;
+        }
+
+        .slider-value {
+            font-weight: 700;
+            color: var(--slate);
+            background: var(--slate-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.9rem;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--slate);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--slate-hover);
+        }
+
+        .btn-secondary {
+            background-color: #E2E8F0;
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #CBD5E1;
+        }
+
+        .btn-gold {
+            background-color: var(--gold);
+            color: #2B2D42;
+        }
+
+        .btn-gold:hover {
+            background-color: var(--gold-hover);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background: var(--slate-light);
+            color: var(--slate);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        /* OUTPUT PANELS */
+        .output-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .output-box {
+            background: #F8FAFC;
+            border-left: 4px solid var(--slate);
+            padding: 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin-bottom: 1.25rem;
+        }
+
+        .output-box.gold-accent {
+            border-left-color: var(--gold);
+            background: #FFFDF5;
+        }
+
+        .output-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--slate);
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .output-box.gold-accent .output-title {
+            color: #B38600;
+        }
+
+        .output-content {
+            font-size: 0.98rem;
+            color: #334155;
+            white-space: pre-line;
+        }
+
+        /* COPY BUTTON SPECIFIC */
+        .script-container {
+            position: relative;
+            background: #FFFFFF;
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #1E293B;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+        }
+
+        /* PROGRESS / STAMINA BARS */
+        .metric-bar-container {
+            margin-bottom: 1rem;
+        }
+
+        .metric-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .bar-bg {
+            height: 10px;
+            background: #E2E8F0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 5px;
+        }
+
+        .bar-fill.red { background-color: #EF4444; }
+        .bar-fill.yellow { background-color: #F59E0B; }
+        .bar-fill.green { background-color: #10B981; }
+
+        /* DASHBOARD GRID */
+        .hero {
+            text-align: center;
+            padding: 2.5rem 1rem 2rem 1rem;
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            color: var(--slate);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--slate);
+        }
+
+        .dash-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--slate-light);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--slate);
+            font-size: 1.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .dash-title {
+            font-weight: 700;
+            color: var(--slate);
+            font-size: 1.1rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .dash-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            flex-grow: 1;
+        }
+
+        .dash-action {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--slate);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        /* ACCORDION / HISTORY */
+        .history-section {
+            margin-top: 2rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            user-select: none;
+        }
+
+        .history-title {
+            font-weight: 600;
+            color: var(--slate);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .history-list {
+            display: none;
+            margin-top: 1rem;
+            gap: 0.75rem;
+            flex-direction: column;
+        }
+
+        .history-list.open {
+            display: flex;
+        }
+
+        .history-item {
+            background: #F8FAFC;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.85rem;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item-date {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--slate);
+            color: #FFFFFF;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #FFFFFF;
+            border-top: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+
+        /* RESPONSIVE MEDIA QUERIES */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .overlay.mobile-open {
+                display: block;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .main-content {
+                padding: 1.25rem 1rem;
+            }
+
+            .hero h2 {
+                font-size: 1.85rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- OVERLAY FOR MOBILE SIDEBAR -->
+    <div class="overlay" id="mobileOverlay" onclick="closeSidebar()"></div>
+
+    <div class="app-container">
+        <!-- FIXED SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-compass-drafting"></i>
+                <h1>New Circle</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" onclick="switchView('dashboard')">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </button>
+                <button class="nav-item" onclick="switchView('tool1')">
+                    <i class="fa-solid fa-chart-pie"></i> Connection Audit
+                </button>
+                <button class="nav-item" onclick="switchView('tool2')">
+                    <i class="fa-solid fa-shoe-prints"></i> Low-Stakes Entry
+                </button>
+                <button class="nav-item" onclick="switchView('tool3')">
+                    <i class="fa-solid fa-bridge"></i> Interest Bridge
+                </button>
+                <button class="nav-item" onclick="switchView('tool4')">
+                    <i class="fa-solid fa-comments"></i> The Follow-Up
+                </button>
+                <button class="nav-item" onclick="switchView('tool5')">
+                    <i class="fa-solid fa-battery-half"></i> Social Stamina
+                </button>
+            </nav>
+        </aside>
+
+        <!-- MAIN WRAPPER -->
+        <div class="main-wrapper">
+            <!-- MOBILE HEADER -->
+            <header class="mobile-header">
+                <div style="display:flex; align-items:center; gap:0.5rem; font-weight:700; color:var(--slate);">
+                    <i class="fa-solid fa-compass-drafting"></i> New Circle
+                </div>
+                <button class="hamburger" onclick="openSidebar()" aria-label="Open Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </header>
+
+            <main class="main-content">
+                <!-- VIEW 0: DASHBOARD -->
+                <section id="dashboard" class="view-panel">
+                    <div class="hero">
+                        <h2>New Circle</h2>
+                        <p>Strangers today. Your people tomorrow.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dash-card" onclick="switchView('tool1')">
+                            <div>
+                                <div class="dash-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                                <div class="dash-title">Connection Audit</div>
+                                <div class="dash-desc">Assess where you stand without judgment and establish a clear baseline.</div>
+                            </div>
+                            <div class="dash-action">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool2')">
+                            <div>
+                                <div class="dash-icon"><i class="fa-solid fa-shoe-prints"></i></div>
+                                <div class="dash-title">Low-Stakes Entry</div>
+                                <div class="dash-desc">Find comfortable, zero-pressure ways to enter local spaces without anxiety.</div>
+                            </div>
+                            <div class="dash-action">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool3')">
+                            <div>
+                                <div class="dash-icon"><i class="fa-solid fa-bridge"></i></div>
+                                <div class="dash-title">Interest Bridge</div>
+                                <div class="dash-desc">Convert solo hobbies and interests into real-world local social opportunities.</div>
+                            </div>
+                            <div class="dash-action">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool4')">
+                            <div>
+                                <div class="dash-icon"><i class="fa-solid fa-comments"></i></div>
+                                <div class="dash-title">The Follow-Up</div>
+                                <div class="dash-desc">Turn pleasant first encounters into actual friendships with low-pressure scripts.</div>
+                            </div>
+                            <div class="dash-action">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool5')">
+                            <div>
+                                <div class="dash-icon"><i class="fa-solid fa-battery-half"></i></div>
+                                <div class="dash-title">Social Stamina</div>
+                                <div class="dash-desc">Track your emotional battery, protect your energy, and avoid burnout.</div>
+                            </div>
+                            <div class="dash-action">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 1: CONNECTION AUDIT -->
+                <section id="tool1" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fa-solid fa-chart-pie"></i> Connection Audit</div>
+                            <div class="card-subtitle">"I don't know anyone here and I don't know where to start."</div>
+                        </div>
+
+                        <form id="form-tool1" onsubmit="runTool1(event)">
+                            <div class="form-group">
+                                <label for="t1-time">Time since move:</label>
+                                <select id="t1-time" class="form-select" required>
+                                    <option value="<1 month">&lt;1 month</option>
+                                    <option value="1-3 months">1-3 months</option>
+                                    <option value="3-6 months">3-6 months</option>
+                                    <option value="6-12 months">6-12 months</option>
+                                    <option value="1+ years">1+ years</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-contacts">Current social contacts locally:</label>
+                                <select id="t1-contacts" class="form-select" required>
+                                    <option value="0">0</option>
+                                    <option value="1-2">1-2</option>
+                                    <option value="3-5">3-5</option>
+                                    <option value="5+">5+</option>
+                                    <option value="Only coworkers">Only coworkers</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-previous">Previous social life richness:</label>
+                                <select id="t1-previous" class="form-select" required>
+                                    <option value="Very rich">Very rich</option>
+                                    <option value="Moderate">Moderate</option>
+                                    <option value="Small but close">Small but close</option>
+                                    <option value="Isolated before too">Isolated before too</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-work">Work situation:</label>
+                                <select id="t1-work" class="form-select" required>
+                                    <option value="Office">Office</option>
+                                    <option value="Remote">Remote</option>
+                                    <option value="Hybrid">Hybrid</option>
+                                    <option value="Unemployed">Unemployed</option>
+                                    <option value="Student">Student</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-living">Living situation:</label>
+                                <select id="t1-living" class="form-select" required>
+                                    <option value="Alone">Alone</option>
+                                    <option value="Partner">Partner</option>
+                                    <option value="Family">Family</option>
+                                    <option value="Roommates">Roommates</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-energy">Social energy:</label>
+                                <select id="t1-energy" class="form-select" required>
+                                    <option value="High">High</option>
+                                    <option value="Moderate">Moderate</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Depends">Depends</option>
+                                    <option value="Anxious">Anxious</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Analyze Reality</button>
+                                <button type="button" class="btn btn-gold" onclick="loadSampleTool1()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="out-tool1" class="output-section">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title"><i class="fa-solid fa-compass"></i> Your Reality Baseline</div>
+                            </div>
+                            
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-flag"></i> The Starting Point</div>
+                                <div class="output-content" id="t1-out-start"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-heart-broken"></i> The Grief Check</div>
+                                <div class="output-content" id="t1-out-grief"></div>
+                            </div>
+
+                            <div class="output-box gold-accent">
+                                <div class="output-title"><i class="fa-solid fa-star"></i> The Advantage List</div>
+                                <div class="output-content" id="t1-out-advantage"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-shield-halved"></i> The Barrier</div>
+                                <div class="output-content" id="t1-out-barrier"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-hourglass-half"></i> The Realistic Timeline</div>
+                                <div class="output-content" id="t1-out-timeline"></div>
+                            </div>
+
+                            <div class="output-box gold-accent">
+                                <div class="output-title"><i class="fa-solid fa-arrow-right-long"></i> The First Step</div>
+                                <div class="output-content" id="t1-out-firststep"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HISTORY -->
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool1')">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Audits</div>
+                            <i class="fa-solid fa-chevron-down" id="hist-icon-tool1"></i>
+                        </div>
+                        <div class="history-list" id="hist-list-tool1"></div>
+                    </div>
+                </section>
+
+                <!-- VIEW 2: LOW-STAKES ENTRY -->
+                <section id="tool2" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fa-solid fa-shoe-prints"></i> Low-Stakes Entry Plan</div>
+                            <div class="card-subtitle">"I don't want to go to a networking event or join a club alone. It feels desperate."</div>
+                        </div>
+
+                        <form id="form-tool2" onsubmit="runTool2(event)">
+                            <div class="form-group">
+                                <label>Comfort level with strangers (1-10):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t2-comfort" min="1" max="10" value="5" oninput="updateSliderVal('t2-comfort', 't2-comfort-val')">
+                                    <span class="slider-value" id="t2-comfort-val">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-interests">Interests you'd pursue anyway ( hobbys, genres, sports ):</label>
+                                <textarea id="t2-interests" class="form-control" placeholder="e.g. Hiking, board games, coffee roasting, photography..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-neighborhood">Neighborhood type:</label>
+                                <select id="t2-neighborhood" class="form-select" required>
+                                    <option value="Urban">Urban</option>
+                                    <option value="Suburban">Suburban</option>
+                                    <option value="Rural">Rural</option>
+                                    <option value="Small town">Small town</option>
+                                    <option value="Campus">Campus</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-tried">What you've already tried:</label>
+                                <textarea id="t2-tried" class="form-control" placeholder="e.g. Went to one meetup group, visited local library..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-stopped">What stopped you from returning:</label>
+                                <select id="t2-stopped" class="form-select" required>
+                                    <option value="Too cliquey">Too cliquey</option>
+                                    <option value="I didn't click with anyone">I didn't click with anyone</option>
+                                    <option value="It felt forced">It felt forced</option>
+                                    <option value="Scheduling">Scheduling</option>
+                                    <option value="Cost">Cost</option>
+                                    <option value="Anxiety">Anxiety</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-route"></i> Generate Strategy</button>
+                                <button type="button" class="btn btn-gold" onclick="loadSampleTool2()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="out-tool2" class="output-section">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title"><i class="fa-solid fa-map-location-dot"></i> Low-Pressure Blueprint</div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-list-check"></i> The Entry Menu (5 Options)</div>
+                                <div class="output-content" id="t2-out-menu"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-people-arrows"></i> The Parallel Activity Rule</div>
+                                <div class="output-content" id="t2-out-parallel"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-rotate"></i> The Regularity Beat</div>
+                                <div class="output-content" id="t2-out-regularity"></div>
+                            </div>
+
+                            <div class="output-box gold-accent">
+                                <div class="output-title"><i class="fa-solid fa-comment-dots"></i> Conversation Starters</div>
+                                <div class="output-content" id="t2-out-openers"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-door-open"></i> The Exit Strategy</div>
+                                <div class="output-content" id="t2-out-exit"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-paper-plane"></i> The Low-Pressure Follow-Up</div>
+                                <div class="output-content" id="t2-out-followup"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HISTORY -->
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool2')">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Entry Plans</div>
+                            <i class="fa-solid fa-chevron-down" id="hist-icon-tool2"></i>
+                        </div>
+                        <div class="history-list" id="hist-list-tool2"></div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: INTEREST BRIDGE -->
+                <section id="tool3" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fa-solid fa-bridge"></i> Interest Bridge Builder</div>
+                            <div class="card-subtitle">"I have hobbies but they haven't turned into friendships."</div>
+                        </div>
+
+                        <form id="form-tool3" onsubmit="runTool3(event)">
+                            <div class="form-group">
+                                <label for="t3-solo">Current hobbies done alone:</label>
+                                <textarea id="t3-solo" class="form-control" placeholder="e.g. Reading, single-player gaming, running, cooking..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-group">Current hobbies done in groups:</label>
+                                <textarea id="t3-group" class="form-control" placeholder="e.g. Yoga class, casual soccer, pottery..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Willingness to try new activity (1-10):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t3-willingness" min="1" max="10" value="7" oninput="updateSliderVal('t3-willingness', 't3-willingness-val')">
+                                    <span class="slider-value" id="t3-willingness-val">7</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-researched">Local options researched:</label>
+                                <select id="t3-researched" class="form-select" required>
+                                    <option value="None">None</option>
+                                    <option value="Some">Some</option>
+                                    <option value="Many">Many</option>
+                                    <option value="I don't know how to find them">I don't know how to find them</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-online">Online communities you're in:</label>
+                                <textarea id="t3-online" class="form-control" placeholder="e.g. Reddit local sub, specific Discord, Facebook groups..."></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-link"></i> Build My Bridge</button>
+                                <button type="button" class="btn btn-gold" onclick="loadSampleTool3()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="out-tool3" class="output-section">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title"><i class="fa-solid fa-archway"></i> Your Bridge Strategy</div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-arrows-split-up-and-left"></i> The Solo-to-Social Bridge</div>
+                                <div class="output-content" id="t3-out-bridge"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-magnifying-glass-location"></i> The Local Search</div>
+                                <div class="output-content" id="t3-out-search"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-laptop-house"></i> The Online-to-Offline Plan</div>
+                                <div class="output-content" id="t3-out-online"></div>
+                            </div>
+
+                            <div class="output-box gold-accent">
+                                <div class="output-title"><i class="fa-solid fa-lightbulb"></i> New Activity Suggestion</div>
+                                <div class="output-content" id="t3-out-suggestion"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-anchor"></i> The Commitment Trick</div>
+                                <div class="output-content" id="t3-out-commitment"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-seedling"></i> The Patience Frame</div>
+                                <div class="output-content" id="t3-out-patience"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HISTORY -->
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool3')">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Bridges</div>
+                            <i class="fa-solid fa-chevron-down" id="hist-icon-tool3"></i>
+                        </div>
+                        <div class="history-list" id="hist-list-tool3"></div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: THE FOLLOW-UP -->
+                <section id="tool4" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fa-solid fa-comments"></i> The Follow-Up Playbook</div>
+                            <div class="card-subtitle">"I meet people but nothing sticks. We exchange numbers and then silence."</div>
+                        </div>
+
+                        <form id="form-tool4" onsubmit="runTool4(event)">
+                            <div class="form-group">
+                                <label for="t4-people">Recent people met:</label>
+                                <textarea id="t4-people" class="form-control" placeholder="e.g. Sarah from yoga class, Alex from dog park..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-initiated">Who initiated last contact:</label>
+                                <select id="t4-initiated" class="form-select" required>
+                                    <option value="Always me">Always me</option>
+                                    <option value="Usually me">Usually me</option>
+                                    <option value="Equal">Equal</option>
+                                    <option value="Usually them">Usually them</option>
+                                    <option value="Neither, we never follow up">Neither, we never follow up</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-fear">Your follow-up fear:</label>
+                                <select id="t4-fear" class="form-select" required>
+                                    <option value="I'll seem desperate">I'll seem desperate</option>
+                                    <option value="They don't actually like me">They don't actually like me</option>
+                                    <option value="I don't know what to suggest">I don't know what to suggest</option>
+                                    <option value="I'm worried they'll say no">I'm worried they'll say no</option>
+                                    <option value="I forget">I forget</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-style">Preferred connection style:</label>
+                                <select id="t4-style" class="form-select" required>
+                                    <option value="Text">Text</option>
+                                    <option value="Phone">Phone</option>
+                                    <option value="In-person">In-person</option>
+                                    <option value="Group settings">Group settings</option>
+                                    <option value="One-on-one">One-on-one</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-wish">What you wish someone would invite you to:</label>
+                                <textarea id="t4-wish" class="form-control" placeholder="e.g. Casual dinner, coffee on Sunday, outdoor market stroll..." required></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Draft Action Scripts</button>
+                                <button type="button" class="btn btn-gold" onclick="loadSampleTool4()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="out-tool4" class="output-section">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title"><i class="fa-solid fa-envelope-open-text"></i> Outreach & Scripts</div>
+                            </div>
+
+                            <div class="output-box gold-accent">
+                                <div class="output-title"><i class="fa-solid fa-message"></i> The Initiation Script</div>
+                                <div class="output-content" id="t4-out-script"></div>
+                            </div>
+
+                            <div class="output-box gold-accent">
+                                <div class="output-title"><i class="fa-solid fa-calendar-plus"></i> The Invitation Template</div>
+                                <div class="output-content" id="t4-out-invitation"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-scale-balanced"></i> The Reciprocity Check</div>
+                                <div class="output-content" id="t4-out-reciprocity"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-mug-hot"></i> The Group Gathering</div>
+                                <div class="output-content" id="t4-out-group"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-hashtag"></i> The 3-Touch Rule</div>
+                                <div class="output-content" id="t4-out-touch"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-hand-holding-heart"></i> The Letting-Go Protocol</div>
+                                <div class="output-content" id="t4-out-lettinggo"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HISTORY -->
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool4')">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Follow-Ups</div>
+                            <i class="fa-solid fa-chevron-down" id="hist-icon-tool4"></i>
+                        </div>
+                        <div class="history-list" id="hist-list-tool4"></div>
+                    </div>
+                </section>
+
+                <!-- VIEW 5: SOCIAL STAMINA -->
+                <section id="tool5" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fa-solid fa-battery-half"></i> Social Stamina Monitor</div>
+                            <div class="card-subtitle">"Trying to make friends is exhausting and I want to give up."</div>
+                        </div>
+
+                        <form id="form-tool5" onsubmit="runTool5(event)">
+                            <div class="form-group">
+                                <label>I feel lonely most days (1-10):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t5-lonely" min="1" max="10" value="5" oninput="updateSliderVal('t5-lonely', 't5-lonely-val')">
+                                    <span class="slider-value" id="t5-lonely-val">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>I feel hopeful about meeting people here (1-10):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t5-hopeful" min="1" max="10" value="5" oninput="updateSliderVal('t5-hopeful', 't5-hopeful-val')">
+                                    <span class="slider-value" id="t5-hopeful-val">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>I have energy to put myself out there (1-10):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t5-energy" min="1" max="10" value="5" oninput="updateSliderVal('t5-energy', 't5-energy-val')">
+                                    <span class="slider-value" id="t5-energy-val">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>I feel okay being alone while I build community (1-10):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t5-alone" min="1" max="10" value="5" oninput="updateSliderVal('t5-alone', 't5-alone-val')">
+                                    <span class="slider-value" id="t5-alone-val">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>I feel like I belong in this new place (1-10):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t5-belong" min="1" max="10" value="5" oninput="updateSliderVal('t5-belong', 't5-belong-val')">
+                                    <span class="slider-value" id="t5-belong-val">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>I'm taking care of myself while I build social life (1-10):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t5-selfcare" min="1" max="10" value="5" oninput="updateSliderVal('t5-selfcare', 't5-selfcare-val')">
+                                    <span class="slider-value" id="t5-selfcare-val">5</span>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-heart-pulse"></i> Check My Stamina</button>
+                                <button type="button" class="btn btn-gold" onclick="loadSampleTool5()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="out-tool5" class="output-section">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title"><i class="fa-solid fa-gauge-high"></i> Energy Diagnostic</div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-chart-simple"></i> The Social Dashboard</div>
+                                <div id="t5-out-dashboard" style="margin-top:0.75rem;"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-battery-charging"></i> Energy Protection</div>
+                                <div class="output-content" id="t5-out-protection"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-couch"></i> Alone-Time Reframe</div>
+                                <div class="output-content" id="t5-out-reframe"></div>
+                            </div>
+
+                            <div class="output-box gold-accent">
+                                <div class="output-title"><i class="fa-solid fa-bolt"></i> The One Social Action</div>
+                                <div class="output-content" id="t5-out-action"></div>
+                            </div>
+
+                            <div class="output-box">
+                                <div class="output-title"><i class="fa-solid fa-sparkles"></i> Self-Care Non-Negotiable</div>
+                                <div class="output-content" id="t5-out-selfcare"></div>
+                            </div>
+
+                            <div class="output-box gold-accent">
+                                <div class="output-title"><i class="fa-solid fa-anchor"></i> Patience Reminder</div>
+                                <div class="output-content" id="t5-out-patience"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HISTORY -->
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool5')">
+                            <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Stamina Checks</div>
+                            <i class="fa-solid fa-chevron-down" id="hist-icon-tool5"></i>
+                        </div>
+                        <div class="history-list" id="hist-list-tool5"></div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- FOOTER -->
+            <footer>
+                For entertainment and reflection purposes only. Not therapy or professional advice.
+            </footer>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Copied!</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* ----------------------------------------------------
+           NAVIGATION & UI HELPERS
+        ---------------------------------------------------- */
+        function switchView(viewId) {
+            document.querySelectorAll('.view-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            document.getElementById(viewId).style.display = 'block';
+
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Find matching nav button
+            const navMap = {
+                'dashboard': 0, 'tool1': 1, 'tool2': 2, 'tool3': 3, 'tool4': 4, 'tool5': 5
+            };
+            const navItems = document.querySelectorAll('.nav-item');
+            if (navItems[navMap[viewId]]) {
+                navItems[navMap[viewId]].classList.add('active');
+            }
+
+            closeSidebar();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Load history for tool if switched
+            if(viewId !== 'dashboard') {
+                renderHistoryList(viewId);
+            }
+        }
+
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('mobile-open');
+            document.getElementById('mobileOverlay').classList.add('mobile-open');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('mobile-open');
+            document.getElementById('mobileOverlay').classList.remove('mobile-open');
+        }
+
+        function updateSliderVal(inputId, displayId) {
+            const val = document.getElementById(inputId).value;
+            document.getElementById(displayId).innerText = val;
+        }
+
+        function showToast(message = "Copied!") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        /* ----------------------------------------------------
+           LOCAL STORAGE & HISTORY MANAGEMENT
+        ---------------------------------------------------- */
+        function saveHistory(toolId, summaryText, fullData) {
+            const key = `newcircle_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                summary: summaryText,
+                data: fullData
+            };
+
+            history.unshift(newItem);
+            if (history.length > 30) history = history.slice(0, 30); // Max 30 items
+            
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistoryList(toolId);
+        }
+
+        function renderHistoryList(toolId) {
+            const listEl = document.getElementById(`hist-list-${toolId}`);
+            if(!listEl) return;
+            
+            const key = `newcircle_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+            if (history.length === 0) {
+                listEl.innerHTML = `<div style="font-size:0.85rem; color:var(--text-muted); padding:0.5rem 0;">No previous records saved yet.</div>`;
+                return;
+            }
+
+            let html = history.map(item => `
+                <div class="history-item">
+                    <div>
+                        <strong style="color:var(--slate);">${escapeHtml(item.summary)}</strong>
+                        <div class="history-item-date">${item.timestamp}</div>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick='restoreHistory("${toolId}", ${item.id})'>
+                        <i class="fa-solid fa-rotate-left"></i> View
+                    </button>
+                </div>
+            `).join('');
+
+            html += `<div style="text-align:right; margin-top:0.5rem;">
+                        <button class="btn btn-outline btn-sm" onclick="clearToolHistory('${toolId}')" style="color:#EF4444; border-color:#FCA5A5;">
+                            <i class="fa-solid fa-trash"></i> Clear History
+                        </button>
+                    </div>`;
+
+            listEl.innerHTML = html;
+        }
+
+        function toggleHistory(toolId) {
+            const listEl = document.getElementById(`hist-list-${toolId}`);
+            const iconEl = document.getElementById(`hist-icon-${toolId}`);
+            listEl.classList.toggle('open');
+            if (listEl.classList.contains('open')) {
+                iconEl.className = 'fa-solid fa-chevron-up';
+            } else {
+                iconEl.className = 'fa-solid fa-chevron-down';
+            }
+        }
+
+        function clearToolHistory(toolId) {
+            if (confirm("Are you sure you want to clear history for this tool?")) {
+                localStorage.removeItem(`newcircle_history_${toolId}`);
+                renderHistoryList(toolId);
+            }
+        }
+
+        function restoreHistory(toolId, itemId) {
+            const key = `newcircle_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const record = history.find(h => h.id === itemId);
+            if (!record) return;
+
+            // Populate form and rerun
+            if (toolId === 'tool1') {
+                document.getElementById('t1-time').value = record.data.time;
+                document.getElementById('t1-contacts').value = record.data.contacts;
+                document.getElementById('t1-previous').value = record.data.previous;
+                document.getElementById('t1-work').value = record.data.work;
+                document.getElementById('t1-living').value = record.data.living;
+                document.getElementById('t1-energy').value = record.data.energy;
+                runTool1(null, false);
+            } else if (toolId === 'tool2') {
+                document.getElementById('t2-comfort').value = record.data.comfort;
+                document.getElementById('t2-interests').value = record.data.interests;
+                document.getElementById('t2-neighborhood').value = record.data.neighborhood;
+                document.getElementById('t2-tried').value = record.data.tried;
+                document.getElementById('t2-stopped').value = record.data.stopped;
+                updateSliderVal('t2-comfort', 't2-comfort-val');
+                runTool2(null, false);
+            } else if (toolId === 'tool3') {
+                document.getElementById('t3-solo').value = record.data.solo;
+                document.getElementById('t3-group').value = record.data.group;
+                document.getElementById('t3-willingness').value = record.data.willingness;
+                document.getElementById('t3-researched').value = record.data.researched;
+                document.getElementById('t3-online').value = record.data.online;
+                updateSliderVal('t3-willingness', 't3-willingness-val');
+                runTool3(null, false);
+            } else if (toolId === 'tool4') {
+                document.getElementById('t4-people').value = record.data.people;
+                document.getElementById('t4-initiated').value = record.data.initiated;
+                document.getElementById('t4-fear').value = record.data.fear;
+                document.getElementById('t4-style').value = record.data.style;
+                document.getElementById('t4-wish').value = record.data.wish;
+                runTool4(null, false);
+            } else if (toolId === 'tool5') {
+                document.getElementById('t5-lonely').value = record.data.lonely;
+                document.getElementById('t5-hopeful').value = record.data.hopeful;
+                document.getElementById('t5-energy').value = record.data.energy;
+                document.getElementById('t5-alone').value = record.data.alone;
+                document.getElementById('t5-belong').value = record.data.belong;
+                document.getElementById('t5-selfcare').value = record.data.selfcare;
+                ['lonely', 'hopeful', 'energy', 'alone', 'belong', 'selfcare'].forEach(id => {
+                    updateSliderVal(`t5-${id}`, `t5-${id}-val`);
+                });
+                runTool5(null, false);
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        /* ----------------------------------------------------
+           TOOL 1: CONNECTION AUDIT LOGIC
+        ---------------------------------------------------- */
+        function loadSampleTool1() {
+            document.getElementById('t1-time').value = '3-6 months';
+            document.getElementById('t1-contacts').value = '0';
+            document.getElementById('t1-previous').value = 'Very rich';
+            document.getElementById('t1-work').value = 'Remote';
+            document.getElementById('t1-living').value = 'Alone';
+            document.getElementById('t1-energy').value = 'Moderate';
+        }
+
+        function runTool1(e, save = true) {
+            if(e) e.preventDefault();
+
+            const time = document.getElementById('t1-time').value;
+            const contacts = document.getElementById('t1-contacts').value;
+            const previous = document.getElementById('t1-previous').value;
+            const work = document.getElementById('t1-work').value;
+            const living = document.getElementById('t1-living').value;
+            const energy = document.getElementById('t1-energy').value;
+
+            // Output logic template
+            let startText = `You have been in your new location for ${time} with ${contacts === '0' ? 'zero' : contacts} local contacts. Living ${living.toLowerCase()} and working in a ${work.toLowerCase()} setup creates significant structural friction for spontaneous encounters.`;
+            
+            let griefText = previous === 'Very rich' || previous === 'Small but close' 
+                ? `Because your past social life was ${previous.toLowerCase()}, the contrast you are feeling right now is acute. You aren't bad at making friends; you are suffering from the sudden disappearance of built-in social capital. It is completely normal to mourn that ease.`
+                : `Transitioning to a new environment without an established social baseline can amplify feelings of isolation. Give yourself permission to feel out of place—building a social sphere takes deliberate infrastructure.`;
+
+            let advantageText = `• Blank Slate: You can curate exactly who enters your life without legacy obligations.\n• Modern Perspective: Moving brings fresh stories, curiosity, and adaptability.\n• Intentionality: You are building community out of choice rather than proximity habit.`;
+
+            let barrierText = `Your primary bottleneck appears to be ${work === 'Remote' ? 'lack of environmental exposure (remote work eliminates water-cooler interaction)' : 'energy management and lack of natural meeting grounds'}. ${energy === 'Low' || energy === 'Anxious' ? 'High anxiety or low social battery is making low-stakes actions feel overwhelming.' : 'Structure, not willingness, is your current hurdle.'}`;
+
+            let timelineText = `Making true, reliable friends takes roughly 50 hours of interaction for casual friendship and 200 hours for close friendship. Expect a 6–12 month building phase. You are currently in the foundation layer.`;
+
+            let stepText = work === 'Remote' 
+                ? `This week: Work from a local coffee shop or library for 2 hours twice. Don't worry about talking to anyone yet—just establish a physical presence outside your residence.`
+                : `This week: Choose one recurring local activity (a coffee spot, gym time, or walk route) and go at the exact same day and time twice.`;
+
+            document.getElementById('t1-out-start').innerText = startText;
+            document.getElementById('t1-out-grief').innerText = griefText;
+            document.getElementById('t1-out-advantage').innerText = advantageText;
+            document.getElementById('t1-out-barrier').innerText = barrierText;
+            document.getElementById('t1-out-timeline').innerText = timelineText;
+            document.getElementById('t1-out-firststep').innerText = stepText;
+
+            document.getElementById('out-tool1').style.display = 'block';
+            document.getElementById('out-tool1').scrollIntoView({ behavior: 'smooth' });
+
+            if(save) {
+                saveHistory('tool1', `${time} move, ${contacts} contacts (${work})`, {
+                    time, contacts, previous, work, living, energy
+                });
+            }
+        }
+
+        /* ----------------------------------------------------
+           TOOL 2: LOW-STAKES ENTRY LOGIC
+        ---------------------------------------------------- */
+        function loadSampleTool2() {
+            document.getElementById('t2-comfort').value = '4';
+            document.getElementById('t2-interests').value = 'Hiking, board games, trying local coffee';
+            document.getElementById('t2-neighborhood').value = 'Suburban';
+            document.getElementById('t2-tried').value = 'Attended one general Meetup group';
+            document.getElementById('t2-stopped').value = 'Too cliquey';
+            updateSliderVal('t2-comfort', 't2-comfort-val');
+        }
+
+        function runTool2(e, save = true) {
+            if(e) e.preventDefault();
+
+            const comfort = parseInt(document.getElementById('t2-comfort').value);
+            const interests = document.getElementById('t2-interests').value;
+            const neighborhood = document.getElementById('t2-neighborhood').value;
+            const tried = document.getElementById('t2-tried').value;
+            const stopped = document.getElementById('t2-stopped').value;
+
+            let menuOptions = [
+                `1. Focus Activity: Join a structured group centered strictly around "${interests.split(',')[0] || 'a shared hobby'}". Pure activity focus reduces small-talk pressure.`,
+                `2. Local Third Space: Visit a local ${neighborhood === 'Suburban' ? 'community center or library' : 'neighborhood cafe or bookstore'} at a consistent hour.`,
+                `3. Volunteer Action: Short-duration volunteer shifts (e.g., trail cleanup, food pantry). People who volunteer are predisposed to be welcoming.`,
+                `4. Low-Key Workshop: One-off adult learning classes (cooking, pottery, hardware repair).`,
+                `5. Parallel Social Hubs: Co-working spaces or open-table board game nights where playing the game absorbs the social tension.`
+            ];
+
+            let parallelText = `Never meet just to "get to know each other." That creates job-interview energy. Always anchor encounters around an external activity (${interests.split(',')[0] || 'a hobby'}). When your eyes are on a board game, trail, or project, conversation flows naturally.`;
+
+            let regularityText = `Showing up once is rarely enough. Groups feel "${stopped}" because people know each other's patterns. Commit to attending 3 distinct times before deciding if a space is a fit. Exposure builds familiarity.`;
+
+            let openersHTML = `
+                <div style="margin-bottom:0.75rem;">
+                    <em>1. Contextual Comment:</em>
+                    <div class="script-container">
+                        "Have you been coming to this group for long? I moved here recently and I'm still testing out local spots."
+                        <button class="btn btn-outline btn-sm copy-btn" onclick="copyToClipboard('Have you been coming to this group for long? I moved here recently and I me still testing out local spots.')"><i class="fa-solid fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <em>2. Micro-Advice Query:</em>
+                    <div class="script-container">
+                        "Hey, quick question—do you know any good coffee spots or bakeries nearby? Still getting my bearings in ${neighborhood}."
+                        <button class="btn btn-outline btn-sm copy-btn" onclick="copyToClipboard('Hey, quick question—do you know any good coffee spots or bakeries nearby? Still getting my bearings.')"><i class="fa-solid fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+                <div>
+                    <em>3. Low-Pressure Observation:</em>
+                    <div class="script-container">
+                        "Great turn-out today. Is it usually this active or did I get lucky?"
+                        <button class="btn btn-outline btn-sm copy-btn" onclick="copyToClipboard('Great turn-out today. Is it usually this active or did I get lucky?')"><i class="fa-solid fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+            `;
+
+            let exitText = `Always have an "escape hatch" pre-planned so you don't feel trapped. Say: "I've got to run to handle an errand in 10 minutes, but I'm really glad I checked this out." Leave while energy is still positive.`;
+
+            let followupText = `If you have a pleasant chat, say before leaving: "I really enjoyed chatting! I'm trying to meet more locals. Mind if we swap Instagram/numbers?"`;
+
+            document.getElementById('t2-out-menu').innerText = menuOptions.join('\n\n');
+            document.getElementById('t2-out-parallel').innerText = parallelText;
+            document.getElementById('t2-out-regularity').innerText = regularityText;
+            document.getElementById('t2-out-openers').innerHTML = openersHTML;
+            document.getElementById('t2-out-exit').innerText = exitText;
+            document.getElementById('t2-out-followup').innerText = followupText;
+
+            document.getElementById('out-tool2').style.display = 'block';
+            document.getElementById('out-tool2').scrollIntoView({ behavior: 'smooth' });
+
+            if(save) {
+                saveHistory('tool2', `Comfort ${comfort}/10, stopped by: ${stopped}`, {
+                    comfort, interests, neighborhood, tried, stopped
+                });
+            }
+        }
+
+        /* ----------------------------------------------------
+           TOOL 3: INTEREST BRIDGE LOGIC
+        ---------------------------------------------------- */
+        function loadSampleTool3() {
+            document.getElementById('t3-solo').value = 'Reading, single-player gaming';
+            document.getElementById('t3-group').value = 'Yoga classes';
+            document.getElementById('t3-willingness').value = '7';
+            document.getElementById('t3-researched').value = 'None';
+            document.getElementById('t3-online').value = 'Active in one gaming Discord server';
+            updateSliderVal('t3-willingness', 't3-willingness-val');
+        }
+
+        function runTool3(e, save = true) {
+            if(e) e.preventDefault();
+
+            const solo = document.getElementById('t3-solo').value;
+            const group = document.getElementById('t3-group').value;
+            const willingness = parseInt(document.getElementById('t3-willingness').value);
+            const researched = document.getElementById('t3-researched').value;
+            const online = document.getElementById('t3-online').value;
+
+            let bridgeText = `To bridge solo activities like "${solo}" into social ones:\n• Turn reading into a silent reading club or local library group where reading happens alongside social wrap-up.\n• Turn solo gaming into local LAN/board game café casual nights or local tournament spectating.\n• For group hobbies like "${group || 'your classes'}", transition from leaving right after class to hanging out 10 minutes prior/after in the lobby.`;
+
+            let searchText = `Check these specific local vectors:\n1. Local independent coffee shop bulletin boards\n2. Public library event calendars (often host craft, book, and gaming clubs)\n3. Local Subreddit / Discord regional servers\n4. Regional parks & rec seasonal guides (affordable adult social leagues).`;
+
+            let onlineText = online 
+                ? `Since you are active in (${online}): Post a low-key inquiry: "Hey everyone! Anyone here living in [City/Area]? Thinking of grabbing a coffee or hosting a casual meetup."`
+                : `Join your local city Subreddit or regional Discord server. Search past posts for "meetup" or "new in town" before posting your own intro.`;
+
+            let suggestionText = willingness > 6 
+                ? `Try bouldering/climbing gyms, adult trivia nights, or a local recreational bocce/bowling league. These require zero pre-existing team structure and encourage social downtime.`
+                : `Try a low-intensity book club or a structured workshop (e.g. coffee tasting, wood working). Minimal forced socialization with high shared focus.`;
+
+            let commitmentText = `Increase your follow-through by prepaying for a multi-week class or scheduling it directly into your primary calendar as a non-negotiable appointment. Bringing a specific item (like a board game or snack) also cements your participation.`;
+
+            let patienceText = `Friendships require repeated accidental or structured exposures over time. Do not expect deep connections on session one; focus on becoming a familiar face.`;
+
+            document.getElementById('t3-out-bridge').innerText = bridgeText;
+            document.getElementById('t3-out-search').innerText = searchText;
+            document.getElementById('t3-out-online').innerText = onlineText;
+            document.getElementById('t3-out-suggestion').innerText = suggestionText;
+            document.getElementById('t3-out-commitment').innerText = commitmentText;
+            document.getElementById('t3-out-patience').innerText = patienceText;
+
+            document.getElementById('out-tool3').style.display = 'block';
+            document.getElementById('out-tool3').scrollIntoView({ behavior: 'smooth' });
+
+            if(save) {
+                saveHistory('tool3', `Willingness ${willingness}/10, Solo: ${solo.slice(0, 20)}...`, {
+                    solo, group, willingness, researched, online
+                });
+            }
+        }
+
+        /* ----------------------------------------------------
+           TOOL 4: THE FOLLOW-UP LOGIC
+        ---------------------------------------------------- */
+        function loadSampleTool4() {
+            document.getElementById('t4-people').value = 'Sarah and Mark from weekly yoga class';
+            document.getElementById('t4-initiated').value = 'Always me';
+            document.getElementById('t4-fear').value = "I'll seem desperate";
+            document.getElementById('t4-style').value = 'In-person';
+            document.getElementById('t4-wish').value = 'Casual dinner or coffee on a weekend';
+        }
+
+        function runTool4(e, save = true) {
+            if(e) e.preventDefault();
+
+            const people = document.getElementById('t4-people').value;
+            const initiated = document.getElementById('t4-initiated').value;
+            const fear = document.getElementById('t4-fear').value;
+            const style = document.getElementById('t4-style').value;
+            const wish = document.getElementById('t4-wish').value;
+
+            const scriptMsg = `Hey! Great running into you at ${people.split(' ')[0] || 'class'}. Hope your week is off to a good start!`;
+            const invMsg = `Hey! I'm heading out to check out that local spot for ${wish || 'a coffee'} this Thursday around 5pm. No worries if you're busy, but let me know if you'd like to tag along!`;
+
+            let scriptHTML = `
+                <div class="script-container">
+                    "${scriptMsg}"
+                    <button class="btn btn-outline btn-sm copy-btn" onclick="copyToClipboard('${scriptMsg}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+            `;
+
+            let invitationHTML = `
+                <div class="script-container">
+                    "${invMsg}"
+                    <button class="btn btn-outline btn-sm copy-btn" onclick="copyToClipboard('${invMsg}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+            `;
+
+            let reciprocityText = initiated === 'Always me' 
+                ? `Notice: You reported that outreach is "Always me". It's normal to carry the initiation burden early on, but if you've initiated 3 times with zero counter-offers or inquiries from them, pause and let them make the next move.`
+                : `Your current outreach dynamic (${initiated}) is relatively balanced. Keep planting low-stakes seeds without over-calculating.`;
+
+            let groupText = `Instead of high-pressure 1-on-1 hangouts, invite 3–4 acquaintances to a casual group activity: "Hosting a casual pizza/coffee session this Saturday at [Park/Spot]. Feel free to pop by if you're free!"`;
+
+            let touchText = `The 3-Touch Rule: It usually takes 3 distinct, non-consecutive interactions (e.g., event encounter -> text banter -> coffee meetup) before people stop viewing you as an acquaintance and start viewing you as a friend.`;
+
+            let lettingGoText = `If someone takes days to reply with short, non-expanding answers ("Yeah cool!") and never suggests alternatives when busy, let them float away grace-fully. They aren't rejecting you as a person; they simply lack social capacity right now.`;
+
+            document.getElementById('t4-out-script').innerHTML = scriptHTML;
+            document.getElementById('t4-out-invitation').innerHTML = invitationHTML;
+            document.getElementById('t4-out-reciprocity').innerText = reciprocityText;
+            document.getElementById('t4-out-group').innerText = groupText;
+            document.getElementById('t4-out-touch').innerText = touchText;
+            document.getElementById('t4-out-lettinggo').innerText = lettingGoText;
+
+            document.getElementById('out-tool4').style.display = 'block';
+            document.getElementById('out-tool4').scrollIntoView({ behavior: 'smooth' });
+
+            if(save) {
+                saveHistory('tool4', `Target: ${people.slice(0, 20)}... Fear: ${fear}`, {
+                    people, initiated, fear, style, wish
+                });
+            }
+        }
+
+        /* ----------------------------------------------------
+           TOOL 5: SOCIAL STAMINA LOGIC
+        ---------------------------------------------------- */
+        function loadSampleTool5() {
+            document.getElementById('t5-lonely').value = '8';
+            document.getElementById('t5-hopeful').value = '5';
+            document.getElementById('t5-energy').value = '3';
+            document.getElementById('t5-alone').value = '6';
+            document.getElementById('t5-belong').value = '2';
+            document.getElementById('t5-selfcare').value = '5';
+
+            ['lonely', 'hopeful', 'energy', 'alone', 'belong', 'selfcare'].forEach(id => {
+                updateSliderVal(`t5-${id}`, `t5-${id}-val`);
+            });
+        }
+
+        function runTool5(e, save = true) {
+            if(e) e.preventDefault();
+
+            const lonely = parseInt(document.getElementById('t5-lonely').value);
+            const hopeful = parseInt(document.getElementById('t5-hopeful').value);
+            const energy = parseInt(document.getElementById('t5-energy').value);
+            const alone = parseInt(document.getElementById('t5-alone').value);
+            const belong = parseInt(document.getElementById('t5-belong').value);
+            const selfcare = parseInt(document.getElementById('t5-selfcare').value);
+
+            const metrics = [
+                { label: 'Loneliness Level', val: lonely, invert: true },
+                { label: 'Hopefulness', val: hopeful, invert: false },
+                { label: 'Social Energy', val: energy, invert: false },
+                { label: 'Comfort Being Alone', val: alone, invert: false },
+                { label: 'Sense of Belonging', val: belong, invert: false },
+                { label: 'Self-Care Routine', val: selfcare, invert: false }
+            ];
+
+            let dashboardHTML = metrics.map(m => {
+                // Determine color
+                // For regular metrics: 7-10 Green, 4-6 Yellow, 1-3 Red
+                // For inverted (Loneliness): high is bad, so 7-10 Red, 4-6 Yellow, 1-3 Green
+                let colorClass = 'yellow';
+                let score = m.val;
+                if (!m.invert) {
+                    if (score >= 7) colorClass = 'green';
+                    else if (score <= 3) colorClass = 'red';
+                } else {
+                    if (score >= 7) colorClass = 'red';
+                    else if (score <= 3) colorClass = 'green';
+                }
+
+                return `
+                    <div class="metric-bar-container">
+                        <div class="metric-label">
+                            <span>${m.label}</span>
+                            <span>${m.val}/10</span>
+                        </div>
+                        <div class="bar-bg">
+                            <div class="bar-fill ${colorClass}" style="width: ${m.val * 10}%;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            let protectionText = energy < 4 
+                ? `Your social battery is running critically low (${energy}/10). Pause forced networking events for 1-2 weeks. Exhausted social interactions rarely yield genuine connection and often lead to burnout.`
+                : `Your energy levels are steady (${energy}/10). Keep a balanced rhythm: 1 social attempt per week followed by deliberate rest.`;
+
+            let reframeText = `Solitude is the baseline of relocating, not evidence of personal failure. Treat alone-time as an opportunity to build deep familiarity with your new neighborhood independently.`;
+
+            let actionText = energy < 4 
+                ? `Ultra low-energy action: Send one warm text to an old friend back home to recharge your emotional bank account. No local outreach required today.`
+                : `Low-energy action: Spend 30 minutes reading or sitting at a local neighborhood park or coffee shop with no expectation to talk to anyone.`;
+
+            let selfcareText = selfcare < 5 
+                ? `Prioritize physical self-care immediately: steady sleep, solid meals, and comfortable daily routines. You cannot build community from a depleted foundation.`
+                : `Maintain your current self-care routines. They anchor you while your local social circle is still developing.`;
+
+            let patienceText = `Reminder: You are not behind. You are new. Building a meaningful life in a brand new place takes time, courage, and self-compassion.`;
+
+            document.getElementById('t5-out-dashboard').innerHTML = dashboardHTML;
+            document.getElementById('t5-out-protection').innerText = protectionText;
+            document.getElementById('t5-out-reframe').innerText = reframeText;
+            document.getElementById('t5-out-action').innerText = actionText;
+            document.getElementById('t5-out-selfcare').innerText = selfcareText;
+            document.getElementById('t5-out-patience').innerText = patienceText;
+
+            document.getElementById('out-tool5').style.display = 'block';
+            document.getElementById('out-tool5').scrollIntoView({ behavior: 'smooth' });
+
+            if(save) {
+                saveHistory('tool5', `Loneliness: ${lonely}/10, Energy: ${energy}/10`, {
+                    lonely, hopeful, energy, alone, belong, selfcare
+                });
+            }
+        }
+
+        // Initialize default view on load
+        document.addEventListener('DOMContentLoaded', () => {
+            switchView('dashboard');
+        });
+    </script>
+</body>
+</html>

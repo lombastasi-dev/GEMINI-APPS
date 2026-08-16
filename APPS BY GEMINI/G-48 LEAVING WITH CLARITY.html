@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaving With Clarity — Practical Exit Toolkit</title>
+    
+    <!-- Google Fonts (Inter) & FontAwesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* -----------------------------------------------------------------
+           CSS RESET & BASE STYLES
+           Primary Slate: #457B9D | Warm Sand: #D4A373
+           Background: Linear gradient #F8F9FA to #FDF6EC
+        ----------------------------------------------------------------- */
+        :root {
+            --slate-main: #457B9D;
+            --slate-hover: #366380;
+            --slate-light: #EBF3F8;
+            --sand-main: #D4A373;
+            --sand-hover: #C28E5C;
+            --sand-light: #F9F3EB;
+            --bg-start: #F8F9FA;
+            --bg-end: #FDF6EC;
+            --text-dark: #2B2D42;
+            --text-muted: #6C757D;
+            --card-bg: #FFFFFF;
+            --border-color: #E9ECEF;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* -----------------------------------------------------------------
+           LAYOUT STRUCTURE
+        ----------------------------------------------------------------- */
+        .app-container {
+            display: flex;
+            flex: 1;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Fixed Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--slate-main);
+        }
+
+        .sidebar-brand i {
+            font-size: 1.5rem;
+        }
+
+        .sidebar-brand h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 1rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .nav-item {
+            padding: 0 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.925rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background-color: var(--slate-light);
+            color: var(--slate-main);
+        }
+
+        .nav-link.active {
+            background-color: var(--slate-main);
+            color: #FFFFFF;
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2.5rem 1.5rem;
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            background-color: var(--card-bg);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--slate-main);
+            font-weight: 700;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.35rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 95;
+        }
+
+        /* -----------------------------------------------------------------
+           COMPONENTS & CARDS
+        ----------------------------------------------------------------- */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 1.5rem; /* padding 6 */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .hero-banner {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, var(--slate-light) 0%, var(--sand-light) 100%);
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(69, 123, 157, 0.15);
+        }
+
+        .hero-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--slate-main);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-tagline {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .tool-card {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: all 0.25 ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+            border-color: var(--slate-main);
+        }
+
+        .tool-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.5rem;
+            background-color: var(--slate-light);
+            color: var(--slate-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-card h3 {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .tool-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* -----------------------------------------------------------------
+           FORMS & INPUTS
+        ----------------------------------------------------------------- */
+        .tool-header {
+            margin-bottom: 1.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .tool-header-text h2 {
+            font-size: 1.6rem;
+            color: var(--slate-main);
+            margin-bottom: 0.25rem;
+        }
+
+        .tool-header-text p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--slate-main);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--slate-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--sand-light);
+            color: var(--sand-hover);
+            border: 1px solid rgba(212, 163, 115, 0.4);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--sand-main);
+            color: #FFFFFF;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            color: var(--text-dark);
+        }
+
+        .form-control, select, textarea {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 0.925rem;
+            color: var(--text-dark);
+            background-color: #FAFAFA;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--slate-main);
+            background-color: #FFFFFF;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group, .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.65rem;
+            margin-top: 0.35rem;
+        }
+
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 400;
+            cursor: pointer;
+            background-color: #FAFAFA;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border-color);
+            transition: background 0.15s;
+        }
+
+        .checkbox-label:hover, .radio-label:hover {
+            background-color: var(--slate-light);
+        }
+
+        .checkbox-label input, .radio-label input {
+            accent-color: var(--slate-main);
+        }
+
+        /* -----------------------------------------------------------------
+           OUTPUT ANALYSIS DISPLAY
+        ----------------------------------------------------------------- */
+        .output-container {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .output-card {
+            background: #FFFFFF;
+            border-left: 4px solid var(--slate-main);
+            border-radius: 0.5rem;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .output-card.highlight {
+            border-left-color: var(--sand-main);
+            background: linear-gradient(to right, var(--sand-light), #FFFFFF);
+        }
+
+        .output-card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--slate-main);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .output-card.highlight .output-card-title {
+            color: var(--sand-hover);
+        }
+
+        .output-card p {
+            font-size: 0.925rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .output-card p:last-child {
+            margin-bottom: 0;
+        }
+
+        .script-box {
+            background-color: #F8F9FA;
+            border: 1px border var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: #2B2D42;
+            position: relative;
+            margin: 0.75rem 0;
+            border-left: 3px solid var(--slate-main);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.75rem;
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            color: var(--slate-main);
+            border-color: var(--slate-main);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 50px;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-low { background-color: #D4EDDA; color: #155724; }
+        .badge-medium { background-color: #FFF3CD; color: #856404; }
+        .badge-high { background-color: #F8D7DA; color: #721C24; }
+
+        /* -----------------------------------------------------------------
+           HISTORY ACCORDION
+        ----------------------------------------------------------------- */
+        .history-section {
+            margin-top: 2.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .history-item {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: #FFFFFF;
+            overflow: hidden;
+        }
+
+        .history-summary {
+            padding: 0.75rem 1rem;
+            background: #FAFAFA;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .history-summary:hover {
+            background-color: var(--slate-light);
+        }
+
+        .history-details {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            display: none;
+            font-size: 0.875rem;
+            background: #FFFFFF;
+        }
+
+        .history-item.open .history-details {
+            display: block;
+        }
+
+        /* -----------------------------------------------------------------
+           FOOTER & TOAST
+        ----------------------------------------------------------------- */
+        footer {
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+
+        footer p {
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--text-dark);
+            color: #FFFFFF;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.375rem;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* -----------------------------------------------------------------
+           RESPONSIVE MEDIA QUERIES
+        ----------------------------------------------------------------- */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                padding: 1.5rem 1rem;
+            }
+
+            .hero-title {
+                font-size: 1.75rem;
+            }
+
+            .checkbox-group, .radio-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Overlay for Mobile Sidebar -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
+        <!-- Fixed Left Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-compass"></i>
+                <h1>Leaving With Clarity</h1>
+            </div>
+            <nav style="flex: 1;">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a class="nav-link active" onclick="switchTab('dashboard')">
+                            <i class="fa-solid fa-house"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="switchTab('guilt-decoder')">
+                            <i class="fa-solid fa-heart-crack"></i>
+                            <span>Guilt Decoder</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="switchTab('entanglement-unpacker')">
+                            <i class="fa-solid fa-diagram-project"></i>
+                            <span>Entanglement Unpacker</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="switchTab('the-conversation')">
+                            <i class="fa-solid fa-comments"></i>
+                            <span>The Conversation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="switchTab('post-breakup-integrity')">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>Post-Breakup Integrity</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="switchTab('post-exit-rebuild')">
+                            <i class="fa-solid fa-seedling"></i>
+                            <span>Post-Exit Rebuild</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Mobile Header Bar -->
+            <header class="mobile-header">
+                <div class="mobile-brand">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Leaving With Clarity</span>
+                </div>
+                <button class="hamburger-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+
+                <!-- DASHBOARD VIEW -->
+                <section id="dashboard" class="view-section active">
+                    <div class="hero-banner">
+                        <h2 class="hero-title">Leaving With Clarity</h2>
+                        <p class="hero-tagline">You can exit with compassion. You don't need permission to go.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="tool-card" onclick="switchTab('guilt-decoder')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-heart-crack"></i></div>
+                            <h3>Guilt Decoder</h3>
+                            <p>Untangle obligation from genuine care when leaving someone who hasn't done wrong.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTab('entanglement-unpacker')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                            <h3>Entanglement Unpacker</h3>
+                            <p>Step-by-step logistics plan for separating leases, money, pets, and social circles.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTab('the-conversation')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-comments"></i></div>
+                            <h3>The Conversation</h3>
+                            <p>Script your exit with complete honesty, firm boundaries, and zero cruelty.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTab('post-breakup-integrity')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h3>Post-Breakup Integrity</h3>
+                            <p>Protect your boundaries and navigate post-exit contact with dignity for both.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchTab('post-exit-rebuild')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-seedling"></i></div>
+                            <h3>Post-Exit Rebuild</h3>
+                            <p>Manage the initial grief wave, counteract guilt, and safely reclaim your independent identity.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: GUILT DECODER -->
+                <section id="guilt-decoder" class="view-section">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-header-text">
+                                <h2>Guilt Decoder</h2>
+                                <p>"I feel terrible about leaving someone who hasn't done anything 'wrong.'"</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="loadSampleScenario('guilt')">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-guilt" onsubmit="processGuilt(event)">
+                            <div class="form-group">
+                                <label for="guilt-why">Why you want to leave:</label>
+                                <textarea id="guilt-why" placeholder="Describe your underlying reasons for wanting to end the relationship..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="guilt-qualities">Partner's 'good' qualities:</label>
+                                <textarea id="guilt-qualities" placeholder="What qualities do you appreciate about them?" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="guilt-duration">Duration of unhappiness:</label>
+                                <select id="guilt-duration" required>
+                                    <option value="<6mo">&lt; 6 months</option>
+                                    <option value="6mo-1yr">6 months – 1 year</option>
+                                    <option value="1-2yr">1 – 2 years</option>
+                                    <option value="2+yr">2+ years</option>
+                                    <option value="beginning">Since the beginning</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Guilt sources (Check all that apply):</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="guilt-source" value="love"> They love me</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="guilt-source" value="devastated"> They'll be devastated</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="guilt-source" value="depend"> They depend on me</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="guilt-source" value="history"> Shared history</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="guilt-source" value="promised"> I promised</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="guilt-source" value="family"> Their family likes me</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="guilt-source" value="cohabit"> We live together</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="guilt-source" value="isolated"> They have no one else</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="guilt-source" value="imperfect"> I'm not perfect either</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="guilt-tried">Have you tried to fix it?</label>
+                                <select id="guilt-tried" required>
+                                    <option value="extensively">Yes, extensively</option>
+                                    <option value="somewhat">Yes, somewhat</option>
+                                    <option value="early">No, I knew it was wrong early</option>
+                                    <option value="afraid">No, I'm afraid to try</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Analyze Guilt</button>
+                        </form>
+                    </div>
+
+                    <div id="output-guilt" class="output-container"></div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <span class="history-title">Saved Guilt Analyses</span>
+                            <button class="btn btn-outline" style="font-size:0.8rem; padding:0.3rem 0.6rem;" onclick="clearToolHistory('guilt')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="history-guilt"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: ENTANGLEMENT UNPACKER -->
+                <section id="entanglement-unpacker" class="view-section">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-header-text">
+                                <h2>Entanglement Unpacker</h2>
+                                <p>"We share a lease, a dog, a friend group, and a bank account. I don't know how to separate."</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="loadSampleScenario('entanglement')">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-entanglement" onsubmit="processEntanglement(event)">
+                            <div class="form-group">
+                                <label for="entangle-living">Living situation:</label>
+                                <select id="entangle-living" required>
+                                    <option value="lease">Live together (lease)</option>
+                                    <option value="mortgage">Live together (mortgage)</option>
+                                    <option value="their_place">Live together (their place)</option>
+                                    <option value="my_place">Live together (my place)</option>
+                                    <option value="long_distance">Long distance</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Financial entanglement:</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="fin-entangle" value="lease"> Joint lease</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="fin-entangle" value="mortgage"> Joint mortgage</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="fin-entangle" value="bank"> Shared bank account</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="fin-entangle" value="debt"> Shared debt</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="fin-entangle" value="car"> Shared car</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="fin-entangle" value="pets"> Shared pets</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="fin-entangle" value="phone"> Shared phone plan</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="fin-entangle" value="none"> None</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Social entanglement:</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="social-entangle" value="friends"> Shared friend group</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="social-entangle" value="family"> Close to their family</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="social-entangle" value="work"> Work together</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="social-entangle" value="hobby"> Same hobby communities</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="social-entangle" value="minimal"> Minimal overlap</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Children involved?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="kids" value="yes" required> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="kids" value="no" checked required> No</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Pets involved?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="pets" value="yes" checked required> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="pets" value="no" required> No</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="entangle-resources">Your exit resources:</label>
+                                <select id="entangle-resources" required>
+                                    <option value="savings">Savings available</option>
+                                    <option value="family">Family nearby</option>
+                                    <option value="friends">Friends support</option>
+                                    <option value="new_place">New place lined up</option>
+                                    <option value="nothing">Nothing yet</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-list-check"></i> Unpack Entanglement</button>
+                        </form>
+                    </div>
+
+                    <div id="output-entanglement" class="output-container"></div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <span class="history-title">Saved Entanglement Plans</span>
+                            <button class="btn btn-outline" style="font-size:0.8rem; padding:0.3rem 0.6rem;" onclick="clearToolHistory('entanglement')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="history-entanglement"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: THE CONVERSATION -->
+                <section id="the-conversation" class="view-section">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-header-text">
+                                <h2>The Conversation</h2>
+                                <p>"I need to say it in a way that is honest but not cruel."</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="loadSampleScenario('conversation')">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-conversation" onsubmit="processConversation(event)">
+                            <div class="form-group">
+                                <label for="conv-reaction">Their likely reaction:</label>
+                                <select id="conv-reaction" required>
+                                    <option value="shock">Shock</option>
+                                    <option value="begging">Begging / Bargaining</option>
+                                    <option value="anger">Anger / Defensiveness</option>
+                                    <option value="silence">Silence / Shutdown</option>
+                                    <option value="relief">Relief</option>
+                                    <option value="iknew">"I knew this was coming"</option>
+                                    <option value="threats">Threats / Manipulation</option>
+                                    <option value="selfharm">Self-harm references</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="conv-pattern">Your relationship pattern:</label>
+                                <select id="conv-pattern" required>
+                                    <option value="pursue_withdraw">They pursue, I withdraw</option>
+                                    <option value="avoid_conflict">We both avoid conflict</option>
+                                    <option value="one_dominates">One person dominates conversations</option>
+                                    <option value="talk_openly">We generally talk openly</option>
+                                    <option value="rarely_deep">We rarely talk deeply</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="conv-understand">What you want them to understand:</label>
+                                <textarea id="conv-understand" placeholder="Core truth you need to convey gently..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="conv-dontsay">What you don't want to say:</label>
+                                <textarea id="conv-dontsay" placeholder="Things that are overly hurtful, unnecessary, or unhelpful..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="conv-safety">Safety concerns:</label>
+                                <select id="conv-safety" required>
+                                    <option value="none">None</option>
+                                    <option value="yell">They might yell / cause a scene</option>
+                                    <option value="break">They might break property</option>
+                                    <option value="hurt_me">They might physically hurt me</option>
+                                    <option value="hurt_self">They might hurt themselves</option>
+                                    <option value="unsure">I'm not completely sure</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-comment-dots"></i> Generate Conversation Script</button>
+                        </form>
+                    </div>
+
+                    <div id="output-conversation" class="output-container"></div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <span class="history-title">Saved Conversation Scripts</span>
+                            <button class="btn btn-outline" style="font-size:0.8rem; padding:0.3rem 0.6rem;" onclick="clearToolHistory('conversation')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="history-conversation"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: POST-BREAKUP INTEGRITY -->
+                <section id="post-breakup-integrity" class="view-section">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-header-text">
+                                <h2>Post-Breakup Integrity</h2>
+                                <p>"I want to be decent in the aftermath but I also need to protect myself."</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="loadSampleScenario('integrity')">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-integrity" onsubmit="processIntegrity(event)">
+                            <div class="form-group">
+                                <label for="integ-contact">Desired post-breakup contact:</label>
+                                <select id="integ-contact" required>
+                                    <option value="none">None / Complete No-Contact</option>
+                                    <option value="logistics">Brief logistics only</option>
+                                    <option value="friendly">Friendly checking in</option>
+                                    <option value="friends_eventually">Friends eventually</option>
+                                    <option value="dont_know">I don't know yet</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="integ-theircontact">Their likely contact attempts:</label>
+                                <select id="integ-theircontact" required>
+                                    <option value="constant">Constant texts/calls</option>
+                                    <option value="occasional">Occasional check-ins</option>
+                                    <option value="none">None / Full radio silence</option>
+                                    <option value="angry">Angry or guilt-tripping messages</option>
+                                    <option value="hopeful">Hopeful / Reminiscing</option>
+                                    <option value="bargaining">Bargaining for second chances</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="integ-vulnerability">Your primary emotional vulnerability:</label>
+                                <select id="integ-vulnerability" required>
+                                    <option value="miss">I'll miss them terribly</option>
+                                    <option value="guilt">I'll feel overwhelming guilt</option>
+                                    <option value="second_guess">I'll second-guess my choice</option>
+                                    <option value="comfort">I'll want to comfort them when they cry</option>
+                                    <option value="relieved">I'll feel guilty for feeling relieved</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="integ-possessions">Mutual possessions to exchange:</label>
+                                <textarea id="integ-possessions" placeholder="List items that need to be swapped or resolved..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="integ-socialmedia">Social media approach:</label>
+                                <select id="integ-socialmedia" required>
+                                    <option value="block">Block across all platforms</option>
+                                    <option value="mute">Mute / Hide stories & posts</option>
+                                    <option value="nothing">Change nothing right now</option>
+                                    <option value="unfollow">Unfollow / Remove as follower</option>
+                                    <option value="soft_launch">Soft launch single status</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-user-shield"></i> Build Integrity Plan</button>
+                        </form>
+                    </div>
+
+                    <div id="output-integrity" class="output-container"></div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <span class="history-title">Saved Integrity Protocols</span>
+                            <button class="btn btn-outline" style="font-size:0.8rem; padding:0.3rem 0.6rem;" onclick="clearToolHistory('integrity')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="history-integrity"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: POST-EXIT REBUILD -->
+                <section id="post-exit-rebuild" class="view-section">
+                    <div class="card">
+                        <div class="tool-header">
+                            <div class="tool-header-text">
+                                <h2>Post-Exit Rebuild</h2>
+                                <p>"I know I'll feel guilty, lonely, and unsure once I'm out."</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="loadSampleScenario('rebuild')">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-rebuild" onsubmit="processRebuild(event)">
+                            <div class="form-group">
+                                <label for="rebuild-support">Support system:</label>
+                                <select id="rebuild-support" required>
+                                    <option value="strong">Strong (Reliable friends/family)</option>
+                                    <option value="moderate">Moderate (A couple of contacts)</option>
+                                    <option value="weak">Weak (Few people to turn to)</option>
+                                    <option value="isolated">Isolated (Mostly alone)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="rebuild-housing">Housing plan post-exit:</label>
+                                <select id="rebuild-housing" required>
+                                    <option value="staying">Staying in my current place</option>
+                                    <option value="moving_out">Moving to a new apartment</option>
+                                    <option value="family">Moving in with family/friends</option>
+                                    <option value="unclear">Currently unclear / Temporary</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="rebuild-finances">Financial situation post-exit:</label>
+                                <select id="rebuild-finances" required>
+                                    <option value="stable">Stable & Secure</option>
+                                    <option value="tight">Tight but manageable</option>
+                                    <option value="dire">Dire / High stress</option>
+                                    <option value="unclear">Unclear right now</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="rebuild-fear">What you're most afraid of after:</label>
+                                <textarea id="rebuild-fear" placeholder="Regret, acute loneliness, missing them..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="rebuild-forward">What you're most looking forward to:</label>
+                                <textarea id="rebuild-forward" placeholder="Peace, independence, emotional freedom..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-compass-drafting"></i> Generate Rebuild Roadmap</button>
+                        </form>
+                    </div>
+
+                    <div id="output-rebuild" class="output-container"></div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <span class="history-title">Saved Rebuild Roadmaps</span>
+                            <button class="btn btn-outline" style="font-size:0.8rem; padding:0.3rem 0.6rem;" onclick="clearToolHistory('rebuild')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="history-rebuild"></div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Mandatory Footer -->
+            <footer>
+                <p>For entertainment and reflection purposes only. Not therapy or professional advice. If you are in an abusive relationship, contact a domestic violence hotline before making any moves.</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">Script copied to clipboard!</div>
+
+    <!-- -----------------------------------------------------------------
+       JAVASCRIPT APPLICATION LOGIC
+    ----------------------------------------------------------------- -->
+    <script>
+        // --- Navigation / UI State Management ---
+        function switchTab(toolId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+
+            const targetSection = document.getElementById(toolId);
+            if(targetSection) targetSection.classList.add('active');
+
+            const activeNav = document.querySelector(`.nav-link[onclick="switchTab('${toolId}')"]`);
+            if(activeNav) activeNav.classList.add('active');
+
+            // Close mobile menu if open
+            closeMobileSidebar();
+
+            // Scroll top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Render existing history for this tool
+            if(toolId !== 'dashboard') {
+                renderHistory(toolId.replace('-', ''));
+            }
+        }
+
+        function toggleMobileSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+            document.getElementById('sidebarOverlay').classList.toggle('mobile-open');
+        }
+
+        function closeMobileSidebar() {
+            document.getElementById('sidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('mobile-open');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg || "Copied to clipboard!";
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Script copied to clipboard!");
+            }).catch(err => {
+                console.error('Copy failed', err);
+            });
+        }
+
+        // --- LocalStorage History Management ---
+        function getHistoryKey(toolId) {
+            return `leavingclarity_history_${toolId}`;
+        }
+
+        function saveToHistory(toolId, inputSummary, outputHtml) {
+            const key = getHistoryKey(toolId);
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString(),
+                summary: inputSummary,
+                html: outputHtml
+            };
+
+            history.unshift(newItem);
+            if(history.length > 30) history = history.slice(0, 30); // Max 30 items
+
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            // Map toolId names correctly to element IDs
+            const map = {
+                'guilt': 'guilt',
+                'guiltdecoder': 'guilt',
+                'entanglement': 'entanglement',
+                'entanglementunpacker': 'entanglement',
+                'conversation': 'conversation',
+                'theconversation': 'conversation',
+                'integrity': 'integrity',
+                'postbreakupintegrity': 'integrity',
+                'rebuild': 'rebuild',
+                'postexitrebuild': 'rebuild'
+            };
+
+            const cleanId = map[toolId] || toolId;
+            const container = document.getElementById(`history-${cleanId}`);
+            if(!container) return;
+
+            const key = getHistoryKey(cleanId);
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+            if(history.length === 0) {
+                container.innerHTML = '<p style="font-size:0.85rem; color: var(--text-muted); padding:0.5rem 0;">No saved analyses yet.</p>';
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="history-item" id="hist-item-${item.id}">
+                    <div class="history-summary" onclick="toggleHistoryItem(${item.id})">
+                        <span><strong>${item.timestamp}</strong> — ${escapeHtml(item.summary)}</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="history-details">
+                        ${item.html}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistoryItem(id) {
+            const item = document.getElementById(`hist-item-${id}`);
+            if(item) item.classList.toggle('open');
+        }
+
+        function clearToolHistory(toolId) {
+            const key = getHistoryKey(toolId);
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+
+        // --- SAMPLE SCENARIO LOADERS ---
+        function loadSampleScenario(tool) {
+            if(tool === 'guilt') {
+                document.getElementById('guilt-why').value = "I'm simply not in love anymore. We have grown into completely different people with different life visions.";
+                document.getElementById('guilt-qualities').value = "They are so kind, stable, dependable, and genuinely care about my well-being.";
+                document.getElementById('guilt-duration').value = "1-2yr";
+                
+                // Set checkboxes
+                const cbValues = ['love', 'history', 'cohabit'];
+                document.querySelectorAll('input[name="guilt-source"]').forEach(cb => {
+                    cb.checked = cbValues.includes(cb.value);
+                });
+                
+                document.getElementById('guilt-tried').value = "somewhat";
+                showToast("Sample Guilt Scenario Loaded");
+            } 
+            else if(tool === 'entanglement') {
+                document.getElementById('entangle-living').value = "lease";
+                
+                document.querySelectorAll('input[name="fin-entangle"]').forEach(cb => {
+                    cb.checked = ['lease', 'bank', 'pets'].includes(cb.value);
+                });
+
+                document.querySelectorAll('input[name="social-entangle"]').forEach(cb => {
+                    cb.checked = ['friends'].includes(cb.value);
+                });
+
+                document.querySelector('input[name="kids"][value="no"]').checked = true;
+                document.querySelector('input[name="pets"][value="yes"]').checked = true;
+                document.getElementById('entangle-resources').value = "savings";
+                showToast("Sample Entanglement Scenario Loaded");
+            }
+            else if(tool === 'conversation') {
+                document.getElementById('conv-reaction').value = "begging";
+                document.getElementById('conv-pattern').value = "avoid_conflict";
+                document.getElementById('conv-understand').value = "I want them to know they did nothing wrong, but my heart is no longer in this and staying wouldn't be fair to either of us.";
+                document.getElementById('conv-dontsay').value = "I don't want to say 'I never loved you' or bring up minor flaws that don't matter.";
+                document.getElementById('conv-safety').value = "none";
+                showToast("Sample Conversation Scenario Loaded");
+            }
+            else if(tool === 'integrity') {
+                document.getElementById('integ-contact').value = "logistics";
+                document.getElementById('integ-theircontact').value = "hopeful";
+                document.getElementById('integ-vulnerability').value = "guilt";
+                document.getElementById('integ-possessions').value = "A few boxes of books, winter coat, and kitchen items.";
+                document.getElementById('integ-socialmedia').value = "unfollow";
+                showToast("Sample Integrity Scenario Loaded");
+            }
+            else if(tool === 'rebuild') {
+                document.getElementById('rebuild-support').value = "moderate";
+                document.getElementById('rebuild-housing').value = "moving_out";
+                document.getElementById('rebuild-finances').value = "tight";
+                document.getElementById('rebuild-fear').value = "I'm afraid of overwhelming guilt when I sit alone in my new place, wondering if I made a huge mistake.";
+                document.getElementById('rebuild-forward').value = "I am looking forward to genuine emotional alignment, personal space, and true peace of mind.";
+                showToast("Sample Rebuild Scenario Loaded");
+            }
+        }
+
+
+        // --- TOOL 1 LOGIC: GUILT DECODER ---
+        function processGuilt(e) {
+            e.preventDefault();
+            const why = document.getElementById('guilt-why').value;
+            const qualities = document.getElementById('guilt-qualities').value;
+            const duration = document.getElementById('guilt-duration').value;
+            const tried = document.getElementById('guilt-tried').value;
+
+            const selectedGuilt = Array.from(document.querySelectorAll('input[name="guilt-source"]:checked')).map(cb => cb.value);
+
+            let guiltMapText = "Your guilt is primarily rooted in ";
+            if(selectedGuilt.includes('love') || selectedGuilt.includes('devastated')) {
+                guiltMapText += "<strong>empathic distress</strong> — hurting someone you care about who hasn't hurt you. ";
+            }
+            if(selectedGuilt.includes('depend') || selectedGuilt.includes('isolated')) {
+                guiltMapText += "<strong>a rescue dynamic</strong> — feeling responsible for another adult's life stability. ";
+            }
+            if(selectedGuilt.includes('promised') || selectedGuilt.includes('history')) {
+                guiltMapText += "<strong>sunk cost & contract obligations</strong> — confusing past commitment with present compatibility. ";
+            }
+            if(selectedGuilt.length === 0) {
+                guiltMapText += "general discomfort with causing necessary pain.";
+            }
+
+            const html = `
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-compass"></i> THE GUILT MAP</div>
+                    <p>${guiltMapText}</p>
+                    <p style="font-size:0.85rem; color:var(--text-muted);">Care is wanting them to be happy. Obligation is staying so you don't look like the bad guy. Recognize the difference.</p>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-hourglass-half"></i> THE STAY COST</div>
+                    <p>Staying out of pity costs you your integrity and costs them the opportunity to be loved wholeheartedly by someone who chooses them freely.</p>
+                    <p><strong>Duration Context:</strong> Unhappiness lasting <em>${duration}</em> indicates a persistent reality, not a temporary rough patch.</p>
+                </div>
+
+                <div class="output-card highlight">
+                    <div class="output-card-title"><i class="fa-solid fa-hand-holding-heart"></i> THE KINDNESS OF LEAVING</div>
+                    <p>It feels like cruelty to leave a good person, but the truest cruelty is letting someone build a life on a foundation of unreciprocated affection.</p>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-shield-cat"></i> THE "GOOD PERSON" TRAP</div>
+                    <p>You appreciate that they are: <em>"${escapeHtml(qualities)}"</em>. Someone can be wonderful, stable, and blameless, and still not be your person. Lack of wrongdoing is not a requirement for exit.</p>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-quote-left"></i> THE SELF-FORGIVENESS ANCHOR</div>
+                    <p style="font-style: italic; font-size: 1rem; color: var(--slate-main);">"You are not required to set yourself on fire to keep someone else warm."</p>
+                </div>
+            `;
+
+            const outContainer = document.getElementById('output-guilt');
+            outContainer.innerHTML = html;
+            outContainer.classList.add('active');
+
+            saveToHistory('guilt', `Guilt Analysis (${selectedGuilt.length} sources)`, html);
+        }
+
+
+        // --- TOOL 2 LOGIC: ENTANGLEMENT UNPACKER ---
+        function processEntanglement(e) {
+            e.preventDefault();
+            const living = document.getElementById('entangle-living').value;
+            const resources = document.getElementById('entangle-resources').value;
+            const kids = document.querySelector('input[name="kids"]:checked').value;
+            const pets = document.querySelector('input[name="pets"]:checked').value;
+
+            const finCheck = Array.from(document.querySelectorAll('input[name="fin-entangle"]:checked')).map(cb => cb.value);
+            const socCheck = Array.from(document.querySelectorAll('input[name="social-entangle"]:checked')).map(cb => cb.value);
+
+            // Compute complexity level
+            let complexityScore = finCheck.length + socCheck.length;
+            if(kids === 'yes') complexityScore += 5;
+            if(pets === 'yes') complexityScore += 2;
+            if(living === 'mortgage') complexityScore += 3;
+
+            let complexityBadge = '<span class="badge badge-low">Low Complexity</span>';
+            if(complexityScore >= 5 && complexityScore < 9) {
+                complexityBadge = '<span class="badge badge-medium">Medium Complexity</span>';
+            } else if(complexityScore >= 9) {
+                complexityBadge = '<span class="badge badge-high">High Complexity</span>';
+            }
+
+            const html = `
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-layer-group"></i> THE EXIT COMPLEXITY</div>
+                    ${complexityBadge}
+                    <p>Your situation involves ${finCheck.length} financial touchpoints and ${socCheck.length} social overlap areas. Entanglement is a logistical puzzle, not an emotional trap. Every thread can be untangled one step at a time.</p>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-house-user"></i> THE HOUSING PLAN</div>
+                    <p><strong>Status (${living}):</strong> Draft a 30-day exit timeline. If you have <em>${resources}</em>, leverage that immediate baseline. Do not negotiate housing during the emotional breakup talk — address it 24-48 hours later.</p>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-coins"></i> FINANCIAL SEPARATION (30-60 DAY ROADMAP)</div>
+                    <p>• Gather personal documents (Passport, ID, tax forms) into a secure place prior to speaking.<br>
+                       • Open an individual bank account in your name only if you haven't already.<br>
+                       • Set a definitive date to close/split shared bills and accounts.</p>
+                </div>
+
+                ${pets === 'yes' ? `
+                <div class="output-card highlight">
+                    <div class="output-card-title"><i class="fa-solid fa-dog"></i> THE PET PLAN</div>
+                    <p>Decide pet arrangements based strictly on the animal's wellbeing and primary caregiver capacity. Avoid complex shared visitation schedules long-term as they prolong emotional ambiguity.</p>
+                </div>` : ''}
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-users"></i> SOCIAL NAVIGATION & PREP CHECKLIST</div>
+                    <p>• <strong>Friendship group:</strong> Do not demand friends take sides. State clearly: "We've broken up, but I care about them and want you all to remain supportive of both of us."<br>
+                       • <strong>Pre-conversation prep:</strong> Secure key valuables, log out of shared digital devices, and establish a safe destination for the night after the talk.</p>
+                </div>
+            `;
+
+            const outContainer = document.getElementById('output-entanglement');
+            outContainer.innerHTML = html;
+            outContainer.classList.add('active');
+
+            saveToHistory('entanglement', `Unpack Plan (${living}, Pets: ${pets})`, html);
+        }
+
+
+        // --- TOOL 3 LOGIC: THE CONVERSATION ---
+        function processConversation(e) {
+            e.preventDefault();
+            const reaction = document.getElementById('conv-reaction').value;
+            const pattern = document.getElementById('conv-pattern').value;
+            const understand = document.getElementById('conv-understand').value;
+            const dontsay = document.getElementById('conv-dontsay').value;
+            const safety = document.getElementById('conv-safety').value;
+
+            const openerScript = "I need to talk to you about something difficult. I’ve cared about you deeply, but I’ve realized that this relationship isn't the right path for me anymore, and I need to end it.";
+
+            const boundaryScript = "I know this is incredibly painful, and I am so sorry. But my decision is final. I am not opening a debate or asking you to fix anything — I am letting you know where I stand.";
+
+            let settingAdvice = "Choose a private, quiet setting at home where you both can speak without interruption.";
+            if(safety !== 'none') {
+                settingAdvice = "Because of potential safety/volatility concerns, hold this conversation in a neutral, public space (like a quiet park corner) or have a trusted support person waiting nearby.";
+            }
+
+            const html = `
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-location-dot"></i> THE SETTING & ATMOSPHERE</div>
+                    <p>${settingAdvice}</p>
+                </div>
+
+                <div class="output-card highlight">
+                    <div class="output-card-title"><i class="fa-solid fa-comment-medical"></i> THE OPENER</div>
+                    <p>Deliver the main point within the first two minutes. Do not start with pleasantries.</p>
+                    <div class="script-box">
+                        "${openerScript}"
+                        <button class="copy-btn" onclick="copyToClipboard('${openerScript.replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-bullseye"></i> THE BODY (NON-BLAMING & DIRECT)</div>
+                    <p><strong>What to communicate:</strong> "${escapeHtml(understand)}"</p>
+                    <p><strong>What to strictly avoid saying:</strong> "${escapeHtml(dontsay)}"</p>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-shield"></i> THE BOUNDARY SCRIPT (FOR ${reaction.toUpperCase()})</div>
+                    <p>When they react with ${reaction}, stay calm and repeated. Do not engage in bargaining.</p>
+                    <div class="script-box">
+                        "${boundaryScript}"
+                        <button class="copy-btn" onclick="copyToClipboard('${boundaryScript.replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-arrow-right-from-bracket"></i> SAFETY EXIT & LOGISTICS FOLLOW-UP</div>
+                    <p>Keep the emotional talk under 45 minutes. Once the truth is out, continuous talking breeds circular arguments. Arrange to discuss practical next steps after 24-48 hours once emotions settle.</p>
+                </div>
+            `;
+
+            const outContainer = document.getElementById('output-conversation');
+            outContainer.innerHTML = html;
+            outContainer.classList.add('active');
+
+            saveToHistory('conversation', `Conversation Script (Reaction: ${reaction})`, html);
+        }
+
+
+        // --- TOOL 4 LOGIC: POST-BREAKUP INTEGRITY ---
+        function processIntegrity(e) {
+            e.preventDefault();
+            const contact = document.getElementById('integ-contact').value;
+            const theirContact = document.getElementById('integ-theircontact').value;
+            const vulnerability = document.getElementById('integ-vulnerability').value;
+            const possessions = document.getElementById('integ-possessions').value;
+            const socialMedia = document.getElementById('integ-socialmedia').value;
+
+            const contactScript = "I want to respect both of our healing processes. I need space right now and will only be responding to essential logistical items.";
+
+            const html = `
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-comment-slash"></i> THE CONTACT BOUNDARY</div>
+                    <p>Target Contact Level: <strong>${contact}</strong>. Expected incoming pattern: <em>${theirContact}</em>.</p>
+                    <div class="script-box">
+                        "${contactScript}"
+                        <button class="copy-btn" onclick="copyToClipboard('${contactScript.replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+
+                <div class="output-card highlight">
+                    <div class="output-card-title"><i class="fa-solid fa-box-archive"></i> THE POSSESSION SWAP</div>
+                    <p>Items to exchange: <em>"${escapeHtml(possessions)}"</em></p>
+                    <p><strong>Rule of Integrity:</strong> Pack all belongings cleanly. Exchange them via a third party or set a single neutral 15-minute window. Do not use items as breadcrumbs for future contact.</p>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-heart-shield"></i> THE GRIEF & VULNERABILITY BOUNDARY</div>
+                    <p>Your primary trigger is <strong>${vulnerability}</strong>. Remind yourself: comforting them now feels kind, but actually prolongs their distress by giving false hope.</p>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-mobile-screen-button"></i> DIGITAL SEPARATION PLAN</div>
+                    <p>Strategy: <strong>${socialMedia}</strong>. Remove tracking capabilities, location sharing, and direct notification updates immediately to avoid digital emotional triggers.</p>
+                </div>
+            `;
+
+            const outContainer = document.getElementById('output-integrity');
+            outContainer.innerHTML = html;
+            outContainer.classList.add('active');
+
+            saveToHistory('integrity', `Integrity Plan (${contact})`, html);
+        }
+
+
+        // --- TOOL 5 LOGIC: POST-EXIT REBUILD ---
+        function processRebuild(e) {
+            e.preventDefault();
+            const support = document.getElementById('rebuild-support').value;
+            const housing = document.getElementById('rebuild-housing').value;
+            const finances = document.getElementById('rebuild-finances').value;
+            const fear = document.getElementById('rebuild-fear').value;
+            const forward = document.getElementById('rebuild-forward').value;
+
+            const html = `
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-clock"></i> THE FIRST 48 HOURS PROTOCOL</div>
+                    <p>• Hour 0-12: Focus solely on immediate physical comfort (food, rest, safety). Notify your primary contact (${support} support system).<br>
+                       • Hour 12-48: Keep schedules simple. Avoid alcohol or impulsive decisions. Allow yourself to feel the natural emotional release.</p>
+                </div>
+
+                <div class="output-card highlight">
+                    <div class="output-card-title"><i class="fa-solid fa-kit-medical"></i> THE GRIEF WAVE & REGRET ANTIDOTE</div>
+                    <p>Grief is a physiological response to change, not proof that you made the wrong choice.</p>
+                    <p><strong>Your Fear:</strong> <em>"${escapeHtml(fear)}"</em></p>
+                    <p><strong>Your Compass (Re-read this when guilt strikes):</strong> <em>"${escapeHtml(forward)}"</em></p>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-house-chimney"></i> PRACTICAL STABILITY CHECK</div>
+                    <p><strong>Housing (${housing}) & Financials (${finances}):</strong> Prioritize strict budgeting and physical safety over luxury for the first 90 days. Basic security builds internal peace.</p>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-title"><i class="fa-solid fa-spa"></i> IDENTITY RECLAIM</div>
+                    <p>Begin reclaiming space that belongs entirely to you. Pick up one simple daily ritual or hobby that was neglected during the relationship.</p>
+                </div>
+            `;
+
+            const outContainer = document.getElementById('output-rebuild');
+            outContainer.innerHTML = html;
+            outContainer.classList.add('active');
+
+            saveToHistory('rebuild', `Rebuild Roadmap (${support} support)`, html);
+        }
+
+        // Initialize default view on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab('dashboard');
+        });
+    </script>
+</body>
+</html>

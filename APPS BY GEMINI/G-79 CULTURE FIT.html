@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CultureFitDecisionKit — Values-Alignment Toolkit</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --forest-green: #2D6A4F;
+            --forest-green-dark: #1B4332;
+            --forest-green-light: #40916C;
+            --dusty-mauve: #9D8189;
+            --dusty-mauve-light: #F5E6E8;
+            --bg-gradient-start: #F1F8F5;
+            --bg-gradient-end: #F5E6E8;
+            --text-dark: #2B2D42;
+            --text-muted: #6C757D;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Layout Structure */
+        .app-container {
+            display: flex;
+            flex: 1;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #FFFFFF;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-header i {
+            font-size: 24px;
+            color: var(--forest-green);
+        }
+
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--forest-green);
+            line-height: 1.2;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-y: auto;
+        }
+
+        .nav-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            color: var(--text-dark);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item button:hover {
+            background-color: var(--bg-gradient-start);
+            color: var(--forest-green);
+        }
+
+        .nav-item button.active {
+            background-color: var(--forest-green);
+            color: #FFFFFF;
+        }
+
+        .nav-item button i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        /* Main Content Styling */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .mobile-toggle {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--forest-green);
+            cursor: pointer;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 95;
+        }
+
+        /* Cards & Components */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .view-header {
+            margin-bottom: 8px;
+        }
+
+        .view-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--forest-green);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .view-subtitle {
+            font-size: 15px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-dark);
+            background-color: #FAFAFA;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--forest-green);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .checkbox-label:hover, .radio-label:hover {
+            border-color: var(--dusty-mauve);
+            background: var(--dusty-mauve-light);
+        }
+
+        .checkbox-label input, .radio-label input {
+            accent-color: var(--forest-green);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--forest-green);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--forest-green-dark);
+        }
+
+        .btn-secondary {
+            background-color: #E2E8F0;
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #CBD5E1;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--dusty-mauve);
+            color: var(--dusty-mauve);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--dusty-mauve-light);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Dashboard Specifics */
+        .hero-card {
+            background: linear-gradient(135deg, var(--forest-green) 0%, var(--forest-green-dark) 100%);
+            color: white;
+            border: none;
+        }
+
+        .hero-card h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .hero-card p {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 300;
+            line-height: 1.5;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .tool-card {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08);
+            border-color: var(--forest-green);
+        }
+
+        .tool-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--dusty-mauve-light);
+            color: var(--dusty-mauve);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .tool-card:hover .tool-card-icon {
+            background: var(--forest-green);
+            color: #FFFFFF;
+        }
+
+        .tool-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .tool-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Output & Results */
+        .output-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .output-card {
+            border-left: 4px solid var(--forest-green);
+            background: #F8FAF8;
+        }
+
+        .output-card.score-high { border-left-color: #2D6A4F; }
+        .output-card.score-moderate { border-left-color: #E9C46A; }
+        .output-card.score-low { border-left-color: #F4A261; }
+        .output-card.score-hostile { border-left-color: #E76F51; }
+
+        .output-header {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--dusty-mauve);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .output-content {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-dark);
+            white-space: pre-line;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .copy-btn:hover {
+            color: var(--forest-green);
+        }
+
+        /* Accordion / History */
+        .history-section {
+            margin-top: 24px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .history-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .history-item-header {
+            padding: 12px 16px;
+            background: #FAFAFA;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .history-item-header:hover {
+            background: #F1F5F9;
+        }
+
+        .history-item-body {
+            padding: 16px;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            background: #FFFFFF;
+            font-size: 14px;
+        }
+
+        .history-item.open .history-item-body {
+            display: block;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--text-dark);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        .site-footer {
+            margin-top: auto;
+            padding: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            line-height: 1.5;
+            background: rgba(255,255,255,0.4);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 80px 16px 24px 16px;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-compass" style="color: var(--forest-green); font-size: 18px;"></i>
+            <span style="font-weight: 700; color: var(--forest-green); font-size: 16px;">CultureFit</span>
+        </div>
+        <button class="mobile-toggle" id="mobileToggle">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="app-container">
+        <!-- Navigation Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-compass"></i>
+                <h1>CultureFit<br><span style="font-size: 12px; font-weight: 400; color: var(--text-muted);">Decision Kit</span></h1>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <button class="active" onclick="switchView('dashboard')">
+                        <i class="fa-solid fa-house"></i> Dashboard
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button onclick="switchView('tool1')">
+                        <i class="fa-solid fa-scale-balanced"></i> Values Audit
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button onclick="switchView('tool2')">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i> Situation Decoder
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button onclick="switchView('tool3')">
+                        <i class="fa-solid fa-seedling"></i> Micro-Rebellion
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button onclick="switchView('tool4')">
+                        <i class="fa-solid fa-arrows-split-up-and-left"></i> Internal Transfer
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button onclick="switchView('tool5')">
+                        <i class="fa-solid fa-door-open"></i> Exit with Integrity
+                    </button>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <div class="content-wrapper">
+
+                <!-- DASHBOARD VIEW -->
+                <div id="view-dashboard" class="view-panel">
+                    <div class="card hero-card">
+                        <h2>Culture Fit Decision Kit</h2>
+                        <p>This isn't who you want to become. Let's figure out what to do about it.</p>
+                    </div>
+
+                    <div style="margin-top: 24px;">
+                        <h3 style="font-size: 16px; margin-bottom: 16px; color: var(--text-muted);">Reflection Tools</h3>
+                        <div class="dashboard-grid">
+                            <div class="card tool-card" onclick="switchView('tool1')">
+                                <div class="tool-card-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+                                <h3>1. The Values Audit</h3>
+                                <p>Uncover why you feel uncomfortable and map the exact compromises you're making daily.</p>
+                            </div>
+                            <div class="card tool-card" onclick="switchView('tool2')">
+                                <div class="tool-card-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                                <h3>2. The Situation Decoder</h3>
+                                <p>Isolate whether the toxicity is company-wide, restricted to your team, or just your boss.</p>
+                            </div>
+                            <div class="card tool-card" onclick="switchView('tool3')">
+                                <div class="tool-card-icon"><i class="fa-solid fa-seedling"></i></div>
+                                <h3>3. The Micro-Rebellion Plan</h3>
+                                <p>Reclaim agency without burning bridges through subtle, values-based boundary setting.</p>
+                            </div>
+                            <div class="card tool-card" onclick="switchView('tool4')">
+                                <div class="tool-card-icon"><i class="fa-solid fa-arrows-split-up-and-left"></i></div>
+                                <h3>4. The Internal Transfer Plan</h3>
+                                <p>Navigate quiet moves to adjacent departments or safer pods inside the organization.</p>
+                            </div>
+                            <div class="card tool-card" onclick="switchView('tool5')">
+                                <div class="tool-card-icon"><i class="fa-solid fa-door-open"></i></div>
+                                <h3>5. The Exit with Integrity</h3>
+                                <p>Plan a clean departure strategy while holding on to your respect and self-worth.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 1 VIEW -->
+                <div id="view-tool1" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="view-header">
+                            <div class="view-title"><i class="fa-solid fa-scale-balanced"></i> The Values Audit</div>
+                            <div class="view-subtitle">Problem: "I feel uncomfortable here but I can't name exactly why."</div>
+                        </div>
+                        <form id="form-tool1" onsubmit="handleAnalyze(event, 'tool1')">
+                            <div class="form-group">
+                                <label for="t1-values">Your top 3 personal values:</label>
+                                <textarea id="t1-values" class="form-control" required placeholder="e.g., Honesty, Fairness, Work-Life Balance"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-rewarded">Behaviors that are rewarded here:</label>
+                                <textarea id="t1-rewarded" class="form-control" required placeholder="e.g., Aggression, 24/7 responsiveness, overpromising"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-punished">Behaviors that are punished here:</label>
+                                <textarea id="t1-punished" class="form-control" required placeholder="e.g., Asking questions, leaving on time, admitting mistakes"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-started">What have you started doing that feels wrong?</label>
+                                <textarea id="t1-started" class="form-control" required placeholder="e.g., Working weekends, hiding mistakes, talking down to vendors"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-stopped">What have you stopped doing that feels right?</label>
+                                <textarea id="t1-stopped" class="form-control" required placeholder="e.g., Taking lunch breaks, being transparent with clients"></textarea>
+                            </div>
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Alignment</button>
+                                <button type="button" class="btn btn-outline" onclick="loadSample('tool1')">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="results-tool1" class="output-container" style="display: none;"></div>
+                    <div id="history-tool1" class="history-section"></div>
+                </div>
+
+                <!-- TOOL 2 VIEW -->
+                <div id="view-tool2" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="view-header">
+                            <div class="view-title"><i class="fa-solid fa-magnifying-glass-chart"></i> The Situation Decoder</div>
+                            <div class="view-subtitle">Problem: "Is this the whole company, my team, or just my boss?"</div>
+                        </div>
+                        <form id="form-tool2" onsubmit="handleAnalyze(event, 'tool2')">
+                            <div class="form-group">
+                                <label for="t2-conflict">Where do you feel the conflict?</label>
+                                <select id="t2-conflict" class="form-control" required>
+                                    <option value="">Select scope...</option>
+                                    <option value="Company-wide">Company-wide</option>
+                                    <option value="My department">My department</option>
+                                    <option value="My team">My team</option>
+                                    <option value="Just my boss">Just my boss</option>
+                                    <option value="Specific individuals">Specific individuals</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Is it worse in certain situations?</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="t2-sit" value="Meetings"> Meetings</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t2-sit" value="With clients"> With clients</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t2-sit" value="After hours"> After hours</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t2-sit" value="Under pressure"> Under pressure</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t2-sit" value="Performance reviews"> Performance reviews</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t2-sit" value="Social events"> Social events</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Do others seem bothered?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2-others" value="Yes" required> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t2-others" value="Some"> Some</label>
+                                    <label class="radio-label"><input type="radio" name="t2-others" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t2-others" value="They seem fine"> They seem fine</label>
+                                    <label class="radio-label"><input type="radio" name="t2-others" value="They seem rewarded"> They seem rewarded</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-duration">How long have you felt this way?</label>
+                                <select id="t2-duration" class="form-control" required>
+                                    <option value="">Select duration...</option>
+                                    <option value="<1mo">Less than 1 month</option>
+                                    <option value="1-3mo">1 to 3 months</option>
+                                    <option value="3-6mo">3 to 6 months</option>
+                                    <option value="6mo+">6 months or longer</option>
+                                </select>
+                            </div>
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Decode Situation</button>
+                                <button type="button" class="btn btn-outline" onclick="loadSample('tool2')">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="results-tool2" class="output-container" style="display: none;"></div>
+                    <div id="history-tool2" class="history-section"></div>
+                </div>
+
+                <!-- TOOL 3 VIEW -->
+                <div id="view-tool3" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="view-header">
+                            <div class="view-title"><i class="fa-solid fa-seedling"></i> The Micro-Rebellion Plan</div>
+                            <div class="view-subtitle">Problem: "I can't change the culture but I don't want to fully conform."</div>
+                        </div>
+                        <form id="form-tool3" onsubmit="handleAnalyze(event, 'tool3')">
+                            <div class="form-group">
+                                <label for="t3-value">One value you want to protect:</label>
+                                <select id="t3-value" class="form-control" required>
+                                    <option value="">Select a value...</option>
+                                    <option value="Honesty">Honesty</option>
+                                    <option value="Fairness">Fairness</option>
+                                    <option value="Kindness">Kindness</option>
+                                    <option value="Creativity">Creativity</option>
+                                    <option value="Rest">Rest</option>
+                                    <option value="Family">Family</option>
+                                    <option value="Integrity">Integrity</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-compromising">How you're currently compromising it:</label>
+                                <textarea id="t3-compromising" class="form-control" required placeholder="e.g., Joining in office gossip to avoid being targeted"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-acting">What would acting from this value look like?</label>
+                                <textarea id="t3-acting" class="form-control" required placeholder="e.g., Refusing to participate in negative talk about peers"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-risk">The risk of acting from this value:</label>
+                                <textarea id="t3-risk" class="form-control" required placeholder="e.g., Social exclusion or being seen as not a 'team player'"></textarea>
+                            </div>
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Draft Rebellion Plan</button>
+                                <button type="button" class="btn btn-outline" onclick="loadSample('tool3')">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="results-tool3" class="output-container" style="display: none;"></div>
+                    <div id="history-tool3" class="history-section"></div>
+                </div>
+
+                <!-- TOOL 4 VIEW -->
+                <div id="view-tool4" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="view-header">
+                            <div class="view-title"><i class="fa-solid fa-arrows-split-up-and-left"></i> The Internal Transfer Plan</div>
+                            <div class="view-subtitle">Problem: "Maybe there's a team or role here that fits me better."</div>
+                        </div>
+                        <form id="form-tool4" onsubmit="handleAnalyze(event, 'tool4')">
+                            <div class="form-group">
+                                <label for="t4-depts">Other departments you're curious about:</label>
+                                <textarea id="t4-depts" class="form-control" required placeholder="e.g., Product Development, Customer Success"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-people">People in those departments:</label>
+                                <textarea id="t4-people" class="form-control" placeholder="e.g., Sarah from Product (met on last project)"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-skills">Skills that transfer:</label>
+                                <textarea id="t4-skills" class="form-control" required placeholder="e.g., Communication, analytical thinking, project management"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-reaction">Your current manager's likely reaction:</label>
+                                <select id="t4-reaction" class="form-control" required>
+                                    <option value="">Select reaction...</option>
+                                    <option value="Supportive">Supportive</option>
+                                    <option value="Neutral">Neutral</option>
+                                    <option value="Punitive">Punitive</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-policy">Internal transfer policy:</label>
+                                <select id="t4-policy" class="form-control" required>
+                                    <option value="">Select policy environment...</option>
+                                    <option value="Easy">Easy / Encouraged</option>
+                                    <option value="Requires manager approval">Requires manager approval</option>
+                                    <option value="Political">Highly Political / Fraught</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Formulate Transfer Plan</button>
+                                <button type="button" class="btn btn-outline" onclick="loadSample('tool4')">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="results-tool4" class="output-container" style="display: none;"></div>
+                    <div id="history-tool4" class="history-section"></div>
+                </div>
+
+                <!-- TOOL 5 VIEW -->
+                <div id="view-tool5" class="view-panel" style="display: none;">
+                    <div class="card">
+                        <div class="view-header">
+                            <div class="view-title"><i class="fa-solid fa-door-open"></i> The Exit with Integrity</div>
+                            <div class="view-subtitle">Problem: "I've decided this culture and I are incompatible. How do I leave without becoming bitter?"</div>
+                        </div>
+                        <form id="form-tool5" onsubmit="handleAnalyze(event, 'tool5')">
+                            <div class="form-group">
+                                <label for="t5-stay">How long can you stay while searching?</label>
+                                <select id="t5-stay" class="form-control" required>
+                                    <option value="">Select runway...</option>
+                                    <option value="3mo">Up to 3 months</option>
+                                    <option value="6mo">Up to 6 months</option>
+                                    <option value="1yr">Up to 1 year</option>
+                                    <option value="As long as needed">As long as needed</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-interviewers">What would you tell interviewers about why you're leaving?</label>
+                                <textarea id="t5-interviewers" class="form-control" required placeholder="e.g., Seeking better strategic alignment and growth opportunities"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-relationships">Who do you want to maintain relationships with?</label>
+                                <textarea id="t5-relationships" class="form-control" placeholder="e.g., Two peers on my immediate team, former lead"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-preserve">What do you want to preserve about yourself?</label>
+                                <textarea id="t5-preserve" class="form-control" required placeholder="e.g., Optimism, kindness, healthy boundaries"></textarea>
+                            </div>
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Design Exit Strategy</button>
+                                <button type="button" class="btn btn-outline" onclick="loadSample('tool5')">Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="results-tool5" class="output-container" style="display: none;"></div>
+                    <div id="history-tool5" class="history-section"></div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">Copied!</div>
+
+    <!-- Mandatory Footer -->
+    <footer class="site-footer">
+        For career values reflection only. Not therapeutic, legal, or HR advice. For mental health concerns related to workplace identity, consult a licensed professional.
+    </footer>
+
+    <script>
+        /* UI Navigation Logic */
+        const mobileToggle = document.getElementById('mobileToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function toggleMobileSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        mobileToggle.addEventListener('click', toggleMobileSidebar);
+        overlay.addEventListener('click', toggleMobileSidebar);
+
+        function switchView(viewId) {
+            // Hide all views
+            document.querySelectorAll('.view-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+
+            // Show selected view
+            const selectedView = document.getElementById('view-' + viewId);
+            if (selectedView) {
+                selectedView.style.display = 'block';
+            }
+
+            // Update active state in sidebar
+            document.querySelectorAll('.nav-item button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('onclick').includes(viewId)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Close mobile sidebar if open
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+
+            // Render history for the active tool if applicable
+            if (viewId !== 'dashboard') {
+                renderHistory(viewId);
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* Toast Notification Helper */
+        function showToast(text = 'Copied!') {
+            const toast = document.getElementById('toast');
+            toast.innerText = text;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy.");
+            });
+        }
+
+        /* Sample Scenarios Loader */
+        function loadSample(toolId) {
+            if (toolId === 'tool1') {
+                document.getElementById('t1-values').value = 'Honesty, Fairness, Work-Life Balance';
+                document.getElementById('t1-rewarded').value = 'Aggression, 24/7 availability, cutting corners to meet deadlines';
+                document.getElementById('t1-punished').value = 'Asking clarifying questions, leaving at 5 PM, admitting mistakes early';
+                document.getElementById('t1-started').value = 'Working weekends, hiding minor errors, and talking down to vendors to look tough';
+                document.getElementById('t1-stopped').value = 'Taking proper lunch breaks and being fully transparent with clients about realistic timelines';
+            } else if (toolId === 'tool2') {
+                document.getElementById('t2-conflict').value = 'Company-wide';
+                
+                document.querySelectorAll('input[name="t2-sit"]').forEach(cb => {
+                    cb.checked = ['Meetings', 'Under pressure'].includes(cb.value);
+                });
+                
+                document.querySelectorAll('input[name="t2-others"]').forEach(rb => {
+                    rb.checked = rb.value === 'Some';
+                });
+                
+                document.getElementById('t2-duration').value = '6mo+';
+            } else if (toolId === 'tool3') {
+                document.getElementById('t3-value').value = 'Kindness';
+                document.getElementById('t3-compromising').value = 'Participating in petty office gossip and trash-talking peers to fit in with the core team.';
+                document.getElementById('t3-acting').value = 'Refusing to contribute to gossip, changing the subject, or offering positive counter-perspectives.';
+                document.getElementById('t3-risk').value = 'Risking social exclusion or being viewed as naive or outside the inner circle.';
+            } else if (toolId === 'tool4') {
+                document.getElementById('t4-depts').value = 'Product Management, Customer Success';
+                document.getElementById('t4-people').value = 'Alex (Lead PM on cross-functional taskforce), Maya (Customer Success Manager)';
+                document.getElementById('t4-skills').value = 'Strategic communication, cross-team coordination, data-driven analysis';
+                document.getElementById('t4-reaction').value = 'Punitive';
+                document.getElementById('t4-policy').value = 'Requires manager approval';
+            } else if (toolId === 'tool5') {
+                document.getElementById('t5-stay').value = '6mo';
+                document.getElementById('t5-interviewers').value = 'Seeking a position better aligned with sustainable growth and transparent team values.';
+                document.getElementById('t5-relationships').value = 'Two close peers on my immediate sub-team, and a former mentor in operations.';
+                document.getElementById('t5-preserve').value = 'My core optimism, professional kindness, and healthy work-life boundaries.';
+            }
+        }
+
+        /* Business Logic & Pre-written Template Generation */
+        function generateAnalysis(toolId, formData) {
+            let sections = [];
+
+            if (toolId === 'tool1') {
+                const values = formData.values.toLowerCase();
+                const rewarded = formData.rewarded.toLowerCase();
+                
+                let score = 'Moderate';
+                let scoreClass = 'score-moderate';
+                if (rewarded.includes('aggression') || rewarded.includes('cutting corners') || formData.started.length > 50) {
+                    score = 'Hostile';
+                    scoreClass = 'score-hostile';
+                } else if (values.includes('balance') && rewarded.includes('24/7')) {
+                    score = 'Low';
+                    scoreClass = 'score-low';
+                }
+
+                sections = [
+                    { title: "THE ALIGNMENT SCORE", class: scoreClass, content: `Score: ${score}\n\nYour current environment shows significant systemic friction against your core principles. High friction leads directly to identity erosion if unaddressed.` },
+                    { title: "THE COMPROMISE MAP", content: `You are actively trading away core commitments to ${formData.values}. Specifically, sacrificing transparency or peace of mind to align with rewarded behaviors like "${formData.rewarded}" creates deep inner friction.` },
+                    { title: "THE IDENTITY DRIFT", content: `You reported that you have started: "${formData.started}". Over time, behaviors adopted merely for survival solidify into permanent habits, gradually turning you into someone you do not respect.` },
+                    { title: "THE COST", content: `The psychological overhead of stopping healthy habits—such as "${formData.stopped}"—is driving chronic fatigue, cognitive dissonance, and emotional detachment.` },
+                    { title: "THE NON-NEGOTIABLES", content: `Draw a firm line immediately around your primary values (${formData.values}). Identify at least one behavior you will halt today regardless of cultural expectations.` }
+                ];
+
+            } else if (toolId === 'tool2') {
+                const scope = formData.conflict;
+                const duration = formData.duration;
+                
+                sections = [
+                    { title: "THE SCOPE DIAGNOSIS", content: `Conflict scope: ${scope}.\n${scope === 'Company-wide' ? 'Because this friction is structural and company-wide, individual adaptation will be significantly harder than in isolated manager conflict.' : 'Because the issue is localized, moving teams or creating local boundaries may resolve most friction.'}` },
+                    { title: "THE ALLY HUNT", content: `You noted that for others: "${formData.others}". ${formData.others === 'Some' ? 'Seek out these quiet dissenters. Look for colleagues who demonstrate calm integrity during stressful moments.' : 'Be cautious; if others seem comfortable or rewarded by these behaviors, keep your reflections private.'}` },
+                    { title: "THE POCKET OF SAFETY", content: `${scope === 'Company-wide' ? 'In a culture-wide issue, safety pockets exist mainly in specialized cross-functional projects or sub-teams led by grounded leaders.' : 'Look toward adjacent sub-teams or managers who maintain distinct local norms.'}` },
+                    { title: "THE ADAPTATION CHECK", content: `Situations appearing in ${formData.situations.join(', ')} require intentional compartmentalization. Decide in advance which meetings or triggers require emotional shielding.` },
+                    { title: "THE TIMELINE", content: `You have felt this way for ${duration}. ${duration === '6mo+' ? 'WARNING: 6+ months in a misaligned environment risks normalizing toxic behaviors as baseline. Time-box your next decision.' : 'Monitor closely. Ensure this period does not quietly stretch without active boundary evaluation.'}` }
+                ];
+
+            } else if (toolId === 'tool3') {
+                sections = [
+                    { title: "THE MICRO-ACTION", content: `Commit to one subtle non-conformity this week around ${formData.value}: Instead of engaging in "${formData.compromising}", execute your ideal behavior: "${formData.acting}".` },
+                    { title: "THE LANGUAGE", content: `Use neutral, non-preachy scripts to step back:\n• "I don't have enough context to comment on that, so I'd rather focus on the project details."\n• "I'm keeping my schedule focused on current deliverables right now."` },
+                    { title: "THE ALLY STRATEGY", content: `Identify one colleague who acts with restraint. You don't need a grand coalition—just one person who shares a commitment to ${formData.value}.` },
+                    { title: "THE SELF-TALK", content: `When feeling pressure or fearing "${formData.risk}", remind yourself: "Disapproval from a system I do not respect is not a measure of my worth."` },
+                    { title: "THE BOUNDARY", content: `Non-negotiable rule: Perform required tasks, but refuse to adopt toxic relational habits as a trade-off for short-term approval.` }
+                ];
+
+            } else if (toolId === 'tool4') {
+                const reaction = formData.reaction;
+                
+                sections = [
+                    { title: "THE RECONNAISSANCE PLAN", content: `Research ${formData.depts} quietly. Analyze their team outputs, communication styles, and meeting patterns without signaling dissatisfaction with your current team.` },
+                    { title: "THE COFFEE CHAT", content: `Reach out to internal contacts (${formData.people || 'Key team members'}):\n"I really admire how your team approaches projects. I'd love to learn 15 minutes' worth of insights about your workflow as I plan my long-term development."` },
+                    { title: "THE TRANSFER PITCH", content: `Leverage your core skills (${formData.skills}). Frame the move strictly around career growth: "I'm eager to apply my strengths in ${formData.skills} to solve key challenges in ${formData.depts}."` },
+                    { title: "IF MANAGER BLOCKS", content: `Since your manager reaction is predicted as ${reaction}: ${reaction === 'Punitive' ? 'Avoid revealing transfer plans prematurely. Explore cross-functional projects first to establish relationships before requesting formal moves.' : 'Keep communication open and link your departure to organizational goals.'}` },
+                    { title: "THE TIMING", content: `Coordinate your formal request after completing a major milestone to ensure your current track record remains unassailable.` }
+                ];
+
+            } else if (toolId === 'tool5') {
+                sections = [
+                    { title: "THE SEARCH CRITERIA", content: `Target companies that explicitly demonstrate values opposite to your current friction. Ask in interviews: "Can you share an example of how your team handles honest mistakes or tight deadlines?"` },
+                    { title: "THE RED FLAG DETECTOR", content: `Watch out for high-turnover indicators, vague answers about work-life balance, or subtle pressure during interview scheduling.` },
+                    { title: "THE RESIGNATION STORY", content: `Your prepared narrative: "${formData.interviewers}". Keep exit interviews polite, brief, and entirely forward-focused.` },
+                    { title: "THE IDENTITY REPAIR", content: `During your ${formData.stay} runway, actively practice preserving "${formData.preserve}". Separate your sense of worth from daily office dynamics.` },
+                    { title: "THE NEW JOB FILTER", content: `Before accepting a future offer, request to speak with potential peers without managers present to verify real daily culture.` }
+                ];
+            }
+
+            return sections;
+        }
+
+        /* Form Submissions & Storage Handling */
+        function handleAnalyze(event, toolId) {
+            event.preventDefault();
+            let formData = {};
+
+            if (toolId === 'tool1') {
+                formData = {
+                    values: document.getElementById('t1-values').value,
+                    rewarded: document.getElementById('t1-rewarded').value,
+                    punished: document.getElementById('t1-punished').value,
+                    started: document.getElementById('t1-started').value,
+                    stopped: document.getElementById('t1-stopped').value
+                };
+            } else if (toolId === 'tool2') {
+                const sitNodes = document.querySelectorAll('input[name="t2-sit"]:checked');
+                const situations = Array.from(sitNodes).map(n => n.value);
+                const othersNode = document.querySelector('input[name="t2-others"]:checked');
+                
+                formData = {
+                    conflict: document.getElementById('t2-conflict').value,
+                    situations: situations,
+                    others: othersNode ? othersNode.value : 'Unspecified',
+                    duration: document.getElementById('t2-duration').value
+                };
+            } else if (toolId === 'tool3') {
+                formData = {
+                    value: document.getElementById('t3-value').value,
+                    compromising: document.getElementById('t3-compromising').value,
+                    acting: document.getElementById('t3-acting').value,
+                    risk: document.getElementById('t3-risk').value
+                };
+            } else if (toolId === 'tool4') {
+                formData = {
+                    depts: document.getElementById('t4-depts').value,
+                    people: document.getElementById('t4-people').value,
+                    skills: document.getElementById('t4-skills').value,
+                    reaction: document.getElementById('t4-reaction').value,
+                    policy: document.getElementById('t4-policy').value
+                };
+            } else if (toolId === 'tool5') {
+                formData = {
+                    stay: document.getElementById('t5-stay').value,
+                    interviewers: document.getElementById('t5-interviewers').value,
+                    relationships: document.getElementById('t5-relationships').value,
+                    preserve: document.getElementById('t5-preserve').value
+                };
+            }
+
+            const analysis = generateAnalysis(toolId, formData);
+            renderResults(toolId, analysis);
+
+            // Save to LocalStorage
+            saveToHistory(toolId, {
+                timestamp: new Date().toLocaleString(),
+                formData: formData,
+                analysis: analysis
+            });
+
+            // Refresh History list
+            renderHistory(toolId);
+        }
+
+        function renderResults(toolId, analysis) {
+            const resultsContainer = document.getElementById('results-' + toolId);
+            resultsContainer.innerHTML = '';
+            resultsContainer.style.display = 'flex';
+
+            let fullTextToCopy = "";
+
+            analysis.forEach(item => {
+                fullTextToCopy += `${item.title}\n${item.content}\n\n`;
+
+                const card = document.createElement('div');
+                card.className = `card output-card ${item.class || ''}`;
+                
+                const header = document.createElement('div');
+                header.className = 'output-header';
+                header.innerHTML = `<span>${item.title}</span><button class="copy-btn" onclick="copyToClipboard('${escapeJsString(item.content)}')"><i class="fa-regular fa-copy"></i> Copy</button>`;
+
+                const content = document.createElement('div');
+                content.className = 'output-content';
+                content.innerText = item.content;
+
+                card.appendChild(header);
+                card.appendChild(content);
+                resultsContainer.appendChild(card);
+            });
+
+            // Master Copy Button
+            const masterCopyBtn = document.createElement('button');
+            masterCopyBtn.className = 'btn btn-secondary';
+            masterCopyBtn.style.alignSelf = 'flex-start';
+            masterCopyBtn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy Full Reflection Output`;
+            masterCopyBtn.onclick = () => copyToClipboard(fullTextToCopy);
+            resultsContainer.appendChild(masterCopyBtn);
+
+            // Smooth Scroll to Results
+            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function escapeJsString(str) {
+            return str.replace(/'/g, "\\'").replace(/\n/g, "\\n");
+        }
+
+        /* LocalStorage & History Management */
+        function saveToHistory(toolId, entry) {
+            const storageKey = `culture_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            history.unshift(entry); // Add to beginning
+            if (history.length > 30) history = history.slice(0, 30); // Max 30 items
+
+            localStorage.setItem(storageKey, JSON.stringify(history));
+        }
+
+        function getHistory(toolId) {
+            const storageKey = `culture_history_${toolId}`;
+            return JSON.parse(localStorage.getItem(storageKey) || '[]');
+        }
+
+        function clearHistory(toolId) {
+            const storageKey = `culture_history_${toolId}`;
+            localStorage.removeItem(storageKey);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function renderHistory(toolId) {
+            const historyContainer = document.getElementById('history-' + toolId);
+            if (!historyContainer) return;
+
+            const history = getHistory(toolId);
+
+            if (history.length === 0) {
+                historyContainer.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <div class="history-header">
+                    <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Reflections (${history.length})</span>
+                    <button class="btn btn-outline btn-sm" onclick="clearHistory('${toolId}')"><i class="fa-solid fa-trash"></i> Clear History</button>
+                </div>
+                <div class="history-list">
+            `;
+
+            history.forEach((item, index) => {
+                html += `
+                    <div class="history-item" id="hist-${toolId}-${index}">
+                        <div class="history-item-header" onclick="toggleHistoryItem('${toolId}', ${index})">
+                            <span>Saved Reflection — ${item.timestamp}</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="history-item-body">
+                            ${item.analysis.map(a => `<div style="margin-bottom: 12px;"><strong>${a.title}</strong><p style="white-space: pre-line; margin-top: 4px; color: var(--text-dark);">${a.content}</p></div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            historyContainer.innerHTML = html;
+        }
+
+        function toggleHistoryItem(toolId, index) {
+            const itemElem = document.getElementById(`hist-${toolId}-${index}`);
+            if (itemElem) {
+                itemElem.classList.toggle('open');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewCityReset — Build a Life From Scratch</title>
+  
+  <!-- Google Fonts & Font Awesome CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* CSS RESET & VARIABLES */
+    :root {
+      --terracotta: #E76F51;
+      --terracotta-hover: #D65D3F;
+      --terracotta-light: #FDF0ED;
+      --teal: #2A9D8F;
+      --teal-hover: #238377;
+      --teal-light: #EBF7F5;
+      --bg-gradient: linear-gradient(135deg, #FFF8F5 0%, #F0FDFA 100%);
+      --text-main: #2D3748;
+      --text-muted: #718096;
+      --border-color: #E2E8F0;
+      --sidebar-width: 260px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* LAYOUT STRUCTURE */
+    #app-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* SIDEBAR */
+    #sidebar {
+      width: var(--sidebar-width);
+      background: #FFFFFF;
+      border-right: 1px solid var(--border-color);
+      box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-header i {
+      font-size: 1.5rem;
+      color: var(--terracotta);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 0.75rem 1rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover {
+      background: var(--terracotta-light);
+      color: var(--terracotta);
+    }
+
+    .nav-item.active {
+      background: var(--terracotta);
+      color: #FFFFFF;
+    }
+
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+    }
+
+    /* MAIN CONTENT AREA */
+    #main-wrapper {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      width: calc(100% - var(--sidebar-width));
+      transition: margin-left 0.3s ease, width 0.3s ease;
+    }
+
+    #main-content {
+      flex: 1;
+      max-width: 850px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* MOBILE NAVBAR */
+    .mobile-header {
+      display: none;
+      background: #FFFFFF;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .mobile-header .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .mobile-header .brand i {
+      color: var(--terracotta);
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--text-main);
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 95;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(0,0,0,0.05);
+      background: rgba(255,255,255,0.5);
+    }
+
+    /* CARDS & UI COMPONENTS */
+    .card {
+      background: #FFFFFF;
+      border-radius: 0.75rem; /* rounded-xl */
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .hero-card {
+      background: linear-gradient(135deg, #FFFFFF 0%, var(--terracotta-light) 100%);
+      border: 1px solid rgba(231, 111, 81, 0.2);
+    }
+
+    .tool-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .tool-header h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .tool-header p.problem-statement {
+      color: var(--terracotta);
+      font-weight: 500;
+      font-size: 0.95rem;
+      font-style: italic;
+    }
+
+    /* FORMS & INPUTS */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .form-control, select, textarea {
+      width: 100%;
+      padding: 0.65rem 0.875rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      background-color: #FFFFFF;
+      color: var(--text-main);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-control:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.15);
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .checkbox-grid, .radio-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .checkbox-label, .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.15s ease;
+      background: #FFFFFF;
+    }
+
+    .checkbox-label:hover, .radio-label:hover {
+      background: var(--teal-light);
+      border-color: var(--teal);
+    }
+
+    .checkbox-label input, .radio-label input {
+      accent-color: var(--teal);
+    }
+
+    /* BUTTONS */
+    .btn-group {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: 0.5rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--terracotta);
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+      background: var(--terracotta-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--teal-light);
+      color: var(--teal);
+      border: 1px solid rgba(42, 157, 143, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: var(--teal);
+      color: #FFFFFF;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .btn-outline:hover {
+      background: #F7FAFC;
+      color: var(--text-main);
+    }
+
+    .btn-sm {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    /* OUTPUT RESULTS STYLING */
+    .results-container {
+      margin-top: 2rem;
+      display: none;
+    }
+
+    .results-container.active {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-section {
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .result-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .result-section h4 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--teal);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .result-section p, .result-section ul {
+      color: var(--text-main);
+      font-size: 0.95rem;
+    }
+
+    .result-section ul {
+      list-style-type: none;
+    }
+
+    .result-section ul li {
+      position: relative;
+      padding-left: 1.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .result-section ul li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--terracotta);
+      font-weight: bold;
+    }
+
+    .quote-box {
+      background: var(--terracotta-light);
+      border-left: 4px solid var(--terracotta);
+      padding: 1rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      font-style: italic;
+      margin-top: 0.5rem;
+    }
+
+    /* DASHBOARD SPECIFIC */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .dash-card {
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border-color: var(--terracotta);
+    }
+
+    .dash-card-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--teal-light);
+      color: var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .dash-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.35rem;
+      color: var(--text-main);
+    }
+
+    .dash-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .move-counter-box {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #FFFFFF;
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ACCORDION / HISTORY */
+    .history-section {
+      margin-top: 2rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .history-header h3 {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    .history-item {
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      margin-bottom: 0.5rem;
+      background: #FFFFFF;
+      overflow: hidden;
+    }
+
+    .history-item-header {
+      padding: 0.75rem 1rem;
+      background: #FAF9F8;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+
+    }
+
+    .history-item-body {
+      padding: 1rem;
+      display: none;
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .history-item-body.active {
+      display: block;
+    }
+
+    /* COPY & TOAST */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--text-main);
+      color: #FFFFFF;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 768px) {
+      #sidebar {
+        transform: translateX(-100%);
+      }
+
+      #sidebar.mobile-open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay.active {
+        display: block;
+      }
+
+      #main-wrapper {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .mobile-header {
+        display: flex;
+      }
+
+      #main-content {
+        padding: 1.25rem 1rem;
+      }
+
+      .checkbox-grid, .radio-group {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app-container">
+    <!-- MOBILE HEADER -->
+    <header class="mobile-header">
+      <div class="brand">
+        <i class="fa-solid fa-compass"></i>
+        <span>NewCityReset</span>
+      </div>
+      <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle Navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- FIXED SIDEBAR -->
+    <nav id="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-compass"></i>
+        <h1>NewCityReset</h1>
+      </div>
+      <ul class="nav-list">
+        <li>
+          <a class="nav-item active" data-tool="dashboard">
+            <i class="fa-solid fa-house"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tool="tool1">
+            <i class="fa-solid fa-kit-medical"></i>
+            <span>Week 1 Survival</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tool="tool2">
+            <i class="fa-solid fa-user-group"></i>
+            <span>Social Map</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tool="tool3">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span>Neighborhoods</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tool="tool4">
+            <i class="fa-solid fa-masks-theater"></i>
+            <span>Identity Rebuilder</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tool="tool5">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>Connection Planner</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- MAIN CONTENT AREA -->
+    <div id="main-wrapper">
+      <main id="main-content">
+        
+        <!-- DASHBOARD VIEW -->
+        <section id="view-dashboard" class="view-section">
+          <div class="card hero-card">
+            <h2>New City Reset</h2>
+            <p style="font-size: 1.1rem; color: var(--terracotta); font-weight: 500; margin-top: 0.25rem;">
+              Build a life here without the loneliness.
+            </p>
+            <p style="margin-top: 0.75rem; color: var(--text-muted); font-size: 0.95rem;">
+              Relocating is a massive psychological and logistical reset. You aren't failing because it feels hard—it's supposed to be hard. Select a tool below to get actionable, low-pressure steps to establish your ground game.
+            </p>
+          </div>
+
+          <div class="move-counter-box">
+            <i class="fa-solid fa-calendar-days" style="font-size: 1.5rem; color: var(--teal);"></i>
+            <div style="flex: 1;">
+              <label for="move-days-input" style="font-weight: 600; font-size: 0.875rem; display: block;">Days since you moved:</label>
+              <input type="number" id="move-days-input" class="form-control" placeholder="e.g. 14" style="max-width: 150px; margin-top: 0.25rem;" min="0">
+            </div>
+            <div id="move-days-badge" style="display: none; font-weight: 600; color: var(--teal); background: var(--teal-light); padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.875rem;">
+              Day <span id="days-count">0</span>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="card dash-card" data-target="tool1">
+              <div>
+                <div class="dash-card-icon"><i class="fa-solid fa-kit-medical"></i></div>
+                <h3>Week 1 Survival</h3>
+                <p>Stabilize logistics, triage immediate stress, and build your initial safety net.</p>
+              </div>
+              <div style="margin-top: 1rem; color: var(--terracotta); font-size: 0.85rem; font-weight: 600;">
+                Start Triage &rarr;
+              </div>
+            </div>
+
+            <div class="card dash-card" data-target="tool2">
+              <div>
+                <div class="dash-card-icon"><i class="fa-solid fa-user-group"></i></div>
+                <h3>Social Map</h3>
+                <p>Find tailored, low-stakes ways to meet people based on your specific social style.</p>
+              </div>
+              <div style="margin-top: 1rem; color: var(--terracotta); font-size: 0.85rem; font-weight: 600;">
+                Map Connections &rarr;
+              </div>
+            </div>
+
+            <div class="card dash-card" data-target="tool3">
+              <div>
+                <div class="dash-card-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                <h3>Neighborhood Negotiator</h3>
+                <p>Figure out where to live, what trade-offs you're making, and explore wisely.</p>
+              </div>
+              <div style="margin-top: 1rem; color: var(--terracotta); font-size: 0.85rem; font-weight: 600;">
+                Explore Areas &rarr;
+              </div>
+            </div>
+
+            <div class="card dash-card" data-target="tool4">
+              <div>
+                <div class="dash-card-icon"><i class="fa-solid fa-masks-theater"></i></div>
+                <h3>Identity Rebuilder</h3>
+                <p>Process who you were back home and intentionally construct who you want to be here.</p>
+              </div>
+              <div style="margin-top: 1rem; color: var(--terracotta); font-size: 0.85rem; font-weight: 600;">
+                Rebuild Self &rarr;
+              </div>
+            </div>
+
+            <div class="card dash-card" data-target="tool5">
+              <div>
+                <div class="dash-card-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <h3>Connection Planner</h3>
+                <p>Establish a sustainable weekly skeleton and turn an empty calendar into comfort.</p>
+              </div>
+              <div style="margin-top: 1rem; color: var(--terracotta); font-size: 0.85rem; font-weight: 600;">
+                Plan Routine &rarr;
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 1: WEEK 1 SURVIVAL -->
+        <section id="view-tool1" class="view-section" style="display: none;">
+          <div class="tool-header">
+            <h2><i class="fa-solid fa-kit-medical" style="color: var(--terracotta);"></i> Tool 1 — Week 1 Survival</h2>
+            <p class="problem-statement">"I don't know where anything is and everything feels overwhelming."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-tool1">
+              <div class="form-group">
+                <label for="t1-reason">Why did you move?</label>
+                <select id="t1-reason" required>
+                  <option value="">Select a reason...</option>
+                  <option value="New job">New job</option>
+                  <option value="Relationship">Relationship</option>
+                  <option value="School">School</option>
+                  <option value="Fresh start">Fresh start</option>
+                  <option value="Family">Family</option>
+                  <option value="Had to">Had to move</option>
+                  <option value="Still figuring it out">Still figuring it out</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t1-living">Living situation:</label>
+                <select id="t1-living" required>
+                  <option value="">Select living situation...</option>
+                  <option value="Alone">Alone</option>
+                  <option value="Roommate">Roommate(s)</option>
+                  <option value="Partner">Partner</option>
+                  <option value="Family">Family</option>
+                  <option value="Temporary housing">Temporary housing (Airbnb/Hotel)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Do you have a job here yet?</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="t1-job" value="Yes" checked> Yes</label>
+                  <label class="radio-label"><input type="radio" name="t1-job" value="Starting soon"> Starting soon</label>
+                  <label class="radio-label"><input type="radio" name="t1-job" value="No"> No</label>
+                  <label class="radio-label"><input type="radio" name="t1-job" value="Remote from previous job"> Remote from previous job</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>What stresses you most right now? (Select all that apply)</label>
+                <div class="checkbox-grid">
+                  <label class="checkbox-label"><input type="checkbox" name="t1-stress" value="Finding housing"> Finding housing</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t1-stress" value="Navigating transit"> Navigating transit</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t1-stress" value="Making money"> Making money</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t1-stress" value="Meeting people"> Meeting people</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t1-stress" value="Being alone"> Being alone</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t1-stress" value="Missing old life"> Missing old life</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t1-stress" value="Language/culture"> Language/culture</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t1-stress" value="Safety"> Safety</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t1-working">What is working so far? (Even small things)</label>
+                <textarea id="t1-working" placeholder="e.g. Found a good coffee spot, unpacking went okay..."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-bolt"></i> Generate Survival Plan</button>
+                <button type="button" class="btn btn-secondary load-sample-btn" data-tool="tool1"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- OUTPUT CONTAINER -->
+          <div id="output-tool1" class="card results-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="color: var(--terracotta);">Your Week 1 Action Plan</h3>
+              <button class="btn btn-outline btn-sm copy-btn" data-target="output-tool1"><i class="fa-regular fa-copy"></i> Copy Plan</button>
+            </div>
+            
+            <div class="result-body"></div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="history-section" id="history-tool1">
+            <div class="history-header">
+              <h3><i class="fa-solid fa-clock-rotate-left"></i> Previous Triage Logs</h3>
+              <button class="btn btn-outline btn-sm clear-history-btn" data-tool="tool1">Clear History</button>
+            </div>
+            <div class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 2: SOCIAL MAP -->
+        <section id="view-tool2" class="view-section" style="display: none;">
+          <div class="tool-header">
+            <h2><i class="fa-solid fa-user-group" style="color: var(--terracotta);"></i> Tool 2 — Social Map</h2>
+            <p class="problem-statement">"I don't know how to meet people here. I feel invisible."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-tool2">
+              <div class="form-group">
+                <label>Your social style:</label>
+                <div class="radio-group">
+                  <label class="radio-label"><input type="radio" name="t2-style" value="Introvert" checked> Introvert</label>
+                  <label class="radio-label"><input type="radio" name="t2-style" value="Ambivert"> Ambivert</label>
+                  <label class="radio-label"><input type="radio" name="t2-style" value="Extrovert"> Extrovert</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>What do you enjoy doing? (Select all that apply)</label>
+                <div class="checkbox-grid">
+                  <label class="checkbox-label"><input type="checkbox" name="t2-interests" value="Fitness"> Fitness</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t2-interests" value="Reading"> Reading</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t2-interests" value="Gaming"> Gaming</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t2-interests" value="Arts/creative"> Arts/creative</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t2-interests" value="Food/drink"> Food/drink</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t2-interests" value="Outdoors"> Outdoors</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t2-interests" value="Music"> Music</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t2-interests" value="Tech"> Tech</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t2-interests" value="Volunteering"> Volunteering</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t2-interests" value="Sports"> Sports</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t2-tried">What have you tried so far?</label>
+                <textarea id="t2-tried" placeholder="e.g. Downloaded Bumble BFF, walked around downtown..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t2-barrier">What stops you from reaching out?</label>
+                <select id="t2-barrier" required>
+                  <option value="">Select main barrier...</option>
+                  <option value="Fear of rejection">Fear of rejection</option>
+                  <option value="Don't know where to go">Don't know where to go</option>
+                  <option value="Language barrier">Language barrier</option>
+                  <option value="Too tired">Too tired / Energy burnout</option>
+                  <option value="Don't know what to say">Don't know what to say</option>
+                  <option value="I don't want to seem desperate">I don't want to seem desperate</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t2-work">Work/school situation:</label>
+                <select id="t2-work" required>
+                  <option value="">Select situation...</option>
+                  <option value="Full-time office">Full-time office</option>
+                  <option value="Remote">Remote</option>
+                  <option value="Hybrid">Hybrid</option>
+                  <option value="Student">Student</option>
+                  <option value="Looking">Looking for work</option>
+                  <option value="Not working">Not working</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-map-location"></i> Build Social Map</button>
+                <button type="button" class="btn btn-secondary load-sample-btn" data-tool="tool2"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool2" class="card results-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="color: var(--terracotta);">Your Tailored Social Strategy</h3>
+              <button class="btn btn-outline btn-sm copy-btn" data-target="output-tool2"><i class="fa-regular fa-copy"></i> Copy Plan</button>
+            </div>
+            <div class="result-body"></div>
+          </div>
+
+          <div class="history-section" id="history-tool2">
+            <div class="history-header">
+              <h3><i class="fa-solid fa-clock-rotate-left"></i> Previous Social Maps</h3>
+              <button class="btn btn-outline btn-sm clear-history-btn" data-tool="tool2">Clear History</button>
+            </div>
+            <div class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 3: NEIGHBORHOOD NEGOTIATOR -->
+        <section id="view-tool3" class="view-section" style="display: none;">
+          <div class="tool-header">
+            <h2><i class="fa-solid fa-map-location-dot" style="color: var(--terracotta);"></i> Tool 3 — Neighborhood Negotiator</h2>
+            <p class="problem-statement">"I don't know which neighborhood to live in or if I'm paying too much."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-tool3">
+              <div class="form-group">
+                <label for="t3-budget">Your monthly housing budget ($):</label>
+                <input type="number" id="t3-budget" class="form-control" placeholder="e.g. 1500" required min="0">
+              </div>
+
+              <div class="form-group">
+                <label>Must-haves: (Select up to 4)</label>
+                <div class="checkbox-grid">
+                  <label class="checkbox-label"><input type="checkbox" name="t3-musthaves" value="Walkable"> Walkable</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t3-musthaves" value="Near transit"> Near transit</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t3-musthaves" value="Quiet"> Quiet</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t3-musthaves" value="Nightlife"> Nightlife</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t3-musthaves" value="Near work"> Near work</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t3-musthaves" value="Safe"> Safe</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t3-musthaves" value="Affordable"> Affordable</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t3-musthaves" value="Good food"> Good food</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t3-musthaves" value="Parks"> Parks</label>
+                  <label class="checkbox-label"><input type="checkbox" name="t3-musthaves" value="Diverse"> Diverse</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t3-feel">Current neighborhood feel:</label>
+                <select id="t3-feel" required>
+                  <option value="">Select current feel...</option>
+                  <option value="Love it">Love it</option>
+                  <option value="Okay">Okay / Fine for now</option>
+                  <option value="Hate it">Hate it</option>
+                  <option value="Don't know yet">Don't know yet / Haven't moved in</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t3-commute">Commute time acceptable:</label>
+                <select id="t3-commute" required>
+                  <option value="">Select acceptable commute...</option>
+                  <option value="<15 min">&lt; 15 min</option>
+                  <option value="15-30 min">15–30 min</option>
+                  <option value="30-45 min">30–45 min</option>
+                  <option value="45-60 min">45–60 min</option>
+                  <option value="Don't care">Don't care / Work from home</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t3-looking">What are you actually looking for in a neighborhood?</label>
+                <textarea id="t3-looking" placeholder="Describe the vibe, people, pace of daily life..."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-compass"></i> Analyze Neighborhood Needs</button>
+                <button type="button" class="btn btn-secondary load-sample-btn" data-tool="tool3"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool3" class="card results-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="color: var(--terracotta);">Neighborhood Analysis</h3>
+              <button class="btn btn-outline btn-sm copy-btn" data-target="output-tool3"><i class="fa-regular fa-copy"></i> Copy Analysis</button>
+            </div>
+            <div class="result-body"></div>
+          </div>
+
+          <div class="history-section" id="history-tool3">
+            <div class="history-header">
+              <h3><i class="fa-solid fa-clock-rotate-left"></i> Previous Neighborhood Searches</h3>
+              <button class="btn btn-outline btn-sm clear-history-btn" data-tool="tool3">Clear History</button>
+            </div>
+            <div class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 4: IDENTITY REBUILDER -->
+        <section id="view-tool4" class="view-section" style="display: none;">
+          <div class="tool-header">
+            <h2><i class="fa-solid fa-masks-theater" style="color: var(--terracotta);"></i> Tool 4 — Identity Rebuilder</h2>
+            <p class="problem-statement">"I used to be someone back home. Here, I'm nobody."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-tool4">
+              <div class="form-group">
+                <label for="t4-old">Who were you in your old city?</label>
+                <textarea id="t4-old" placeholder="Describe roles, reputation, activities, how people knew you..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t4-keep">What parts of that identity do you want to keep?</label>
+                <textarea id="t4-keep" placeholder="Values, habits, creative hobbies, core traits..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t4-leave">What parts do you want to leave behind?</label>
+                <textarea id="t4-leave" placeholder="Old expectations, bad habits, roles you outgrew..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t4-know">What do you want people here to know about you?</label>
+                <textarea id="t4-know" placeholder="How do you want to be perceived in 6 months?"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t4-scares">What scares you about starting over?</label>
+                <textarea id="t4-scares" placeholder="Anxieties about obscurity, making mistakes, being forgotten..."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-seedling"></i> Construct Identity Roadmap</button>
+                <button type="button" class="btn btn-secondary load-sample-btn" data-tool="tool4"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool4" class="card results-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="color: var(--terracotta);">Identity Roadmap</h3>
+              <button class="btn btn-outline btn-sm copy-btn" data-target="output-tool4"><i class="fa-regular fa-copy"></i> Copy Roadmap</button>
+            </div>
+            <div class="result-body"></div>
+          </div>
+
+          <div class="history-section" id="history-tool4">
+            <div class="history-header">
+              <h3><i class="fa-solid fa-clock-rotate-left"></i> Previous Identity Worksheets</h3>
+              <button class="btn btn-outline btn-sm clear-history-btn" data-tool="tool4">Clear History</button>
+            </div>
+            <div class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 5: CONNECTION PLANNER -->
+        <section id="view-tool5" class="view-section" style="display: none;">
+          <div class="tool-header">
+            <h2><i class="fa-solid fa-calendar-check" style="color: var(--terracotta);"></i> Tool 5 — Connection Planner</h2>
+            <p class="problem-statement">"I have no routine and every day feels the same."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-tool5">
+              <div class="form-group">
+                <label for="t5-work">Your work schedule:</label>
+                <input type="text" id="t5-work" class="form-control" placeholder="e.g. 9-5 remote, flexible shifts, student" required>
+              </div>
+
+              <div class="form-group">
+                <label for="t5-energy">Your energy pattern:</label>
+                <select id="t5-energy" required>
+                  <option value="">Select energy pattern...</option>
+                  <option value="Morning person">Morning person</option>
+                  <option value="Midday">Midday peak</option>
+                  <option value="Evening">Evening person</option>
+                  <option value="Night owl">Night owl</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t5-weekly">One thing you need weekly:</label>
+                <select id="t5-weekly" required>
+                  <option value="">Select core weekly need...</option>
+                  <option value="Deep conversation">Deep conversation</option>
+                  <option value="Physical activity">Physical activity</option>
+                  <option value="Creative time">Creative time</option>
+                  <option value="Nature">Nature / Outdoors</option>
+                  <option value="Learning">Learning / Growth</option>
+                  <option value="Quiet">Quiet solitude</option>
+                  <option value="Social event">Social event / Crowd energy</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t5-hardday">What day feels hardest?</label>
+                <select id="t5-hardday" required>
+                  <option value="">Select hardest day...</option>
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t5-homefeel">What would make this feel like home?</label>
+                <textarea id="t5-homefeel" placeholder="e.g. Having a regular coffee spot, knowing neighbors, cooking in a full kitchen..."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calendar-days"></i> Generate Weekly Routine</button>
+                <button type="button" class="btn btn-secondary load-sample-btn" data-tool="tool5"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-tool5" class="card results-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="color: var(--terracotta);">Weekly Connection Plan</h3>
+              <button class="btn btn-outline btn-sm copy-btn" data-target="output-tool5"><i class="fa-regular fa-copy"></i> Copy Plan</button>
+            </div>
+            <div class="result-body"></div>
+          </div>
+
+          <div class="history-section" id="history-tool5">
+            <div class="history-header">
+              <h3><i class="fa-solid fa-clock-rotate-left"></i> Previous Routine Plans</h3>
+              <button class="btn btn-outline btn-sm clear-history-btn" data-tool="tool5">Clear History</button>
+            </div>
+            <div class="history-list"></div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- MANDATORY FOOTER -->
+      <footer>
+        For practical planning and encouragement only. Not therapy or professional advice.
+      </footer>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast">Copied!</div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      /* ----------------------------------------------------
+         NAVIGATION & MOBILE SIDEBAR
+      ---------------------------------------------------- */
+      const navItems = document.querySelectorAll('.nav-item');
+      const viewSections = document.querySelectorAll('.view-section');
+      const hamburgerBtn = document.getElementById('hamburger-btn');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebar-overlay');
+      const dashCards = document.querySelectorAll('.dash-card');
+
+      function switchTab(toolId) {
+        // Toggle Active Class on Nav
+        navItems.forEach(item => {
+          if(item.getAttribute('data-tool') === toolId) {
+            item.classList.add('active');
+          } else {
+            item.classList.remove('active');
+          }
+        });
+
+        // Toggle Visible View
+        viewSections.forEach(section => {
+          if(section.id === `view-${toolId}`) {
+            section.style.display = 'block';
+          } else {
+            section.style.display = 'none';
+          }
+        });
+
+        // Close mobile sidebar if open
+        sidebar.classList.remove('mobile-open');
+        sidebarOverlay.classList.remove('active');
+
+        // Scroll to top of content
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      navItems.forEach(item => {
+        item.addEventListener('click', () => {
+          switchTab(item.getAttribute('data-tool'));
+        });
+      });
+
+      dashCards.forEach(card => {
+        card.addEventListener('click', () => {
+          switchTab(card.getAttribute('data-target'));
+        });
+      });
+
+      hamburgerBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+        sidebarOverlay.classList.toggle('active');
+      });
+
+      sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('mobile-open');
+        sidebarOverlay.classList.remove('active');
+      });
+
+      /* ----------------------------------------------------
+         DAYS SINCE MOVE COUNTER
+      ---------------------------------------------------- */
+      const moveDaysInput = document.getElementById('move-days-input');
+      const moveDaysBadge = document.getElementById('move-days-badge');
+      const daysCount = document.getElementById('days-count');
+
+      const savedDays = localStorage.getItem('newcity_days_moved');
+      if(savedDays !== null && savedDays !== '') {
+        moveDaysInput.value = savedDays;
+        daysCount.textContent = savedDays;
+        moveDaysBadge.style.display = 'inline-block';
+      }
+
+      moveDaysInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        if(val !== '' && val >= 0) {
+          localStorage.setItem('newcity_days_moved', val);
+          daysCount.textContent = val;
+          moveDaysBadge.style.display = 'inline-block';
+        } else {
+          localStorage.removeItem('newcity_days_moved');
+          moveDaysBadge.style.display = 'none';
+        }
+      });
+
+      /* ----------------------------------------------------
+         TOAST & COPY SYSTEM
+      ---------------------------------------------------- */
+      const toast = document.getElementById('toast');
+
+      function showToast(message = "Copied!") {
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 2000);
+      }
+
+      document.addEventListener('click', (e) => {
+        if(e.target.closest('.copy-btn')) {
+          const btn = e.target.closest('.copy-btn');
+          const targetId = btn.getAttribute('data-target');
+          const targetEl = document.getElementById(targetId);
+          if(targetEl) {
+            const bodyContent = targetEl.querySelector('.result-body');
+            const textToCopy = bodyContent ? bodyContent.innerText : targetEl.innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+              showToast("Copied to clipboard!");
+            });
+          }
+        }
+      });
+
+      /* ----------------------------------------------------
+         LOCAL STORAGE HISTORY MANAGEMENT
+      ---------------------------------------------------- */
+      function saveToHistory(toolId, inputSummary, outputHTML) {
+        const key = `newcity_history_${toolId}`;
+        let history = JSON.parse(localStorage.getItem(key) || '[]');
+        
+        const newItem = {
+          id: Date.now(),
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          summary: inputSummary,
+          html: outputHTML
+        };
+
+        history.unshift(newItem); // prepend
+        if(history.length > 30) history = history.slice(0, 30); // max 30
+
+        localStorage.setItem(key, JSON.stringify(history));
+        renderHistory(toolId);
+      }
+
+      function renderHistory(toolId) {
+        const key = `newcity_history_${toolId}`;
+        const container = document.querySelector(`#history-${toolId} .history-list`);
+        if(!container) return;
+
+        const history = JSON.parse(localStorage.getItem(key) || '[]');
+        if(history.length === 0) {
+          container.innerHTML = `<p style="font-size: 0.85rem; color: var(--text-muted); italic;">No previous logs saved.</p>`;
+          return;
+        }
+
+        container.innerHTML = history.map(item => `
+          <div class="history-item">
+            <div class="history-item-header" onclick="this.nextElementSibling.classList.toggle('active')">
+              <span><strong>${item.date}</strong> — ${escapeHTML(item.summary)}</span>
+              <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: var(--text-muted);"></i>
+            </div>
+            <div class="history-item-body">
+              ${item.html}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function clearHistory(toolId) {
+        const key = `newcity_history_${toolId}`;
+        localStorage.removeItem(key);
+        renderHistory(toolId);
+        showToast("History cleared");
+      }
+
+      document.querySelectorAll('.clear-history-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const toolId = btn.getAttribute('data-tool');
+          clearHistory(toolId);
+        });
+      });
+
+      function escapeHTML(str) {
+        return str.replace(/[&<>'"]/g, 
+          tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+        );
+      }
+
+      // Initialize histories
+      ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistory);
+
+      /* ----------------------------------------------------
+         SAMPLE SCENARIO LOADERS
+      ---------------------------------------------------- */
+      const sampleScenarios = {
+        tool1: () => {
+          document.getElementById('t1-reason').value = 'New job';
+          document.getElementById('t1-living').value = 'Alone';
+          document.querySelector('input[name="t1-job"][value="Yes"]').checked = true;
+          document.querySelectorAll('input[name="t1-stress"]').forEach(cb => {
+            cb.checked = ['Finding housing', 'Navigating transit', 'Being alone', 'Missing old life'].includes(cb.value);
+          });
+          document.getElementById('t1-working').value = 'Found a solid coffee spot down the street and unpacked my bed.';
+        },
+        tool2: () => {
+          document.querySelector('input[name="t2-style"][value="Introvert"]').checked = true;
+          document.querySelectorAll('input[name="t2-interests"]').forEach(cb => {
+            cb.checked = ['Reading', 'Outdoors', 'Arts/creative'].includes(cb.value);
+          });
+          document.getElementById('t2-tried').value = 'Walked through a museum alone and browsed a bookstore.';
+          document.getElementById('t2-barrier').value = 'Fear of rejection';
+          document.getElementById('t2-work').value = 'Remote';
+        },
+        tool3: () => {
+          document.getElementById('t3-budget').value = '1400';
+          document.querySelectorAll('input[name="t3-musthaves"]').forEach(cb => {
+            cb.checked = ['Walkable', 'Safe', 'Near transit', 'Affordable'].includes(cb.value);
+          });
+          document.getElementById('t3-feel').value = 'Hate it';
+          document.getElementById('t3-commute').value = '15-30 min';
+          document.getElementById('t3-looking').value = 'A neighborhood with trees, local cafes, quiet nights, but within a quick bus ride to central action.';
+        },
+        tool4: () => {
+          document.getElementById('t4-old').value = 'I was the social organizer, the connector, the go-to person for weekend plans and deep late-night chats.';
+          document.getElementById('t4-keep').value = 'My warmth, my love for hosting small dinners, and my curiosity about people.';
+          document.getElementById('t4-leave').value = 'Feeling obligated to say yes to every event and being the only one who plans things.';
+          document.getElementById('t4-know').value = 'That I am thoughtful, grounded, creative, and a loyal friend.';
+          document.getElementById('t4-scares').value = 'Being completely anonymous and feeling like my past accomplishments don\'t matter here.';
+        },
+        tool5: () => {
+          document.getElementById('t5-work').value = '9-5 remote software role';
+          document.getElementById('t5-energy').value = 'Morning person';
+          document.getElementById('t5-weekly').value = 'Deep conversation';
+          document.getElementById('t5-hardday').value = 'Sunday';
+          document.getElementById('t5-homefeel').value = 'Having a regular weekend morning spot where the barista knows my order, and having one person to text spontaneously.';
+        }
+      };
+
+      document.querySelectorAll('.load-sample-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const toolId = btn.getAttribute('data-tool');
+          if(sampleScenarios[toolId]) {
+            sampleScenarios[toolId]();
+            showToast("Sample scenario loaded!");
+          }
+        });
+      });
+
+      /* ----------------------------------------------------
+         TOOL 1 LOGIC: WEEK 1 SURVIVAL
+      ---------------------------------------------------- */
+      document.getElementById('form-tool1').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const reason = document.getElementById('t1-reason').value;
+        const living = document.getElementById('t1-living').value;
+        const job = document.querySelector('input[name="t1-job"]:checked').value;
+        const stresses = Array.from(document.querySelectorAll('input[name="t1-stress"]:checked')).map(c => c.value);
+        const working = document.getElementById('t1-working').value.trim();
+
+        // Template Generator Logic
+        let triageItems = [];
+        if(stresses.includes('Safety') || living === 'Temporary housing') {
+          triageItems.push("<strong>Tier 1 — Essential Shelter & Security:</strong> Focus strictly on securing your baseline housing and physical safety before worrying about socializing.");
+        }
+        if(job === 'No' || stresses.includes('Making money')) {
+          triageItems.push("<strong>Tier 1 — Financial & Employment Anchor:</strong> Set a daily 2-hour block for job searching/logistics, then intentionally close the laptop.");
+        }
+        if(stresses.includes('Navigating transit') || stresses.includes('Finding housing')) {
+          triageItems.push("<strong>Tier 2 — Environmental Orientation:</strong> Map out your immediate 4-block radius on foot to establish geographic familiarity.");
+        }
+        triageItems.push("<strong>Tier 3 — Psychological Stabilization:</strong> Protect your evening routine to prevent sensory overload from the move.");
+
+        const checklist = [
+          "Locate one primary grocery store and one pharmacy within a 15-minute radius.",
+          "Set up your sleeping space completely—make the bed first, unpack clothes second.",
+          "Establish one 'safe zone' room or corner in your home that is 100% free of moving boxes.",
+          "Identify the fastest route to a green space, park, or quiet walking path.",
+          "Save local emergency contacts and nearest urgent care address into your phone."
+        ];
+
+        let comfortWin = "Buy a small table lamp, plant, or soft candle today. Warm lighting instantly signals safety to your nervous system in a new space.";
+        if(living === 'Alone') {
+          comfortWin = "Set up a dedicated comfortable sitting spot with your favorite blanket or pillow. Unpack your mug and make a hot drink there tonight.";
+        }
+
+        let antidote = "When missing old friends or routines, write down 2 specific things you loved doing with them, then schedule a video catch-up call for this weekend.";
+        if(stresses.includes('Missing old life')) {
+          antidote = "Permit yourself to grieve the old city. Order your favorite familiar comfort food tonight while watching a comfort show you know by heart.";
+        }
+
+        const htmlOutput = `
+          <div class="result-section">
+            <h4><i class="fa-solid fa-triangle-exclamation"></i> Priority Triage</h4>
+            <p style="margin-bottom:0.5rem;">Based on your current setup (${reason}, living ${living.toLowerCase()}):</p>
+            <ul>${triageItems.map(i => `<li>${i}</li>`).join('')}</ul>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-list-check"></i> Week 1 Concrete Checklist</h4>
+            <ul>${checklist.map(c => `<li>${c}</li>`).join('')}</ul>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-couch"></i> One Immediate Comfort Win</h4>
+            <p>${comfortWin}</p>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-heart"></i> Homesickness Antidote</h4>
+            <p>${antidote}</p>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-hourglass-half"></i> The Real Timeline</h4>
+            <div class="quote-box">
+              "Most adults feel disoriented and out of place for 3 to 6 months after a major relocation. You are not falling behind; your brain is simply cataloging thousands of new data points."
+            </div>
+          </div>
+        `;
+
+        const container = document.getElementById('output-tool1');
+        container.querySelector('.result-body').innerHTML = htmlOutput;
+        container.classList.add('active');
+
+        saveToHistory('tool1', `Moved for ${reason} (${living})`, htmlOutput);
+      });
+
+      /* ----------------------------------------------------
+         TOOL 2 LOGIC: SOCIAL MAP
+      ---------------------------------------------------- */
+      document.getElementById('form-tool2').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const style = document.querySelector('input[name="t2-style"]:checked').value;
+        const interests = Array.from(document.querySelectorAll('input[name="t2-interests"]:checked')).map(c => c.value);
+        const tried = document.getElementById('t2-tried').value.trim();
+        const barrier = document.getElementById('t2-barrier').value;
+        const work = document.getElementById('t2-work').value;
+
+        let pathItems = [];
+        if(interests.includes('Reading') || interests.includes('Arts/creative')) {
+          pathItems.push("<strong>Independent Third Places:</strong> Independent bookstores, quiet art gallery openings, or local library workshops where conversation is optional.");
+        }
+        if(interests.includes('Fitness') || interests.includes('Outdoors') || interests.includes('Sports')) {
+          pathItems.push("<strong>Structured Activity Groups:</strong> Social bouldering gyms, casual run clubs, or outdoor volunteer groups (low social pressure because eyes are on the activity).");
+        }
+        if(interests.includes('Gaming') || interests.includes('Tech')) {
+          pathItems.push("<strong>Interest Meetups:</strong> Board game cafes, local Discord/Reddit city channels, or hackathons/meetup groups.");
+        }
+        if(pathItems.length === 0) {
+          pathItems.push("<strong>Neighborhood Anchor Spots:</strong> A regular coffee shop, neighborhood farmers market, or community garden where consistency builds familiarity.");
+        }
+
+        let lowStakes = "Sit at the counter of a local cafe for 20 minutes instead of taking your drink to-go. You don't need to speak to anyone—just occupy the space.";
+        if(style === 'Extrovert') {
+          lowStakes = "Ask a barista or shopkeeper: 'I just moved here this month—what's one hidden spot in this neighborhood I shouldn't miss?'";
+        }
+
+        let opener = `"Hey! I'm pretty new to the neighborhood. How long have you been coming here?"`;
+        if(barrier === 'Don\'t know what to say') {
+          opener = `"Hi! Quick question—do you know if the coffee/food here is as good as the reviews say? I just moved down the street."`;
+        } else if(barrier === 'I don\'t want to seem desperate') {
+          opener = `"Excuse me, I'm trying to get my bearings in this area—do you have a favorite spot nearby for lunch?"`;
+        }
+
+        let remoteAdvice = "";
+        if(work === 'Remote') {
+          remoteAdvice = `<div class="result-section">
+            <h4><i class="fa-solid fa-laptop-house"></i> Remote Worker Social Engine</h4>
+            <p>Working remotely strips away automatic micro-interactions. Join a local co-working space 2 days a week, or test 3 different public libraries to build a 'work neighborhood' routine.</p>
+          </div>`;
+        }
+
+        const htmlOutput = `
+          <div class="result-section">
+            <h4><i class="fa-solid fa-route"></i> Your Social Path (${style})</h4>
+            <ul>${pathItems.map(p => `<li>${p}</li>`).join('')}</ul>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-shoe-prints"></i> The Low-Stakes Start (This Week)</h4>
+            <p>${lowStakes}</p>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-comment-dots"></i> Natural Conversation Opener</h4>
+            <div class="quote-box" style="font-style: normal; font-weight: 500; color: var(--text-main);">
+              ${opener}
+            </div>
+          </div>
+
+          ${remoteAdvice}
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-calendar-days"></i> The 3-Month Expectation Rule</h4>
+            <p>Sociological research shows it takes roughly 50 hours of proximity to turn an acquaintance into a casual friend. Expecting deep bonds in month one creates unnecessary shame. Give yourself 3 full months of light consistency.</p>
+          </div>
+        `;
+
+        const container = document.getElementById('output-tool2');
+        container.querySelector('.result-body').innerHTML = htmlOutput;
+        container.classList.add('active');
+
+        saveToHistory('tool2', `${style} • ${interests.slice(0,2).join(', ') || 'General'}`, htmlOutput);
+      });
+
+      /* ----------------------------------------------------
+         TOOL 3 LOGIC: NEIGHBORHOOD NEGOTIATOR
+      ---------------------------------------------------- */
+      document.getElementById('form-tool3').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const budget = document.getElementById('t3-budget').value;
+        const mustHaves = Array.from(document.querySelectorAll('input[name="t3-musthaves"]:checked')).map(c => c.value);
+        const feel = document.getElementById('t3-feel').value;
+        const commute = document.getElementById('t3-commute').value;
+        const looking = document.getElementById('t3-looking').value.trim();
+
+        let tradeOff = "At your current target budget, you will likely need to trade square footage or updated appliances in exchange for location and transit convenience.";
+        if(mustHaves.includes('Quiet') && mustHaves.includes('Nightlife')) {
+          tradeOff = "Balancing Quiet and Nightlife usually means looking at 'buffer zones'—residential streets located 3–5 blocks off main commercial corridors.";
+        } else if(mustHaves.includes('Walkable') && mustHaves.includes('Affordable')) {
+          tradeOff = "Walkable + Affordable often requires looking at transitioning neighborhoods or older, non-renovated brick apartments rather than modern complexes.";
+        }
+
+        let neighborhoodsToExplore = [
+          "<strong>The Transit Hub Fringe:</strong> Areas 1-2 train stops outside the main downtown center. High walkability, lower rent.",
+          "<strong>The Arts/Industrial Pocket:</strong> Converted warehouse or creative districts. Vibrant food scene, varied safety/quiet levels.",
+          "<strong>The Established Residential Core:</strong> Tree-lined neighborhoods slightly further from nightlife, offering peace and local parks."
+        ];
+
+        const htmlOutput = `
+          <div class="result-section">
+            <h4><i class="fa-solid fa-sliders"></i> Priority Mix</h4>
+            <p>Budget: <strong>$${budget}/mo</strong> | Key Priorities: <strong>${mustHaves.join(', ') || 'General Balance'}</strong></p>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-scale-balanced"></i> Trade-Off Reality Check</h4>
+            <p>${tradeOff}</p>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-compass"></i> Neighborhood Archetypes to Target</h4>
+            <ul>${neighborhoodsToExplore.map(n => `<li>${n}</li>`).join('')}</ul>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-binoculars"></i> One Explore Mission</h4>
+            <p>Take public transit to a candidate neighborhood on a <strong>Saturday at 11:00 AM</strong>. Walk 6 blocks, buy a coffee, sit in a local park or bench, and observe: <em>Do the people here match the pace of life you want?</em></p>
+          </div>
+        `;
+
+        const container = document.getElementById('output-tool3');
+        container.querySelector('.result-body').innerHTML = htmlOutput;
+        container.classList.add('active');
+
+        saveToHistory('tool3', `$${budget}/mo • ${mustHaves.slice(0,2).join(', ') || 'General'}`, htmlOutput);
+      });
+
+      /* ----------------------------------------------------
+         TOOL 4 LOGIC: IDENTITY REBUILDER
+      ---------------------------------------------------- */
+      document.getElementById('form-tool4').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const oldIdentity = document.getElementById('t4-old').value.trim();
+        const keepIdentity = document.getElementById('t4-keep').value.trim();
+        const leaveIdentity = document.getElementById('t4-leave').value.trim();
+        const knowIdentity = document.getElementById('t4-know').value.trim();
+        const scares = document.getElementById('t4-scares').value.trim();
+
+        const newStory = `"I recently moved here after being based in my previous city for a while. Right now, I'm really focusing on ${keepIdentity ? keepIdentity.slice(0, 40) + '...' : 'exploring the local culture'} and building a grounded, intentional routine."`;
+
+        const htmlOutput = `
+          <div class="result-section">
+            <h4><i class="fa-solid fa-heart-broken"></i> The Identity You're Grieving</h4>
+            <p>It is completely normal to mourn the social capital and reputation you built over years. You spent years becoming 'someone' back home—losing that instant recognition creates an uneasy blank slate.</p>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-feather"></i> Your Conscious Filter</h4>
+            <p><strong>What you are keeping:</strong> ${escapeHTML(keepIdentity)}</p>
+            ${leaveIdentity ? `<p style="margin-top:0.4rem;"><strong>What you are shedding:</strong> ${escapeHTML(leaveIdentity)}</p>` : ''}
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-comment-slash"></i> One Simple Introduction Story</h4>
+            <div class="quote-box" style="font-style: normal; font-weight: 500; color: var(--text-main);">
+              ${newStory}
+            </div>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-award"></i> One Micro-Role to Claim</h4>
+            <p>Don't try to be famous—just become recognizable. Become 'the person who reads on Tuesdays at the corner cafe' or 'the regular at the Saturday morning farmers market.' Local familiarity precedes friendship.</p>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-seedling"></i> The Patience Benchmark</h4>
+            <div class="quote-box">
+              "Rebuilding an identity takes 12 to 18 months in a new location. You are not empty or broken; you are currently in the foundation-laying phase."
+            </div>
+          </div>
+        `;
+
+        const container = document.getElementById('output-tool4');
+        container.querySelector('.result-body').innerHTML = htmlOutput;
+        container.classList.add('active');
+
+        saveToHistory('tool4', `Identity Transition Worksheet`, htmlOutput);
+      });
+
+      /* ----------------------------------------------------
+         TOOL 5 LOGIC: CONNECTION PLANNER
+      ---------------------------------------------------- */
+      document.getElementById('form-tool5').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const work = document.getElementById('t5-work').value.trim();
+        const energy = document.getElementById('t5-energy').value;
+        const weeklyNeed = document.getElementById('t5-weekly').value;
+        const hardDay = document.getElementById('t5-hardday').value;
+        const homeFeel = document.getElementById('t5-homefeel').value.trim();
+
+        let hardDayStrategy = `On ${hardDay}s, schedule a low-friction reward immediately after work: order your favorite takeout, watch a movie, or schedule a phone call with a friend back home so the day has a built-in anchor.`;
+        
+        let ritual = "Take a 30-minute 'neighborhood audit' walk every Thursday evening without headphones, simply noticing changes in local shops.";
+        if(weeklyNeed === 'Nature') {
+          ritual = "Dedicated Saturday morning park walk or trail run, followed by a hot coffee in solitude.";
+        } else if(weeklyNeed === 'Physical activity') {
+          ritual = "Mid-week evening workout class or group run to break up the workday monotony.";
+        } else if(weeklyNeed === 'Deep conversation') {
+          ritual = "Weekly Sunday evening phone catch-up with an old friend or family member while preparing dinner.";
+        }
+
+        const htmlOutput = `
+          <div class="result-section">
+            <h4><i class="fa-solid fa-calendar-lines"></i> Your Weekly Skeleton</h4>
+            <ul>
+              <li><strong>Anchor 1 (Work Alignment):</strong> Sync your intensive tasks with your peak energy window (${energy}).</li>
+              <li><strong>Anchor 2 (Core Need):</strong> Lock in time for <em>${weeklyNeed}</em> every week as an non-negotiable appointment with yourself.</li>
+              <li><strong>Anchor 3 (Environment Shift):</strong> Change your physical location at least twice on weekends.</li>
+            </ul>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-shield-heart"></i> The ${hardDay} Survival Protocol</h4>
+            <p>${hardDayStrategy}</p>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-rotate"></i> One Weekly Anchor Ritual</h4>
+            <p>${ritual}</p>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-bullseye"></i> One 30-Day Target Goal</h4>
+            <p>Identify <strong>ONE local spot</strong> (cafe, park bench, climbing gym, bakery) and visit it at the exact same day/time for 4 consecutive weeks.</p>
+          </div>
+
+          <div class="result-section">
+            <h4><i class="fa-solid fa-house-chimney"></i> Home Feeling Assessment</h4>
+            <p>${homeFeel ? `You noted that home means: <em>"${escapeHTML(homeFeel)}"</em>. This is fully achievable, but requires small repetition over time rather than instant setup.` : 'Home is built through micro-familiarity with your surroundings over time.'}</p>
+          </div>
+        `;
+
+        const container = document.getElementById('output-tool5');
+        container.querySelector('.result-body').innerHTML = htmlOutput;
+        container.classList.add('active');
+
+        saveToHistory('tool5', `Routine • Hardest day: ${hardDay}`, htmlOutput);
+      });
+
+    });
+  </script>
+</body>
+</html>

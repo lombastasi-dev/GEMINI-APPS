@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teen Connection - Toolkit for Parents</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --slate: #3D5A80;
+            --coral: #EE6C4D;
+            --light-blue: #E0FBFC;
+            --dark-slate: #293241;
+            --bg-start: #F0F4F8;
+            --bg-end: #FEF1F0;
+            --card-bg: #FFFFFF;
+            --text-main: #2D3748;
+            --text-muted: #718096;
+            --border-color: #E2E8F0;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #FFFFFF;
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--slate);
+            font-weight: 700;
+            font-size: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-brand i {
+            color: var(--coral);
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nav-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item button:hover {
+            background-color: #F8FAFC;
+            color: var(--slate);
+        }
+
+        .nav-item button.active {
+            background-color: var(--slate);
+            color: #FFFFFF;
+        }
+
+        .nav-item button i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Mobile Header & Overlay */
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            background: #FFFFFF;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 90;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-toggle {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--slate);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 95;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .view-container {
+            width: 100%;
+            max-width: 800px;
+            display: none;
+        }
+
+        .view-container.active {
+            display: block;
+        }
+
+        /* Common Components */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--dark-slate);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 1.35rem;
+            color: var(--slate);
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 24px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--dark-slate);
+            margin-bottom: 8px;
+        }
+
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background: #FAFAFA;
+            transition: border 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--slate);
+            background: #FFFFFF;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 400;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background: #F8FAFC;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .checkbox-label input {
+            accent-color: var(--coral);
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .slider-header span.val {
+            color: var(--coral);
+            font-weight: 700;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--coral);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--coral);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #e05a39;
+        }
+
+        .btn-secondary {
+            background-color: #EDF2F7;
+            color: var(--dark-slate);
+        }
+
+        .btn-secondary:hover {
+            background-color: #E2E8F0;
+        }
+
+        .btn-copy {
+            background: var(--light-blue);
+            color: var(--slate);
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
+        .btn-copy:hover {
+            background: #cbf7fa;
+        }
+
+        /* Output Formatting */
+        .results-container {
+            margin-top: 32px;
+            display: none;
+        }
+
+        .results-container.active {
+            display: block;
+        }
+
+        .output-section {
+            border-left: 4px solid var(--slate);
+            padding-left: 16px;
+            margin-bottom: 24px;
+        }
+
+        .output-section.accent {
+            border-left-color: var(--coral);
+        }
+
+        .output-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .output-content {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--dark-slate);
+        }
+
+        .script-box {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Dashboard Specifics */
+        .hero-card {
+            background: linear-gradient(135deg, var(--slate), var(--dark-slate));
+            color: white;
+            border: none;
+        }
+
+        .hero-card h1 {
+            color: white;
+        }
+
+        .hero-card p {
+            color: var(--light-blue);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .dash-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        }
+
+        .dash-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: var(--bg-start);
+            color: var(--coral);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        /* Parent Check-In Meters */
+        .meter-group {
+            margin-bottom: 12px;
+        }
+
+        .meter-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .meter-bar {
+            height: 10px;
+            background: #E2E8F0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .bg-red { background-color: #E53E3E; }
+        .bg-yellow { background-color: #DD6B20; }
+        .bg-green { background-color: #38A169; }
+
+        /* Accordion / History */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .history-list {
+            display: none;
+            margin-top: 16px;
+            gap: 12px;
+            flex-direction: column;
+        }
+
+        .history-list.open {
+            display: flex;
+        }
+
+        .history-item {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--dark-slate);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 200;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            background: #FFFFFF;
+            border-top: 1px solid var(--border-color);
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+            .mobile-header {
+                display: flex;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Top Bar -->
+    <div class="mobile-header">
+        <div class="sidebar-brand" style="padding:0; border:none;">
+            <i class="fa-solid fa-hands-holding-child"></i>
+            <span>TeenConnection</span>
+        </div>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Fixed Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-hands-holding-child"></i>
+                <span>TeenConnection</span>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <button class="nav-btn active" data-view="dashboard">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-btn" data-view="tool1">
+                        <i class="fa-solid fa-compass"></i>
+                        <span>Distance Decoder</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-btn" data-view="tool2">
+                        <i class="fa-solid fa-comment-dots"></i>
+                        <span>Re-Entry Script</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-btn" data-view="tool3">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Boundary vs Freedom</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-btn" data-view="tool4">
+                        <i class="fa-solid fa-car"></i>
+                        <span>The Car Rule</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-btn" data-view="tool5">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                        <span>Parent Check-In</span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- VIEW: DASHBOARD -->
+            <div class="view-container active" id="view-dashboard">
+                <div class="card hero-card">
+                    <h1>Teen Connection</h1>
+                    <p class="subtitle" style="margin-bottom:0;">They need space. You need connection. Find the balance.</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card dash-card" onclick="switchView('tool1')">
+                        <div class="dash-icon"><i class="fa-solid fa-compass"></i></div>
+                        <h3>Distance Decoder</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Differentiate developmental independence from red flag emotional distress.</p>
+                    </div>
+
+                    <div class="card dash-card" onclick="switchView('tool2')">
+                        <div class="dash-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                        <h3>Re-Entry Script</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Transform interrogation dynamics into non-threatening conversations.</p>
+                    </div>
+
+                    <div class="card dash-card" onclick="switchView('tool3')">
+                        <div class="dash-icon"><i class="fa-solid fa-sliders"></i></div>
+                        <h3>Boundary vs Freedom</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Separate core safety rules from negotiable autonomy preferences.</p>
+                    </div>
+
+                    <div class="card dash-card" onclick="switchView('tool4')">
+                        <div class="dash-icon"><i class="fa-solid fa-car"></i></div>
+                        <h3>The Car Rule</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Leverage low-pressure, side-by-side environments for dialogue.</p>
+                    </div>
+
+                    <div class="card dash-card" onclick="switchView('tool5')">
+                        <div class="dash-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                        <h3>Parent Check-In</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Assess your own emotional state to avoid anxious or controlling behaviors.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: TOOL 1 - DISTANCE DECODER -->
+            <div class="view-container" id="view-tool1">
+                <div class="card">
+                    <h2>Distance Decoder</h2>
+                    <p class="subtitle">Analyze whether your teen's space is typical autonomy building or an indicator of distress.</p>
+                    
+                    <form id="form-tool1">
+                        <div class="form-group">
+                            <label for="t1-age">Teen's Age</label>
+                            <select id="t1-age" required>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15" selected>15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t1-onset">When the distance started</label>
+                            <select id="t1-onset" required>
+                                <option value="Gradual over months">Gradual over months</option>
+                                <option value="Sudden">Sudden</option>
+                                <option value="After a specific event">After a specific event</option>
+                                <option value="Since starting high school">Since starting high school</option>
+                                <option value="Always been somewhat distant">Always been somewhat distant</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Changes observed</label>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-label"><input type="checkbox" name="t1-changes" value="Less talking"> Less talking</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t1-changes" value="Door always closed"> Door always closed</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t1-changes" value="Avoids family meals"> Avoids family meals</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t1-changes" value="New friend group"> New friend group</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t1-changes" value="Grades dropped"> Grades dropped</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t1-changes" value="Sleep changes"> Sleep changes</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t1-changes" value="Phone secrecy"> Phone secrecy</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t1-changes" value="Mood swings"> Mood swings</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t1-changes" value="No change in mood, just less present"> No mood change, just less present</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t1-engage">What they still engage in (hobbies, sports, texting friends, late snacks):</label>
+                            <textarea id="t1-engage" placeholder="e.g., Playing soccer, gaming with friends online, coming down for late night snacks..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t1-fear">Your biggest fear:</label>
+                            <select id="t1-fear" required>
+                                <option value="Depression">Depression</option>
+                                <option value="Drugs">Drugs or Substance Use</option>
+                                <option value="Bad influence">Bad Influence / Falling with wrong crowd</option>
+                                <option value="They hate me">They dislike or resent me</option>
+                                <option value="Normal but I miss them">Normal separation, but I miss them</option>
+                                <option value="Something happened they won't tell me">Something happened they won't disclose</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Analyze Pattern</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()">Load Sample Scenario</button>
+                        </div>
+                    </form>
+
+                    <div class="results-container" id="results-tool1">
+                        <hr style="margin: 24px 0; border: 0; border-top: 1px solid var(--border-color);">
+                        <h2>Decoder Analysis</h2>
+                        <div class="output-section">
+                            <div class="output-title">The Normal vs. Concerning</div>
+                            <div class="output-content" id="t1-out-normal"></div>
+                        </div>
+                        <div class="output-section accent">
+                            <div class="output-title">The Pattern Type</div>
+                            <div class="output-content" id="t1-out-pattern"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">What's Still Working</div>
+                            <div class="output-content" id="t1-out-working"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Watch List</div>
+                            <div class="output-content" id="t1-out-watch"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Conversation Prompt</div>
+                            <div class="output-content" id="t1-out-prompt"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Professional Prompt</div>
+                            <div class="output-content" id="t1-out-pro"></div>
+                        </div>
+                    </div>
+
+                    <!-- History Section -->
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool1')">
+                            <span style="font-weight: 600; font-size: 0.9rem;"><i class="fa-solid fa-history"></i> Saved Analyses</span>
+                            <i class="fa-solid fa-chevron-down" id="hist-icon-tool1"></i>
+                        </div>
+                        <div class="history-list" id="hist-list-tool1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: TOOL 2 - RE-ENTRY SCRIPT -->
+            <div class="view-container" id="view-tool2">
+                <div class="card">
+                    <h2>Re-Entry Script Generator</h2>
+                    <p class="subtitle">Formulate non-intrusive openers that reduce defensiveness and invite authentic connection.</p>
+                    
+                    <form id="form-tool2">
+                        <div class="form-group">
+                            <label for="t2-opening">Your typical opening line:</label>
+                            <textarea id="t2-opening" placeholder="e.g., How was your day? What did you do today?"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t2-response">Their typical response:</label>
+                            <select id="t2-response" required>
+                                <option value="One word">One word ("Fine", "Good", "Nothing")</option>
+                                <option value="Eye roll">Eye roll / Sigh</option>
+                                <option value="Leave room">Walks away / Leaves room</option>
+                                <option value="Defensive">Defensive ("Why are you asking?")</option>
+                                <option value="Honest but brief">Honest but extremely brief</option>
+                                <option value="Accusatory">Accusatory ("You're always nagging me")</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t2-want-know">What you actually want to know:</label>
+                            <textarea id="t2-want-know" placeholder="e.g., Are you feeling stressed about school? Is anyone picking on you?"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t2-think-want">What you think they THINK you want:</label>
+                            <textarea id="t2-think-want" placeholder="e.g., They think I'm auditing their performance or trying to control them."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t2-best-conv">Best recent conversation (optional):</label>
+                            <textarea id="t2-best-conv" placeholder="e.g., Talking about a movie in the car last Friday."></textarea>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-code-branch"></i> Generate Scripts</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()">Load Sample Scenario</button>
+                        </div>
+                    </form>
+
+                    <div class="results-container" id="results-tool2">
+                        <hr style="margin: 24px 0; border: 0; border-top: 1px solid var(--border-color);">
+                        <h2>Re-Entry Strategy</h2>
+                        <div class="output-section">
+                            <div class="output-title">The Interrogation Check</div>
+                            <div class="output-content" id="t2-out-check"></div>
+                        </div>
+                        <div class="output-section accent">
+                            <div class="output-title">The Re-Entry Scripts</div>
+                            <div id="t2-out-scripts"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Side-by-Side Rule</div>
+                            <div class="output-content" id="t2-out-rule"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Listening Mandate</div>
+                            <div class="output-content" id="t2-out-mandate"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Follow-Up Strategy</div>
+                            <div class="output-content" id="t2-out-followup"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Backoff Signal</div>
+                            <div class="output-content" id="t2-out-backoff"></div>
+                        </div>
+                    </div>
+
+                    <!-- History Section -->
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool2')">
+                            <span style="font-weight: 600; font-size: 0.9rem;"><i class="fa-solid fa-history"></i> Saved Scripts</span>
+                            <i class="fa-solid fa-chevron-down" id="hist-icon-tool2"></i>
+                        </div>
+                        <div class="history-list" id="hist-list-tool2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: TOOL 3 - BOUNDARY VS FREEDOM -->
+            <div class="view-container" id="view-tool3">
+                <div class="card">
+                    <h2>Boundary vs Freedom Mapper</h2>
+                    <p class="subtitle">Clarify non-negotiable safety limits versus areas where giving space builds long-term trust.</p>
+                    
+                    <form id="form-tool3">
+                        <div class="form-group">
+                            <label>Current conflict areas:</label>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-label"><input type="checkbox" name="t3-conflict" value="Curfew"> Curfew</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-conflict" value="Phone use"> Phone use</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-conflict" value="Grades"> Grades</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-conflict" value="Chores"> Chores</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-conflict" value="Friends"> Friends</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-conflict" value="Dating"> Dating</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-conflict" value="Appearance"> Appearance / Clothing</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-conflict" value="Language"> Language / Tone</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-conflict" value="Privacy"> Bedroom Privacy</label>
+                                <label class="checkbox-label"><input type="checkbox" name="t3-conflict" value="Money"> Money / Spending</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t3-nonneg">Your core non-negotiables (safety/morals):</label>
+                            <textarea id="t3-nonneg" placeholder="e.g., Location sharing when out late, no drinking and driving, maintaining C average..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t3-loosened">What you've already loosened:</label>
+                            <textarea id="t3-loosened" placeholder="e.g., Bedtime on weekends, clothing choices, room cleanliness..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t3-wantfree">What they want more freedom in:</label>
+                            <textarea id="t3-wantfree" placeholder="e.g., Staying out until midnight with friends, fewer phone checks..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t3-fear">Your fear if you say "Yes":</label>
+                            <textarea id="t3-fear" placeholder="e.g., They will get into dangerous situations or make bad choices without supervision."></textarea>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-map"></i> Map Boundaries</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()">Load Sample Scenario</button>
+                        </div>
+                    </form>
+
+                    <div class="results-container" id="results-tool3">
+                        <hr style="margin: 24px 0; border: 0; border-top: 1px solid var(--border-color);">
+                        <h2>Boundary Analysis</h2>
+                        <div class="output-section">
+                            <div class="output-title">The Boundary Map</div>
+                            <div class="output-content" id="t3-out-map"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Negotiable List</div>
+                            <div class="output-content" id="t3-out-negotiable"></div>
+                        </div>
+                        <div class="output-section accent">
+                            <div class="output-title">The Non-Negotiable List</div>
+                            <div class="output-content" id="t3-out-nonnegotiable"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Graduated Freedom Plan</div>
+                            <div class="output-content" id="t3-out-graduated"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Trust Deposit</div>
+                            <div class="output-content" id="t3-out-deposit"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">Consequence Clarity</div>
+                            <div class="output-content" id="t3-out-consequence"></div>
+                        </div>
+                    </div>
+
+                    <!-- History Section -->
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool3')">
+                            <span style="font-weight: 600; font-size: 0.9rem;"><i class="fa-solid fa-history"></i> Saved Maps</span>
+                            <i class="fa-solid fa-chevron-down" id="hist-icon-tool3"></i>
+                        </div>
+                        <div class="history-list" id="hist-list-tool3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: TOOL 4 - THE CAR RULE -->
+            <div class="view-container" id="view-tool4">
+                <div class="card">
+                    <h2>The Car Rule & Side-by-Side Planner</h2>
+                    <p class="subtitle">Design indirect, low-pressure environments where teenagers naturally share more.</p>
+                    
+                    <form id="form-tool4">
+                        <div class="form-group">
+                            <label for="t4-easiest">Where conversations happen easiest:</label>
+                            <select id="t4-easiest" required>
+                                <option value="Car">Car drives</option>
+                                <option value="Walks">Walking outdoor / nature</option>
+                                <option value="Meals">Shared meals</option>
+                                <option value="Before bed">Late night / before bed</option>
+                                <option value="While doing activity">While cooking or doing chores together</option>
+                                <option value="Text">Text messaging / sending memes</option>
+                                <option value="They don't">They currently don't happen anywhere</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-shutdown">Where they shut down most:</label>
+                            <select id="t4-shutdown" required>
+                                <option value="Meals">Formal sit-down meals</option>
+                                <option value="Car">Car drives</option>
+                                <option value="Walks">Walks</option>
+                                <option value="Before bed">Before bed</option>
+                                <option value="Living room">Living room confrontation</option>
+                                <option value="Text">Text messages</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-interests">Your teen's interests & hobbies:</label>
+                            <textarea id="t4-interests" placeholder="e.g., Hip hop music, video games, thrifting, basketball..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-voluntary">Topics they bring up voluntarily:</label>
+                            <textarea id="t4-voluntary" placeholder="e.g., Funny videos, clothes they want, friend drama, sports stats..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-offlimit">Topics that immediately close them off:</label>
+                            <textarea id="t4-offlimit" placeholder="e.g., College applications, bad grades, messy room, family events..."></textarea>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-route"></i> Build Engagement Plan</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()">Load Sample Scenario</button>
+                        </div>
+                    </form>
+
+                    <div class="results-container" id="results-tool4">
+                        <hr style="margin: 24px 0; border: 0; border-top: 1px solid var(--border-color);">
+                        <h2>Environment & Communication Plan</h2>
+                        <div class="output-section">
+                            <div class="output-title">The Safe Zone Mechanics</div>
+                            <div class="output-content" id="t4-out-zone"></div>
+                        </div>
+                        <div class="output-section accent">
+                            <div class="output-title">The Drive / Side-by-Side Scripts</div>
+                            <div id="t4-out-scripts"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Walk / Action Protocol</div>
+                            <div class="output-content" id="t4-out-protocol"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Shared Activity Bridge</div>
+                            <div class="output-content" id="t4-out-bridge"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Text Strategy</div>
+                            <div class="output-content" id="t4-out-text"></div>
+                        </div>
+                        <div class="output-section">
+                            <div class="output-title">The Avoid List</div>
+                            <div class="output-content" id="t4-out-avoid"></div>
+                        </div>
+                    </div>
+
+                    <!-- History Section -->
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool4')">
+                            <span style="font-weight: 600; font-size: 0.9rem;"><i class="fa-solid fa-history"></i> Saved Plans</span>
+                            <i class="fa-solid fa-chevron-down" id="hist-icon-tool4"></i>
+                        </div>
+                        <div class="history-list" id="hist-list-tool4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: TOOL 5 - PARENT CHECK-IN -->
+            <div class="view-container" id="view-tool5">
+                <div class="card">
+                    <h2>Parent Self-Check-In</h2>
+                    <p class="subtitle">Evaluate your emotional capacity and ensure anxiety isn't driving your parenting choices.</p>
+                    
+                    <form id="form-tool5">
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span>1. I trust my teen to make good choices:</span>
+                                <span class="val" id="val-t5-s1">5</span>
+                            </div>
+                            <input type="range" id="t5-s1" min="1" max="10" value="5" oninput="document.getElementById('val-t5-s1').innerText=this.value">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span>2. I feel connected to my teen:</span>
+                                <span class="val" id="val-t5-s2">5</span>
+                            </div>
+                            <input type="range" id="t5-s2" min="1" max="10" value="5" oninput="document.getElementById('val-t5-s2').innerText=this.value">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span>3. My worry about my teen is manageable:</span>
+                                <span class="val" id="val-t5-s3">5</span>
+                            </div>
+                            <input type="range" id="t5-s3" min="1" max="10" value="5" oninput="document.getElementById('val-t5-s3').innerText=this.value">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span>4. I can let them fail without rescuing them:</span>
+                                <span class="val" id="val-t5-s4">5</span>
+                            </div>
+                            <input type="range" id="t5-s4" min="1" max="10" value="5" oninput="document.getElementById('val-t5-s4').innerText=this.value">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span>5. I have my own life outside of parenting:</span>
+                                <span class="val" id="val-t5-s5">5</span>
+                            </div>
+                            <input type="range" id="t5-s5" min="1" max="10" value="5" oninput="document.getElementById('val-t5-s5').innerText=this.value">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span>6. I feel like I'm doing a good job as a parent:</span>
+                                <span class="val" id="val-t5-s6">5</span>
+                            </div>
+                            <input type="range" id="t5-s6" min="1" max="10" value="5" oninput="document.getElementById('val-t5-s6').innerText=this.value">
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-heart-circle-check"></i> Evaluate State</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()">Load Sample Scenario</button>
+                        </div>
+                    </form>
+
+                    <div class="results-container" id="results-tool5">
+                        <hr style="margin: 24px 0; border: 0; border-top: 1px solid var(--border-color);">
+                        <h2>Parent Wellbeing & Mindset Dashboard</h2>
+                        
+                        <div class="output-section">
+                            <div class="output-title">Parent Self-Assessment Meters</div>
+                            <div id="t5-meters"></div>
+                        </div>
+
+                        <div class="output-section accent">
+                            <div class="output-title">The Anxiety Source</div>
+                            <div class="output-content" id="t5-out-anxiety"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-title">The Helicopter Check</div>
+                            <div class="output-content" id="t5-out-helicopter"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-title">One Letting-Go Action</div>
+                            <div class="output-content" id="t5-out-lettinggo"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-title">One Self-Care Action</div>
+                            <div class="output-content" id="t5-out-selfcare"></div>
+                        </div>
+
+                        <div class="output-section">
+                            <div class="output-title">One Connection Action</div>
+                            <div class="output-content" id="t5-out-connection"></div>
+                        </div>
+                    </div>
+
+                    <!-- History Section -->
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('tool5')">
+                            <span style="font-weight: 600; font-size: 0.9rem;"><i class="fa-solid fa-history"></i> Saved Check-Ins</span>
+                            <i class="fa-solid fa-chevron-down" id="hist-icon-tool5"></i>
+                        </div>
+                        <div class="history-list" id="hist-list-tool5"></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Toast Component -->
+    <div class="toast" id="toast">Copied to clipboard!</div>
+
+    <!-- Footer Required on Every Screen -->
+    <footer>
+        <div class="footer-content">
+            For entertainment and reflection purposes only. Not therapy or professional advice. If you are concerned about depression, self-harm, or substance abuse, contact a mental health professional or your child's physician.
+        </div>
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        // --- Navigation Logic ---
+        function switchView(viewId) {
+            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+            const targetView = document.getElementById(`view-${viewId}`);
+            if (targetView) targetView.classList.add('active');
+
+            const activeBtn = document.querySelector(`.nav-btn[data-view="${viewId}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // Close mobile sidebar if open
+            closeMobileSidebar();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const view = e.currentTarget.getAttribute('data-view');
+                switchView(view);
+            });
+        });
+
+        // Mobile Sidebar Controls
+        const mobileToggle = document.getElementById('mobileToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function openMobileSidebar() {
+            sidebar.classList.add('mobile-open');
+            sidebarOverlay.classList.add('active');
+        }
+
+        function closeMobileSidebar() {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('active');
+        }
+
+        mobileToggle.addEventListener('click', () => {
+            if (sidebar.classList.contains('mobile-open')) {
+                closeMobileSidebar();
+            } else {
+                openMobileSidebar();
+            }
+        });
+
+        sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+        // Toast Helper
+        function showToast(msg = "Copied!") {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        // --- LocalStorage Helpers ---
+        function saveHistory(toolId, data) {
+            const key = `teenconnection_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            history.unshift({ timestamp: new Date().toLocaleString(), data: data });
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function getHistory(toolId) {
+            const key = `teenconnection_history_${toolId}`;
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+
+        function clearHistory(toolId) {
+            const key = `teenconnection_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function toggleHistory(toolId) {
+            const list = document.getElementById(`hist-list-${toolId}`);
+            const icon = document.getElementById(`hist-icon-${toolId}`);
+            if (list.classList.contains('open')) {
+                list.classList.remove('open');
+                icon.className = 'fa-solid fa-chevron-down';
+            } else {
+                list.classList.add('open');
+                icon.className = 'fa-solid fa-chevron-up';
+            }
+        }
+
+        function renderHistory(toolId) {
+            const list = document.getElementById(`hist-list-${toolId}`);
+            const history = getHistory(toolId);
+            if (!list) return;
+
+            if (history.length === 0) {
+                list.innerHTML = '<div class="history-item" style="color:var(--text-muted);">No saved items yet.</div>';
+                return;
+            }
+
+            let html = `<div style="text-align:right; margin-bottom:8px;"><button type="button" onclick="clearHistory('${toolId}')" style="background:none; border:none; color:var(--coral); cursor:pointer; font-size:0.8rem; font-weight:600;"><i class="fa-solid fa-trash"></i> Clear History</button></div>`;
+            history.forEach((item, index) => {
+                let summary = item.timestamp;
+                if (toolId === 'tool1') summary += ` - Age ${item.data.age}, Fear: ${item.data.fear}`;
+                if (toolId === 'tool2') summary += ` - Response: ${item.data.response}`;
+                if (toolId === 'tool3') summary += ` - Non-neg: ${item.data.nonneg.substring(0,20)}...`;
+                if (toolId === 'tool4') summary += ` - Easiest: ${item.data.easiest}`;
+                if (toolId === 'tool5') summary += ` - Avg Rating: ${item.data.avg}/10`;
+
+                html += `<div class="history-item"><span>${summary}</span></div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        // --- TOOL 1: DISTANCE DECODER ---
+        function loadSampleTool1() {
+            document.getElementById('t1-age').value = '15';
+            document.getElementById('t1-onset').value = 'Gradual over months';
+            
+            // Check specific boxes
+            const checks = ['Less talking', 'Door always closed', 'Avoids family meals'];
+            document.querySelectorAll('input[name="t1-changes"]').forEach(cb => {
+                cb.checked = checks.includes(cb.value);
+            });
+
+            document.getElementById('t1-engage').value = 'High school soccer team, online gaming with school friends, coming down for midnight snacks.';
+            document.getElementById('t1-fear').value = 'Depression';
+        }
+
+        document.getElementById('form-tool1').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const age = document.getElementById('t1-age').value;
+            const onset = document.getElementById('t1-onset').value;
+            const changes = Array.from(document.querySelectorAll('input[name="t1-changes"]:checked')).map(cb => cb.value);
+            const engage = document.getElementById('t1-engage').value;
+            const fear = document.getElementById('t1-fear').value;
+
+            // Synthesis Logic
+            let isRedFlag = changes.includes('Grades dropped') || changes.includes('Sleep changes') || fear === 'Depression' || onset === 'Sudden';
+            
+            let normalTxt = `At age ${age}, pulling away to establish individual identity is biologically normal. Shutting the door or preferring peer connection reflects typical ego-development rather than rejection.`;
+            
+            let patternTxt = isRedFlag ? 
+                `<strong>Stress Response / Potential Red Flag Pattern:</strong> The combination of timeline (${onset}) and specific indicators like mood/sleep/grade adjustments suggests their pulling away might be driven by internal overwhelm or emotional distress rather than simple autonomy.` :
+                `<strong>Healthy Separation Pattern:</strong> This reflects standard adolescent individuation. They are testing boundaries of privacy while still maintaining baseline stability in their environment.`;
+
+            let workingTxt = engage ? 
+                `They are still invested in: <em>"${engage}"</em>. This proves they have functional connection anchors. Protect these safe zones without turning them into interrogation sessions.` :
+                `No active engagement areas noted. Focus on observing small, low-demand moments (e.g., sharing a favorite meal or pet interaction).`;
+
+            let watchTxt = `<ul>
+                <li>Watch for sudden drops in academic performance or quitting activities they previously enjoyed.</li>
+                <li>Monitor drastic changes in sleep hygiene or appetite.</li>
+                <li>Observe whether social withdrawal spans across peers too, or if it is strictly parent-directed.</li>
+            </ul>`;
+
+            let promptTxt = `<strong>Low-Pressure Opening:</strong> "I've noticed you've been keeping to yourself a bit more lately. That's completely okay—you're balancing a lot at ${age}. I'm always here if you want to vent, no advice attached."`;
+
+            let proTxt = isRedFlag ?
+                `Because there are noticeable mood/life shifts present, consult a counselor or doctor if withdrawal persists continuously for over 2-3 weeks or if they express explicit hopelessness.` :
+                `Currently, standard parental monitoring is appropriate. Professional intervention is generally only needed if functioning in school, hygiene, or friendships severely breaks down.`;
+
+            document.getElementById('t1-out-normal').innerHTML = normalTxt;
+            document.getElementById('t1-out-pattern').innerHTML = patternTxt;
+            document.getElementById('t1-out-working').innerHTML = workingTxt;
+            document.getElementById('t1-out-watch').innerHTML = watchTxt;
+            document.getElementById('t1-out-prompt').innerHTML = promptTxt;
+            document.getElementById('t1-out-pro').innerHTML = proTxt;
+
+            document.getElementById('results-tool1').classList.add('active');
+
+            saveHistory('tool1', { age, onset, fear });
+        });
+
+        // --- TOOL 2: RE-ENTRY SCRIPT ---
+        function loadSampleTool2() {
+            document.getElementById('t2-opening').value = 'How was school today? What did you do?';
+            document.getElementById('t2-response').value = 'One word';
+            document.getElementById('t2-want-know').value = 'I worry they are being bullied or left out at lunch because they seem stressed.';
+            document.getElementById('t2-think-want').value = 'They think I am checking up on their grades or trying to control their schedule.';
+            document.getElementById('t2-best-conv').value = 'Talking about funny TikTok videos in the car on the way to soccer.';
+        }
+
+        document.getElementById('form-tool2').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const opening = document.getElementById('t2-opening').value;
+            const response = document.getElementById('t2-response').value;
+            const wantKnow = document.getElementById('t2-want-know').value;
+            const thinkWant = document.getElementById('t2-think-want').value;
+
+            let checkTxt = `Your usual question ("${opening || 'How was your day?'}") sounds routine to you, but to a tired teen, it feels like an administrative audit. Because they assume you want "${thinkWant || 'performance updates'}", their defense mechanism is: <strong>${response}</strong>.`;
+
+            let s1 = `1. Statement instead of Question: "Hey, glad you're home. You look exhausted—no need to talk, just wanted to say hi."`;
+            let s2 = `2. Specific & Low-Stakes: "I know school is a grind right now. I'm making smoothies if you want one."`;
+            let s3 = `3. Vulnerable / Observation: "I've had a chaotic day. If you ever feel like venting about your week later, I'm around—zero judgment."`;
+
+            let scriptsHtml = `
+                <div class="script-box">
+                    <span>${s1}</span>
+                    <button class="btn btn-copy" onclick="copyToClipboard('${s1.replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+                <div class="script-box">
+                    <span>${s2}</span>
+                    <button class="btn btn-copy" onclick="copyToClipboard('${s2.replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+                <div class="script-box">
+                    <span>${s3}</span>
+                    <button class="btn btn-copy" onclick="copyToClipboard('${s3.replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+            `;
+
+            let ruleTxt = `Teens talk more when they don't have to look you in the eye. Intense eye contact feels like an interrogation. Parallel positions (driving, cooking, walking) lower defense mechanisms instantly.`;
+
+            let mandateTxt = `When they do speak: <strong>Do not fix, correct, or lecture.</strong> Respond only with validation ("That sounds exhausting", "I get why you'd be annoyed by that").`;
+
+            let followupTxt = `If they give you a one-word answer, let it sit. Drop the topic immediately without showing disappointment. Try again 24-48 hours later in a different context.`;
+
+            let backoffTxt = `If you see crossed arms, earphones going in, or monosyllabic grunts, say: "Got it, leaving you to relax!" and physically step away.`;
+
+            document.getElementById('t2-out-check').innerHTML = checkTxt;
+            document.getElementById('t2-out-scripts').innerHTML = scriptsHtml;
+            document.getElementById('t2-out-rule').innerHTML = ruleTxt;
+            document.getElementById('t2-out-mandate').innerHTML = mandateTxt;
+            document.getElementById('t2-out-followup').innerHTML = followupTxt;
+            document.getElementById('t2-out-backoff').innerHTML = backoffTxt;
+
+            document.getElementById('results-tool2').classList.add('active');
+
+            saveHistory('tool2', { response, wantKnow });
+        });
+
+        // --- TOOL 3: BOUNDARY VS FREEDOM ---
+        function loadSampleTool3() {
+            const conflicts = ['Phone use', 'Friends'];
+            document.querySelectorAll('input[name="t3-conflict"]').forEach(cb => {
+                cb.checked = conflicts.includes(cb.value);
+            });
+            document.getElementById('t3-nonneg').value = 'Location sharing on life360 for safety when out at night; no drinking/drugs.';
+            document.getElementById('t3-loosened').value = 'Bedtime on weekends, keeping room perfectly clean.';
+            document.getElementById('t3-wantfree').value = 'Going to out-of-town weekend sleepovers with new friends I haven\'t met yet.';
+            document.getElementById('t3-fear').value = 'I fear they will end up at unsupervised parties with dangerous activity.';
+        }
+
+        document.getElementById('form-tool3').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const conflicts = Array.from(document.querySelectorAll('input[name="t3-conflict"]:checked')).map(cb => cb.value);
+            const nonneg = document.getElementById('t3-nonneg').value;
+            const loosened = document.getElementById('t3-loosened').value;
+            const wantfree = document.getElementById('t3-wantfree').value;
+            const fear = document.getElementById('t3-fear').value;
+
+            let mapTxt = `Active conflict points identified: <strong>${conflicts.join(', ') || 'General limits'}</strong>. Categorize these strictly into Safety (Non-negotiable) vs. Identity/Preference (Negotiable).`;
+
+            let negTxt = `Areas to offer control: Room layout, clothing choices, daily schedule timing, music preference, and how they organize their homework, provided results are steady.`;
+
+            let nonNegTxt = `Non-Negotiable anchors: <em>"${nonneg || 'Physical safety & location transparency'}"</em>. Firmness here provides container stability.`;
+
+            let gradTxt = `Instead of a flat YES or NO to <em>"${wantfree}"</em>, offer a step ladder: "I can say yes to local evening events first. Once we establish clear check-ins there, we can expand to weekend overnight trips."`;
+
+            let depTxt = `<strong>Small 'Yes' Signal:</strong> Grant immediate autonomy over one low-stakes preference this week without offering unsolicited advice or critiques.`;
+
+            let consTxt = `If boundaries are crossed, apply natural, predictable consequences rather than emotional punishments (e.g., "If curfew is missed by 30 mins, next weekend's curfew is 30 mins earlier"—no yelling, just logic).`;
+
+            document.getElementById('t3-out-map').innerHTML = mapTxt;
+            document.getElementById('t3-out-negotiable').innerHTML = negTxt;
+            document.getElementById('t3-out-nonnegotiable').innerHTML = nonNegTxt;
+            document.getElementById('t3-out-graduated').innerHTML = gradTxt;
+            document.getElementById('t3-out-deposit').innerHTML = depTxt;
+            document.getElementById('t3-out-consequence').innerHTML = consTxt;
+
+            document.getElementById('results-tool3').classList.add('active');
+
+            saveHistory('tool3', { nonneg, wantfree });
+        });
+
+        // --- TOOL 4: THE CAR RULE ---
+        function loadSampleTool4() {
+            document.getElementById('t4-easiest').value = 'Car';
+            document.getElementById('t4-shutdown').value = 'Meals';
+            document.getElementById('t4-interests').value = 'Indie rock music, thifting, playing guitar, sneaker collecting.';
+            document.getElementById('t4-voluntary').value = 'Funny videos, new album drops, gossip about musicians.';
+            document.getElementById('t4-offlimit').value = 'Math grades, college prep, messy bedroom.';
+        }
+
+        document.getElementById('form-tool4').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const easiest = document.getElementById('t4-easiest').value;
+            const shutdown = document.getElementById('t4-shutdown').value;
+            const interests = document.getElementById('t4-interests').value;
+            const voluntary = document.getElementById('t4-voluntary').value;
+            const offlimit = document.getElementById('t4-offlimit').value;
+
+            let zoneTxt = `Why <strong>${easiest}</strong> works: It eliminates intense direct eye contact, has a natural end point, and lowers threat perception. Avoid <strong>${shutdown}</strong> for heavy discussions.`;
+
+            let s1 = `"Hey, put on whatever music/podcast you're listening to right now—I want to hear it."`;
+            let s2 = `"I noticed you were into ${interests.substring(0, 30) || 'your hobbies'} lately. What's the coolest thing about that right now?"`;
+            let s3 = `"Random question for the drive: if you could travel anywhere next summer, where would you go?"`;
+
+            let scriptsHtml = `
+                <div class="script-box">
+                    <span>${s1}</span>
+                    <button class="btn btn-copy" onclick="copyToClipboard('${s1.replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+                <div class="script-box">
+                    <span>${s2}</span>
+                    <button class="btn btn-copy" onclick="copyToClipboard('${s2.replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+                <div class="script-box">
+                    <span>${s3}</span>
+                    <button class="btn btn-copy" onclick="copyToClipboard('${s3.replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                </div>
+            `;
+
+            let protoTxt = `During walks or shared physical tasks, keep 80% of comments focused on the activity itself. Let silence exist without rushing to fill it.`;
+
+            let bridgeTxt = `Shared activity recommendation: Engage in thrift shop browsing, cooking a specific recipe, or driving practice—activities centered on a physical third object.`;
+
+            let textTxt = `Use texting for light connection: send low-pressure memes, short video links, or "saw this and thought of you" photos without requiring a reply.`;
+
+            let avoidTxt = `Strictly steer clear of: <em>"${offlimit || 'Grades, chores, future planning'}"</em> during these connection rides/walks. Keep connection time separate from administrative time.`;
+
+            document.getElementById('t4-out-zone').innerHTML = zoneTxt;
+            document.getElementById('t4-out-scripts').innerHTML = scriptsHtml;
+            document.getElementById('t4-out-protocol').innerHTML = protoTxt;
+            document.getElementById('t4-out-bridge').innerHTML = bridgeTxt;
+            document.getElementById('t4-out-text').innerHTML = textTxt;
+            document.getElementById('t4-out-avoid').innerHTML = avoidTxt;
+
+            document.getElementById('results-tool4').classList.add('active');
+
+            saveHistory('tool4', { easiest, shutdown });
+        });
+
+        // --- TOOL 5: PARENT CHECK-IN ---
+        function loadSampleTool5() {
+            document.getElementById('t5-s1').value = 3;
+            document.getElementById('val-t5-s1').innerText = 3;
+            document.getElementById('t5-s2').value = 3;
+            document.getElementById('val-t5-s2').innerText = 3;
+            document.getElementById('t5-s3').value = 2;
+            document.getElementById('val-t5-s3').innerText = 2;
+            document.getElementById('t5-s4').value = 4;
+            document.getElementById('val-t5-s4').innerText = 4;
+            document.getElementById('t5-s5').value = 2;
+            document.getElementById('val-t5-s5').innerText = 2;
+            document.getElementById('t5-s6').value = 4;
+            document.getElementById('val-t5-s6').innerText = 4;
+        }
+
+        document.getElementById('form-tool5').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const s1 = parseInt(document.getElementById('t5-s1').value);
+            const s2 = parseInt(document.getElementById('t5-s2').value);
+            const s3 = parseInt(document.getElementById('t5-s3').value);
+            const s4 = parseInt(document.getElementById('t5-s4').value);
+            const s5 = parseInt(document.getElementById('t5-s5').value);
+            const s6 = parseInt(document.getElementById('t5-s6').value);
+
+            const scores = [
+                { label: "Trust in Teen Choices", val: s1 },
+                { label: "Sense of Connection", val: s2 },
+                { label: "Worry Management", val: s3 },
+                { label: "Ability to Let Fail", val: s4 },
+                { label: "Personal Identity Outside Parenting", val: s5 },
+                { label: "Parenting Confidence", val: s6 }
+            ];
+
+            let metersHtml = '';
+            scores.forEach(s => {
+                let colorClass = s.val >= 7 ? 'bg-green' : (s.val >= 4 ? 'bg-yellow' : 'bg-red');
+                metersHtml += `
+                    <div class="meter-group">
+                        <div class="meter-label">
+                            <span>${s.label}</span>
+                            <span>${s.val}/10</span>
+                        </div>
+                        <div class="meter-bar">
+                            <div class="meter-fill ${colorClass}" style="width: ${s.val * 10}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            let avg = (scores.reduce((a, b) => a + b.val, 0) / 6).toFixed(1);
+
+            let anxTxt = s3 < 5 ? 
+                `High anxiety detected. Your brain is interpreting your teen's developmental distance as a critical crisis. When worry is high, parents tend to hover or over-control, which drives teens further away.` :
+                `Your worry levels are within a manageable range. This allows you to respond with clarity rather than reactivity.`;
+
+            let heliTxt = (s4 < 5 || s1 < 5) ?
+                `<strong>Over-Involvement Risk:</strong> Low scores on trust or letting them fail suggest a tendency toward helicoptering. Remember: shielding them from small natural consequences now prevents them from building resilience.` :
+                `<strong>Balanced Involvement:</strong> You show an age-appropriate ability to give them room to navigate their own struggles.`;
+
+            let lettingTxt = `Grant one concrete piece of autonomy this week: Let them manage their own morning alarm, homework schedule, or weekend plans without reminder texts.`;
+
+            let selfcareTxt = s5 < 5 ?
+                `Reclaim 2 hours this week strictly for yourself—revisit a personal hobby, book, or social outing that has nothing to do with your children.` :
+                `Maintain your personal hobbies and social ties; having a full life models healthy adulthood for your teenager.`;
+
+            let connTxt = `Low-pressure contact point: Bring them their favorite drink or snack, leave it on their desk with a warm smile, and walk away without asking any questions.`;
+
+            document.getElementById('t5-meters').innerHTML = metersHtml;
+            document.getElementById('t5-out-anxiety').innerHTML = anxTxt;
+            document.getElementById('t5-out-helicopter').innerHTML = heliTxt;
+            document.getElementById('t5-out-lettinggo').innerHTML = lettingTxt;
+            document.getElementById('t5-out-selfcare').innerHTML = selfcareTxt;
+            document.getElementById('t5-out-connection').innerHTML = connTxt;
+
+            document.getElementById('results-tool5').classList.add('active');
+
+            saveHistory('tool5', { avg });
+        });
+
+        // Initialize History Displays on load
+        window.addEventListener('DOMContentLoaded', () => {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(id => renderHistory(id));
+        });
+    </script>
+</body>
+</html>

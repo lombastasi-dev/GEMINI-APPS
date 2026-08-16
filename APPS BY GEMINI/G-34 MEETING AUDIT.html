@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Audit — Calendar Reclamation Toolkit</title>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --midnight-violet: #2B2D42;
+            --soft-coral: #F8AD9D;
+            --soft-coral-dark: #E88C78;
+            --bg-start: #F8F9FA;
+            --bg-end: #FFF0F3;
+            --card-bg: #FFFFFF;
+            --text-main: #2D3748;
+            --text-muted: #6C757D;
+            --border-color: #EDF2F7;
+            --sidebar-width: 260px;
+            --radius-xl: 1rem;
+            --shadow-sm: 0 4px 6px -1px rgba(43, 45, 66, 0.05), 0 2px 4px -1px rgba(43, 45, 66, 0.03);
+            --shadow-md: 0 10px 15px -3px rgba(43, 45, 66, 0.08), 0 4px 6px -2px rgba(43, 45, 66, 0.04);
+            --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            line-height: 1.5;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--card-bg);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-shadow: 2px 0 12px rgba(43, 45, 66, 0.05);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition-fast);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            background-color: var(--midnight-violet);
+            color: var(--soft-coral);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .brand-title {
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: var(--midnight-violet);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 1rem 0.75rem;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            margin-bottom: 0.35rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 0.6rem;
+            font-weight: 500;
+            font-size: 0.925rem;
+            transition: var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(248, 173, 157, 0.15);
+            color: var(--midnight-violet);
+        }
+
+        .nav-link.active {
+            background-color: var(--midnight-violet);
+            color: #FFFFFF;
+            box-shadow: 0 4px 8px rgba(43, 45, 66, 0.2);
+        }
+
+        .nav-link.active i {
+            color: var(--soft-coral);
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Mobile Top Bar & Hamburger */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--card-bg);
+            z-index: 900;
+            padding: 0 1.25rem;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.35rem;
+            color: var(--midnight-violet);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(43, 45, 66, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 950;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Main Container Layout */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .main-content {
+            max-width: 860px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 3rem 1.5rem;
+            flex-grow: 1;
+        }
+
+        /* Views Switching */
+        .view-panel {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Styling */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(237, 242, 247, 0.8);
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, var(--midnight-violet) 0%, #1A1C2E 100%);
+            color: white;
+            padding: 2.5rem 2rem;
+            position: relative;
+            overflow: hidden;
+            border: none;
+        }
+
+        .hero-card::after {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(248, 173, 157, 0.15);
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .hero-title span {
+            color: var(--soft-coral);
+        }
+
+        .hero-tagline {
+            font-size: 1.1rem;
+            color: #E2E8F0;
+            font-weight: 400;
+            max-width: 600px;
+        }
+
+        /* Dashboard Tools Grid */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: var(--transition-fast);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--soft-coral);
+        }
+
+        .tool-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(248, 173, 157, 0.2);
+            color: var(--midnight-violet);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+        }
+
+        .tool-card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--midnight-violet);
+        }
+
+        .tool-card-desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Tool Headers */
+        .tool-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--midnight-violet);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .tool-problem {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-style: italic;
+            background: rgba(248, 173, 157, 0.12);
+            padding: 0.6rem 1rem;
+            border-left: 3px solid var(--soft-coral);
+            border-radius: 0 8px 8px 0;
+            margin-top: 0.5rem;
+        }
+
+        /* Forms Styling */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--midnight-violet);
+        }
+
+        .form-control, .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1.5px solid var(--border-color);
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #FAFAFA;
+            transition: var(--transition-fast);
+        }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--midnight-violet);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(43, 45, 66, 0.1);
+        }
+
+        .checkbox-group, .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+
+        .check-item, .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #F8F9FA;
+            padding: 0.6rem 0.8rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition-fast);
+        }
+
+        .check-item:hover, .radio-item:hover {
+            border-color: var(--soft-coral);
+            background: #FFF;
+        }
+
+        .check-item input, .radio-item input {
+            accent-color: var(--midnight-violet);
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Buttons & Actions */
+        .action-bar {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: var(--transition-fast);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--midnight-violet);
+            color: white;
+            box-shadow: 0 2px 4px rgba(43, 45, 66, 0.15);
+        }
+
+        .btn-primary:hover {
+            background-color: #1E2030;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #EDF2F7;
+            color: var(--midnight-violet);
+        }
+
+        .btn-secondary:hover {
+            background-color: #E2E8F0;
+        }
+
+        .btn-sample {
+            background-color: rgba(248, 173, 157, 0.2);
+            color: var(--midnight-violet);
+            border: 1px dashed var(--soft-coral-dark);
+        }
+
+        .btn-sample:hover {
+            background-color: rgba(248, 173, 157, 0.35);
+        }
+
+        .btn-copy {
+            background-color: #F8F9FA;
+            color: var(--midnight-violet);
+            border: 1px solid var(--border-color);
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: 0.4rem;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--midnight-violet);
+            color: white;
+        }
+
+        /* Output Card Styling */
+        .output-card {
+            background: #FFFFFF;
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-sm);
+            border: 2px solid var(--midnight-violet);
+            margin-top: 2rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .output-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .output-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--midnight-violet);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .output-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .output-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .section-subtitle {
+            font-size: 0.825rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--soft-coral-dark);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-box {
+            background: #F8F9FA;
+            border-radius: 0.6rem;
+            padding: 1rem;
+            font-size: 0.925rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .stat-highlight {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--midnight-violet);
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .stat-subtext {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 2.5rem;
+        }
+
+        .history-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--midnight-violet);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 0.6rem;
+            overflow: hidden;
+        }
+
+        .history-header {
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: #FAFAFA;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .history-header:hover {
+            background: #F1F5F9;
+        }
+
+        .history-body {
+            padding: 1rem;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .history-item.open .history-body {
+            display: block;
+        }
+
+        /* Footer */
+        .app-footer {
+            margin-top: auto;
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(5px);
+            border-top: 1px solid var(--border-color);
+            width: 100%;
+        }
+
+        /* Toast Alert */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--midnight-violet);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            z-index: 2000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-left: 4px solid var(--soft-coral);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 60px;
+            }
+
+            .main-content {
+                padding: 1.25rem 1rem 2rem 1rem;
+            }
+
+            .hero-card {
+                padding: 1.75rem 1.25rem;
+            }
+
+            .hero-title {
+                font-size: 1.65rem;
+            }
+
+            .checkbox-group, .radio-group {
+                grid-template-columns: 1fr;
+            }
+
+            .action-bar {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Top Navigation Header -->
+    <div class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <div class="brand-logo" style="width:32px; height:32px; font-size:1rem;"><i class="fa-solid fa-calendar-xmark"></i></div>
+            <span class="brand-title" style="font-size:1rem;">MeetingAudit</span>
+        </div>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Fixed Left Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-logo">
+                <i class="fa-solid fa-calendar-xmark"></i>
+            </div>
+            <div>
+                <div class="brand-title">MeetingAudit</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Reclamation Toolkit</div>
+            </div>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a class="nav-link active" data-tool="dashboard">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-tool="inventory">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>1. Inventory</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-tool="decline">
+                    <i class="fa-solid fa-user-xmark"></i>
+                    <span>2. Decline Scripts</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-tool="agenda">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>3. Agenda Enforcer</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-tool="reclaim">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>4. Calendar Reclaim</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-tool="campaign">
+                    <i class="fa-solid fa-bullhorn"></i>
+                    <span>5. Team Campaign</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <main class="main-content">
+
+            <!-- DASHBOARD PANEL -->
+            <section id="panel-dashboard" class="view-panel active">
+                <div class="card hero-card">
+                    <h1 class="hero-title"><i class="fa-solid fa-fire"></i> Meeting <span>Audit</span></h1>
+                    <p class="hero-tagline">Your calendar is not a to-do list for other people. Take back your time, eliminate low-value syncs, and do actual deep work.</p>
+                </div>
+
+                <div class="tools-grid">
+                    <div class="tool-card" onclick="switchTool('inventory')">
+                        <div class="tool-card-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                        <div>
+                            <div class="tool-card-title">1. Meeting Inventory</div>
+                            <div class="tool-card-desc">Audit your current weekly load and quantify the financial & focused time cost.</div>
+                        </div>
+                    </div>
+
+                    <div class="tool-card" onclick="switchTool('decline')">
+                        <div class="tool-card-icon"><i class="fa-solid fa-user-xmark"></i></div>
+                        <div>
+                            <div class="tool-card-title">2. Decline Script Builder</div>
+                            <div class="tool-card-desc">Craft bulletproof polite refusal messages tailored by recipient power dynamics.</div>
+                        </div>
+                    </div>
+
+                    <div class="tool-card" onclick="switchTool('agenda')">
+                        <div class="tool-card-icon"><i class="fa-solid fa-list-check"></i></div>
+                        <div>
+                            <div class="tool-card-title">3. Agenda Enforcer</div>
+                            <div class="tool-card-desc">Tools & language to ensure mandatory syncs have agendas and end early.</div>
+                        </div>
+                    </div>
+
+                    <div class="tool-card" onclick="switchTool('reclaim')">
+                        <div class="tool-card-icon"><i class="fa-solid fa-clock"></i></div>
+                        <div>
+                            <div class="tool-card-title">4. Calendar Reclaim</div>
+                            <div class="tool-card-desc">Physically construct non-negotiable focus blocks and set team availability boundaries.</div>
+                        </div>
+                    </div>
+
+                    <div class="tool-card" onclick="switchTool('campaign')">
+                        <div class="tool-card-icon"><i class="fa-solid fa-bullhorn"></i></div>
+                        <div>
+                            <div class="tool-card-title">5. Team Campaign</div>
+                            <div class="tool-card-desc">Mobilize your peers and propose team-wide cultural experiments for fewer meetings.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 1: MEETING INVENTORY -->
+            <section id="panel-inventory" class="view-panel">
+                <div class="tool-header">
+                    <h2 class="tool-title"><i class="fa-solid fa-chart-pie"></i> Tool 1 — Meeting Inventory</h2>
+                    <div class="tool-problem">"I don't even know how many meetings I have. Let me count."</div>
+                </div>
+
+                <div class="card">
+                    <form id="form-inventory" onsubmit="runInventory(event)">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label" for="inv-count">Meetings this week</label>
+                                <input type="number" id="inv-count" class="form-control" min="0" required placeholder="e.g. 12">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="inv-hours">Hours in meetings</label>
+                                <input type="number" id="inv-hours" class="form-control" min="0" step="0.5" required placeholder="e.g. 18">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="inv-needed">Focus hours needed</label>
+                                <input type="number" id="inv-needed" class="form-control" min="0" step="0.5" required placeholder="e.g. 20">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Meeting types present on calendar:</label>
+                            <div class="checkbox-group">
+                                <label class="check-item"><input type="checkbox" name="inv-type" value="1:1"> 1:1 Syncs</label>
+                                <label class="check-item"><input type="checkbox" name="inv-type" value="Team standup"> Team Standups</label>
+                                <label class="check-item"><input type="checkbox" name="inv-type" value="Project sync"> Project Syncs</label>
+                                <label class="check-item"><input type="checkbox" name="inv-type" value="Status update"> Status Updates</label>
+                                <label class="check-item"><input type="checkbox" name="inv-type" value="Brainstorm"> Brainstorms</label>
+                                <label class="check-item"><input type="checkbox" name="inv-type" value="Decision-making"> Decision-making</label>
+                                <label class="check-item"><input type="checkbox" name="inv-type" value="Training"> Training</label>
+                                <label class="check-item"><input type="checkbox" name="inv-type" value="Social"> Social / Chat</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="inv-email">Which could have been an email / async message?</label>
+                            <select id="inv-email" class="form-select" required>
+                                <option value="None">None (All were necessary)</option>
+                                <option value="A few">A few (~20%)</option>
+                                <option value="About half">About half (~50%)</option>
+                                <option value="Most">Most (~75%)</option>
+                                <option value="All">All of them (100%)</option>
+                            </select>
+                        </div>
+
+                        <div class="action-bar">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Run Audit</button>
+                            <button type="button" class="btn btn-sample" onclick="loadSampleInventory()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-inventory" style="display:none;" class="output-card">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-chart-column"></i> Audit Analysis</div>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);" id="inv-timestamp"></span>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">Meeting Breakdown</div>
+                        <div class="output-box" id="out-inv-breakdown"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">The Reality Check</div>
+                        <div class="output-box" id="out-inv-reality"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">Cost Calculator</div>
+                        <div class="output-box" id="out-inv-cost"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">The Offenders</div>
+                        <div class="output-box" id="out-inv-offenders"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">One Stat to Share With Your Manager
+                            <button class="btn btn-copy" onclick="copyText('out-inv-stat')"><i class="fa-regular fa-copy"></i> Copy Stat</button>
+                        </div>
+                        <div class="output-box" id="out-inv-stat" style="font-weight: 600; color: var(--midnight-violet);"></div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="history-section">
+                    <div class="history-title">
+                        <span><i class="fa-solid fa-clock-rotate-left"></i> Previous Inventories</span>
+                        <button class="btn btn-copy" onclick="clearHistory('inventory')">Clear History</button>
+                    </div>
+                    <div class="history-list" id="history-inventory"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 2: DECLINE SCRIPT BUILDER -->
+            <section id="panel-decline" class="view-panel">
+                <div class="tool-header">
+                    <h2 class="tool-title"><i class="fa-solid fa-user-xmark"></i> Tool 2 — Decline Script Builder</h2>
+                    <div class="tool-problem">"I need to say no to meetings without looking uncooperative."</div>
+                </div>
+
+                <div class="card">
+                    <form id="form-decline" onsubmit="runDecline(event)">
+                        <div class="form-group">
+                            <label class="form-label" for="dec-title">Meeting you want to decline</label>
+                            <input type="text" id="dec-title" class="form-control" required placeholder="e.g. Weekly Cross-functional Alignment Sync">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label" for="dec-reason">Your actual reason</label>
+                                <select id="dec-reason" class="form-select" required>
+                                    <option value="Not relevant">Not relevant to my current priorities</option>
+                                    <option value="Too many meetings">Too many back-to-back meetings</option>
+                                    <option value="Need focus time">Need focus time for active deliverables</option>
+                                    <option value="Wrong attendees">Wrong attendees / I'm not the right person</option>
+                                    <option value="No agenda">No clear agenda provided</option>
+                                    <option value="Redundant">Redundant with existing async reports</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="dec-inviter">Who invited you?</label>
+                                <select id="dec-inviter" class="form-select" required>
+                                    <option value="Boss">My Manager / Boss</option>
+                                    <option value="Peer">Peer / Teammate</option>
+                                    <option value="Junior">Junior Direct Report / Mentee</option>
+                                    <option value="Client">External Client / Partner</option>
+                                    <option value="System auto-invite">System auto-invite / Recurring series</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Is attendance optional?</label>
+                            <div class="radio-group">
+                                <label class="radio-item"><input type="radio" name="dec-optional" value="Explicitly" checked> Explicitly Optional</label>
+                                <label class="radio-item"><input type="radio" name="dec-optional" value="Implicitly"> Implicitly Optional</label>
+                                <label class="radio-item"><input type="radio" name="dec-optional" value="Mandatory"> Marked Mandatory</label>
+                                <label class="radio-item"><input type="radio" name="dec-optional" value="Not sure"> Not Sure</label>
+                            </div>
+                        </div>
+
+                        <div class="action-bar">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-pen-nib"></i> Generate Scripts</button>
+                            <button type="button" class="btn btn-sample" onclick="loadSampleDecline()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-decline" style="display:none;" class="output-card">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-comment-dots"></i> Decline Scripts</div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">1. Brief & Direct Version
+                            <button class="btn btn-copy" onclick="copyText('out-dec-brief')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="output-box" id="out-dec-brief"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">2. Contextual & Value-Focused Version
+                            <button class="btn btn-copy" onclick="copyText('out-dec-context')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="output-box" id="out-dec-context"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">3. Alternative Async Offer
+                            <button class="btn btn-copy" onclick="copyText('out-dec-alt')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="output-box" id="out-dec-alt"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">The Proposed Substitute</div>
+                        <div class="output-box" id="out-dec-substitute"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">If They Push Back (Defense Plan)</div>
+                        <div class="output-box" id="out-dec-pushback"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">The Recurring Meeting Exit Strategy</div>
+                        <div class="output-box" id="out-dec-recurring"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">The Boss Strategy (Declining Upward)</div>
+                        <div class="output-box" id="out-dec-boss"></div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="history-section">
+                    <div class="history-title">
+                        <span><i class="fa-solid fa-clock-rotate-left"></i> Script History</span>
+                        <button class="btn btn-copy" onclick="clearHistory('decline')">Clear History</button>
+                    </div>
+                    <div class="history-list" id="history-decline"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 3: AGENDA ENFORCER -->
+            <section id="panel-agenda" class="view-panel">
+                <div class="tool-header">
+                    <h2 class="tool-title"><i class="fa-solid fa-list-check"></i> Tool 3 — Agenda Enforcer</h2>
+                    <div class="tool-problem">"The meetings I must attend are inefficient and endless."</div>
+                </div>
+
+                <div class="card">
+                    <form id="form-agenda" onsubmit="runAgenda(event)">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Meetings without agendas:</label>
+                                <div class="radio-group" style="grid-template-columns: 1fr 1fr;">
+                                    <label class="radio-item"><input type="radio" name="age-noagenda" value="All"> All of them</label>
+                                    <label class="radio-item"><input type="radio" name="age-noagenda" value="Most" checked> Most</label>
+                                    <label class="radio-item"><input type="radio" name="age-noagenda" value="Some"> Some</label>
+                                    <label class="radio-item"><input type="radio" name="age-noagenda" value="None"> None</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Meetings that run over time:</label>
+                                <div class="radio-group" style="grid-template-columns: 1fr 1fr;">
+                                    <label class="radio-item"><input type="radio" name="age-runover" value="All"> All of them</label>
+                                    <label class="radio-item"><input type="radio" name="age-runover" value="Most" checked> Most</label>
+                                    <label class="radio-item"><input type="radio" name="age-runover" value="Some"> Some</label>
+                                    <label class="radio-item"><input type="radio" name="age-runover" value="None"> None</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 0.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Meetings with clear outcomes:</label>
+                                <div class="radio-group" style="grid-template-columns: 1fr 1fr;">
+                                    <label class="radio-item"><input type="radio" name="age-outcomes" value="All"> All of them</label>
+                                    <label class="radio-item"><input type="radio" name="age-outcomes" value="Most"> Most</label>
+                                    <label class="radio-item"><input type="radio" name="age-outcomes" value="Some" checked> Some</label>
+                                    <label class="radio-item"><input type="radio" name="age-outcomes" value="None"> None</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="age-role">Your typical role in meetings:</label>
+                                <select id="age-role" class="form-select" required style="margin-top:0.3rem;">
+                                    <option value="Leader">Meeting Leader / Host</option>
+                                    <option value="Active participant">Active Participant</option>
+                                    <option value="Observer">Passive Observer</option>
+                                    <option value="Note-taker">Note-taker / Admin</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="action-bar">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-shield-halved"></i> Generate Strategy</button>
+                            <button type="button" class="btn btn-sample" onclick="loadSampleAgenda()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-agenda" style="display:none;" class="output-card">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-bullseye"></i> Efficiency Blueprint</div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">The Pre-Meeting Ask (Agenda Request)
+                            <button class="btn btn-copy" onclick="copyText('out-age-ask')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                        </div>
+                        <div class="output-box" id="out-age-ask"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">The Timekeeper Role (In-Meeting Control)</div>
+                        <div class="output-box" id="out-age-timekeeper"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">The Parking Lot Technique (Tangents)</div>
+                        <div class="output-box" id="out-age-parking"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">The Hard Close (Action & Accountability)</div>
+                        <div class="output-box" id="out-age-close"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">Team Hygiene Feedback Template</div>
+                        <div class="output-box" id="out-age-feedback"></div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="history-section">
+                    <div class="history-title">
+                        <span><i class="fa-solid fa-clock-rotate-left"></i> Enforcement History</span>
+                        <button class="btn btn-copy" onclick="clearHistory('agenda')">Clear History</button>
+                    </div>
+                    <div class="history-list" id="history-agenda"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 4: CALENDAR RECLAIM -->
+            <section id="panel-reclaim" class="view-panel">
+                <div class="tool-header">
+                    <h2 class="tool-title"><i class="fa-solid fa-clock"></i> Tool 4 — Calendar Reclaim</h2>
+                    <div class="tool-problem">"I need to physically block time for actual work."</div>
+                </div>
+
+                <div class="card">
+                    <form id="form-reclaim" onsubmit="runReclaim(event)">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label" for="rec-peak">Your ideal deep work hours</label>
+                                <select id="rec-peak" class="form-select" required>
+                                    <option value="Early morning">Early Morning (8am - 10am)</option>
+                                    <option value="Mid-morning">Mid-Morning (10am - 12pm)</option>
+                                    <option value="Afternoon">Early Afternoon (1pm - 3pm)</option>
+                                    <option value="Late afternoon">Late Afternoon (3pm - 5pm)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="rec-blocks">Focus blocks needed / week</label>
+                                <input type="number" id="rec-blocks" class="form-control" min="1" max="10" required placeholder="e.g. 4">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="rec-length">Length of each block</label>
+                                <select id="rec-length" class="form-select" required>
+                                    <option value="1hr">1 Hour</option>
+                                    <option value="2hr">2 Hours</option>
+                                    <option value="3hr">3 Hours</option>
+                                    <option value="Half day">Half Day (4 Hours)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Who controls your calendar?</label>
+                            <div class="radio-group">
+                                <label class="radio-item"><input type="radio" name="rec-control" value="Me"> Fully Me</label>
+                                <label class="radio-item"><input type="radio" name="rec-control" value="My boss"> My Boss</label>
+                                <label class="radio-item"><input type="radio" name="rec-control" value="My team"> My Team</label>
+                                <label class="radio-item"><input type="radio" name="rec-control" value="Assistant"> Executive Assistant</label>
+                                <label class="radio-item"><input type="radio" name="rec-control" value="Chaos" checked> Pure Chaos</label>
+                            </div>
+                        </div>
+
+                        <div class="action-bar">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calendar-plus"></i> Reclaim Calendar</button>
+                            <button type="button" class="btn btn-sample" onclick="loadSampleReclaim()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-reclaim" style="display:none;" class="output-card">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-calendar-check"></i> Defense Blueprint</div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">1. Calendar Block Titles to Create</div>
+                        <div class="output-box" id="out-rec-blocks"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">2. Visual Color Coding System</div>
+                        <div class="output-box" id="out-rec-color"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">3. The No-Meeting Day Proposal
+                            <button class="btn btn-copy" onclick="copyText('out-rec-nomeeting')"><i class="fa-regular fa-copy"></i> Copy Proposal</button>
+                        </div>
+                        <div class="output-box" id="out-rec-nomeeting"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">4. Buffer Strategy (Transition Protection)</div>
+                        <div class="output-box" id="out-rec-buffer"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">5. Public Calendar Rule Declaration
+                            <button class="btn btn-copy" onclick="copyText('out-rec-declaration')"><i class="fa-regular fa-copy"></i> Copy Declaration</button>
+                        </div>
+                        <div class="output-box" id="out-rec-declaration"></div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="history-section">
+                    <div class="history-title">
+                        <span><i class="fa-solid fa-clock-rotate-left"></i> Reclaim History</span>
+                        <button class="btn btn-copy" onclick="clearHistory('reclaim')">Clear History</button>
+                    </div>
+                    <div class="history-list" id="history-reclaim"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 5: TEAM CAMPAIGN -->
+            <section id="panel-campaign" class="view-panel">
+                <div class="tool-header">
+                    <h2 class="tool-title"><i class="fa-solid fa-bullhorn"></i> Tool 5 — Team Campaign</h2>
+                    <div class="tool-problem">"This isn't just me. The whole team is drowning in meetings."</div>
+                </div>
+
+                <div class="card">
+                    <form id="form-campaign" onsubmit="runCampaign(event)">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Have teammates complained?</label>
+                                <div class="radio-group" style="grid-template-columns: 1fr 1fr;">
+                                    <label class="radio-item"><input type="radio" name="cam-complained" value="Openly"> Openly</label>
+                                    <label class="radio-item"><input type="radio" name="cam-complained" value="Privately" checked> Privately</label>
+                                    <label class="radio-item"><input type="radio" name="cam-complained" value="No"> No</label>
+                                    <label class="radio-item"><input type="radio" name="cam-complained" value="I'm not sure"> Not sure</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="cam-champion">Who could champion change?</label>
+                                <select id="cam-champion" class="form-select" required style="margin-top:0.3rem;">
+                                    <option value="My boss">My Direct Manager</option>
+                                    <option value="Senior leader">Senior Leadership / Executive</option>
+                                    <option value="HR">People / HR Team</option>
+                                    <option value="Operations">Operations Leader</option>
+                                    <option value="Me">Me (Grassroots)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top:0.5rem;">
+                            <div class="form-group">
+                                <label class="form-label" for="cam-pain">Biggest team pain point</label>
+                                <select id="cam-pain" class="form-select" required>
+                                    <option value="Too many meetings">Too many meetings overall</option>
+                                    <option value="No agendas">Lack of agendas and structure</option>
+                                    <option value="Too long">Meetings run too long / over time</option>
+                                    <option value="Wrong people">Too many irrelevant people invited</option>
+                                    <option value="No action items">No clear owners or action items</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Are you willing to lead change?</label>
+                                <div class="radio-group" style="grid-template-columns: 1fr;">
+                                    <label class="radio-item"><input type="radio" name="cam-lead" value="Yes"> Yes, I'll take charge</label>
+                                    <label class="radio-item"><input type="radio" name="cam-lead" value="No"> No, behind the scenes only</label>
+                                    <label class="radio-item"><input type="radio" name="cam-lead" value="If someone else starts it" checked> If someone else co-leads</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="action-bar">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Launch Campaign</button>
+                            <button type="button" class="btn btn-sample" onclick="loadSampleCampaign()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="output-campaign" style="display:none;" class="output-card">
+                    <div class="output-header">
+                        <div class="output-title"><i class="fa-solid fa-users-gear"></i> Campaign Plan</div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">1. The Business Case (Executive Summary)
+                            <button class="btn btn-copy" onclick="copyText('out-cam-case')"><i class="fa-regular fa-copy"></i> Copy Text</button>
+                        </div>
+                        <div class="output-box" id="out-cam-case"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">2. The Pilot Experiment Proposal</div>
+                        <div class="output-box" id="out-cam-pilot"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">3. Ally Building Strategy</div>
+                        <div class="output-box" id="out-cam-ally"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">4. Team Meeting Charter Template
+                            <button class="btn btn-copy" onclick="copyText('out-cam-charter')"><i class="fa-regular fa-copy"></i> Copy Charter</button>
+                        </div>
+                        <div class="output-box" id="out-cam-charter"></div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="section-subtitle">5. Self-Protection Protocol (If Culture Resists)</div>
+                        <div class="output-box" id="out-cam-protection"></div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="history-section">
+                    <div class="history-title">
+                        <span><i class="fa-solid fa-clock-rotate-left"></i> Campaign History</span>
+                        <button class="btn btn-copy" onclick="clearHistory('campaign')">Clear History</button>
+                    </div>
+                    <div class="history-list" id="history-campaign"></div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="app-footer">
+            For productivity and time management only. Not a substitute for team culture conversations. For mandatory meeting policies, consult your manager.
+        </footer>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="toast" id="toastNotification">
+        <i class="fa-solid fa-circle-check" style="color:var(--soft-coral);"></i>
+        <span id="toastMessage">Copied to clipboard!</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- ROUTING & NAVIGATION ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const viewPanels = document.querySelectorAll('.view-panel');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function switchTool(toolId) {
+            navLinks.forEach(link => {
+                if (link.dataset.tool === toolId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            viewPanels.forEach(panel => {
+                if (panel.id === `panel-${toolId}`) {
+                    panel.classList.add('active');
+                } else {
+                    panel.classList.remove('active');
+                }
+            });
+
+            closeMobileMenu();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTool(link.dataset.tool);
+            });
+        });
+
+        function toggleMobileMenu() {
+            sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('active');
+        }
+
+        function closeMobileMenu() {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('active');
+        }
+
+        hamburgerBtn.addEventListener('click', toggleMobileMenu);
+        sidebarOverlay.addEventListener('click', closeMobileMenu);
+
+        // --- UTILITY FUNCTIONS ---
+        function showToast(message = "Copied to clipboard!") {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastMessage').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(err => {
+                console.error("Failed to copy text: ", err);
+            });
+        }
+
+        // LocalStorage History Helpers
+        const MAX_HISTORY = 30;
+
+        function saveToHistory(toolId, summary, fullData) {
+            const key = `meeting_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            const timestamp = new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            
+            history.unshift({
+                timestamp,
+                summary,
+                data: fullData
+            });
+
+            if (history.length > MAX_HISTORY) {
+                history = history.slice(0, MAX_HISTORY);
+            }
+
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = `meeting_history_${toolId}`;
+            const listContainer = document.getElementById(`history-${toolId}`);
+            if (!listContainer) return;
+
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            if (history.length === 0) {
+                listContainer.innerHTML = `<div style="font-size:0.85rem; color: var(--text-muted); padding:0.5rem;">No saved calculations or scripts yet.</div>`;
+                return;
+            }
+
+            listContainer.innerHTML = history.map((item, idx) => `
+                <div class="history-item" id="hist-${toolId}-${idx}">
+                    <div class="history-header" onclick="toggleHistoryItem('${toolId}', ${idx})">
+                        <span>${item.summary}</span>
+                        <span style="font-weight:normal; font-size:0.75rem; color:var(--text-muted);">${item.timestamp} <i class="fa-solid fa-chevron-down"></i></span>
+                    </div>
+                    <div class="history-body">
+                        ${item.data}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistoryItem(toolId, idx) {
+            const elem = document.getElementById(`hist-${toolId}-${idx}`);
+            elem.classList.toggle('open');
+        }
+
+        function clearHistory(toolId) {
+            const key = `meeting_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        // Initialize history views on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            ['inventory', 'decline', 'agenda', 'reclaim', 'campaign'].forEach(renderHistory);
+        });
+
+        // --- TOOL 1: MEETING INVENTORY LOGIC ---
+        function loadSampleInventory() {
+            document.getElementById('inv-count').value = 12;
+            document.getElementById('inv-hours').value = 18;
+            document.getElementById('inv-needed').value = 20;
+            
+            const checkboxes = document.querySelectorAll('input[name="inv-type"]');
+            checkboxes.forEach(cb => {
+                cb.checked = ['Status update', 'Project sync', '1:1', 'Team standup'].includes(cb.value);
+            });
+
+            document.getElementById('inv-email').value = "About half";
+        }
+
+        function runInventory(e) {
+            e.preventDefault();
+            const count = parseFloat(document.getElementById('inv-count').value);
+            const hours = parseFloat(document.getElementById('inv-hours').value);
+            const needed = parseFloat(document.getElementById('inv-needed').value);
+            const emailRatio = document.getElementById('inv-email').value;
+
+            const selectedTypes = Array.from(document.querySelectorAll('input[name="inv-type"]:checked')).map(c => c.value);
+            const typesStr = selectedTypes.length > 0 ? selectedTypes.join(', ') : 'General Meetings';
+
+            // Calculations
+            const totalWorkHours = 40;
+            const availableFocus = totalWorkHours - hours;
+            const deficit = needed - availableFocus;
+            
+            let emailPct = 0.2;
+            if (emailRatio === 'About half') emailPct = 0.5;
+            if (emailRatio === 'Most') emailPct = 0.75;
+            if (emailRatio === 'All') emailPct = 1.0;
+            if (emailRatio === 'None') emailPct = 0.0;
+
+            const wastedHours = hours * emailPct;
+            const avgSalary = 95000; // estimated standard knowledge worker benchmark
+            const hourlyRate = avgSalary / (52 * 40);
+            const weeklyCost = Math.round(hours * hourlyRate);
+            const wastedCost = Math.round(wastedHours * hourlyRate);
+
+            // Output HTML Generation
+            document.getElementById('out-inv-breakdown').innerHTML = `
+                <p>You have <strong>${count} meetings</strong> totaling <strong>${hours} hours</strong> this week across types: <em>${typesStr}</em>.</p>
+                <p style="margin-top:0.4rem;">Meeting intensity: <strong>${Math.round((hours/40)*100)}% of your standard 40-hour work week</strong> is spent sitting in calls.</p>
+            `;
+
+            document.getElementById('out-inv-reality').innerHTML = `
+                <div class="stat-highlight">${availableFocus} hrs <span class="stat-subtext">available focus time</span></div>
+                <p style="margin-top:0.5rem;">You need <strong>${needed} hours</strong> of deep work, but only have <strong>${availableFocus} hours</strong> left. ${deficit > 0 ? `<span style="color:#D97706; font-weight:600;">You are running a ${deficit}-hour weekly focus deficit</span>, leading to late-night or weekend catch-up work.` : `<span style="color:#10B981; font-weight:600;">You have sufficient focus capacity</span>, provided no unexpected calls get added.`}</p>
+            `;
+
+            document.getElementById('out-inv-cost').innerHTML = `
+                <p>At an estimated industry benchmark ($95k salary / ~$45/hr):</p>
+                <div style="display:flex; gap:1.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                    <div><span style="font-size:1.2rem; font-weight:700; color:var(--midnight-violet);">$${weeklyCost}</span> <span style="font-size:0.8rem; color:var(--text-muted);">Total Weekly Meeting Cost</span></div>
+                    <div><span style="font-size:1.2rem; font-weight:700; color:#E11D48;">$${wastedCost}</span> <span style="font-size:0.8rem; color:var(--text-muted);">Wasted on Async-Eligible Syncs</span></div>
+                </div>
+            `;
+
+            document.getElementById('out-inv-offenders').innerHTML = `
+                <p>Based on your selected types, the primary time thieves are <strong>${selectedTypes.includes('Status update') ? 'Status Updates (should be async Slack/email)' : ''} ${selectedTypes.includes('Project sync') ? 'and Weekly Project Syncs' : ''}</strong>.</p>
+                <p style="margin-top:0.4rem; font-size:0.875rem; color:var(--text-muted);">Self-reported assessment indicates <strong>${emailRatio.toLowerCase()}</strong> of these meetings could easily be converted into asynchronous written updates.</p>
+            `;
+
+            const statText = `"I am currently spending ${hours} hours in meetings per week (${Math.round((hours/40)*100)}% of my capacity). Eliminating low-value status updates would unlock ${Math.round(wastedHours)} hours per week of deep work focus time."`;
+            document.getElementById('out-inv-stat').innerText = statText;
+
+            document.getElementById('inv-timestamp').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('output-inventory').style.display = 'block';
+
+            // Save History
+            const fullHTML = document.getElementById('output-inventory').innerHTML;
+            saveToHistory('inventory', `${count} meetings (${hours}h) - ${deficit > 0 ? deficit+'h deficit' : 'OK'}`, fullHTML);
+        }
+
+        // --- TOOL 2: DECLINE SCRIPT BUILDER LOGIC ---
+        function loadSampleDecline() {
+            document.getElementById('dec-title').value = "Weekly Cross-Departmental Project Sync";
+            document.getElementById('dec-reason').value = "Need focus time";
+            document.getElementById('dec-inviter').value = "Peer";
+            document.querySelector('input[name="dec-optional"][value="Implicitly"]').checked = true;
+        }
+
+        function runDecline(e) {
+            e.preventDefault();
+            const title = document.getElementById('dec-title').value;
+            const reason = document.getElementById('dec-reason').value;
+            const inviter = document.getElementById('dec-inviter').value;
+            const optional = document.querySelector('input[name="dec-optional"]:checked').value;
+
+            let brief = "";
+            let context = "";
+            let alt = "";
+            let sub = "";
+            let push = "";
+            let recur = "";
+            let boss = "";
+
+            if (inviter === 'Boss') {
+                brief = `Hi! I noticed "${title}" on my calendar. I have a tight deadline on my core deliverables this week. Should I prioritize attending this call, or focus on finishing the project updates first?`;
+                context = `Hi! To ensure I stay on track with my top priorities this week, I am carefully auditing my meeting schedule. Is my attendance at "${title}" critical, or can I review the notes/recording asynchronously afterward?`;
+                alt = `Hi! I won't be able to join "${title}" live, but I will submit my written updates in the shared doc 30 minutes before the call starts and review any action items assigned to me immediately after.`;
+            } else {
+                brief = `Hi! Thanks for the invite to "${title}". I'm currently in a heavy focus block for my current deliverables and won't be able to attend live.`;
+                context = `Hi! Thanks for reaching out. My calendar is packed with heads-down work this week to hit our target milestones, so I'm declining "${title}". If there are specific items you need my input on, please ping me in Slack!`;
+                alt = `Hi! I can't make the live session for "${title}", but please send over the key agenda questions or notes. I'll review and drop my input asynchronously by EOD.`;
+            }
+
+            sub = `Offer a 3-minute Loom video update, a shared Google Doc / Notion page with pre-filled status bullet points, or a quick Slack thread summary instead of live attendance.`;
+            
+            push = `If they reply "We really need you there live": Ask "What specific agenda point requires my live decision?" If it's a 5-minute item, ask to join for the first 10 minutes only, then drop off.`;
+
+            recur = `To exit a recurring series: "I've reviewed my recurring syncs to protect focus time. Since my role in '${title}' is primarily observational, please remove me from the recurring invite. I'll check the weekly recap notes instead!"`;
+
+            boss = `Upward Negotiation Framework: "I want to deliver top quality on [Project X]. Attending [Meeting Y] takes away 2 focus hours today. Would you prefer I prioritize attending or hitting our target delivery date for [Project X]?"`;
+
+            document.getElementById('out-dec-brief').innerText = brief;
+            document.getElementById('out-dec-context').innerText = context;
+            document.getElementById('out-dec-alt').innerText = alt;
+            document.getElementById('out-dec-substitute').innerText = sub;
+            document.getElementById('out-dec-pushback').innerText = push;
+            document.getElementById('out-dec-recurring').innerText = recur;
+            document.getElementById('out-dec-boss').innerText = boss;
+
+            document.getElementById('output-decline').style.display = 'block';
+
+            const fullHTML = document.getElementById('output-decline').innerHTML;
+            saveToHistory('decline', `Declining "${title}" (${inviter})`, fullHTML);
+        }
+
+        // --- TOOL 3: AGENDA ENFORCER LOGIC ---
+        function loadSampleAgenda() {
+            document.querySelectorAll('input[name="age-noagenda"]')[1].checked = true; // Most
+            document.querySelectorAll('input[name="age-runover"]')[1].checked = true; // Most
+            document.querySelectorAll('input[name="age-outcomes"]')[2].checked = true; // Some
+            document.getElementById('age-role').value = "Active participant";
+        }
+
+        function runAgenda(e) {
+            e.preventDefault();
+            const noAgenda = document.querySelector('input[name="age-noagenda"]:checked').value;
+            const runOver = document.querySelector('input[name="age-runover"]:checked').value;
+            const outcomes = document.querySelector('input[name="age-outcomes"]:checked').value;
+            const role = document.getElementById('age-role').value;
+
+            const askText = `"Hi team! Looking forward to our upcoming sync. To make sure I prepare the right data and keep us on schedule, could you share the quick agenda and primary objective for this session? Thanks!"`;
+            
+            const timekeeperText = role === 'Leader' 
+                ? "As host, open with: 'We have 30 minutes and 3 items. I will spend 8 mins on each so we can exit 5 minutes early.' Set a visible timer." 
+                : "As participant, interject gently at halftime: 'Hey team, we are halfway through our allotted time and still on topic #1. Should we park this or adjust the remaining topics?'";
+
+            const parkingText = `"That is a critical point, but it seems outside our main objective today. Let's add it to the 'Parking Lot' section of our notes and schedule a dedicated follow-up if needed so we can honor everyone's time."`;
+
+            const closeText = `"5 minutes before end: 'To wrap up on time: We agreed that [Person A] owns [Task X] by Friday, and [Person B] owns [Task Y]. Thanks everyone, giving you back 5 minutes!'"`;
+
+            const feedbackText = `"Hey team! I noticed our syncs frequently run over time without a structured agenda. Could we pilot a new rule: 24-hr advance agenda required, and default meetings set to 25/50 minutes instead of 30/60?"`;
+
+            document.getElementById('out-age-ask').innerText = askText;
+            document.getElementById('out-age-timekeeper').innerText = timekeeperText;
+            document.getElementById('out-age-parking').innerText = parkingText;
+            document.getElementById('out-age-close').innerText = closeText;
+            document.getElementById('out-age-feedback').innerText = feedbackText;
+
+            document.getElementById('output-agenda').style.display = 'block';
+
+            const fullHTML = document.getElementById('output-agenda').innerHTML;
+            saveToHistory('agenda', `Agenda Strategy (${role} - ${noAgenda} missing agendas)`, fullHTML);
+        }
+
+        // --- TOOL 4: CALENDAR RECLAIM LOGIC ---
+        function loadSampleReclaim() {
+            document.getElementById('rec-peak').value = "Mid-morning";
+            document.getElementById('rec-blocks').value = 4;
+            document.getElementById('rec-length').value = "2hr";
+            document.querySelector('input[name="rec-control"][value="Chaos"]').checked = true;
+        }
+
+        function runReclaim(e) {
+            e.preventDefault();
+            const peak = document.getElementById('rec-peak').value;
+            const blocks = document.getElementById('rec-blocks').value;
+            const length = document.getElementById('rec-length').value;
+            const control = document.querySelector('input[name="rec-control"]:checked').value;
+
+            document.getElementById('out-rec-blocks').innerHTML = `
+                <p>Create these recurring recurring blocks on your calendar right now:</p>
+                <ul style="margin-left:1.2rem; margin-top:0.5rem; line-height:1.6;">
+                    <li><strong>🔒 DEEP WORK — [Core Project Deliverables]</strong> (${blocks}x per week, ${length} during ${peak})</li>
+                    <li><strong>⚡ ASYNC ADMIN & EMAIL CLEARANCE</strong> (30 mins every day at 4:30 PM)</li>
+                    <li><strong>🧠 STRATEGIC PLANNING & REVIEW</strong> (1 hour every Friday afternoon)</li>
+                </ul>
+            `;
+
+            document.getElementById('out-rec-color').innerHTML = `
+                <p>Implement high-contrast calendar color coding:</p>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:0.5rem; margin-top:0.5rem;">
+                    <div style="background:#2B2D42; color:white; padding:0.5rem; border-radius:0.4rem; text-align:center;">Dark Violet: Deep Work</div>
+                    <div style="background:#F8AD9D; color:#2B2D42; padding:0.5rem; border-radius:0.4rem; text-align:center; font-weight:600;">Soft Coral: Mandatory Client</div>
+                    <div style="background:#E2E8F0; color:#2D3748; padding:0.5rem; border-radius:0.4rem; text-align:center;">Light Slate: Internal Sync</div>
+                </div>
+            `;
+
+            document.getElementById('out-rec-nomeeting').innerText = `"Hi team! To ensure high-quality execution on key initiatives, our department is testing 'Focus Wednesdays' (No-Meeting Day). On Wednesdays, all internal syncs are moved to async updates or rescheduled. Emergency calls remain allowed."`;
+
+            document.getElementById('out-rec-buffer').innerText = `Configure Google Calendar / Outlook settings for Speedy Meetings: 30-minute meetings automatically end at 25 minutes, and 60-minute meetings end at 50 minutes. This builds built-in 5-10 minute buffer transition times.`;
+
+            document.getElementById('out-rec-declaration').innerText = `"Hey everyone! I am updating my calendar working hours and blocking designated Deep Work focus windows during ${peak}. If you see a 'DEEP WORK' block, please treat it as busy, but feel free to ping me on Slack if there is an urgent blocker!"`;
+
+            document.getElementById('output-reclaim').style.display = 'block';
+
+            const fullHTML = document.getElementById('output-reclaim').innerHTML;
+            saveToHistory('reclaim', `Calendar Reclaim (${blocks}x ${length} blocks - ${peak})`, fullHTML);
+        }
+
+        // --- TOOL 5: TEAM CAMPAIGN LOGIC ---
+        function loadSampleCampaign() {
+            document.querySelector('input[name="cam-complained"][value="Privately"]').checked = true;
+            document.getElementById('cam-champion').value = "My boss";
+            document.getElementById('cam-pain').value = "Too many meetings";
+            document.querySelector('input[name="cam-lead"][value="If someone else starts it"]').checked = true;
+        }
+
+        function runCampaign(e) {
+            e.preventDefault();
+            const complained = document.querySelector('input[name="cam-complained"]:checked').value;
+            const champion = document.getElementById('cam-champion').value;
+            const pain = document.getElementById('cam-pain').value;
+            const lead = document.querySelector('input[name="cam-lead"]:checked').value;
+
+            document.getElementById('out-cam-case').innerText = `"Our team currently spends significant hours weekly in syncs, with ${pain.toLowerCase()} identified as a primary friction point. By reducing redundant meetings by just 20%, we can unlock ~150+ hours of team engineering/execution capacity per month with zero extra hiring cost."`;
+
+            document.getElementById('out-cam-pilot').innerText = `Propose a low-risk 2-week experiment to ${champion}: 'Let's try No-Meeting Thursdays for 14 days and measure our sprint throughput and team satisfaction score before and after.'`;
+
+            document.getElementById('out-cam-ally').innerText = `Since teammates have complained ${complained.toLowerCase()}, schedule informal 10-minute 1:1 chats with 2 respected peers. Share your meeting inventory stats and ask if they'd co-sign a proposal for meeting hygiene norms.`;
+
+            document.getElementById('out-cam-charter').innerText = `TEAM MEETING CHARTER:
+1. No Agenda = No Attenda (Agendas required 24h prior)
+2. Default 25/50 minute duration (Speedy Meetings)
+3. Written async recap within 2 hours of meeting close
+4. Silent reads: spend first 5 mins reading context doc in silence
+5. Declining is normal and respected when non-essential`;
+
+            document.getElementById('out-cam-protection').innerText = `If team culture refuses to change: Decline low-value invites with polite alternatives, block out focus time on your calendar under 'Client/Project Commitments', and ask your manager to explicitly prioritize your deliverables over meeting attendance during 1:1s.`;
+
+            document.getElementById('output-campaign').style.display = 'block';
+
+            const fullHTML = document.getElementById('output-campaign').innerHTML;
+            saveToHistory('campaign', `Campaign Proposal (Champion: ${champion}, Pain: ${pain})`, fullHTML);
+        }
+    </script>
+</body>
+</html>

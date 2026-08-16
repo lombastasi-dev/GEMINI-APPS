@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Mistake Recovery Toolkit</title>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --charcoal: #343A40;
+            --charcoal-light: #495057;
+            --soft-sage: #A3B18A;
+            --sage-dark: #588157;
+            --sage-light: #DAD7CD;
+            --sage-bg: #E9EDC9;
+            --bg-gradient: linear-gradient(135deg, #F8F9FA 0%, #F1F8F5 100%);
+            --white: #FFFFFF;
+            --text-main: #212529;
+            --text-muted: #6C757D;
+            --border-color: #E9ECEF;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            --radius-xl: 1rem;
+            --radius-lg: 0.75rem;
+            --radius-md: 0.5rem;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--white);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--sage-dark);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            line-height: 1.2;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.925rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 1.25rem;
+            text-align: center;
+        }
+
+        .nav-item:hover {
+            background-color: #F8F9FA;
+            color: var(--charcoal);
+        }
+
+        .nav-item.active {
+            background-color: var(--charcoal);
+            color: var(--white);
+        }
+
+        .nav-item.active i {
+            color: var(--soft-sage);
+        }
+
+        /* Mobile Header & Overlay */
+        .mobile-header {
+            display: none;
+            background-color: var(--white);
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .mobile-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            color: var(--charcoal);
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.35rem;
+            color: var(--charcoal);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 95;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .content-container {
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+            flex: 1;
+        }
+
+        /* Footer */
+        .app-footer {
+            background-color: var(--white);
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+            text-align: center;
+            font-size: 0.825rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-top: auto;
+        }
+
+        .app-footer p {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* UI Elements & Cards */
+        .card {
+            background-color: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.75rem;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .tool-header {
+            margin-bottom: 2rem;
+        }
+
+        .tool-header h1 {
+            font-size: 1.85rem;
+            color: var(--charcoal);
+            margin-bottom: 0.35rem;
+            font-weight: 700;
+        }
+
+        .tool-header .problem-statement {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Dashboard Hero & Grid */
+        .hero-section {
+            background: linear-gradient(135deg, var(--charcoal) 0%, #212529 100%);
+            color: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: var(--soft-sage);
+            opacity: 0.15;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-section h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-section p.tagline {
+            font-size: 1.15rem;
+            color: var(--sage-light);
+            font-weight: 400;
+            max-width: 600px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .dash-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.25 ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--soft-sage);
+        }
+
+        .dash-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            background-color: #F1F8F5;
+            color: var(--sage-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .dash-card h3 {
+            font-size: 1.15rem;
+            color: var(--charcoal);
+            margin-bottom: 0.4rem;
+        }
+
+        .dash-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+            flex: 1;
+        }
+
+        .dash-card .action-btn {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--sage-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--charcoal);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, select.form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid #CED4DA;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: var(--white);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus, select.form-control:focus {
+            outline: none;
+            border-color: var(--sage-dark);
+            box-shadow: 0 0 0 3px rgba(163, 177, 138, 0.25);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: center;
+            background: #F8F9FA;
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .radio-option:hover, .checkbox-option:hover {
+            background: #E9ECEF;
+        }
+
+        .radio-option input, .checkbox-option input {
+            margin-right: 0.5rem;
+            accent-color: var(--sage-dark);
+        }
+
+        .radio-option input:checked + span,
+        .checkbox-option input:checked + span {
+            font-weight: 600;
+            color: var(--charcoal);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.925rem;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--charcoal);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--charcoal-light);
+        }
+
+        .btn-secondary {
+            background-color: #E9ECEF;
+            color: var(--charcoal);
+        }
+
+        .btn-secondary:hover {
+            background-color: #DEE2E6;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background-color: #F8F9FA;
+            color: var(--charcoal);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.825rem;
+        }
+
+        /* Output / Analysis Styles */
+        .output-section {
+            margin-top: 2rem;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.825rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-minor { background-color: #D1E7DD; color: #0F5132; }
+        .badge-moderate { background-color: #FFF3CD; color: #664D03; }
+        .badge-major { background-color: #FFE6D5; color: #9A3412; }
+        .badge-critical { background-color: #F8D7DA; color: #842029; }
+
+        .output-box {
+            background-color: #F8F9FA;
+            border-left: 4px solid var(--soft-sage);
+            padding: 1.25rem;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .output-box h4 {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--charcoal);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-box p, .output-box ul {
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .output-box ul {
+            padding-left: 1.2rem;
+        }
+
+        .output-box ul li {
+            margin-bottom: 0.4rem;
+        }
+
+        .script-box {
+            background-color: #2B303A;
+            color: #F8F9FA;
+            padding: 1.25rem;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            position: relative;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: var(--white);
+            padding: 0.35rem 0.65rem;
+            border-radius: var(--radius-md);
+            font-size: 0.775rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-header h3 {
+            font-size: 1.1rem;
+            color: var(--charcoal);
+        }
+
+        .history-item {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.75rem;
+            background: var(--white);
+            overflow: hidden;
+        }
+
+        .history-item-header {
+            padding: 0.85rem 1.1rem;
+            background: #F8F9FA;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--charcoal);
+        }
+
+        .history-item-body {
+            padding: 1.1rem;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            background: var(--white);
+        }
+
+        .history-item.open .history-item-body {
+            display: block;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--charcoal);
+            color: var(--white);
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast i {
+            color: var(--soft-sage);
+        }
+
+        /* Views management */
+        .tool-view {
+            display: none;
+        }
+
+        .tool-view.active {
+            display: block;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .overlay.mobile-open {
+                display: block;
+            }
+
+            .content-container {
+                padding: 1.5rem 1rem;
+            }
+
+            .hero-section {
+                padding: 1.75rem 1.25rem;
+            }
+
+            .hero-section h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <div class="brand">
+                <i class="fa-solid fa-life-ring" style="color: var(--sage-dark);"></i>
+                <span>WorkMistakeRecovery</span>
+            </div>
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Navigation">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Sidebar Overlay -->
+        <div class="overlay" id="sidebarOverlay"></div>
+
+        <!-- Left Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-shield-heart"></i>
+                <h2>Recovery Toolkit</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tool="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-item" data-tool="tool1">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                    <span>1. Damage Assessment</span>
+                </button>
+                <button class="nav-item" data-tool="tool2">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>2. Confession Script</span>
+                </button>
+                <button class="nav-item" data-tool="tool3">
+                    <i class="fa-solid fa-wrench"></i>
+                    <span>3. The Fix Plan</span>
+                </button>
+                <button class="nav-item" data-tool="tool4">
+                    <i class="fa-solid fa-award"></i>
+                    <span>4. Credibility Rebuild</span>
+                </button>
+                <button class="nav-item" data-tool="tool5">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <span>5. Shame Exit</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-wrapper">
+            <main class="content-container">
+                
+                <!-- DASHBOARD VIEW -->
+                <div id="dashboard" class="tool-view active">
+                    <div class="hero-section">
+                        <h1>Work Mistake Recovery</h1>
+                        <p class="tagline">You made a mistake. You're not a mistake. Let's fix this.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dash-card" onclick="switchTool('tool1')">
+                            <div>
+                                <div class="dash-card-icon">
+                                    <i class="fa-solid fa-scale-balanced"></i>
+                                </div>
+                                <h3>1. Damage Assessment</h3>
+                                <p>Evaluate the actual impact objectively before anxiety distorts your judgment.</p>
+                            </div>
+                            <span class="action-btn">Assess Damage <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+
+                        <div class="dash-card" onclick="switchTool('tool2')">
+                            <div>
+                                <div class="dash-card-icon">
+                                    <i class="fa-solid fa-comments"></i>
+                                </div>
+                                <h3>2. Confession Script</h3>
+                                <p>Draft exact word-for-word scripts to inform your manager professionally and calmly.</p>
+                            </div>
+                            <span class="action-btn">Draft Script <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+
+                        <div class="dash-card" onclick="switchTool('tool3')">
+                            <div>
+                                <div class="dash-card-icon">
+                                    <i class="fa-solid fa-wrench"></i>
+                                </div>
+                                <h3>3. The Fix Plan</h3>
+                                <p>Create a structured step-by-step recovery and prevention action plan.</p>
+                            </div>
+                            <span class="action-btn">Build Plan <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+
+                        <div class="dash-card" onclick="switchTool('tool4')">
+                            <div>
+                                <div class="dash-card-icon">
+                                    <i class="fa-solid fa-award"></i>
+                                </div>
+                                <h3>4. Credibility Rebuild</h3>
+                                <p>Strategic 30-day roadmap to restore trust and demonstrate reliable performance.</p>
+                            </div>
+                            <span class="action-btn">Rebuild Trust <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+
+                        <div class="dash-card" onclick="switchTool('tool5')">
+                            <div>
+                                <div class="dash-card-icon">
+                                    <i class="fa-solid fa-heart-pulse"></i>
+                                </div>
+                                <h3>5. Shame Exit</h3>
+                                <p>Break rumination loops, calm emotional distress, and regain professional confidence.</p>
+                            </div>
+                            <span class="action-btn">Exit Shame Loop <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 1: DAMAGE ASSESSMENT -->
+                <div id="tool1" class="tool-view">
+                    <div class="tool-header">
+                        <h1>Damage Assessment</h1>
+                        <p class="problem-statement"><i class="fa-regular fa-lightbulb"></i> "I need to know how bad this actually is before I panic."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool1">
+                            <div class="form-group">
+                                <label for="t1-happened">What happened?</label>
+                                <textarea id="t1-happened" class="form-control" placeholder="Describe the mistake neutrally without self-judgment..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-affected">Who is affected?</label>
+                                <select id="t1-affected" class="form-control" required>
+                                    <option value="Just me">Just me</option>
+                                    <option value="My team">My team</option>
+                                    <option value="A client">A client</option>
+                                    <option value="The company">The company</option>
+                                    <option value="External stakeholders">External stakeholders</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Can it be undone or fixed?</label>
+                                <div class="radio-group">
+                                    <label class="radio-option">
+                                        <input type="radio" name="t1-fixable" value="Yes easily" checked>
+                                        <span>Yes easily</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t1-fixable" value="Yes with effort">
+                                        <span>Yes with effort</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t1-fixable" value="Partially">
+                                        <span>Partially</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t1-fixable" value="No">
+                                        <span>No</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-knows">Who knows about it?</label>
+                                <select id="t1-knows" class="form-control" required>
+                                    <option value="Just me">Just me</option>
+                                    <option value="My boss">My boss</option>
+                                    <option value="My team">My team</option>
+                                    <option value="Client">Client</option>
+                                    <option value="Everyone">Everyone</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Is there legal or safety risk?</label>
+                                <div class="radio-group">
+                                    <label class="radio-option">
+                                        <input type="radio" name="t1-legal" value="Yes">
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t1-legal" value="Maybe">
+                                        <span>Maybe</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t1-legal" value="No" checked>
+                                        <span>No</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t1-legal" value="Not sure">
+                                        <span>Not sure</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool1()">
+                                    <i class="fa-solid fa-calculator"></i> Assess Severity
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()">
+                                    <i class="fa-solid fa-vial"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool1" class="output-section" style="display:none;"></div>
+                    <div id="history-tool1" class="history-section"></div>
+                </div>
+
+                <!-- TOOL 2: CONFESSION SCRIPT -->
+                <div id="tool2" class="tool-view">
+                    <div class="tool-header">
+                        <h1>The Confession Script</h1>
+                        <p class="problem-statement"><i class="fa-regular fa-lightbulb"></i> "I need to tell my boss what happened without making it worse."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool2">
+                            <div class="form-group">
+                                <label for="t2-knows">What do they already know?</label>
+                                <select id="t2-knows" class="form-control" required>
+                                    <option value="Nothing">Nothing</option>
+                                    <option value="Suspects something">Suspects something</option>
+                                    <option value="Knows something happened">Knows something happened</option>
+                                    <option value="Knows full details">Knows full details</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Your relationship with your boss:</label>
+                                <div class="radio-group">
+                                    <label class="radio-option">
+                                        <input type="radio" name="t2-rel" value="Strong" checked>
+                                        <span>Strong</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t2-rel" value="Neutral">
+                                        <span>Neutral</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t2-rel" value="Strained">
+                                        <span>Strained</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-type">The mistake was:</label>
+                                <select id="t2-type" class="form-control" required>
+                                    <option value="Careless">Careless oversight</option>
+                                    <option value="Misunderstood instructions">Misunderstood instructions</option>
+                                    <option value="Skill gap">Skill gap / lack of knowledge</option>
+                                    <option value="System failure">System or process failure</option>
+                                    <option value="External factor">External factor / dependency</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Do you have a fix in mind?</label>
+                                <div class="radio-group">
+                                    <label class="radio-option">
+                                        <input type="radio" name="t2-fix" value="Yes" checked>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t2-fix" value="Partial">
+                                        <span>Partial</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t2-fix" value="No">
+                                        <span>No</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t2-fix" value="Need help">
+                                        <span>Need help</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool2()">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Script
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()">
+                                    <i class="fa-solid fa-vial"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool2" class="output-section" style="display:none;"></div>
+                    <div id="history-tool2" class="history-section"></div>
+                </div>
+
+                <!-- TOOL 3: THE FIX PLAN -->
+                <div id="tool3" class="tool-view">
+                    <div class="tool-header">
+                        <h1>The Fix Plan</h1>
+                        <p class="problem-statement"><i class="fa-regular fa-lightbulb"></i> "I need to actually fix what went wrong and prevent it from happening again."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool3">
+                            <div class="form-group">
+                                <label for="t3-correct">What needs to be corrected?</label>
+                                <textarea id="t3-correct" class="form-control" placeholder="Specify technical fixes, corrected documents, or required adjustments..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-cause">What caused the mistake?</label>
+                                <select id="t3-cause" class="form-control" required>
+                                    <option value="Rushed">Rushed due to deadline</option>
+                                    <option value="Unclear instructions">Unclear or changing instructions</option>
+                                    <option value="Lack of skill">Lack of technical skill / training</option>
+                                    <option value="No process">Absence of standardized process</option>
+                                    <option value="Distraction">Distraction / context switching</option>
+                                    <option value="System issue">System error or tool failure</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-resources">What resources do you need?</label>
+                                <textarea id="t3-resources" class="form-control" placeholder="Tools, access permissions, guidelines, budget, or extra time needed..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-involved">Who else needs to be involved?</label>
+                                <textarea id="t3-involved" class="form-control" placeholder="List specific colleagues, teams, approvers, or IT support..." required></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool3()">
+                                    <i class="fa-solid fa-diagram-project"></i> Build Action Plan
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()">
+                                    <i class="fa-solid fa-vial"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool3" class="output-section" style="display:none;"></div>
+                    <div id="history-tool3" class="history-section"></div>
+                </div>
+
+                <!-- TOOL 4: CREDIBILITY REBUILD -->
+                <div id="tool4" class="tool-view">
+                    <div class="tool-header">
+                        <h1>The Credibility Rebuild</h1>
+                        <p class="problem-statement"><i class="fa-regular fa-lightbulb"></i> "I feel like everyone sees me differently now. How do I earn back trust?"</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool4">
+                            <div class="form-group">
+                                <label for="t4-visible">How visible was the mistake?</label>
+                                <select id="t4-visible" class="form-control" required>
+                                    <option value="Private">Private (Just boss/me)</option>
+                                    <option value="Team">Team-wide</option>
+                                    <option value="Department">Department-wide</option>
+                                    <option value="Company">Company-wide</option>
+                                    <option value="External">External (Clients/Public)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-feeling">How are you feeling?</label>
+                                <select id="t4-feeling" class="form-control" required>
+                                    <option value="Ashamed">Ashamed</option>
+                                    <option value="Anxious">Anxious</option>
+                                    <option value="Determined">Determined</option>
+                                    <option value="Numb">Numb</option>
+                                    <option value="Paranoid">Paranoid</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-reputation">What do you want people to think of you in 3 months?</label>
+                                <textarea id="t4-reputation" class="form-control" placeholder="e.g., Reliable, precise, highly capable, proactive..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-trait">What's your strongest professional trait?</label>
+                                <textarea id="t4-trait" class="form-control" placeholder="e.g., Attention to detail, fast problem solver, team player..." required></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool4()">
+                                    <i class="fa-solid fa-chart-line"></i> Generate Roadmap
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()">
+                                    <i class="fa-solid fa-vial"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool4" class="output-section" style="display:none;"></div>
+                    <div id="history-tool4" class="history-section"></div>
+                </div>
+
+                <!-- TOOL 5: SHAME EXIT -->
+                <div id="tool5" class="tool-view">
+                    <div class="tool-header">
+                        <h1>The Shame Exit</h1>
+                        <p class="problem-statement"><i class="fa-regular fa-lightbulb"></i> "I can't stop thinking about this and it's affecting my sleep and work."</p>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool5">
+                            <div class="form-group">
+                                <label for="t5-when">How long ago was the mistake?</label>
+                                <select id="t5-when" class="form-control" required>
+                                    <option value="Today">Today</option>
+                                    <option value="This week">This week</option>
+                                    <option value="This month">This month</option>
+                                    <option value="Months ago">Months ago</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Are you still being punished?</label>
+                                <div class="radio-group">
+                                    <label class="radio-option">
+                                        <input type="radio" name="t5-punished" value="Yes explicitly">
+                                        <span>Yes explicitly</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t5-punished" value="Yes subtly">
+                                        <span>Yes subtly</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t5-punished" value="No" checked>
+                                        <span>No</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t5-punished" value="Not sure">
+                                        <span>Not sure</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>How is it affecting you?</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="t5-affects" value="Sleep" checked>
+                                        <span>Sleep</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="t5-affects" value="Appetite">
+                                        <span>Appetite</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="t5-affects" value="Concentration" checked>
+                                        <span>Concentration</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="t5-affects" value="Confidence" checked>
+                                        <span>Confidence</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="t5-affects" value="Relationships">
+                                        <span>Relationships</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="t5-affects" value="Work performance">
+                                        <span>Work performance</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Have you talked to anyone?</label>
+                                <div class="radio-group">
+                                    <label class="radio-option">
+                                        <input type="radio" name="t5-talked" value="Boss">
+                                        <span>Boss</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t5-talked" value="Friend" checked>
+                                        <span>Friend</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t5-talked" value="Partner">
+                                        <span>Partner</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t5-talked" value="Therapist">
+                                        <span>Therapist</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="t5-talked" value="No one">
+                                        <span>No one</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" onclick="analyzeTool5()">
+                                    <i class="fa-solid fa-shield-heart"></i> Reset Perspective
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()">
+                                    <i class="fa-solid fa-vial"></i> Load Sample Scenario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool5" class="output-section" style="display:none;"></div>
+                    <div id="history-tool5" class="history-section"></div>
+                </div>
+
+            </main>
+
+            <!-- Global Footer -->
+            <footer class="app-footer">
+                <p>For professional recovery planning only. Not legal, therapeutic, or HR advice. For errors with legal or safety implications, consult appropriate authorities immediately.</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-msg">Copied to clipboard!</span>
+    </div>
+
+    <script>
+        // DOM Elements & Navigation Setup
+        const navItems = document.querySelectorAll('.nav-item');
+        const toolViews = document.querySelectorAll('.tool-view');
+        const sidebar = document.getElementById('sidebar');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-msg');
+
+        // Mobile Sidebar Toggle
+        function toggleMobileSidebar() {
+            sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('mobile-open');
+        }
+
+        hamburgerBtn.addEventListener('click', toggleMobileSidebar);
+        sidebarOverlay.addEventListener('click', toggleMobileSidebar);
+
+        // Tool Switching Logic
+        function switchTool(toolId) {
+            navItems.forEach(item => {
+                if(item.getAttribute('data-tool') === toolId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            toolViews.forEach(view => {
+                if(view.id === toolId) {
+                    view.classList.add('active');
+                } else {
+                    view.classList.remove('active');
+                }
+            });
+
+            // Close mobile menu if open
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('mobile-open');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Load tool history
+            if(toolId !== 'dashboard') {
+                renderHistory(toolId);
+            }
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const toolId = item.getAttribute('data-tool');
+                switchTool(toolId);
+            });
+        });
+
+        // Toast Helper
+        function showToast(message) {
+            toastMsg.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Copy Helper
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(err => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        // LocalStorage Helpers
+        function saveToHistory(toolId, inputSummary, outputHtml) {
+            const key = `mistake_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                summary: inputSummary,
+                html: outputHtml
+            };
+
+            history.unshift(newItem);
+            if(history.length > 30) {
+                history = history.slice(0, 30);
+            }
+
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function clearHistory(toolId) {
+            const key = `mistake_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function renderHistory(toolId) {
+            const container = document.getElementById(`history-${toolId}`);
+            if(!container) return;
+
+            const key = `mistake_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+            if(history.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <div class="history-header">
+                    <h3>Previous Analyses (${history.length})</h3>
+                    <button class="btn btn-outline btn-sm" onclick="clearHistory('${toolId}')">
+                        <i class="fa-solid fa-trash-can"></i> Clear History
+                    </button>
+                </div>
+            `;
+
+            history.forEach(item => {
+                html += `
+                    <div class="history-item" id="hist-${item.id}">
+                        <div class="history-item-header" onclick="toggleHistoryItem('${item.id}')">
+                            <span><i class="fa-regular fa-clock"></i> ${item.timestamp} — ${escapeHtml(item.summary)}</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="history-item-body">
+                            ${item.html}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleHistoryItem(id) {
+            const el = document.getElementById(`hist-${id}`);
+            if(el) {
+                el.classList.toggle('open');
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+
+        // TOOL 1 LOGIC: DAMAGE ASSESSMENT
+        function loadSampleTool1() {
+            document.getElementById('t1-happened').value = "Sent Q3 financial forecast spreadsheet with unverified draft data to a major key client.";
+            document.getElementById('t1-affected').value = "A client";
+            document.querySelector('input[name="t1-fixable"][value="Yes with effort"]').checked = true;
+            document.getElementById('t1-knows').value = "Client";
+            document.querySelector('input[name="t1-legal"][value="No"]').checked = true;
+        }
+
+        function analyzeTool1() {
+            const happened = document.getElementById('t1-happened').value.trim();
+            const affected = document.getElementById('t1-affected').value;
+            const fixable = document.querySelector('input[name="t1-fixable"]:checked').value;
+            const knows = document.getElementById('t1-knows').value;
+            const legal = document.querySelector('input[name="t1-legal"]:checked').value;
+
+            if(!happened) {
+                alert("Please describe what happened.");
+                return;
+            }
+
+            // Calculate severity level
+            let severity = "Minor";
+            let badgeClass = "badge-minor";
+
+            if (legal === "Yes" || (affected === "External stakeholders" && fixable === "No")) {
+                severity = "Critical";
+                badgeClass = "badge-critical";
+            } else if (affected === "The company" || affected === "A client" || fixable === "No" || fixable === "Partially" || legal === "Maybe") {
+                severity = "Major";
+                badgeClass = "badge-major";
+            } else if (affected === "My team" || fixable === "Yes with effort") {
+                severity = "Moderate";
+                badgeClass = "badge-moderate";
+            }
+
+            // Calculations for display
+            let realityCheck = "";
+            if (severity === "Critical") {
+                realityCheck = "This is a serious issue that demands immediate formal escalation and careful legal/leadership coordination. However, panicking will only delay mitigation. Focus purely on swift containment and strict factual communication.";
+            } else if (severity === "Major") {
+                realityCheck = "Your anxiety is likely signaling career catastrophe, but the factual reality is that businesses absorb operational errors daily. What matters now is speed of acknowledgment and clear remediation.";
+            } else if (severity === "Moderate") {
+                realityCheck = "This is an uncomfortable setback, but highly fixable. Your brain is catastrophizing a temporary operational hiccup into a personal failure. Keep it in perspective.";
+            } else {
+                realityCheck = "This is a minor snag. It feels overwhelming due to natural professional self-protection, but it has very low long-term impact if handled calmly.";
+            }
+
+            let fixabilityScore = "";
+            if (fixable === "Yes easily") fixabilityScore = "95% Recoverable — Quick technical correction or brief follow-up will resolve this entirely.";
+            else if (fixable === "Yes with effort") fixabilityScore = "75% Recoverable — Requires dedicated labor or time, but full functional recovery is expected.";
+            else if (fixable === "Partially") fixabilityScore = "50% Recoverable — Core damage can be mitigated, though minor legacy impact or extra monitoring will remain.";
+            else fixabilityScore = "25% Recoverable — The outcome cannot be reversed, but professional trust and system safeguards can be 100% recovered through your response.";
+
+            let escalationCheck = "";
+            if (knows === "Just me" && (severity === "Major" || severity === "Critical")) {
+                escalationCheck = "<strong>IMMEDIATE ACTION REQUIRED:</strong> Do not attempt to cover this up. You must notify your immediate manager within the next 2-4 hours with a brief, factual update.";
+            } else if (knows === "Just me") {
+                escalationCheck = "You have time to fix this or outline a concrete solution before informing your manager or relevant peers.";
+            } else {
+                escalationCheck = "Key stakeholders already know. The focus now shifts entirely from disclosure to solution delivery and status updates.";
+            }
+
+            let first24 = [
+                "<strong>Hour 1: Stop and Document:</strong> Write down exact factual timeline of events while fresh.",
+                "<strong>Hour 2: Contain Damage:</strong> Halt any automated processes, pull incorrect files, or notify immediate technical leads.",
+                "<strong>Hour 4: Prepare Disclosure/Plan:</strong> Draft your explanation using Tool 2 (Confession Script) and present a preliminary fix.",
+                "<strong>Hour 24: Verify Recovery:</strong> Follow up with affected parties with confirmed status updates."
+            ];
+
+            const outputHtml = `
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; color: var(--charcoal);">Damage Assessment Summary</h3>
+                    
+                    <div class="output-box">
+                        <h4>Severity Level <span class="badge ${badgeClass}">${severity}</span></h4>
+                        <p><strong>Impact Scope:</strong> ${affected} | <strong>Fixability:</strong> ${fixable}</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-brain"></i> Reality Check vs Anxiety</h4>
+                        <p>${realityCheck}</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-gauge-high"></i> Fixability Score</h4>
+                        <p>${fixabilityScore}</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-bullhorn"></i> Escalation Check</h4>
+                        <p>${escalationCheck}</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-list-check"></i> First 24 Hours Priority Actions</h4>
+                        <ul>
+                            ${first24.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            const outputContainer = document.getElementById('output-tool1');
+            outputContainer.innerHTML = outputHtml;
+            outputContainer.style.display = 'block';
+
+            saveToHistory('tool1', `${severity} Severity: ${happened.substring(0, 40)}...`, outputHtml);
+        }
+
+
+        // TOOL 2 LOGIC: CONFESSION SCRIPT
+        function loadSampleTool2() {
+            document.getElementById('t2-knows').value = "Suspects something";
+            document.querySelector('input[name="t2-rel"][value="Neutral"]').checked = true;
+            document.getElementById('t2-type').value = "Misunderstood instructions";
+            document.querySelector('input[name="t2-fix"][value="Partial"]').checked = true;
+        }
+
+        function analyzeTool2() {
+            const knows = document.getElementById('t2-knows').value;
+            const rel = document.querySelector('input[name="t2-rel"]:checked').value;
+            const type = document.getElementById('t2-type').value;
+            const fix = document.querySelector('input[name="t2-fix"]:checked').value;
+
+            let opening = "";
+            if (knows === "Nothing") {
+                opening = "Hi [Name], I want to bring an issue to your attention right away regarding [Project]. An error occurred on my end, and I've already mapped out the next steps to resolve it.";
+            } else if (knows === "Suspects something" || knows === "Knows something happened") {
+                opening = "Hi [Name], I wanted to follow up directly regarding [Project/Event] to clarify what happened, take full responsibility, and show you how we're fixing it.";
+            } else {
+                opening = "Hi [Name], thanks for your patience as I gathered the facts on [Project]. I want to walk you through the details and the concrete solution I am implementing.";
+            }
+
+            let factsExplanation = "";
+            if (type === "Careless") {
+                factsExplanation = "During the execution of [Task], I overlooked [Specific Step]. It was an oversight on my part due to insufficient verification before finalizing.";
+            } else if (type === "Misunderstood instructions") {
+                factsExplanation = "I misunderstood the core requirement around [Specific Task], which led to [Incorrect Outcome]. I should have clarified the specs earlier.";
+            } else if (type === "Skill gap") {
+                factsExplanation = "I ran into technical complexity with [Task] that exceeded my current familiarity, leading to an incorrect configuration.";
+            } else if (type === "System failure") {
+                factsExplanation = "While processing [Task], a system/process breakdown occurred at [Step]. While external factors contributed, I should have flagged the bottleneck sooner.";
+            } else {
+                factsExplanation = "External delays and changing dependencies impacted [Task], resulting in [Outcome]. I failed to communicate the risk early enough.";
+            }
+
+            let fixProposal = "";
+            if (fix === "Yes") {
+                fixProposal = "Here is the exact fix: I am taking [Action 1] immediately, followed by [Action 2]. This will be fully resolved by [Time/Date] with zero residual impact.";
+            } else if (fix === "Partial") {
+                fixProposal = "I have initiated [Action 1] to stop further impact. To complete the fix, I am currently preparing [Action 2] and will have full completion by [Time/Date].";
+            } else if (fix === "Need help") {
+                fixProposal = "I have contained the immediate impact. To resolve this completely, I recommend we [Proposed Idea], but I would value your quick guidance on [Specific Decision].";
+            } else {
+                fixProposal = "I have stopped further activity to prevent escalation. I am currently evaluating two potential recovery paths and want to align with you on the best direction.";
+            }
+
+            let receivingAnger = "";
+            if (rel === "Strained") {
+                receivingAnger = "Remain neutral, non-defensive, and calm. Say: 'I completely understand your frustration. You expected this to be done correctly, and I take full responsibility. My focus right now is fixing it.' Avoid making excuses or bringing up past issues.";
+            } else {
+                receivingAnger = "Acknowledge their response calmly without over-apologizing: 'I hear you, and I understand why this is problematic for the team. I am focused entirely on correcting this immediately.'";
+            }
+
+            let acceptingSupport = "";
+            if (rel === "Strong") {
+                acceptingSupport = "Say: 'I really appreciate your support and perspective on this. I will keep you updated every step of the way as I execute the fix.'";
+            } else {
+                acceptingSupport = "Say: 'Thank you for helping me navigate this. I will make sure the resolution is thorough and documented so this won't recur.'";
+            }
+
+            const fullScriptText = `${opening}
+
+What happened:
+${factsExplanation}
+
+Proposed Fix:
+${fixProposal}`;
+
+            const outputHtml = `
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; color: var(--charcoal);">The Confession Script & Strategy</h3>
+                    
+                    <div class="output-box">
+                        <h4>
+                            <span><i class="fa-solid fa-comment-dots"></i> Exact Opening & Explanation</span>
+                            <button class="btn btn-outline btn-sm copy-btn" style="position:static; color:var(--charcoal);" onclick="copyToClipboard(\`${fullScriptText.replace(/`/g, '\`')}\`)">
+                                <i class="fa-regular fa-copy"></i> Copy Script
+                            </button>
+                        </h4>
+                        <div class="script-box">${fullScriptText}</div>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-shield"></i> The Facts Only Rule</h4>
+                        <p>State what happened in 2 sentences max. Do NOT over-apologize ('I'm so sorry, I feel terrible, I can't believe I did this'). State the facts, own the gap, transition immediately to the fix.</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-temperature-arrow-up"></i> If They're Angry</h4>
+                        <p>${receivingAnger}</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-handshake"></i> If They're Supportive</h4>
+                        <p>${acceptingSupport}</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-calendar-check"></i> The Follow-Up Strategy</h4>
+                        <p>Send a brief email summary after your meeting outlining: 1) What was agreed upon, 2) Timeline for the fix, 3) Next status check timestamp.</p>
+                    </div>
+                </div>
+            `;
+
+            const outputContainer = document.getElementById('output-tool2');
+            outputContainer.innerHTML = outputHtml;
+            outputContainer.style.display = 'block';
+
+            saveToHistory('tool2', `Script for ${type} (${rel} relationship)`, outputHtml);
+        }
+
+
+        // TOOL 3 LOGIC: THE FIX PLAN
+        function loadSampleTool3() {
+            document.getElementById('t3-correct').value = "Re-issue correct Q3 financial dataset to client with formal cover note highlighting updated figures.";
+            document.getElementById('t3-cause').value = "Rushed";
+            document.getElementById('t3-resources').value = "Access to automated data validation checklist and draft review folder.";
+            document.getElementById('t3-involved').value = "Senior Analyst (for pre-send sign-off) and Account Executive (for client comms).";
+        }
+
+        function analyzeTool3() {
+            const correct = document.getElementById('t3-correct').value.trim();
+            const cause = document.getElementById('t3-cause').value;
+            const resources = document.getElementById('t3-resources').value.trim();
+            const involved = document.getElementById('t3-involved').value.trim();
+
+            if(!correct || !resources || !involved) {
+                alert("Please fill in all form fields.");
+                return;
+            }
+
+            let preventionStrategy = "";
+            if (cause === "Rushed") {
+                preventionStrategy = "Implement a mandatory '30-minute cooling off' buffer between finishing high-stakes work and hitting send/publish.";
+            } else if (cause === "Unclear instructions") {
+                preventionStrategy = "Institute a written confirmation step ('Rephrase & Confirm') before starting any complex project.";
+            } else if (cause === "Lack of skill") {
+                preventionStrategy = "Schedule dedicated skill-building / pair-working session and create a quick reference cheat-sheet.";
+            } else if (cause === "No process") {
+                preventionStrategy = "Create a standardized 5-point checklist or template document for this recurring workflow.";
+            } else if (cause === "Distraction") {
+                preventionStrategy = "Block dedicated 'Focus Time' with notifications muted during final review phases.";
+            } else {
+                preventionStrategy = "Document the system edge case and establish an automated fallback or verification check.";
+            }
+
+            const outputHtml = `
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; color: var(--charcoal);">Structured Fix & Recovery Plan</h3>
+                    
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-screwdriver-wrench"></i> The Immediate Fix</h4>
+                        <p><strong>Action Items:</strong> ${correct}</p>
+                        <p style="margin-top:0.5rem;"><strong>Required Assistance / Collaborators:</strong> ${involved}</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-lock"></i> Permanent Prevention Safeguard</h4>
+                        <p><strong>Root Cause Identified:</strong> ${cause}</p>
+                        <p style="margin-top:0.5rem;"><strong>New Habit / Process Safeguard:</strong> ${preventionStrategy}</p>
+                        <p style="margin-top:0.5rem;"><strong>Tools/Resources Required:</strong> ${resources}</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-circle-check"></i> Verification Checkpoint</h4>
+                        <p>Before closing this issue, perform a double-blind audit or peer verification to ensure 100% precision. Do not rely on visual inspection alone under stress.</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-paper-plane"></i> Stakeholder Communication Protocol</h4>
+                        <p>Send a final confirmation update once completed: <i>"The correction for [Issue] is complete and verified as of [Time]. New process safeguards have been put in place."</i></p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-book-bookmark"></i> Personal Post-Mortem Documentation</h4>
+                        <p>Log this incident in a private personal log: Note 1) Trigger, 2) Fix, 3) Process improvement. Keep it objective and referenceable for future career reviews.</p>
+                    </div>
+                </div>
+            `;
+
+            const outputContainer = document.getElementById('output-tool3');
+            outputContainer.innerHTML = outputHtml;
+            outputContainer.style.display = 'block';
+
+            saveToHistory('tool3', `Fix Plan: ${correct.substring(0, 40)}...`, outputHtml);
+        }
+
+
+        // TOOL 4 LOGIC: CREDIBILITY REBUILD
+        function loadSampleTool4() {
+            document.getElementById('t4-visible').value = "Team";
+            document.getElementById('t4-feeling').value = "Ashamed";
+            document.getElementById('t4-reputation').value = "Reliable, calm under pressure, meticulous in execution.";
+            document.getElementById('t4-trait').value = "Strong attention to detail and proactive communication.";
+        }
+
+        function analyzeTool4() {
+            const visible = document.getElementById('t4-visible').value;
+            const feeling = document.getElementById('t4-feeling').value;
+            const reputation = document.getElementById('t4-reputation').value.trim();
+            const trait = document.getElementById('t4-trait').value.trim();
+
+            if(!reputation || !trait) {
+                alert("Please fill in all form fields.");
+                return;
+            }
+
+            let week1Focus = "Flawless execution on core tasks. Over-communicate progress on immediate deliverables before being asked.";
+            let week2Focus = "Introduce your new process safeguard/checklist to peers subtly by using it consistently.";
+            let week3Focus = "Lean heavily into your core strength: " + trait + ". Voluntarily take on a structured, low-risk task.";
+            let week4Focus = "Review recent performance with manager. Let results speak; do not bring up the old mistake.";
+
+            const outputHtml = `
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; color: var(--charcoal);">30-Day Credibility Rebuild Strategy</h3>
+                    
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-calendar-days"></i> 30-Day Trust Rebuild Roadmap</h4>
+                        <ul>
+                            <li><strong>Days 1-7 (Immediate Stability):</strong> ${week1Focus}</li>
+                            <li><strong>Days 8-14 (Process Demonstration):</strong> ${week2Focus}</li>
+                            <li><strong>Days 15-21 (Strength Capitalization):</strong> ${week3Focus}</li>
+                            <li><strong>Days 22-30 (Solidification):</strong> ${week4Focus}</li>
+                        </ul>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-triangle-exclamation"></i> Over-Correction Warning</h4>
+                        <p><strong>Beware of the Perfectionism Trap:</strong> Your current feeling of <i>${feeling}</i> may drive you to triple-check everything, leading to slow delivery or burnout. Accuracy matters, but velocity and confidence matter equally. Do not let fear paralyze your decision-making.</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-wand-magic-sparkles"></i> Narrative Shift</h4>
+                        <p>In workplace memory, mistakes fade quickly when replaced by steady consistency. Your target perception in 3 months is: <strong>"${reputation}"</strong>. Shift focus from "the person who made an error" to "the person who handled an issue like a seasoned pro."</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-heart-circle-check"></i> Perspective & Self-Forgiveness</h4>
+                        <p>Professional credibility is not built on flawless perfection—it is built on resilience, transparency, and accountability. Every high-performing professional has a list of significant past errors.</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-clipboard-user"></i> The 30-Day Check-In</h4>
+                        <p>Schedule a routine 1-on-1 check-in with your supervisor in 4 weeks. Focus 90% of the conversation on future goals and current wins, asking simply: <i>"How have you found my recent delivery over the last month?"</i></p>
+                    </div>
+                </div>
+            `;
+
+            const outputContainer = document.getElementById('output-tool4');
+            outputContainer.innerHTML = outputHtml;
+            outputContainer.style.display = 'block';
+
+            saveToHistory('tool4', `Rebuild Plan (${visible} visibility)`, outputHtml);
+        }
+
+
+        // TOOL 5 LOGIC: SHAME EXIT
+        function loadSampleTool5() {
+            document.getElementById('t5-when').value = "This week";
+            document.querySelector('input[name="t5-punished"][value="No"]').checked = true;
+            
+            // Checkboxes
+            const checkboxes = document.querySelectorAll('input[name="t5-affects"]');
+            checkboxes.forEach(cb => {
+                if(cb.value === "Sleep" || cb.value === "Concentration" || cb.value === "Confidence") {
+                    cb.checked = true;
+                } else {
+                    cb.checked = false;
+                }
+            });
+
+            document.querySelector('input[name="t5-talked"][value="Friend"]').checked = true;
+        }
+
+        function analyzeTool5() {
+            const when = document.getElementById('t5-when').value;
+            const punished = document.querySelector('input[name="t5-punished"]:checked').value;
+            const talked = document.querySelector('input[name="t5-talked"]:checked').value;
+
+            const selectedAffects = Array.from(document.querySelectorAll('input[name="t5-affects"]:checked')).map(cb => cb.value);
+
+            let affectsText = selectedAffects.length > 0 ? selectedAffects.join(', ') : 'overall peace of mind';
+
+            let punishmentNote = "";
+            if(punished.includes("Yes")) {
+                punishmentNote = "Because you feel ongoing friction or formal punishment, keep strictly professional boundaries. Focus on objective output and document all performance interactions.";
+            } else {
+                punishmentNote = "Notice that you are NOT actively being punished or targeted. Much of the current emotional weight is coming from self-generated shame rather than external hostility.";
+            }
+
+            const outputHtml = `
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; color: var(--charcoal);">Shame Recovery & Perspective Reset</h3>
+                    
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-minimize"></i> Perspective Shrinker</h4>
+                        <p>This mistake happened <strong>${when.toLowerCase()}</strong> and is currently affecting your <strong>${affectsText}</strong>. ${punishmentNote} In 6 months, this will be an invisible footnote in your career.</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-arrows-spin"></i> Rumination Stopper Technique</h4>
+                        <p>When your brain replays the mistake late at night or during focus hours, use the <strong>'Name & Shift'</strong> technique:</p>
+                        <ul>
+                            <li>Say to yourself: <i>"This is rumination, not problem-solving. I have already handled the response."</i></li>
+                            <li>Physical grounding: Change your physical environment or perform a 2-minute tactile task.</li>
+                            <li>Set a strict 10-minute 'Worry Window' during daylight hours. Outside that window, postpone thoughts about the mistake.</li>
+                        </ul>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-user-group"></i> Support & Social Sanity Plan</h4>
+                        <p>You mentioned talking to <strong>${talked}</strong>. Ensure your conversations are focused on grounding and moving forward rather than repeatedly reliving the event. Ask them to help anchor you in reality.</p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-shield-halved"></i> Healthy Self-Criticism Boundary</h4>
+                        <p>Self-criticism is useful ONLY when it leads to actionable change. Once an action plan is set, remaining self-criticism is purely toxic. Reframe: <i>"I am responsible for fixing outcomes, not punishing myself."</i></p>
+                    </div>
+
+                    <div class="output-box">
+                        <h4><i class="fa-solid fa-bullseye"></i> This Week's Forward Focus Win</h4>
+                        <p>Identify ONE small, non-threatening task you can execute cleanly today. Completing a simple task restores momentum and proves to your subconscious that you remain competent.</p>
+                    </div>
+                </div>
+            `;
+
+            const outputContainer = document.getElementById('output-tool5');
+            outputContainer.innerHTML = outputHtml;
+            outputContainer.style.display = 'block';
+
+            saveToHistory('tool5', `Shame Reset (${when})`, outputHtml);
+        }
+
+        // Initialize default view
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTool('dashboard');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sibling Care Planner - Share the load without tearing the family apart</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --deep-olive: #606C38;
+            --olive-light: #283618;
+            --olive-soft: #8a9a5b;
+            --warm-cream: #FEFAE0;
+            --cream-dark: #FAEDCD;
+            --accent-earth: #DDA15E;
+            --accent-rust: #BC6C25;
+            
+            --bg-gradient-start: #F8FAF5;
+            --bg-gradient-end: #FDFCF5;
+            
+            --text-main: #2C3531;
+            --text-muted: #6C757D;
+            --card-bg: #FFFFFF;
+            
+            --border-color: #E9ECEF;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* Layout Structure */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-header i {
+            font-size: 24px;
+            color: var(--deep-olive);
+        }
+
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--deep-olive);
+            line-height: 1.2;
+        }
+
+        .sidebar-nav {
+            padding: 16px 8px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-main);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            margin-bottom: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background-color: var(--warm-cream);
+            color: var(--deep-olive);
+        }
+
+        .nav-item.active {
+            background-color: var(--deep-olive);
+            color: white;
+        }
+
+        .nav-item.active i {
+            color: var(--warm-cream);
+        }
+
+        .nav-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .nav-item:hover i {
+            color: var(--deep-olive);
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - 260px);
+        }
+
+        .mobile-header {
+            display: none;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 20px;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--deep-olive);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .content-container {
+            max-width: 840px;
+            margin: 0 auto;
+            padding: 32px 20px;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Cards & Utilities */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, var(--deep-olive), var(--olive-light));
+            color: white;
+            border: none;
+            text-align: center;
+            padding: 40px 24px;
+        }
+
+        .hero-card h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--warm-cream);
+        }
+
+        .hero-card p {
+            font-size: 16px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--deep-olive);
+        }
+
+        .tool-card .icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background-color: var(--warm-cream);
+            color: var(--deep-olive);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .tool-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--deep-olive);
+        }
+
+        .tool-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .form-control, select, textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background-color: #FAFAFA;
+            font-size: 14px;
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--deep-olive);
+            background-color: #FFF;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+            background: #FAFAFA;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            accent-color: var(--deep-olive);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--deep-olive);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--olive-light);
+        }
+
+        .btn-secondary {
+            background-color: var(--warm-cream);
+            color: var(--deep-olive);
+            border: 1px solid var(--cream-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--cream-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-muted);
+            color: var(--text-main);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Tool Headers & Output */
+        .tool-header {
+            margin-bottom: 24px;
+        }
+
+        .tool-header h2 {
+            font-size: 24px;
+            color: var(--deep-olive);
+            margin-bottom: 6px;
+        }
+
+        .problem-statement {
+            background-color: var(--warm-cream);
+            border-left: 4px solid var(--accent-earth);
+            padding: 12px 16px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            font-size: 14px;
+            color: #555;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .output-container {
+            margin-top: 32px;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+        }
+
+        .output-card {
+            background: #FFF;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .output-card h3 {
+            font-size: 16px;
+            color: var(--deep-olive);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .output-card h3 i {
+            color: var(--accent-earth);
+        }
+
+        .script-box {
+            background-color: #F8F9FA;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            font-family: inherit;
+            font-size: 14px;
+            position: relative;
+            margin-top: 8px;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        /* Split Visual Bar */
+        .split-bar-container {
+            height: 24px;
+            width: 100%;
+            background-color: #E9ECEF;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            margin: 12px 0;
+        }
+
+        .split-bar-segment {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            transition: width 0.5s ease;
+        }
+
+        .split-legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* Slider Controls */
+        .slider-group {
+            margin-bottom: 20px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .slider-control {
+            width: 100%;
+            accent-color: var(--deep-olive);
+        }
+
+        /* Dashboard Status Bars (Tool 5) */
+        .dashboard-bar {
+            height: 12px;
+            border-radius: 6px;
+            background-color: #E9ECEF;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .dashboard-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+
+        .bg-green { background-color: #2E7D32; }
+        .bg-yellow { background-color: #F57F17; }
+        .bg-red { background-color: #C62828; }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 32px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+
+        .history-header h4 {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .history-list {
+            display: none;
+            margin-top: 12px;
+        }
+
+        .history-list.active {
+            display: block;
+        }
+
+        .history-item {
+            padding: 10px 14px;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Footer */
+        footer {
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #323232;
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-hands-holding-child"></i>
+                <h1>Sibling Care Planner</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" onclick="switchTool('dashboard')">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="switchTool('load-audit')">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>1. Load Audit</span>
+                </div>
+                <div class="nav-item" onclick="switchTool('conversation')">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>2. The Conversation</span>
+                </div>
+                <div class="nav-item" onclick="switchTool('money-splitter')">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>3. Money Splitter</span>
+                </div>
+                <div class="nav-item" onclick="switchTool('care-calendar')">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>4. Care Calendar</span>
+                </div>
+                <div class="nav-item" onclick="switchTool('sibling-checkin')">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <span>5. Sibling Check-In</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Mobile Navigation Bar -->
+            <header class="mobile-header">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <i class="fa-solid fa-hands-holding-child" style="color:var(--deep-olive); font-size:20px;"></i>
+                    <strong style="color:var(--deep-olive)">Sibling Care Planner</strong>
+                </div>
+                <button class="hamburger" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </header>
+
+            <!-- Main Content Container -->
+            <main class="content-container">
+
+                <!-- DASHBOARD VIEW -->
+                <section id="view-dashboard" class="tool-view">
+                    <div class="card hero-card">
+                        <h2>Sibling Care Planner</h2>
+                        <p>Share the load without tearing the family apart. A practical toolkit for navigating adult caregiving responsibilities fairly.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="tool-card" onclick="switchTool('load-audit')">
+                            <div class="icon-box"><i class="fa-solid fa-list-check"></i></div>
+                            <h3>1. Load Audit</h3>
+                            <p>Quantify visible and invisible care tasks to show the true workload split.</p>
+                        </div>
+                        <div class="tool-card" onclick="switchTool('conversation')">
+                            <div class="icon-box"><i class="fa-solid fa-comments"></i></div>
+                            <h3>2. The Conversation</h3>
+                            <p>Get framed scripts and strategies to ask for help without guilt or drama.</p>
+                        </div>
+                        <div class="tool-card" onclick="switchTool('money-splitter')">
+                            <div class="icon-box"><i class="fa-solid fa-calculator"></i></div>
+                            <h3>3. Money Splitter</h3>
+                            <p>Distribute out-of-pocket expenses fairly without awkward financial strain.</p>
+                        </div>
+                        <div class="tool-card" onclick="switchTool('care-calendar')">
+                            <div class="icon-box"><i class="fa-solid fa-calendar-days"></i></div>
+                            <h3>4. Care Calendar</h3>
+                            <p>Build coverage schedules, remote support systems, and emergency backup chains.</p>
+                        </div>
+                        <div class="tool-card" onclick="switchTool('sibling-checkin')">
+                            <div class="icon-box"><i class="fa-solid fa-heart-pulse"></i></div>
+                            <h3>5. Sibling Check-In</h3>
+                            <p>Evaluate relationship health, manage resentment, and maintain family bonds.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: LOAD AUDIT -->
+                <section id="view-load-audit" class="tool-view" style="display:none;">
+                    <div class="tool-header">
+                        <h2>Tool 1 — Load Audit</h2>
+                        <div class="problem-statement">
+                            "I feel like I'm doing everything, but I can't prove it to my siblings."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-load-audit" onsubmit="runLoadAudit(event)">
+                            <div class="form-group">
+                                <label>Your tasks (check all you do):</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item"><input type="checkbox" value="Medical appointments" class="user-task"> Medical appointments</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Medication management" class="user-task"> Medication management</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Daily check-ins" class="user-task"> Daily check-ins</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Grocery shopping" class="user-task"> Grocery shopping</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Meal prep" class="user-task"> Meal prep</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Home maintenance" class="user-task"> Home maintenance</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Financial management" class="user-task"> Financial management</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Bill paying" class="user-task"> Bill paying</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="In-home care supervision" class="user-task"> In-home care supervision</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Driving to appointments" class="user-task"> Driving to appointments</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Emotional support" class="user-task"> Emotional support</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Crisis response" class="user-task"> Crisis response</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Researching options" class="user-task"> Researching options</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Facility coordination" class="user-task"> Facility coordination</label>
+                                </div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Sibling A's tasks (if any):</label>
+                                    <textarea id="audit-sib-a" placeholder="List tasks or 'Calls monthly'"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Sibling B's tasks (if any):</label>
+                                    <textarea id="audit-sib-b" placeholder="List tasks or 'Visits occasionally'"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Sibling C's tasks (if any):</label>
+                                <textarea id="audit-sib-c" placeholder="List tasks or leave blank if N/A"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Paid help used:</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item"><input type="checkbox" value="In-home aide" class="paid-help"> In-home aide</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Housekeeper" class="paid-help"> Housekeeper</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Meal delivery" class="paid-help"> Meal delivery</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="Transportation service" class="paid-help"> Transportation service</label>
+                                    <label class="checkbox-item"><input type="checkbox" value="None" class="paid-help"> None</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Parent's location:</label>
+                                <select id="audit-location">
+                                    <option value="Own home">Own home</option>
+                                    <option value="Your home">Your home</option>
+                                    <option value="Sibling's home">Sibling's home</option>
+                                    <option value="Assisted living">Assisted living</option>
+                                    <option value="Nursing facility">Nursing facility</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="action-bar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-pie"></i> Analyze Load Split</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleAudit()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-load-audit" class="output-container">
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-chart-bar"></i> The Split Chart</h3>
+                            <p id="audit-split-desc" style="font-size: 14px; margin-bottom: 8px;"></p>
+                            <div class="split-bar-container" id="audit-bar"></div>
+                            <div class="split-legend" id="audit-legend"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-brain"></i> The Invisible Work</h3>
+                            <p id="audit-invisible-text" style="font-size: 14px; color: #444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-location-dot"></i> The Proximity Penalty</h3>
+                            <p id="audit-proximity-text" style="font-size: 14px; color: #444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-sliders"></i> The Capacity Check</h3>
+                            <p id="audit-capacity-text" style="font-size: 14px; color: #444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-triangle-exclamation"></i> The Gap</h3>
+                            <p id="audit-gap-text" style="font-size: 14px; color: #444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-clipboard-list"></i> Documentation Tip</h3>
+                            <p style="font-size: 14px; color: #444;">Keep a shared digital log (e.g., Google Note or shared care app) for 2 weeks tracking actual time spent, rather than just task lists. Presenting hours instead of feelings neutralizes defensive reactions during family discussions.</p>
+                        </div>
+                    </div>
+
+                    <div id="history-load-audit" class="history-section"></div>
+                </section>
+
+                <!-- TOOL 2: THE CONVERSATION -->
+                <section id="view-conversation" class="tool-view" style="display:none;">
+                    <div class="tool-header">
+                        <h2>Tool 2 — The Conversation</h2>
+                        <div class="problem-statement">
+                            "I need to ask my siblings for help without it turning into a guilt trip or family feud."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-conversation" onsubmit="runConversation(event)">
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Your relationship with siblings:</label>
+                                    <select id="conv-relationship">
+                                        <option value="Close">Close</option>
+                                        <option value="Civil">Civil</option>
+                                        <option value="Strained">Strained</option>
+                                        <option value="Estranged">Estranged</option>
+                                        <option value="Complicated">Complicated</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Previous attempt to ask for help:</label>
+                                    <select id="conv-previous">
+                                        <option value="Never">Never</option>
+                                        <option value="Once, went badly">Once, went badly</option>
+                                        <option value="Once, agreed but didn't follow through">Once, agreed but didn't follow through</option>
+                                        <option value="We avoid the topic">We avoid the topic</option>
+                                        <option value="They offered, I said no">They offered, I said no</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What you need specifically:</label>
+                                <textarea id="conv-needs" placeholder="e.g., Sibling A to handle finances, Sibling B to cover one weekend a month."></textarea>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>What you think their block is:</label>
+                                    <select id="conv-block">
+                                        <option value="They don't see the need">They don't see the need</option>
+                                        <option value="They feel guilty so they avoid">They feel guilty so they avoid</option>
+                                        <option value="They genuinely can't">They genuinely can't</option>
+                                        <option value="They think you have it handled">They think you have it handled</option>
+                                        <option value="They resent parent">They resent parent</option>
+                                        <option value="They don't know how to help">They don't know how to help</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Family communication style:</label>
+                                    <select id="conv-style">
+                                        <option value="Group text">Group text</option>
+                                        <option value="Family meeting">Family meeting</option>
+                                        <option value="One-on-one calls">One-on-one calls</option>
+                                        <option value="Through a parent">Through a parent</option>
+                                        <option value="We don't communicate">We don't communicate</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="action-bar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-comment-dots"></i> Generate Conversation Strategy</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleConversation()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-conversation" class="output-container">
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-users"></i> The Approach</h3>
+                            <p id="conv-approach-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-message"></i> The Script</h3>
+                            <p style="font-size:13px; color:var(--text-muted);">Exact opening line customized for your situation:</p>
+                            <div class="script-box">
+                                <span id="conv-script-text"></span>
+                                <button class="btn btn-secondary btn-sm copy-btn" onclick="copyText('conv-script-text')"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </div>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-crop-simple"></i> The Frame</h3>
+                            <p id="conv-frame-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-bullseye"></i> The Ask</h3>
+                            <p id="conv-ask-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-shield-halved"></i> The Guilt Antidote</h3>
+                            <p id="conv-guilt-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-rotate-right"></i> The Follow-Up</h3>
+                            <p id="conv-followup-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+                    </div>
+
+                    <div id="history-conversation" class="history-section"></div>
+                </section>
+
+                <!-- TOOL 3: MONEY SPLITTER -->
+                <section id="view-money-splitter" class="tool-view" style="display:none;">
+                    <div class="tool-header">
+                        <h2>Tool 3 — Money Splitter</h2>
+                        <div class="problem-statement">
+                            "The medical and care costs are falling on one person and resentment is building."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-money-splitter" onsubmit="runMoneySplitter(event)">
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Monthly parent expenses ($):</label>
+                                    <input type="number" id="money-expenses" class="form-control" placeholder="1200" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Who currently pays:</label>
+                                    <select id="money-payer">
+                                        <option value="Me entirely">Me entirely</option>
+                                        <option value="Me mostly">Me mostly</option>
+                                        <option value="Split equally">Split equally</option>
+                                        <option value="Sibling pays">Sibling pays</option>
+                                        <option value="Parent's savings">Parent's savings</option>
+                                        <option value="Mix">Mix</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Parent's financial status:</label>
+                                    <select id="money-parent-status">
+                                        <option value="Self-sufficient">Self-sufficient</option>
+                                        <option value="Depleting savings">Depleting savings</option>
+                                        <option value="Needs help">Needs help</option>
+                                        <option value="Unknown">Unknown</option>
+                                        <option value="Refuses to discuss">Refuses to discuss</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Sibling income disparity:</label>
+                                    <select id="money-disparity">
+                                        <option value="I earn more">I earn more</option>
+                                        <option value="We earn similarly">We earn similarly</option>
+                                        <option value="I earn less">I earn less</option>
+                                        <option value="I don't know their income">I don't know their income</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>One large upcoming expense:</label>
+                                <textarea id="money-upcoming" placeholder="e.g., Hearing aids, wheelchair ramp, home renovation."></textarea>
+                            </div>
+
+                            <div class="action-bar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-coins"></i> Calculate Financial Strategy</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleMoney()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-money-splitter" class="output-container">
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-scale-balanced"></i> The Fair Formula</h3>
+                            <p id="money-formula-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-eye"></i> The Transparency Tool</h3>
+                            <p style="font-size:14px; color:#444; margin-bottom: 8px;">Use this standardized log format when sharing costs to maintain trust:</p>
+                            <div class="script-box">
+Date | Expense Description | Amount | Paid By | Split Share
+------------------------------------------------------------
+[Date] | Prescription Refills  | $150   | [Name]  | Equal 1/2
+[Date] | Medical Transportation| $75    | [Name]  | Equal 1/2
+                            </div>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-piggy-bank"></i> The Parent Contribution</h3>
+                            <p id="money-parent-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-file-invoice-dollar"></i> The Big Expense Plan</h3>
+                            <p id="money-upcoming-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-hand-holding-dollar"></i> The Reimbursement Protocol</h3>
+                            <p id="money-protocol-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-vault"></i> The Estate Conversation</h3>
+                            <p id="money-estate-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+                    </div>
+
+                    <div id="history-money-splitter" class="history-section"></div>
+                </section>
+
+                <!-- TOOL 4: CARE CALENDAR -->
+                <section id="view-care-calendar" class="tool-view" style="display:none;">
+                    <div class="tool-header">
+                        <h2>Tool 4 — Care Calendar</h2>
+                        <div class="problem-statement">
+                            "We don't have a shared schedule, so coverage gaps happen and I never get a break."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-care-calendar" onsubmit="runCareCalendar(event)">
+                            <div class="form-group">
+                                <label>Current coverage schedule:</label>
+                                <textarea id="cal-current" placeholder="e.g., User handles weekdays, weekends are unstructured or ad-hoc."></textarea>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Your unavailable times:</label>
+                                    <textarea id="cal-unavailable" placeholder="e.g., Work hours 9-5, Tuesday evenings, Thursday mornings."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Sibling availability:</label>
+                                    <textarea id="cal-sib-avail" placeholder="e.g., Sibling A available weekends; Sibling B available evenings remotely."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Respite needed:</label>
+                                    <select id="cal-respite">
+                                        <option value="A few hours weekly">A few hours weekly</option>
+                                        <option value="A full day monthly">A full day monthly</option>
+                                        <option value="A weekend quarterly">A weekend quarterly</option>
+                                        <option value="A week annually">A week annually</option>
+                                        <option value="I haven't had a break in years">I haven't had a break in years</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Emergency backup:</label>
+                                    <select id="cal-backup">
+                                        <option value="Me">Me</option>
+                                        <option value="Sibling">Sibling</option>
+                                        <option value="Neighbor">Neighbor</option>
+                                        <option value="Paid aide">Paid aide</option>
+                                        <option value="No one">No one</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="action-bar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calendar-check"></i> Generate Schedule Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleCalendar()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-care-calendar" class="output-container">
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-table-cells"></i> The Shared Calendar Template</h3>
+                            <p id="cal-shared-text" style="font-size:14px; color:#444; margin-bottom:12px;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-bed"></i> The Respite Plan</h3>
+                            <p id="cal-respite-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-phone-volume"></i> The Emergency Chain</h3>
+                            <p id="cal-chain-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-car"></i> The Visit Schedule</h3>
+                            <p id="cal-visit-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-laptop"></i> The Remote Help</h3>
+                            <p id="cal-remote-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-life-ring"></i> The Backup Build</h3>
+                            <p id="cal-backup-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+                    </div>
+
+                    <div id="history-care-calendar" class="history-section"></div>
+                </section>
+
+                <!-- TOOL 5: SIBLING CHECK-IN -->
+                <section id="view-sibling-checkin" class="tool-view" style="display:none;">
+                    <div class="tool-header">
+                        <h2>Tool 5 — Sibling Check-In</h2>
+                        <div class="problem-statement">
+                            "Caregiving is damaging our sibling relationships and I don't want to lose my brothers/sisters."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-sibling-checkin" onsubmit="runSiblingCheckin(event)">
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <span>I feel resentful toward my sibling(s)</span>
+                                    <span id="val-checkin-1">5</span>
+                                </div>
+                                <input type="range" min="1" max="10" value="5" class="slider-control" id="checkin-1" oninput="updateSliderVal(this, 'val-checkin-1')">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <span>I feel appreciated by my sibling(s)</span>
+                                    <span id="val-checkin-2">5</span>
+                                </div>
+                                <input type="range" min="1" max="10" value="5" class="slider-control" id="checkin-2" oninput="updateSliderVal(this, 'val-checkin-2')">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <span>I feel our parent is getting adequate care</span>
+                                    <span id="val-checkin-3">5</span>
+                                </div>
+                                <input type="range" min="1" max="10" value="5" class="slider-control" id="checkin-3" oninput="updateSliderVal(this, 'val-checkin-3')">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <span>I feel our communication about care is working</span>
+                                    <span id="val-checkin-4">5</span>
+                                </div>
+                                <input type="range" min="1" max="10" value="5" class="slider-control" id="checkin-4" oninput="updateSliderVal(this, 'val-checkin-4')">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <span>I feel optimistic about our ability to handle what's coming</span>
+                                    <span id="val-checkin-5">5</span>
+                                </div>
+                                <input type="range" min="1" max="10" value="5" class="slider-control" id="checkin-5" oninput="updateSliderVal(this, 'val-checkin-5')">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <span>I feel like I'm losing my relationship with my sibling(s)</span>
+                                    <span id="val-checkin-6">5</span>
+                                </div>
+                                <input type="range" min="1" max="10" value="5" class="slider-control" id="checkin-6" oninput="updateSliderVal(this, 'val-checkin-6')">
+                            </div>
+
+                            <div class="action-bar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-heart-pulse"></i> Evaluate Relationship Health</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleCheckin()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-sibling-checkin" class="output-container">
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-gauge-high"></i> The Sibling Dashboard</h3>
+                            <div id="checkin-metrics-container" style="display:flex; flex-direction:column; gap:12px; margin-top:12px;"></div>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-fire"></i> The Resentment Source</h3>
+                            <p id="checkin-resentment-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-handshake"></i> The Relationship Preservation</h3>
+                            <p id="checkin-preservation-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-award"></i> The Appreciation Action</h3>
+                            <p id="checkin-appreciation-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-gavel"></i> The Decision Protocol</h3>
+                            <p id="checkin-decision-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+
+                        <div class="output-card">
+                            <h3><i class="fa-solid fa-user-doctor"></i> The Therapy Prompt</h3>
+                            <p id="checkin-therapy-text" style="font-size:14px; color:#444;"></p>
+                        </div>
+                    </div>
+
+                    <div id="history-sibling-checkin" class="history-section"></div>
+                </section>
+
+            </main>
+
+            <!-- Global Footer -->
+            <footer>
+                For practical planning purposes only. Not legal, medical, or therapeutic advice. For elder law or Medicaid planning, consult an attorney.
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast" class="toast">Copied to clipboard!</div>
+
+    <script>
+        /* --- GLOBAL & UI NAVIGATION LOGIC --- */
+        
+        function switchTool(toolId) {
+            // Hide all tool views
+            document.querySelectorAll('.tool-view').forEach(view => {
+                view.style.display = 'none';
+            });
+            
+            // Show selected view
+            const targetView = document.getElementById('view-' + toolId);
+            if (targetView) {
+                targetView.style.display = 'block';
+            }
+
+            // Update sidebar navigation active state
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Find matching nav item
+            const activeNav = Array.from(document.querySelectorAll('.nav-item')).find(item => {
+                return item.getAttribute('onclick') && item.getAttribute('onclick').includes(toolId);
+            });
+            if (activeNav) {
+                activeNav.classList.add('active');
+            }
+
+            // Close mobile sidebar if open
+            document.getElementById('sidebar').classList.remove('mobile-open');
+
+            // Load tool history
+            if (toolId !== 'dashboard') {
+                renderHistory(toolId);
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
+        function updateSliderVal(slider, valId) {
+            document.getElementById(valId).textContent = slider.value;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied to clipboard!');
+            });
+        }
+
+        /* --- LOCALSTORAGE HISTORY MANAGER --- */
+
+        function saveHistory(toolId, inputData, summaryText) {
+            const key = 'siblingcare_history_' + toolId;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                summary: summaryText,
+                data: inputData
+            };
+
+            history.unshift(newItem);
+            if (history.length > 30) {
+                history = history.slice(0, 30);
+            }
+
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function clearHistory(toolId) {
+            const key = 'siblingcare_history_' + toolId;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast('History cleared.');
+        }
+
+        function renderHistory(toolId) {
+            const historyContainer = document.getElementById('history-' + toolId);
+            if (!historyContainer) return;
+
+            const key = 'siblingcare_history_' + toolId;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+            if (history.length === 0) {
+                historyContainer.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <div class="history-header" onclick="toggleHistoryList('${toolId}')">
+                    <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Audits (${history.length})</h4>
+                    <span id="history-arrow-${toolId}"><i class="fa-solid fa-chevron-down"></i></span>
+                </div>
+                <div class="history-list" id="history-list-${toolId}">
+                    <div style="text-align:right; margin-bottom:8px;">
+                        <button class="btn btn-outline btn-sm" onclick="clearHistory('${toolId}')">Clear History</button>
+                    </div>
+            `;
+
+            history.forEach(item => {
+                html += `
+                    <div class="history-item">
+                        <div>
+                            <strong>${item.timestamp}</strong> - <span style="color:var(--text-muted);">${item.summary}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            historyContainer.innerHTML = html;
+        }
+
+        function toggleHistoryList(toolId) {
+            const list = document.getElementById(`history-list-${toolId}`);
+            if (list) {
+                list.classList.toggle('active');
+            }
+        }
+
+        /* --- TOOL 1: LOAD AUDIT LOGIC --- */
+
+        function loadSampleAudit() {
+            const checkboxes = document.querySelectorAll('.user-task');
+            checkboxes.forEach((cb, idx) => {
+                cb.checked = idx < 10; // Select first 10
+            });
+
+            document.getElementById('audit-sib-a').value = 'Lives 500 miles away. Calls parent monthly.';
+            document.getElementById('audit-sib-b').value = 'Visits twice a year for holidays.';
+            document.getElementById('audit-sib-c').value = '';
+
+            document.querySelectorAll('.paid-help').forEach(cb => {
+                cb.checked = (cb.value === 'None');
+            });
+
+            document.getElementById('audit-location').value = 'Own home';
+            showToast('Sample Scenario Loaded!');
+        }
+
+        function runLoadAudit(e) {
+            e.preventDefault();
+
+            const selectedUserTasks = Array.from(document.querySelectorAll('.user-task:checked')).map(cb => cb.value);
+            const sibA = document.getElementById('audit-sib-a').value.trim();
+            const sibB = document.getElementById('audit-sib-b').value.trim();
+            const sibC = document.getElementById('audit-sib-c').value.trim();
+            const paidHelp = Array.from(document.querySelectorAll('.paid-help:checked')).map(cb => cb.value);
+            const location = document.getElementById('audit-location').value;
+
+            // Calculate Split Logic
+            const userTaskCount = selectedUserTasks.length;
+            let sibACount = sibA ? (sibA.length > 20 ? 2 : 1) : 0;
+            let sibBCount = sibB ? (sibB.length > 20 ? 2 : 1) : 0;
+            let sibCCount = sibC ? (sibC.length > 20 ? 2 : 1) : 0;
+
+            const totalScore = userTaskCount + sibACount + sibBCount + sibCCount || 1;
+            
+            const userPct = Math.round((userTaskCount / totalScore) * 100);
+            const sibAPct = Math.round((sibACount / totalScore) * 100);
+            const sibBPct = Math.round((sibBCount / totalScore) * 100);
+            const sibCPct = 100 - (userPct + sibAPct + sibBPct);
+
+            // Render Split Chart
+            document.getElementById('audit-split-desc').innerText = `You are performing ${userPct}% of the logged care tasks.`;
+            
+            const barContainer = document.getElementById('audit-bar');
+            barContainer.innerHTML = `
+                <div class="split-bar-segment" style="width:${userPct}%; background-color:var(--deep-olive);">${userPct}%</div>
+                ${sibAPct > 0 ? `<div class="split-bar-segment" style="width:${sibAPct}%; background-color:var(--accent-earth);">${sibAPct}%</div>` : ''}
+                ${sibBPct > 0 ? `<div class="split-bar-segment" style="width:${sibBPct}%; background-color:var(--accent-rust);">${sibBPct}%</div>` : ''}
+                ${sibCPct > 0 ? `<div class="split-bar-segment" style="width:${sibCPct}%; background-color:#8D99AE;">${sibCPct}%</div>` : ''}
+            `;
+
+            const legendContainer = document.getElementById('audit-legend');
+            legendContainer.innerHTML = `
+                <div class="legend-item"><div class="legend-color" style="background-color:var(--deep-olive)"></div> You (${userPct}%)</div>
+                ${sibAPct > 0 ? `<div class="legend-item"><div class="legend-color" style="background-color:var(--accent-earth)"></div> Sibling A (${sibAPct}%)</div>` : ''}
+                ${sibBPct > 0 ? `<div class="legend-item"><div class="legend-color" style="background-color:var(--accent-rust)"></div> Sibling B (${sibBPct}%)</div>` : ''}
+                ${sibCPct > 0 ? `<div class="legend-item"><div class="legend-color" style="background-color:#8D99AE"></div> Sibling C (${sibCPct}%)</div>` : ''}
+            `;
+
+            // Template Content Generation
+            document.getElementById('audit-invisible-text').innerText = `Beyond physical tasks, you carry the cognitive and emotional mental load: tracking appointments, predicting crises, worrying, and coordinating care options. This invisible coordination consumes an estimated 8-15 hours per week of mental bandwidth that isn't reflected in physical chore lists.`;
+
+            if (location === 'Your home' || location === 'Own home') {
+                document.getElementById('audit-proximity-text').innerText = `Because parent is in ${location.toLowerCase()}, physical proximity creates an 'automatic default penalty.' Siblings assume that because you are nearby, small daily needs are effortless. In reality, micro-tasks accumulate into full-time care.`;
+            } else {
+                document.getElementById('audit-proximity-text').innerText = `Facility settings shift daily physical tasks to staff, but proximity still makes you the default emergency contact and administrative manager.`;
+            }
+
+            document.getElementById('audit-capacity-text').innerText = `Keep in mind that siblings may have real or perceived constraints (demanding jobs, active parenting, lower emotional stamina, or geographic distance). The goal isn't to force equal task division, but to align expectations with actual capacities.`;
+
+            if (userTaskCount > 7 && (paidHelp.includes('None') || paidHelp.length === 0)) {
+                document.getElementById('audit-gap-text').innerText = `Critical Gap: High task load combined with zero paid help. You are at high risk of burnout. In-home help, meal delivery, or outsourced bill management should be evaluated immediately.`;
+            } else {
+                document.getElementById('audit-gap-text').innerText = `Gap Analysis: Key coverage areas are fragile during emergencies. Cross-training siblings on primary routines or hiring targeted aid for recurring gaps is recommended.`;
+            }
+
+            document.getElementById('output-load-audit').classList.add('active');
+            
+            saveHistory('load-audit', { userPct, userTaskCount }, `User handles ${userPct}% of ${userTaskCount} checked tasks`);
+        }
+
+        /* --- TOOL 2: THE CONVERSATION LOGIC --- */
+
+        function loadSampleConversation() {
+            document.getElementById('conv-relationship').value = 'Civil';
+            document.getElementById('conv-previous').value = 'Never';
+            document.getElementById('conv-needs').value = 'Need Sibling A to take over financial/bill management and Sibling B to visit for one weekend monthly to provide respite.';
+            document.getElementById('conv-block').value = "They don't see the need";
+            document.getElementById('conv-style').value = 'Family meeting';
+            showToast('Sample Scenario Loaded!');
+        }
+
+        function runConversation(e) {
+            e.preventDefault();
+
+            const rel = document.getElementById('conv-relationship').value;
+            const prev = document.getElementById('conv-previous').value;
+            const needs = document.getElementById('conv-needs').value || "Help with ongoing daily care and planning.";
+            const block = document.getElementById('conv-block').value;
+            const style = document.getElementById('conv-style').value;
+
+            // Strategy Generation
+            let approach = "";
+            if (style === 'One-on-one calls' || rel === 'Strained' || rel === 'Complicated') {
+                approach = "Use individual one-on-one phone calls before bringing everyone together. This prevents siblings from ganging up or feeling publicly put on the spot.";
+            } else {
+                approach = `A structured ${style.toLowerCase()} is best. Send a simple head-up message 3 days prior so no one feels ambushed.`;
+            }
+            document.getElementById('conv-approach-text').innerText = approach;
+
+            // Script Generation
+            let script = `Hey everyone, Mom/Dad's needs are evolving and I want to make sure we're looking at the bigger picture together as a family. I'd love to jump on a quick 20-minute call this week so we can review how things are currently running and figure out how to divide upcoming tasks fairly.`;
+            document.getElementById('conv-script-text').innerText = script;
+
+            // Frame Generation
+            document.getElementById('conv-frame-text').innerText = `Frame the issue around change and logistics rather than personal exhaustion. Shift from 'I am overwhelmed and you aren't helping' to 'Parent's care demands have grown beyond what one person can manage. We need a team plan.'`;
+
+            // Ask Generation
+            document.getElementById('conv-ask-text').innerText = `Make your request specific, bounded, and role-based:\n"${needs}"\nSpecific tasks with clear start and end times prevent fear of taking on an endless commitment.`;
+
+            // Guilt Antidote
+            document.getElementById('conv-guilt-text').innerText = `Remember: Asking for help is an act of care for your parent, not a sign of failure. Do not apologize for bringing up the topic (avoid saying "I'm sorry to bother you with this"). State the needs clearly and calmly.`;
+
+            // Follow-Up
+            document.getElementById('conv-followup-text').innerText = `End the conversation by scheduling a 30-day review date: "Let's try this new setup for 4 weeks and check in on how it's working for everyone." This gives reluctant siblings a low-risk trial period.`;
+
+            document.getElementById('output-conversation').classList.add('active');
+
+            saveHistory('conversation', { rel, block }, `Approach for ${rel} relationship with block: "${block}"`);
+        }
+
+        /* --- TOOL 3: MONEY SPLITTER LOGIC --- */
+
+        function loadSampleMoney() {
+            document.getElementById('money-expenses').value = 1200;
+            document.getElementById('money-payer').value = 'Me entirely';
+            document.getElementById('money-parent-status').value = 'Depleting savings';
+            document.getElementById('money-disparity').value = 'We earn similarly';
+            document.getElementById('money-upcoming').value = 'New hearing aids needed ($2,400).';
+            showToast('Sample Scenario Loaded!');
+        }
+
+        function runMoneySplitter(e) {
+            e.preventDefault();
+
+            const expenses = parseFloat(document.getElementById('money-expenses').value) || 0;
+            const payer = document.getElementById('money-payer').value;
+            const parentStatus = document.getElementById('money-parent-status').value;
+            const disparity = document.getElementById('money-disparity').value;
+            const upcoming = document.getElementById('money-upcoming').value || "None specified";
+
+            // Formula Logic
+            let formula = "";
+            if (disparity === 'We earn similarly') {
+                formula = `Because sibling incomes are comparable, an equal split of the remaining out-of-pocket costs after parent contributions is recommended ($${(expenses / 2).toFixed(2)} / month each for 2 siblings).`;
+            } else if (disparity === 'I earn less') {
+                formula = `Given income disparities, consider a proportional split based on available discretionary income, or ask higher-earning siblings to cover major single expenses while you manage day-to-day coordination.`;
+            } else {
+                formula = `Transparent discussion of monthly baseline costs is needed to establish a flat, predictable monthly contribution from each sibling.`;
+            }
+            document.getElementById('money-formula-text').innerText = formula;
+
+            // Parent Contribution
+            document.getElementById('money-parent-text').innerText = `Parent Financial Status: ${parentStatus}. Parent's assets and income should always be the primary source for care costs before adult children contribute out-of-pocket. Ensure parent's pension/benefits are fully utilized.`;
+
+            // Big Expense Plan
+            document.getElementById('money-upcoming-text').innerText = `For upcoming item ("${upcoming}"): Present 2-3 quotes/options to siblings in writing. Request single-payment contributions directly to the vendor/provider rather than transferring money between personal bank accounts.`;
+
+            // Protocol
+            document.getElementById('money-protocol-text').innerText = `Establish a shared electronic folder or expense log. Settle balances monthly on a set date (e.g., 1st of the month) using digital payments (Venmo, Zelle, bank transfer) with itemized receipts attached.`;
+
+            // Estate Conversation
+            document.getElementById('money-estate-text').innerText = `If you are contributing personal funds toward parent care or house upkeep, consult an elder law attorney regarding formal family caregiver contracts or accounting mechanisms to prevent disputes during probate later.`;
+
+            document.getElementById('output-money-splitter').classList.add('active');
+
+            saveHistory('money-splitter', { expenses, payer }, `$${expenses}/mo expenses currently paid by "${payer}"`);
+        }
+
+        /* --- TOOL 4: CARE CALENDAR LOGIC --- */
+
+        function loadSampleCalendar() {
+            document.getElementById('cal-current').value = 'No shared schedule. Primary caregiver covers 7 days a week alone.';
+            document.getElementById('cal-unavailable').value = 'Never unavailable, working constantly around care.';
+            document.getElementById('cal-sib-avail').value = 'Siblings say "call if you need something" but offer no fixed times.';
+            document.getElementById('cal-respite').value = "I haven't had a break in years";
+            document.getElementById('cal-backup').value = 'No one';
+            showToast('Sample Scenario Loaded!');
+        }
+
+        function runCareCalendar(e) {
+            e.preventDefault();
+
+            const current = document.getElementById('cal-current').value;
+            const unavailable = document.getElementById('cal-unavailable').value;
+            const sibAvail = document.getElementById('cal-sib-avail').value;
+            const respite = document.getElementById('cal-respite').value;
+            const backup = document.getElementById('cal-backup').value;
+
+            document.getElementById('cal-shared-text').innerText = `Template Structure: Convert vague offers like "call if needed" into block scheduling. Assign recurring duty shifts (e.g., Sibling A covers 1st & 3rd Saturday; Remote Sibling manages pharmacy refills and telehealth check-ins every Tuesday).`;
+
+            document.getElementById('cal-respite-text').innerText = `Priority Respite Goal: You selected '${respite}'. Lock in a non-negotiable block of time off within the next 14 days. Put it on the shared calendar as 'Caregiver Off-Duty' and require siblings or paid aides to cover that window.`;
+
+            document.getElementById('cal-chain-text').innerText = `Emergency Escalation Order:\n1. Primary Local Caregiver\n2. Secondary Local/Regional Sibling\n3. Designated Neighbor or Trusted Friend\n4. Paid On-Call In-Home Care Agency\nKeep this contact chain printed on parent's refrigerator and stored in all sibling phones.`;
+
+            document.getElementById('cal-visit-text').innerText = `For out-of-town siblings: Shift from sporadic social visits to 'respite visits.' When visiting, the out-of-town sibling takes 100% full care duty so the primary local caregiver can leave the house entirely for 48-72 hours.`;
+
+            document.getElementById('cal-remote-text').innerText = `Remote Sibling Responsibilities: Distance is not an excuse for non-participation. Remote siblings should be assigned administrative ownership: managing medical portal messages, ordering groceries/supplies online, handling insurance claims, and making daily social phone calls.`;
+
+            if (backup === 'No one' || backup === 'Me') {
+                document.getElementById('cal-backup-text').innerText = `Warning: You currently have no external backup. Research local respite agencies, adult day programs, or home care providers this week to set up an intake account before a medical emergency occurs.`;
+            } else {
+                document.getElementById('cal-backup-text').innerText = `Maintain active contact details and clear written instructions for your designated backup (${backup}) to step in smoothly.`;
+            }
+
+            document.getElementById('output-care-calendar').classList.add('active');
+
+            saveHistory('care-calendar', { respite, backup }, `Respite needed: "${respite}" | Backup: "${backup}"`);
+        }
+
+        /* --- TOOL 5: SIBLING CHECK-IN LOGIC --- */
+
+        function loadSampleCheckin() {
+            document.getElementById('checkin-1').value = 9; // High Resentment
+            document.getElementById('checkin-2').value = 2; // Low Appreciation
+            document.getElementById('checkin-3').value = 7; // Adequate Care
+            document.getElementById('checkin-4').value = 3; // Poor Communication
+            document.getElementById('checkin-5').value = 2; // Low Optimism
+            document.getElementById('checkin-6').value = 8; // High Loss Fear
+
+            for(let i=1; i<=6; i++) {
+                const slider = document.getElementById('checkin-' + i);
+                updateSliderVal(slider, 'val-checkin-' + i);
+            }
+
+            showToast('Sample Scenario Loaded!');
+        }
+
+        function runSiblingCheckin(e) {
+            e.preventDefault();
+
+            const scores = {
+                resentment: parseInt(document.getElementById('checkin-1').value),
+                appreciation: parseInt(document.getElementById('checkin-2').value),
+                careQuality: parseInt(document.getElementById('checkin-3').value),
+                communication: parseInt(document.getElementById('checkin-4').value),
+                optimism: parseInt(document.getElementById('checkin-5').value),
+                lossFear: parseInt(document.getElementById('checkin-6').value)
+            };
+
+            // Render Metrics Dashboard
+            const metricsContainer = document.getElementById('checkin-metrics-container');
+            metricsContainer.innerHTML = '';
+
+            const items = [
+                { label: 'Resentment Level (Lower is better)', val: scores.resentment, invert: true },
+                { label: 'Feeling Appreciated', val: scores.appreciation, invert: false },
+                { label: 'Parent Care Quality', val: scores.careQuality, invert: false },
+                { label: 'Communication Working', val: scores.communication, invert: false },
+                { label: 'Optimism for Future', val: scores.optimism, invert: false },
+                { label: 'Relationship Loss Fear (Lower is better)', val: scores.lossFear, invert: true }
+            ];
+
+            items.forEach(item => {
+                let colorClass = 'bg-green';
+                let effectiveScore = item.invert ? (11 - item.val) : item.val;
+
+                if (effectiveScore <= 3) colorClass = 'bg-red';
+                else if (effectiveScore <= 6) colorClass = 'bg-yellow';
+
+                metricsContainer.innerHTML += `
+                    <div>
+                        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:600;">
+                            <span>${item.label}</span>
+                            <span>${item.val} / 10</span>
+                        </div>
+                        <div class="dashboard-bar">
+                            <div class="dashboard-fill ${colorClass}" style="width:${item.val * 10}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Analysis Content
+            if (scores.resentment >= 7) {
+                document.getElementById('checkin-resentment-text').innerText = `Resentment index is elevated (${scores.resentment}/10). Resentment usually stems from unseen effort and unacknowledged sacrifices rather than the work itself. Making your labor visible without attacking is your top priority.`;
+            } else {
+                document.getElementById('checkin-resentment-text').innerText = `Resentment is currently manageable (${scores.resentment}/10). Preventative communication will keep it low.`;
+            }
+
+            document.getElementById('checkin-preservation-text').innerText = `Commit to one 'Non-Care Sibling Interaction' per month. Send a text, meme, or phone call strictly focused on personal life, memories, or sports with an explicit agreement: "Zero talk about Mom/Dad's care on this call."`;
+
+            document.getElementById('checkin-appreciation-text').innerText = `Appreciation builds reciprocity. Identify one small thing each sibling does (even if it's just keeping parent cheerful on a phone call) and explicitly thank them for it in writing. Praise reinforces future effort.`;
+
+            document.getElementById('checkin-decision-text').innerText = `Adopt a consensus protocol for major care choices: Require 24-hour cooling-off periods before voting on non-emergency changes. Avoid majority-rule forcing when consensus can be reached through compromise.`;
+
+            if (scores.lossFear >= 7 || scores.communication <= 3) {
+                document.getElementById('checkin-therapy-text').innerText = `Therapy/Mediation Indication: High relationship strain detected. Consider engaging a professional Elder Care Mediator or Family Counselor. An impartial third party helps navigate old childhood dynamics that distort current caregiving discussions.`;
+            } else {
+                document.getElementById('checkin-therapy-text').innerText = `Family communication channels are functional. Periodic check-ins using these tools will help preserve sibling relationships through coming care transitions.`;
+            }
+
+            document.getElementById('output-sibling-checkin').classList.add('active');
+
+            saveHistory('sibling-checkin', scores, `Resentment: ${scores.resentment}/10 | Comm: ${scores.communication}/10`);
+        }
+    </script>
+</body>
+</html>

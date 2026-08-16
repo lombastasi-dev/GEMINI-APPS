@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResetPlan — Practical Recovery Toolkit</title>
+  
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* CSS VARIABLES & COLOR PALETTE */
+    :root {
+      --primary-plum: #5D4E6D;
+      --primary-plum-hover: #4A3E57;
+      --warm-sand: #D4A373;
+      --sand-light: #F2E3D5;
+      --bg-gradient-start: #F5F2F8;
+      --bg-gradient-end: #FDF6EC;
+      --text-main: #2C2830;
+      --text-muted: #6B6570;
+      --card-bg: #FFFFFF;
+      --border-color: #E6E1EA;
+      --radius-xl: 1rem;
+      --shadow-sm: 0 2px 8px rgba(93, 78, 109, 0.06);
+      --shadow-md: 0 4px 16px rgba(93, 78, 109, 0.1);
+      --sidebar-width: 260px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
+
+    /* LAYOUT STRUCTURE */
+    #app-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* SIDEBAR */
+    #sidebar {
+      width: var(--sidebar-width);
+      background: var(--card-bg);
+      border-right: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-header i {
+      font-size: 1.5rem;
+      color: var(--primary-plum);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary-plum);
+      letter-spacing: -0.02em;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 1rem 0.75rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      margin-bottom: 0.25rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .nav-link:hover {
+      background: var(--bg-gradient-start);
+      color: var(--primary-plum);
+    }
+
+    .nav-link.active {
+      background: var(--primary-plum);
+      color: #FFFFFF;
+    }
+
+    .nav-link i {
+      width: 1.25rem;
+      text-align: center;
+    }
+
+    /* MAIN CONTENT AREA */
+    #main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 2rem 1.5rem;
+      max-width: 850px;
+      width: 100%;
+      margin-right: auto;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* MOBILE HEADER & TOGGLE */
+    .mobile-header {
+      display: none;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 1.5rem;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .mobile-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      color: var(--primary-plum);
+      font-size: 1.1rem;
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      font-size: 1.35rem;
+      color: var(--primary-plum);
+      cursor: pointer;
+      padding: 0.25rem;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 95;
+      backdrop-filter: blur(2px);
+    }
+
+    /* CARD COMPONENTS */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+    }
+
+    /* DASHBOARD STYLES */
+    .hero-section {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      background: linear-gradient(135deg, rgba(93, 78, 109, 0.08) 0%, rgba(212, 163, 115, 0.12) 100%);
+      border-radius: var(--radius-xl);
+      margin-bottom: 2rem;
+      border: 1px solid rgba(93, 78, 109, 0.1);
+    }
+
+    .hero-title {
+      font-size: 2.25rem;
+      color: var(--primary-plum);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-tagline {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .tool-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--warm-sand);
+    }
+
+    .tool-card-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.75rem;
+      background: rgba(212, 163, 115, 0.2);
+      color: var(--primary-plum);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      margin-bottom: 1rem;
+    }
+
+    .tool-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary-plum);
+      margin-bottom: 0.4rem;
+    }
+
+    .tool-card-desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* TOOL PAGES COMMON UI */
+    .tool-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .tool-title {
+      font-size: 1.75rem;
+      color: var(--primary-plum);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tool-problem {
+      background: #FFF8F0;
+      border-left: 4px solid var(--warm-sand);
+      padding: 0.85rem 1.15rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      color: #7A5B3E;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* FORM STYLES */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control, select.form-control, textarea.form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      background-color: #FAFAFC;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-plum);
+      background-color: #FFFFFF;
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.6rem;
+      margin-top: 0.4rem;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #FAFAFC;
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+
+    .checkbox-label:hover {
+      background: var(--bg-gradient-start);
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      accent-color: var(--primary-plum);
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .action-bar {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary-plum);
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-plum-hover);
+    }
+
+    .btn-secondary {
+      background: var(--sand-light);
+      color: #5C4328;
+    }
+
+    .btn-secondary:hover {
+      background: #E8D3C0;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .btn-outline:hover {
+      background: #FAFAFC;
+      color: var(--text-main);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    /* ANALYSIS OUTPUT SECTION */
+    .output-container {
+      display: none;
+      margin-top: 2rem;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--warm-sand);
+    }
+
+    .output-header h3 {
+      color: var(--primary-plum);
+      font-size: 1.25rem;
+    }
+
+    .output-block {
+      margin-bottom: 1.25rem;
+    }
+
+    .output-block-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--warm-sand);
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .output-block-content {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      background: #FAFAFC;
+      padding: 0.85rem 1rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .script-box {
+      position: relative;
+      background: #F4F1F7;
+      border: 1px dashed var(--primary-plum);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: #332B3C;
+      white-space: pre-wrap;
+      margin-top: 0.5rem;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+    }
+
+    /* HISTORY ACCORDION */
+    .history-section {
+      margin-top: 2.5rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .history-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .history-list {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      padding: 0.75rem;
+      background: #FAFAFC;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .history-item:hover {
+      background: var(--bg-gradient-start);
+    }
+
+    /* TOAST NOTIFICATION */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--primary-plum);
+      color: #FFFFFF;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      padding: 1.25rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: auto;
+      z-index: 10;
+    }
+
+    /* RESPONSIVE BREAKPOINTS */
+    @media (max-width: 768px) {
+      #sidebar {
+        transform: translateX(-100%);
+      }
+
+      #sidebar.active {
+        transform: translateX(0);
+      }
+
+      #main-content {
+        margin-left: 0;
+        padding: 1.25rem 1rem;
+      }
+
+      .mobile-header {
+        display: flex;
+      }
+
+      .hero-title {
+        font-size: 1.75rem;
+      }
+
+      .tools-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .action-bar {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MOBILE HEADER -->
+  <header class="mobile-header">
+    <div class="mobile-brand">
+      <i class="fa-solid fa-compass-drafting"></i>
+      <span>ResetPlan</span>
+    </div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div id="app-container">
+    <!-- FIXED SIDEBAR -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-compass-drafting"></i>
+        <h1>ResetPlan</h1>
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a class="nav-link active" data-tool="dashboard">
+            <i class="fa-solid fa-house"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-tool="tool1">
+            <i class="fa-solid fa-shield-halved"></i> Damage Assessment
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-tool="tool2">
+            <i class="fa-solid fa-list-check"></i> Priority Triage
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-tool="tool3">
+            <i class="fa-solid fa-boxes-stacked"></i> Resource Inventory
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-tool="tool4">
+            <i class="fa-solid fa-bullseye"></i> One Small Win
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-tool="tool5">
+            <i class="fa-solid fa-hands-holding-child"></i> Support Map
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- MAIN CONTENT VIEW HOLDER -->
+    <main id="main-content">
+      
+      <!-- DASHBOARD VIEW -->
+      <section id="view-dashboard" class="view-panel">
+        <div class="hero-section">
+          <h2 class="hero-title">Reset Plan</h2>
+          <p class="hero-tagline">Your old life stopped working. Build one that does.</p>
+        </div>
+
+        <div class="tools-grid">
+          <div class="tool-card" onclick="switchTool('tool1')">
+            <div class="tool-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <h3 class="tool-card-title">1. Damage Assessment</h3>
+            <p class="tool-card-desc">Audit what actually broke vs. what just feels broken, and ground your foundation.</p>
+          </div>
+
+          <div class="tool-card" onclick="switchTool('tool2')">
+            <div class="tool-card-icon"><i class="fa-solid fa-list-check"></i></div>
+            <h3 class="tool-card-title">2. Priority Triage</h3>
+            <p class="tool-card-desc">Filter overwhelming stress into a clear timeline: Week 1 survival to Month 3 growth.</p>
+          </div>
+
+          <div class="tool-card" onclick="switchTool('tool3')">
+            <div class="tool-card-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+            <h3 class="tool-card-title">3. Resource Inventory</h3>
+            <p class="tool-card-desc">Catalog hidden assets, transferable skills, and past evidence of your resilience.</p>
+          </div>
+
+          <div class="tool-card" onclick="switchTool('tool4')">
+            <div class="tool-card-icon"><i class="fa-solid fa-bullseye"></i></div>
+            <h3 class="tool-card-title">4. One Small Win</h3>
+            <p class="tool-card-desc">Bypass paralysis with a bite-sized, 24-hour action tailored to your energy level.</p>
+          </div>
+
+          <div class="tool-card" onclick="switchTool('tool5')">
+            <div class="tool-card-icon"><i class="fa-solid fa-hands-holding-child"></i></div>
+            <h3 class="tool-card-title">5. Support Map</h3>
+            <p class="tool-card-desc">Break through shame or isolation with concrete scripts to ask for help.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOOL 1 VIEW -->
+      <section id="view-tool1" class="view-panel" style="display: none;">
+        <div class="tool-header">
+          <h2 class="tool-title"><i class="fa-solid fa-shield-halved"></i> Tool 1: Damage Assessment</h2>
+          <div class="tool-problem">
+            <i class="fa-solid fa-circle-info"></i> "I don't know what actually broke, so I don't know what to fix first."
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="form-tool1">
+            <div class="form-group">
+              <label class="form-label">What happened:</label>
+              <select class="form-control" id="t1-event" required>
+                <option value="">Select event...</option>
+                <option value="Job loss">Job loss</option>
+                <option value="Breakup/divorce">Breakup / divorce</option>
+                <option value="Health crisis">Health crisis</option>
+                <option value="Business failure">Business failure</option>
+                <option value="Financial crash">Financial crash</option>
+                <option value="Legal issue">Legal issue</option>
+                <option value="Burnout">Burnout</option>
+                <option value="Death of someone close">Death of someone close</option>
+                <option value="Eviction/housing loss">Eviction / housing loss</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Immediate losses (check all that apply):</label>
+              <div class="checkbox-grid">
+                <label class="checkbox-label"><input type="checkbox" name="t1-loss" value="Income"> Income</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-loss" value="Housing"> Housing</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-loss" value="Relationship"> Relationship</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-loss" value="Health"> Health</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-loss" value="Reputation"> Reputation</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-loss" value="Community"> Community</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-loss" value="Confidence"> Confidence</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-loss" value="Routine"> Routine</label>
+                <label class="checkbox-label"><input type="checkbox" name="t1-loss" value="Identity"> Identity</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">What still works (things, facts, systems, or areas intact):</label>
+              <textarea class="form-control" id="t1-works" placeholder="e.g. My physical health is good, I have a safe apartment, my dog is healthy..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Current stability:</label>
+              <select class="form-control" id="t1-stability" required>
+                <option value="">Select state...</option>
+                <option value="In crisis">In crisis</option>
+                <option value="Barely holding on">Barely holding on</option>
+                <option value="Stable but shaken">Stable but shaken</option>
+                <option value="Recovering">Recovering</option>
+                <option value="Ready to rebuild">Ready to rebuild</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Support available:</label>
+              <select class="form-control" id="t1-support" required>
+                <option value="">Select level...</option>
+                <option value="Strong">Strong</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Weak">Weak</option>
+                <option value="Isolated">Isolated</option>
+              </select>
+            </div>
+
+            <div class="action-bar">
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-pie"></i> Assess Damage</button>
+              <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="output-tool1" class="output-container card">
+          <div class="output-header">
+            <h3>Assessment Results</h3>
+            <button class="btn btn-outline btn-sm" onclick="copySection('output-tool1')"><i class="fa-regular fa-copy"></i> Copy Analysis</button>
+          </div>
+          
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-map"></i> The Loss Map</div>
+            <div class="output-block-content" id="t1-out-map"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-cubes"></i> The Foundation Check</div>
+            <div class="output-block-content" id="t1-out-foundation"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-kit-medical"></i> The Crisis Triage</div>
+            <div class="output-block-content" id="t1-out-triage"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-heart"></i> The Grief Space</div>
+            <div class="output-block-content" id="t1-out-grief"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-anchor"></i> The Reality Anchor</div>
+            <div class="output-block-content" id="t1-out-anchor"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-shield"></i> The One Protection</div>
+            <div class="output-block-content" id="t1-out-protection"></div>
+          </div>
+        </div>
+
+        <!-- History -->
+        <div class="history-section">
+          <div class="history-header" onclick="toggleHistory('tool1')">
+            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Damage Assessments</span>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('tool1')">Clear</button>
+          </div>
+          <div class="history-list" id="history-tool1"></div>
+        </div>
+      </section>
+
+      <!-- TOOL 2 VIEW -->
+      <section id="view-tool2" class="view-panel" style="display: none;">
+        <div class="tool-header">
+          <h2 class="tool-title"><i class="fa-solid fa-list-check"></i> Tool 2: Priority Triage</h2>
+          <div class="tool-problem">
+            <i class="fa-solid fa-circle-info"></i> "Everything feels urgent and I can't tell what to handle first."
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="form-tool2">
+            <div class="form-group">
+              <label class="form-label">Top 3 stressors right now:</label>
+              <textarea class="form-control" id="t2-stressors" placeholder="e.g. Rent due, telling my parents, fear of failing..." required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">What needs money:</label>
+              <textarea class="form-control" id="t2-money" placeholder="e.g. Rent, groceries, medical bills..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">What needs time:</label>
+              <textarea class="form-control" id="t2-time" placeholder="e.g. Job applications, moving boxes, admin calls..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">What needs emotional energy:</label>
+              <textarea class="form-control" id="t2-energy" placeholder="e.g. Processing the breakup, managing anxiety..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">What can wait 30 days:</label>
+              <textarea class="form-control" id="t2-wait30" placeholder="e.g. Reorganizing closet, career pivot courses..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">What can wait 90 days:</label>
+              <textarea class="form-control" id="t2-wait90" placeholder="e.g. Dating again, big travel plans, long term investing..."></textarea>
+            </div>
+
+            <div class="action-bar">
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-filter"></i> Sort Priorities</button>
+              <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="output-tool2" class="output-container card">
+          <div class="output-header">
+            <h3>Priority Sequence</h3>
+            <button class="btn btn-outline btn-sm" onclick="copySection('output-tool2')"><i class="fa-regular fa-copy"></i> Copy Timeline</button>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-table-cells"></i> The Urgency Matrix</div>
+            <div class="output-block-content" id="t2-out-matrix"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-calendar-day"></i> The Week 1 Focus</div>
+            <div class="output-block-content" id="t2-out-week1"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-calendar-week"></i> The Week 2-4 Focus</div>
+            <div class="output-block-content" id="t2-out-week24"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-calendar-days"></i> The Month 2-3 Focus</div>
+            <div class="output-block-content" id="t2-out-month23"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-pause"></i> The Wait List</div>
+            <div class="output-block-content" id="t2-out-wait"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-lightbulb"></i> The Decision Frame</div>
+            <div class="output-block-content" id="t2-out-frame"></div>
+          </div>
+        </div>
+
+        <div class="history-section">
+          <div class="history-header" onclick="toggleHistory('tool2')">
+            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Triage Logs</span>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('tool2')">Clear</button>
+          </div>
+          <div class="history-list" id="history-tool2"></div>
+        </div>
+      </section>
+
+      <!-- TOOL 3 VIEW -->
+      <section id="view-tool3" class="view-panel" style="display: none;">
+        <div class="tool-header">
+          <h2 class="tool-title"><i class="fa-solid fa-boxes-stacked"></i> Tool 3: Resource Inventory</h2>
+          <div class="tool-problem">
+            <i class="fa-solid fa-circle-info"></i> "I feel like I have nothing, but I probably have more than I think."
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="form-tool3">
+            <div class="form-group">
+              <label class="form-label">Financial resources (savings, credit, severances, aid):</label>
+              <textarea class="form-control" id="t3-financial" placeholder="e.g. $2,000 liquid savings, $500 tax refund coming..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Skills that transfer (hard or soft skills):</label>
+              <textarea class="form-control" id="t3-skills" placeholder="e.g. Writing, customer conflict resolution, project organization..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">People who will help (friends, family, mentors):</label>
+              <textarea class="form-control" id="t3-people" placeholder="e.g. Sister (housing), Mark (resume review)..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Physical health:</label>
+              <select class="form-control" id="t3-phealth" required>
+                <option value="">Select state...</option>
+                <option value="Strong">Strong</option>
+                <option value="Okay">Okay</option>
+                <option value="Struggling">Struggling</option>
+                <option value="Ignored">Ignored</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mental health:</label>
+              <select class="form-control" id="t3-mhealth" required>
+                <option value="">Select state...</option>
+                <option value="Strong">Strong</option>
+                <option value="Okay">Okay</option>
+                <option value="Struggling">Struggling</option>
+                <option value="In crisis">In crisis</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">One past resilience (a tough situation you survived before):</label>
+              <textarea class="form-control" id="t3-resilience" placeholder="e.g. Survived parents divorce as teen, made it through 2020 layout..."></textarea>
+            </div>
+
+            <div class="action-bar">
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-warehouse"></i> Inventory Assets</button>
+              <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="output-tool3" class="output-container card">
+          <div class="output-header">
+            <h3>Resource Analysis</h3>
+            <button class="btn btn-outline btn-sm" onclick="copySection('output-tool3')"><i class="fa-regular fa-copy"></i> Copy Inventory</button>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-vault"></i> The Asset List</div>
+            <div class="output-block-content" id="t3-out-assets"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-bridge"></i> The Skill Bridge</div>
+            <div class="output-block-content" id="t3-out-skills"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-users"></i> The Support Ladder</div>
+            <div class="output-block-content" id="t3-out-ladder"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-heart-pulse"></i> The Health Check</div>
+            <div class="output-block-content" id="t3-out-health"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-medal"></i> The Resilience Reminder</div>
+            <div class="output-block-content" id="t3-out-reminder"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-puzzle-piece"></i> The Gap Fill</div>
+            <div class="output-block-content" id="t3-out-gap"></div>
+          </div>
+        </div>
+
+        <div class="history-section">
+          <div class="history-header" onclick="toggleHistory('tool3')">
+            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Inventories</span>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('tool3')">Clear</button>
+          </div>
+          <div class="history-list" id="history-tool3"></div>
+        </div>
+      </section>
+
+      <!-- TOOL 4 VIEW -->
+      <section id="view-tool4" class="view-panel" style="display: none;">
+        <div class="tool-header">
+          <h2 class="tool-title"><i class="fa-solid fa-bullseye"></i> Tool 4: One Small Win</h2>
+          <div class="tool-problem">
+            <i class="fa-solid fa-circle-info"></i> "I need momentum, not a master plan."
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="form-tool4">
+            <div class="form-group">
+              <label class="form-label">One thing you can control today:</label>
+              <textarea class="form-control" id="t4-control" placeholder="e.g. My morning routine, drinking water, sending 1 email..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">One thing you want to feel by Friday:</label>
+              <select class="form-control" id="t4-feeling" required>
+                <option value="">Select target feeling...</option>
+                <option value="Hopeful">Hopeful</option>
+                <option value="Organized">Organized</option>
+                <option value="Rested">Rested</option>
+                <option value="Connected">Connected</option>
+                <option value="Capable">Capable</option>
+                <option value="Safe">Safe</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Energy level:</label>
+              <select class="form-control" id="t4-energy" required>
+                <option value="">Select current energy...</option>
+                <option value="High">High</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Low">Low</option>
+                <option value="Depleted">Depleted</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Biggest obstacle to action:</label>
+              <select class="form-control" id="t4-obstacle" required>
+                <option value="">Select obstacle...</option>
+                <option value="Fear">Fear</option>
+                <option value="Exhaustion">Exhaustion</option>
+                <option value="Don't know where to start">Don't know where to start</option>
+                <option value="Shame">Shame</option>
+                <option value="Paralysis">Paralysis</option>
+                <option value="No time">No time</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Past small win that felt good:</label>
+              <textarea class="form-control" id="t4-pastwin" placeholder="e.g. Organized my closet, went for a 15 min walk..."></textarea>
+            </div>
+
+            <div class="action-bar">
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-bolt"></i> Generate Win Plan</button>
+              <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="output-tool4" class="output-container card">
+          <div class="output-header">
+            <h3>Momentum Blueprint</h3>
+            <button class="btn btn-outline btn-sm" onclick="copySection('output-tool4')"><i class="fa-regular fa-copy"></i> Copy Action</button>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-stopwatch"></i> The 24-Hour Win</div>
+            <div class="output-block-content" id="t4-out-win"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-square-check"></i> The Friday Check</div>
+            <div class="output-block-content" id="t4-out-friday"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-battery-half"></i> The Energy Match</div>
+            <div class="output-block-content" id="t4-out-energy"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-key"></i> The Obstacle Hack</div>
+            <div class="output-block-content" id="t4-out-obstacle"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-link"></i> The Streak Builder</div>
+            <div class="output-block-content" id="t4-out-streak"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-quote-left"></i> The Affirmation</div>
+            <div class="output-block-content" id="t4-out-affirmation"></div>
+          </div>
+        </div>
+
+        <div class="history-section">
+          <div class="history-header" onclick="toggleHistory('tool4')">
+            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Momentum Plans</span>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('tool4')">Clear</button>
+          </div>
+          <div class="history-list" id="history-tool4"></div>
+        </div>
+      </section>
+
+      <!-- TOOL 5 VIEW -->
+      <section id="view-tool5" class="view-panel" style="display: none;">
+        <div class="tool-header">
+          <h2 class="tool-title"><i class="fa-solid fa-hands-holding-child"></i> Tool 5: Support Map</h2>
+          <div class="tool-problem">
+            <i class="fa-solid fa-circle-info"></i> "I feel like I have to do this alone."
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="form-tool5">
+            <div class="form-group">
+              <label class="form-label">Who knows you're struggling:</label>
+              <textarea class="form-control" id="t5-whoknows" placeholder="e.g. Sister, old coworker..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Who you've asked for help:</label>
+              <textarea class="form-control" id="t5-whoasked" placeholder="e.g. Asked sister to crash on her couch..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Why you haven't asked others:</label>
+              <select class="form-control" id="t5-reason" required>
+                <option value="">Select reason...</option>
+                <option value="Shame">Shame</option>
+                <option value="They have their own problems">They have their own problems</option>
+                <option value="I don't want to burden">I don't want to burden</option>
+                <option value="They'll judge me">They'll judge me</option>
+                <option value="I don't know who">I don't know who</option>
+                <option value="I tried and was rejected">I tried and was rejected</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Professional support:</label>
+              <select class="form-control" id="t5-pro" required>
+                <option value="">Select status...</option>
+                <option value="Therapist">Therapist</option>
+                <option value="Coach">Coach</option>
+                <option value="Doctor">Doctor</option>
+                <option value="Financial advisor">Financial advisor</option>
+                <option value="None">None</option>
+                <option value="Looking">Looking</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">One thing you need that someone could give:</label>
+              <textarea class="form-control" id="t5-need" placeholder="e.g. A review on my resume, a warm meal, advice on filing unemployment..."></textarea>
+            </div>
+
+            <div class="action-bar">
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-network-wired"></i> Map Connection</button>
+              <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="output-tool5" class="output-container card">
+          <div class="output-header">
+            <h3>Support Network Plan</h3>
+            <button class="btn btn-outline btn-sm" onclick="copySection('output-tool5')"><i class="fa-regular fa-copy"></i> Copy Strategy</button>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-sitemap"></i> The Ask Ladder</div>
+            <div class="output-block-content" id="t5-out-ladder"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-comment-dots"></i> The Specific Request Script</div>
+            <div class="output-block-content">
+              <p style="margin-bottom:0.5rem; font-size:0.875rem; color:var(--text-muted)">Copy and adapt this text to send to a contact:</p>
+              <div class="script-box" id="t5-out-script"></div>
+              <button class="btn btn-secondary btn-sm copy-btn" onclick="copyText('t5-out-script')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+            </div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-handshake-slash"></i> The Shame Interrupt</div>
+            <div class="output-block-content" id="t5-out-shame"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-user-tie"></i> The Professional Prompt</div>
+            <div class="output-block-content" id="t5-out-pro"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-people-group"></i> The Community Bridge</div>
+            <div class="output-block-content" id="t5-out-community"></div>
+          </div>
+
+          <div class="output-block">
+            <div class="output-block-title"><i class="fa-solid fa-arrow-rotate-right"></i> The Give-Back Plan</div>
+            <div class="output-block-content" id="t5-out-giveback"></div>
+          </div>
+        </div>
+
+        <div class="history-section">
+          <div class="history-header" onclick="toggleHistory('tool5')">
+            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Support Maps</span>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); clearHistory('tool5')">Clear</button>
+          </div>
+          <div class="history-list" id="history-tool5"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast"><i class="fa-solid fa-check-circle"></i> <span id="toast-msg">Copied!</span></div>
+
+  <!-- GLOBAL FOOTER -->
+  <footer>
+    For entertainment and reflection purposes only. Not therapy or professional advice. If you are in crisis, contact a mental health professional or emergency services.
+  </footer>
+
+  <!-- JS LOGIC & APPLICATION ENGINE -->
+  <script>
+    // --- APP STATE & ROUTING ---
+    document.addEventListener('DOMContentLoaded', () => {
+      initNavigation();
+      initForms();
+      loadAllHistories();
+    });
+
+    function switchTool(toolId) {
+      // Hide all panels
+      document.querySelectorAll('.view-panel').forEach(panel => {
+        panel.style.display = 'none';
+      });
+
+      // Show target panel
+      const targetPanel = document.getElementById(`view-${toolId}`);
+      if (targetPanel) {
+        targetPanel.style.display = 'block';
+      }
+
+      // Update active nav link
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.dataset.tool === toolId) {
+          link.classList.add('active');
+        }
+      });
+
+      // Close mobile menu if open
+      closeMobileMenu();
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function initNavigation() {
+      // Sidebar link clicks
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          switchTool(link.dataset.tool);
+        });
+      });
+
+      // Mobile Menu Toggles
+      const menuToggle = document.getElementById('menuToggle');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+
+      menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+      });
+
+      overlay.addEventListener('click', closeMobileMenu);
+    }
+
+    function closeMobileMenu() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      if (sidebar) sidebar.classList.remove('active');
+      if (overlay) overlay.style.display = 'none';
+    }
+
+    // --- UTILITY FUNCTIONS ---
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    function copyText(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      const textToCopy = el.innerText || el.textContent;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast('Copied to clipboard!');
+      });
+    }
+
+    function copySection(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      
+      let text = '';
+      const blocks = container.querySelectorAll('.output-block');
+      blocks.forEach(block => {
+        const title = block.querySelector('.output-block-title').innerText.trim();
+        const content = block.querySelector('.output-block-content').innerText.trim();
+        text += `=== ${title} ===\n${content}\n\n`;
+      });
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Full analysis copied!');
+      });
+    }
+
+    // --- LOCALSTORAGE HISTORY ENGINE ---
+    const MAX_HISTORY = 30;
+
+    function saveToHistory(toolId, inputData, outputData) {
+      const key = `resetplan_history_${toolId}`;
+      let history = getHistory(toolId);
+      
+      const item = {
+        id: Date.now(),
+        timestamp: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        input: inputData,
+        output: outputData
+      };
+
+      history.unshift(item);
+      if (history.length > MAX_HISTORY) {
+        history = history.slice(0, MAX_HISTORY);
+      }
+
+      localStorage.setItem(key, JSON.stringify(history));
+      renderHistory(toolId);
+    }
+
+    function getHistory(toolId) {
+      const key = `resetplan_history_${toolId}`;
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : [];
+    }
+
+    function clearHistory(toolId) {
+      const key = `resetplan_history_${toolId}`;
+      localStorage.removeItem(key);
+      renderHistory(toolId);
+      showToast('History cleared');
+    }
+
+    function loadAllHistories() {
+      ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(toolId => {
+        renderHistory(toolId);
+      });
+    }
+
+    function renderHistory(toolId) {
+      const container = document.getElementById(`history-${toolId}`);
+      if (!container) return;
+
+      const history = getHistory(toolId);
+      if (history.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem; padding:0.5rem 0;">No saved assessments yet.</p>';
+        return;
+      }
+
+      container.innerHTML = history.map((item, index) => {
+        let label = `Assessment ${history.length - index}`;
+        if (item.input.event) label = item.input.event;
+        else if (item.input.control) label = `Win Target: ${item.input.feeling || 'Action'}`;
+        else if (item.input.stressors) label = `Triage Log`;
+
+        return `
+          <div class="history-item" onclick="loadHistoryItem('${toolId}', ${item.id})">
+            <div>
+              <strong>${label}</strong>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${item.timestamp}</div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:var(--text-muted); font-size:0.75rem;"></i>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function loadHistoryItem(toolId, id) {
+      const history = getHistory(toolId);
+      const item = history.find(i => i.id === id);
+      if (!item) return;
+
+      // Populate form
+      populateForm(toolId, item.input);
+      // Display output
+      renderOutput(toolId, item.output);
+
+      // Scroll to output
+      const outContainer = document.getElementById(`output-${toolId}`);
+      if (outContainer) {
+        outContainer.style.display = 'block';
+        outContainer.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function toggleHistory(toolId) {
+      const list = document.getElementById(`history-${toolId}`);
+      if (list) {
+        list.style.display = (list.style.display === 'none') ? 'flex' : 'none';
+      }
+    }
+
+    function populateForm(toolId, data) {
+      if (toolId === 'tool1') {
+        document.getElementById('t1-event').value = data.event || '';
+        document.getElementById('t1-works').value = data.works || '';
+        document.getElementById('t1-stability').value = data.stability || '';
+        document.getElementById('t1-support').value = data.support || '';
+        
+        document.querySelectorAll('input[name="t1-loss"]').forEach(cb => {
+          cb.checked = data.losses && data.losses.includes(cb.value);
+        });
+      } else if (toolId === 'tool2') {
+        document.getElementById('t2-stressors').value = data.stressors || '';
+        document.getElementById('t2-money').value = data.money || '';
+        document.getElementById('t2-time').value = data.time || '';
+        document.getElementById('t2-energy').value = data.energy || '';
+        document.getElementById('t2-wait30').value = data.wait30 || '';
+        document.getElementById('t2-wait90').value = data.wait90 || '';
+      } else if (toolId === 'tool3') {
+        document.getElementById('t3-financial').value = data.financial || '';
+        document.getElementById('t3-skills').value = data.skills || '';
+        document.getElementById('t3-people').value = data.people || '';
+        document.getElementById('t3-phealth').value = data.phealth || '';
+        document.getElementById('t3-mhealth').value = data.mhealth || '';
+        document.getElementById('t3-resilience').value = data.resilience || '';
+      } else if (toolId === 'tool4') {
+        document.getElementById('t4-control').value = data.control || '';
+        document.getElementById('t4-feeling').value = data.feeling || '';
+        document.getElementById('t4-energy').value = data.energy || '';
+        document.getElementById('t4-obstacle').value = data.obstacle || '';
+        document.getElementById('t4-pastwin').value = data.pastwin || '';
+      } else if (toolId === 'tool5') {
+        document.getElementById('t5-whoknows').value = data.whoknows || '';
+        document.getElementById('t5-whoasked').value = data.whoasked || '';
+        document.getElementById('t5-reason').value = data.reason || '';
+        document.getElementById('t5-pro').value = data.pro || '';
+        document.getElementById('t5-need').value = data.need || '';
+      }
+    }
+
+    // --- FORM SUBMISSIONS & LOGIC TEMPLATES ---
+    function initForms() {
+      // Tool 1
+      document.getElementById('form-tool1').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const losses = Array.from(document.querySelectorAll('input[name="t1-loss"]:checked')).map(cb => cb.value);
+        const input = {
+          event: document.getElementById('t1-event').value,
+          losses: losses,
+          works: document.getElementById('t1-works').value,
+          stability: document.getElementById('t1-stability').value,
+          support: document.getElementById('t1-support').value
+        };
+
+        const output = generateTool1Analysis(input);
+        renderOutput('tool1', output);
+        saveToHistory('tool1', input, output);
+      });
+
+      // Tool 2
+      document.getElementById('form-tool2').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = {
+          stressors: document.getElementById('t2-stressors').value,
+          money: document.getElementById('t2-money').value,
+          time: document.getElementById('t2-time').value,
+          energy: document.getElementById('t2-energy').value,
+          wait30: document.getElementById('t2-wait30').value,
+          wait90: document.getElementById('t2-wait90').value
+        };
+
+        const output = generateTool2Analysis(input);
+        renderOutput('tool2', output);
+        saveToHistory('tool2', input, output);
+      });
+
+      // Tool 3
+      document.getElementById('form-tool3').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = {
+          financial: document.getElementById('t3-financial').value,
+          skills: document.getElementById('t3-skills').value,
+          people: document.getElementById('t3-people').value,
+          phealth: document.getElementById('t3-phealth').value,
+          mhealth: document.getElementById('t3-mhealth').value,
+          resilience: document.getElementById('t3-resilience').value
+        };
+
+        const output = generateTool3Analysis(input);
+        renderOutput('tool3', output);
+        saveToHistory('tool3', input, output);
+      });
+
+      // Tool 4
+      document.getElementById('form-tool4').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = {
+          control: document.getElementById('t4-control').value,
+          feeling: document.getElementById('t4-feeling').value,
+          energy: document.getElementById('t4-energy').value,
+          obstacle: document.getElementById('t4-obstacle').value,
+          pastwin: document.getElementById('t4-pastwin').value
+        };
+
+        const output = generateTool4Analysis(input);
+        renderOutput('tool4', output);
+        saveToHistory('tool4', input, output);
+      });
+
+      // Tool 5
+      document.getElementById('form-tool5').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = {
+          whoknows: document.getElementById('t5-whoknows').value,
+          whoasked: document.getElementById('t5-whoasked').value,
+          reason: document.getElementById('t5-reason').value,
+          pro: document.getElementById('t5-pro').value,
+          need: document.getElementById('t5-need').value
+        };
+
+        const output = generateTool5Analysis(input);
+        renderOutput('tool5', output);
+        saveToHistory('tool5', input, output);
+      });
+    }
+
+    function renderOutput(toolId, output) {
+      const outContainer = document.getElementById(`output-${toolId}`);
+      if (!outContainer) return;
+
+      Object.keys(output).forEach(key => {
+        const el = document.getElementById(`${toolId}-out-${key}`);
+        if (el) {
+          el.innerText = output[key];
+        }
+      });
+
+      outContainer.style.display = 'block';
+    }
+
+    // --- SAMPLE SCENARIO LOADERS ---
+    function loadSampleTool1() {
+      populateForm('tool1', {
+        event: 'Job loss',
+        losses: ['Income', 'Relationship', 'Confidence', 'Routine'],
+        works: 'I still have my physical health, my apartment lease is secure for 6 months, and my family is healthy.',
+        stability: 'Stable but shaken',
+        support: 'Moderate'
+      });
+      showToast('Loaded Sample Scenario: Job Loss + Relationship');
+    }
+
+    function loadSampleTool2() {
+      populateForm('tool2', {
+        stressors: 'Running out of money for rent, feeling like a failure, fear of explaining this to my family.',
+        money: 'Rent next month ($1,200), groceries, credit card minimum payments.',
+        time: 'Updating my resume, applying for jobs, registering for unemployment.',
+        energy: 'Processing the grief of losing my career identity and rebuilding my self-worth.',
+        wait30: 'Rethinking long-term career pivots, buying new furniture, deep networking.',
+        wait90: 'Dating, planning trips, making major financial investments.'
+      });
+      showToast('Loaded Sample Scenario: Triage Priorities');
+    }
+
+    function loadSampleTool3() {
+      populateForm('tool3', {
+        financial: '$2,000 in emergency savings, $400 cash back rewards.',
+        skills: 'Clear copywriting, project organization, customer conflict resolution, basic design.',
+        people: 'Sister (can host dinner), 2 reliable close friends, former manager Mark.',
+        phealth: 'Okay',
+        mhealth: 'Struggling',
+        resilience: 'Surviving my parents stressful divorce when I was 17 while finishing high school.'
+      });
+      showToast('Loaded Sample Scenario: Resources');
+    }
+
+    function loadSampleTool4() {
+      populateForm('tool4', {
+        control: 'Setting my alarm for 8:00 AM, making my bed, drinking 2 glasses of water.',
+        feeling: 'Capable',
+        energy: 'Low',
+        obstacle: 'Paralysis',
+        pastwin: 'Organizing my closet when I felt completely overwhelmed last year.'
+      });
+      showToast('Loaded Sample Scenario: Small Win');
+    }
+
+    function loadSampleTool5() {
+      populateForm('tool5', {
+        whoknows: 'My sister Sarah knows the details. A former coworker knows I was laid off.',
+        whoasked: 'Asked my sister if I could crash at her place for a weekend.',
+        reason: 'Shame',
+        pro: 'None',
+        need: 'Someone to spend 20 minutes reviewing my updated resume and giving candid feedback.'
+      });
+      showToast('Loaded Sample Scenario: Support Map');
+    }
+
+    // --- PRE-WRITTEN TEMPLATE LOGIC ENGINES ---
+
+    // TOOL 1 ANALYSIS ENGINE
+    function generateTool1Analysis(data) {
+      const lossList = data.losses.length > 0 ? data.losses.join(', ') : 'None explicitly listed';
+      
+      let mapText = `Event: ${data.event}. Direct losses identified: ${lossList}. When a major setback strikes, your nervous system conflates immediate loss with total loss. You lost ${lossList}, but you did not lose your capacity to adapt, reason, or rebuild.`;
+
+      let foundationText = data.works && data.works.trim() !== '' 
+        ? `Intact foundation elements: "${data.works}". These are your structural anchors. They aren't bonus items; they are the concrete floor you stand on today.`
+        : `Even without explicit items listed, basic operational reality remains: you are awake, seeking tools, and taking structured inventory. That active agency is your primary foundation.`;
+
+      let triageText = "";
+      if (data.stability === 'In crisis' || data.stability === 'Barely holding on') {
+        triageText = `CURRENT STATUS: HIGH ALERT (${data.stability.toUpperCase()}). Immediate survival comes before processing. Pause all non-essential decisions. Focus strictly on physical safety, food, shelter, and basic stabilizing contact for the next 48 hours.`;
+      } else {
+        triageText = `CURRENT STATUS: STABLE GROUND (${data.stability}). You are out of acute survival mode and ready for structured, step-by-step rebuilding. Do not rush into drastic life overhauls today.`;
+      }
+
+      let griefText = `Acknowledging a loss of [${lossList}] requires honoring the gap it leaves. Rest is not laziness, and mourning what ended is a mandatory phase of transition, not a delay.`;
+
+      let anchorText = `Reality check: You have survived 100% of your hardest days so far. Rebuilding after ${data.event} is a redesign phase, not a total wipe. You are starting from experience, not from zero.`;
+
+      let protectionText = `With ${data.support} support currently available, your primary mandate this week is to protect your basic daily routine and sleep. Guard your energy against unnecessary drama or panic.`;
+
+      return {
+        map: mapText,
+        foundation: foundationText,
+        triage: triageText,
+        grief: griefText,
+        anchor: anchorText,
+        protection: protectionText
+      };
+    }
+
+    // TOOL 2 ANALYSIS ENGINE
+    function generateTool2Analysis(data) {
+      let matrixText = `URGENCY MATRIX EVALUATION:\n`;
+      matrixText += `- Shelter & Immediate Survival: ${data.money ? 'High priority focus.' : 'Stable.'}\n`;
+      matrixText += `- Time/Logistics Needs: ${data.time ? data.time : 'Standard pace.'}\n`;
+      matrixText += `- Emotional Processing: Requires protected boundaries, not constant focus.`;
+
+      let week1Text = `SURVIVAL FOCUS: Handle immediate financial or physical friction. Priority: ${data.money || 'Consolidate basic budget and secure personal routine.'}`;
+
+      let week24Text = `STABILITY FOCUS: Address logistical tasks requiring steady time. Priority: ${data.time || 'Systematize daily effort and application/outreach routines.'}`;
+
+      let month23Text = `REBUILDING FOCUS: Strategic growth, long-term identity, and skill expansion. Priority: ${data.energy || 'Address emotional recovery and broader career/life vision.'}`;
+
+      let waitText = `DEPRIORITIZED FOR NOW: \n- 30-Day Delay: ${data.wait30 || 'Non-urgent administrative tasks.'}\n- 90-Day Delay: ${data.wait90 || 'Major secondary life shifts or new commitments.'}`;
+
+      let frameText = `"You can only rebuild one wall at a time." Trying to solve your finances, emotional health, and future strategy simultaneously leads to paralysis. Focus on Week 1 today.`;
+
+      return {
+        matrix: matrixText,
+        week1: week1Text,
+        week24: week24Text,
+        month23: month23Text,
+        wait: waitText,
+        frame: frameText
+      };
+    }
+
+    // TOOL 3 ANALYSIS ENGINE
+    function generateTool3Analysis(data) {
+      let assetsText = `CURRENT ASSETS:\n- Financial Cushion: ${data.financial || 'Minimal / To be conserved'}\n- Personal Network: ${data.people || 'To be tapped selectively'}`;
+
+      let skillsText = data.skills 
+        ? `TRANSFERABLE COMPETENCIES: "${data.skills}". These capabilities belong to you, not your former role or relationship. They apply directly to solving immediate challenges.`
+        : `Your innate adaptability and problem-solving skills remain fully active and available.`;
+
+      let ladderText = `NETWORK ACTION PLAN: Reach out to specific contacts for targeted needs (${data.people || 'friends, family, or past colleagues'}). Keep asks clear, small, and specific.`;
+
+      let healthText = `HEALTH PROFILE: Physical: ${data.phealth} | Mental: ${data.mhealth}.\n`;
+      if (data.mhealth === 'In crisis' || data.mhealth === 'Struggling') {
+        healthText += `ALERT: Your mental bandwidth is heavily taxed. Seeking professional support or community counseling should be treated as a core operational step, not a luxury.`;
+      } else {
+        healthText += `Your current mental and physical baseline provides a solid platform for taking consistent action.`;
+      }
+
+      let reminderText = data.resilience 
+        ? `SURVIVAL PROOF: Remember when you survived: "${data.resilience}". You have navigated severe uncertainty before and developed real resilience.`
+        : `You have navigated unexpected hardship in the past. This moment requires the same adaptive survival skills.`;
+
+      let gapText = `WEEKLY GAP FOCUS: Identify one missing resource (financial advice, legal clarity, or emotional sounding board) and make one contact to bridge it.`;
+
+      return {
+        assets: assetsText,
+        skills: skillsText,
+        ladder: ladderText,
+        health: healthText,
+        reminder: reminderText,
+        gap: gapText
+      };
+    }
+
+    // TOOL 4 ANALYSIS ENGINE
+    function generateTool4Analysis(data) {
+      let winText = `YOUR 24-HOUR ACTION: Focus strictly on: "${data.control || 'Complete one manageable administrative task.'}". Keep execution time under 20 minutes to guarantee success.`;
+
+      let fridayText = `SUCCESS METRIC: By Friday, success looks like feeling **${data.feeling.toUpperCase()}** by completing small, deliberate daily actions rather than massive overhauls.`;
+
+      let energyText = `ENERGY CALIBRATION (${data.energy.toUpperCase()}): `;
+      if (data.energy === 'Depleted' || data.energy === 'Low') {
+        energyText += `Reduce all target actions by 80%. Break tasks down into tiny 5-minute increments. Rest is a prerequisite for momentum.`;
+      } else {
+        energyText += `You have workable energy. Channel it directly into one structured block of high-impact effort today.`;
+      }
+
+      let obstacleText = `OBSTACLE WORKAROUND (${data.obstacle.toUpperCase()}): `;
+      switch(data.obstacle) {
+        case 'Fear': obstacleText += `Focus only on the next 5 minutes. Action reduces anxiety faster than analysis.`; break;
+        case 'Exhaustion': obstacleText += `Prioritize complete rest for 12 hours. Do not attempt major work while running empty.`; break;
+        case 'Paralysis': obstacleText += `Pick the smallest possible physical movement (e.g., open a document, wash 1 dish). Micro-steps unlock momentum.`; break;
+        case 'Shame': obstacleText += `Separate your self-worth from this temporary circumstance. Setbacks are events, not identities.`; break;
+        default: obstacleText += `Set a timer for 10 minutes and commit only to working until the chime sounds.`; break;
+      }
+
+      let streakText = `STREAK BUILDING: Repeat this micro-action for 3 consecutive days: 1) Execute small win, 2) Mark it off, 3) Stop before burnout. Momentum is built by consistency, not intensity.`;
+
+      let affirmationText = `"Progress is not linear. One step is still movement."`;
+
+      return {
+        win: winText,
+        friday: fridayText,
+        energy: energyText,
+        obstacle: obstacleText,
+        streak: streakText,
+        affirmation: affirmationText
+      };
+    }
+
+    // TOOL 5 ANALYSIS ENGINE
+    function generateTool5Analysis(data) {
+      let ladderText = `ASK LADDER STRATEGY:\n1. Inform trusted inner circle (${data.whoknows || 'Close friends/family'}).\n2. Make specific, bite-sized functional requests to acquaintances.\n3. Avoid suffering in silence due to ${data.reason}.`;
+
+      let scriptText = `Hey [Name], hope you're doing well. I'm currently navigating a transition and working on rebuilding my next steps. I know you have great experience with [relevant area], and I was wondering if you might be open to a quick 15-minute chat or reviewing my [resume/idea/plan] when you have a spare moment? No worries at all if your schedule is full!`;
+
+      let shameText = `SHAME INTERRUPT: You selected '${data.reason}' as your main barrier. Remember: Needing help is an universal human reality, not a personal flaw. Asking for specific assistance gives others a chance to support you.`;
+
+      let proText = `PROFESSIONAL SUPPORT STATUS: Current status: ${data.pro}. If you are navigating legal, financial, or severe emotional distress, engaging a dedicated specialist is an investment in your stability.`;
+
+      let communityText = `COMMUNITY CONNECTIONS: Seek local or online peer groups facing similar transitions (job search groups, grief circles, founder forums). Shared experience reduces isolation.`;
+
+      let givebackText = `THE FUTURE RETURN: Accepting help now creates a bridge. When you are steady again in the future, you will pay this forward to someone else undergoing a reset.`;
+
+      return {
+        ladder: ladderText,
+        script: scriptText,
+        shame: shameText,
+        pro: proText,
+        community: communityText,
+        giveback: givebackText
+      };
+    }
+  </script>
+</body>
+</html>

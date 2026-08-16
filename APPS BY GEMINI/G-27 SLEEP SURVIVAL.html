@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SleepSurvival — Practical Sleep Toolkit for Exhausted Parents</title>
+  
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* RESET & BASE STYLES */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #F1FAEE 0%, #F8F5FA 100%);
+      color: #2B2D42;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* COLORS & VARIABLES */
+    :root {
+      --primary: #1D3557;
+      --accent: #C77DAD;
+      --accent-light: #F3E8F0;
+      --bg-start: #F1FAEE;
+      --bg-end: #F8F5FA;
+      --card-bg: #FFFFFF;
+      --text-main: #2B2D42;
+      --text-muted: #6C757D;
+      --border: #E9ECEF;
+      --danger: #E63946;
+      --warning: #F4A261;
+      --success: #2A9D8F;
+    }
+
+    /* LAYOUT WRAPPER */
+    .app-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* SIDEBAR STYLES */
+    .sidebar {
+      width: 260px;
+      background-color: #FFFFFF;
+      border-right: 1px solid var(--border);
+      box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-brand {
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--primary);
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-brand i {
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+    .sidebar-brand h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .nav-item button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1rem;
+      border: none;
+      background: transparent;
+      border-radius: 0.5rem;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .nav-item button i {
+      font-size: 1.1rem;
+      width: 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .nav-item button:hover {
+      background-color: var(--accent-light);
+      color: var(--primary);
+    }
+
+    .nav-item button.active {
+      background-color: var(--primary);
+      color: #FFFFFF;
+    }
+    .nav-item button.active i {
+      color: var(--accent);
+    }
+
+    /* MOBILE HEADER & OVERLAY */
+    .mobile-header {
+      display: none;
+      background: #FFFFFF;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    }
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--primary);
+      cursor: pointer;
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 999;
+    }
+
+    /* MAIN CONTENT AREA */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2rem 1.5rem 4rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: calc(100% - 260px);
+    }
+
+    .content-wrapper {
+      width: 100%;
+      max-width: 800px;
+    }
+
+    /* CARDS & UI COMPONENTS */
+    .card {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .tool-header {
+      margin-bottom: 1.5rem;
+    }
+    .tool-header h2 {
+      font-size: 1.75rem;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+    .tool-header p.problem-statement {
+      color: var(--accent);
+      font-style: italic;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    /* FORMS */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+      color: var(--primary);
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      background-color: #FAFAFA;
+      transition: border-color 0.2s;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent);
+      background-color: #FFF;
+    }
+    textarea.form-control {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    /* CHECKBOX GROUPS */
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .checkbox-item input {
+      accent-color: var(--primary);
+      width: 16px;
+      height: 16px;
+    }
+
+    /* SLIDERS */
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .slider-container input {
+      flex: 1;
+      accent-color: var(--accent);
+    }
+    .slider-value {
+      font-weight: 700;
+      color: var(--primary);
+      width: 2.5rem;
+      text-align: right;
+    }
+
+    /* BUTTONS */
+    .btn-group {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      border: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #FFF;
+    }
+    .btn-primary:hover {
+      background-color: #122238;
+    }
+    .btn-secondary {
+      background-color: var(--accent-light);
+      color: var(--primary);
+      border: 1px solid rgba(199, 125, 173, 0.3);
+    }
+    .btn-secondary:hover {
+      background-color: #EBD4E4;
+    }
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .btn-outline:hover {
+      background-color: #F5F5F5;
+      color: var(--text-main);
+    }
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    /* ANALYSIS OUTPUT */
+    .output-section {
+      display: none;
+      margin-top: 2rem;
+      border-top: 2px dashed var(--border);
+      padding-top: 1.5rem;
+    }
+    .output-title {
+      font-size: 1.25rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .output-card {
+      background: #FDFBFD;
+      border-left: 4px solid var(--accent);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin-bottom: 1rem;
+    }
+    .output-card.alert {
+      border-left-color: var(--danger);
+      background: #FFF5F5;
+    }
+    .output-card.warning {
+      border-left-color: var(--warning);
+      background: #FFFAF0;
+    }
+    .output-card.success {
+      border-left-color: var(--success);
+      background: #F0FDF4;
+    }
+    .output-card h4 {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      margin-bottom: 0.35rem;
+    }
+    .output-card p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--text-main);
+    }
+
+    /* SCRIPT COPY BOX */
+    .script-box {
+      background: #FFF;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 0.5rem;
+      position: relative;
+      font-style: italic;
+    }
+    .script-box .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+    }
+
+    /* HISTORY ACCORDION */
+    .history-section {
+      margin-top: 2rem;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .history-item {
+      background: #FFF;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    .history-item-header {
+      padding: 0.75rem 1rem;
+      background: #FAFAFA;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .history-item-body {
+      padding: 1rem;
+      display: none;
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    /* DASHBOARD SPECIFIC */
+    .hero-banner {
+      background: linear-gradient(135deg, var(--primary) 0%, #2A4870 100%);
+      color: #FFF;
+      padding: 2rem;
+      border-radius: 1rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(29, 53, 87, 0.15);
+    }
+    .hero-banner h2 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    .hero-banner p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 300;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+    .dashboard-card {
+      background: #FFF;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .dashboard-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      border-color: var(--accent);
+    }
+    .dashboard-card .icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 0.75rem;
+      background: var(--accent-light);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+    }
+    .dashboard-card h3 {
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    .dashboard-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* FOOTER */
+    .app-footer {
+      margin-top: auto;
+      background: #FFFFFF;
+      border-top: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary);
+      color: #FFF;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 2000;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .mobile-header {
+        display: flex;
+      }
+      .sidebar-overlay.open {
+        display: block;
+      }
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 1.25rem 0.75rem;
+      }
+      .hero-banner h2 {
+        font-size: 1.5rem;
+      }
+      .hero-banner p {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MOBILE HEADER -->
+  <div class="mobile-header">
+    <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--primary); font-weight: 700;">
+      <i class="fa-solid font-awesome fa-moon" style="color: var(--accent);"></i>
+      <span>SleepSurvival</span>
+    </div>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <i class="fa-solid fa-moon"></i>
+        <h1>SleepSurvival</h1>
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <button class="nav-btn active" data-target="dashboard">
+            <i class="fa-solid fa-house"></i>
+            <span>Dashboard</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-target="tool1">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span>Sleep Log</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-target="tool2">
+            <i class="fa-solid fa-people-arrows"></i>
+            <span>Shift Strategy</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-target="tool3">
+            <i class="fa-solid fa-sliders"></i>
+            <span>Environment Audit</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-target="tool4">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <span>Sanity Saver</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" data-target="tool5">
+            <i class="fa-solid fa-compass"></i>
+            <span>The Plan B</span>
+          </button>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <div class="content-wrapper">
+
+        <!-- DASHBOARD VIEW -->
+        <section id="dashboardView" class="view-section">
+          <div class="hero-banner">
+            <h2>Sleep Survival</h2>
+            <p>Survive the sleepless nights without losing each other.</p>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="dashboard-card" onclick="switchView('tool1')">
+              <div class="icon-wrapper"><i class="fa-solid fa-clipboard-list"></i></div>
+              <h3>Sleep Log</h3>
+              <p>Track night patterns and identify sleep debt without overcomplicating things.</p>
+            </div>
+            <div class="dashboard-card" onclick="switchView('tool2')">
+              <div class="icon-wrapper"><i class="fa-solid fa-people-arrows"></i></div>
+              <h3>Shift Strategy</h3>
+              <p>Divide night duties fairly, reduce resentment, and set up safe emergency handoffs.</p>
+            </div>
+            <div class="dashboard-card" onclick="switchView('tool3')">
+              <div class="icon-wrapper"><i class="fa-solid fa-sliders"></i></div>
+              <h3>Environment Audit</h3>
+              <p>Audit darkness, temperature, noise, and routine to fix high-impact quick wins.</p>
+            </div>
+            <div class="dashboard-card" onclick="switchView('tool4')">
+              <div class="icon-wrapper"><i class="fa-solid fa-heart-pulse"></i></div>
+              <h3>Sanity Saver</h3>
+              <p>Assess burnout levels, verify safety, and get structured support steps right now.</p>
+            </div>
+            <div class="dashboard-card" onclick="switchView('tool5')">
+              <div class="icon-wrapper"><i class="fa-solid fa-compass"></i></div>
+              <h3>The Plan B</h3>
+              <p>Pragmatic options and permission slips when nothing else is working.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 1: SLEEP LOG -->
+        <section id="tool1View" class="view-section" style="display:none;">
+          <div class="card">
+            <div class="tool-header">
+              <h2>Sleep Log</h2>
+              <p class="problem-statement">"We're too tired to remember what happened last night, so we can't see patterns."</p>
+            </div>
+
+            <form id="form1">
+              <div class="form-group">
+                <label for="t1_age">Child's age:</label>
+                <select id="t1_age" class="form-control">
+                  <option value="0-3mo">0-3 months</option>
+                  <option value="3-6mo">3-6 months</option>
+                  <option value="6-12mo">6-12 months</option>
+                  <option value="1-2yr">1-2 years</option>
+                  <option value="2-3yr">2-3 years</option>
+                  <option value="3+yr">3+ years</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t1_bedtime">Bedtime (approximate):</label>
+                <input type="text" id="t1_bedtime" class="form-control" placeholder="e.g., 7:30pm" />
+              </div>
+
+              <div class="form-group">
+                <label for="t1_wakeups">Wake-ups last night:</label>
+                <input type="number" id="t1_wakeups" class="form-control" min="0" max="30" value="3" />
+              </div>
+
+              <div class="form-group">
+                <label for="t1_sleepSelf">Total sleep YOU got:</label>
+                <select id="t1_sleepSelf" class="form-control">
+                  <option value="0-2hr">0-2 hours</option>
+                  <option value="2-4hr">2-4 hours</option>
+                  <option value="4-6hr" selected>4-6 hours</option>
+                  <option value="6+hr">6+ hours</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t1_sleepPartner">Total sleep PARTNER got:</label>
+                <select id="t1_sleepPartner" class="form-control">
+                  <option value="0-2hr">0-2 hours</option>
+                  <option value="2-4hr">2-4 hours</option>
+                  <option value="4-6hr" selected>4-6 hours</option>
+                  <option value="6+hr">6+ hours</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t1_location">Sleep location:</label>
+                <select id="t1_location" class="form-control">
+                  <option value="Crib in own room">Crib in own room</option>
+                  <option value="Bassinet in parents room">Bassinet in parents' room</option>
+                  <option value="Bed-sharing">Bed-sharing</option>
+                  <option value="Toddler bed">Toddler bed</option>
+                  <option value="Co-sleeping part of night">Co-sleeping part of night</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t1_triggers">What seemed to trigger wake-ups / Notes:</label>
+                <textarea id="t1_triggers" class="form-control" placeholder="e.g. Teething, coughing, lost pacifier..."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="analyzeTool1()"><i class="fa-solid fa-chart-line"></i> Analyze Night</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+
+            <div id="out1" class="output-section">
+              <h3 class="output-title"><i class="fa-solid fa-square-poll-vertical"></i> Night Analysis & Insights</h3>
+              <div id="out1_content"></div>
+            </div>
+          </div>
+
+          <!-- History -->
+          <div class="history-section">
+            <div class="history-header">
+              <h4 style="color: var(--primary);">Saved Sleep Logs</h4>
+              <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool1')">Clear History</button>
+            </div>
+            <div id="history1" class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 2: SHIFT STRATEGY -->
+        <section id="tool2View" class="view-section" style="display:none;">
+          <div class="card">
+            <div class="tool-header">
+              <h2>Shift Strategy</h2>
+              <p class="problem-statement">"One of us is doing all the night duty and resentment is building."</p>
+            </div>
+
+            <form id="form2">
+              <div class="form-group">
+                <label for="t2_split">Current night duty split:</label>
+                <select id="t2_split" class="form-control">
+                  <option value="One parent does 90%+">One parent does 90%+</option>
+                  <option value="Primary caregiver does all">Primary caregiver does all</option>
+                  <option value="Alternating nights">Alternating nights</option>
+                  <option value="Split by shift">Split by shift</option>
+                  <option value="Both wake up together">Both wake up together</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t2_workA">Partner A work status:</label>
+                <select id="t2_workA" class="form-control">
+                  <option value="Stay-at-home">Stay-at-home</option>
+                  <option value="Full-time out of home">Full-time out of home</option>
+                  <option value="Full-time remote">Full-time remote</option>
+                  <option value="Part-time">Part-time</option>
+                  <option value="On leave">On leave</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t2_workB">Partner B work status:</label>
+                <select id="t2_workB" class="form-control">
+                  <option value="Full-time out of home">Full-time out of home</option>
+                  <option value="Full-time remote">Full-time remote</option>
+                  <option value="Part-time">Part-time</option>
+                  <option value="Stay-at-home">Stay-at-home</option>
+                  <option value="On leave">On leave</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Partner A Exhaustion (1 = Fresh, 10 = Dangerously Exhausted):</label>
+                <div class="slider-container">
+                  <input type="range" id="t2_exA" min="1" max="10" value="8" oninput="document.getElementById('v2_a').innerText=this.value" />
+                  <span id="v2_a" class="slider-value">8</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Partner B Exhaustion (1 = Fresh, 10 = Dangerously Exhausted):</label>
+                <div class="slider-container">
+                  <input type="range" id="t2_exB" min="1" max="10" value="8" oninput="document.getElementById('v2_b').innerText=this.value" />
+                  <span id="v2_b" class="slider-value">8</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t2_tried">What you've already tried:</label>
+                <textarea id="t2_tried" class="form-control" placeholder="e.g. Tried taking turns, but Partner B can't hear the baby..."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="analyzeTool2()"><i class="fa-solid fa-chess"></i> Generate Shift Strategy</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+
+            <div id="out2" class="output-section">
+              <h3 class="output-title"><i class="fa-solid fa-people-line"></i> Shift Blueprint & Communication Plan</h3>
+              <div id="out2_content"></div>
+            </div>
+          </div>
+
+          <!-- History -->
+          <div class="history-section">
+            <div class="history-header">
+              <h4 style="color: var(--primary);">Saved Shift Plans</h4>
+              <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool2')">Clear History</button>
+            </div>
+            <div id="history2" class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 3: ENVIRONMENT AUDIT -->
+        <section id="tool3View" class="view-section" style="display:none;">
+          <div class="card">
+            <div class="tool-header">
+              <h2>Environment Audit</h2>
+              <p class="problem-statement">"Maybe the room setup is working against us."</p>
+            </div>
+
+            <form id="form3">
+              <div class="form-group">
+                <label for="t3_darkness">Room darkness:</label>
+                <select id="t3_darkness" class="form-control">
+                  <option value="Pitch black">Pitch black</option>
+                  <option value="Dim nightlight">Dim nightlight</option>
+                  <option value="Light from window">Light from window</option>
+                  <option value="Bright">Bright</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t3_temp">Room temperature:</label>
+                <select id="t3_temp" class="form-control">
+                  <option value="Comfortable">Comfortable (68-72°F / 20-22°C)</option>
+                  <option value="Too cold">Too cold</option>
+                  <option value="Too warm">Too warm</option>
+                  <option value="Varies">Varies throughout night</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t3_sound">White noise or sound:</label>
+                <select id="t3_sound" class="form-control">
+                  <option value="White noise machine">White noise machine (continuous)</option>
+                  <option value="Fan">Fan</option>
+                  <option value="Silence">Silence</option>
+                  <option value="Music">Music / Lullabies</option>
+                  <option value="TV">TV background</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t3_wear">Sleepwear / Swaddle:</label>
+                <select id="t3_wear" class="form-control">
+                  <option value="Appropriate">Appropriate layer TOG rating</option>
+                  <option value="Too warm">Too warm</option>
+                  <option value="Too cold">Too cold</option>
+                  <option value="Transitioning">Transitioning out of swaddle</option>
+                  <option value="Unsure">Unsure</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t3_feed">Last feeding before bed:</label>
+                <select id="t3_feed" class="form-control">
+                  <option value="Nursing">Nursing to sleep</option>
+                  <option value="Bottle">Bottle right before bed</option>
+                  <option value="Solids">Solids + Milk 30m before bed</option>
+                  <option value="Nothing">Finished feed >30m before bed</option>
+                  <option value="Varies">Varies</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t3_routine">Bedtime routine length:</label>
+                <select id="t3_routine" class="form-control">
+                  <option value="10-20 min">10-20 min</option>
+                  <option value="20-45 min">20-45 min</option>
+                  <option value="<10 min">&lt;10 min</option>
+                  <option value=">45 min">&gt;45 min</option>
+                  <option value="None">None</option>
+                  <option value="Inconsistent">Inconsistent</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="analyzeTool3()"><i class="fa-solid fa-check-double"></i> Run Audit</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+
+            <div id="out3" class="output-section">
+              <h3 class="output-title"><i class="fa-solid fa-list-check"></i> Audit Score & Recommendations</h3>
+              <div id="out3_content"></div>
+            </div>
+          </div>
+
+          <!-- History -->
+          <div class="history-section">
+            <div class="history-header">
+              <h4 style="color: var(--primary);">Saved Environment Audits</h4>
+              <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool3')">Clear History</button>
+            </div>
+            <div id="history3" class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 4: SANITY SAVER -->
+        <section id="tool4View" class="view-section" style="display:none;">
+          <div class="card">
+            <div class="tool-header">
+              <h2>Sanity Saver</h2>
+              <p class="problem-statement">"I am so exhausted I feel like I'm failing at everything."</p>
+            </div>
+
+            <form id="form4">
+              <div class="form-group">
+                <label for="t4_mood">Your current mood / internal state:</label>
+                <select id="t4_mood" class="form-control">
+                  <option value="Exhausted but coping">Exhausted but coping</option>
+                  <option value="Irritable">Irritable / Short-tempered</option>
+                  <option value="Numb">Numb / Empty</option>
+                  <option value="Anxious">Anxious / On edge</option>
+                  <option value="Depressed">Depressed / Tearful</option>
+                  <option value="Rage">Rage / Extreme frustration</option>
+                  <option value="Dissociated">Dissociated / Floating</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Support available (check all that apply):</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" name="t4_supp" value="Partner"> Partner</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t4_supp" value="Family nearby"> Family nearby</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t4_supp" value="Friends"> Friends</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t4_supp" value="Sitter"> Sitter / Nanny</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t4_supp" value="Daycare"> Daycare</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t4_supp" value="Online community"> Online community</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t4_supp" value="None"> None right now</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t4_lastSleep">When did you last have 4+ hours uninterrupted sleep?</label>
+                <select id="t4_lastSleep" class="form-control">
+                  <option value="Last night">Last night</option>
+                  <option value="This week">This week</option>
+                  <option value="Last month">Last month</option>
+                  <option value="Can't remember">Can't remember / Months ago</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t4_fear">What you're most afraid of right now:</label>
+                <textarea id="t4_fear" class="form-control" placeholder="e.g. Damaging my relationship, snapping at the baby..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t4_givenup">What you've given up to survive:</label>
+                <textarea id="t4_givenup" class="form-control" placeholder="e.g. Showers, proper meals, hobbies, work performance..."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="analyzeTool4()"><i class="fa-solid fa-life-ring"></i> Get Immediate Support Plan</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+
+            <div id="out4" class="output-section">
+              <h3 class="output-title"><i class="fa-solid fa-shield-heart"></i> Personal Crisis Assessment & Next Steps</h3>
+              <div id="out4_content"></div>
+            </div>
+          </div>
+
+          <!-- History -->
+          <div class="history-section">
+            <div class="history-header">
+              <h4 style="color: var(--primary);">Saved Sanity Checks</h4>
+              <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool4')">Clear History</button>
+            </div>
+            <div id="history4" class="history-list"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 5: THE PLAN B -->
+        <section id="tool5View" class="view-section" style="display:none;">
+          <div class="card">
+            <div class="tool-header">
+              <h2>The Plan B</h2>
+              <p class="problem-statement">"Nothing is working and we need a radical option or just permission to survive."</p>
+            </div>
+
+            <form id="form5">
+              <div class="form-group">
+                <label for="t5_philosophy">Philosophy on sleep training:</label>
+                <select id="t5_philosophy" class="form-control">
+                  <option value="Gentle methods only">Gentle methods only (No tears)</option>
+                  <option value="Willing to try CIO">Willing to try Cry-It-Out / Extinction</option>
+                  <option value="Against all sleep training">Against all sleep training</option>
+                  <option value="Desperate, open to anything">Desperate, open to anything</option>
+                  <option value="Already tried everything">Already tried everything and failed</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>What you've already tried (check all that apply):</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" name="t5_tried" value="Ferber"> Ferber / Check & Console</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t5_tried" value="Chair method"> Chair Method</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t5_tried" value="Pick up put down"> Pick up Put down</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t5_tried" value="Bed-sharing"> Bed-sharing</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t5_tried" value="Car rides"> Car rides / Stroller</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t5_tried" value="Swaddle transition"> Swaddle transition</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t5_tried" value="Earlier bedtime"> Earlier bedtime</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t5_tried" value="Later bedtime"> Later bedtime</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t5_tried" value="Dream feed"> Dream feed</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t5_tried" value="Pacifier"> Pacifier / Props</label>
+                  <label class="checkbox-item"><input type="checkbox" name="t5_tried" value="Nothing"> Nothing formal yet</label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t5_stopped">What stopped you from being consistent?</label>
+                <textarea id="t5_stopped" class="form-control" placeholder="e.g. Crying triggered severe anxiety, illness, teething..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="t5_temp">Child's temperament:</label>
+                <select id="t5_temp" class="form-control">
+                  <option value="Intense">Intense / Persistent</option>
+                  <option value="Easy to soothe">Easy to soothe</option>
+                  <option value="Needs physical contact">Needs physical contact / Velcro</option>
+                  <option value="Variable">Variable day to day</option>
+                  <option value="High needs">High needs / Sensitive</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="t5_breaking">Your current breaking point:</label>
+                <textarea id="t5_breaking" class="form-control" placeholder="e.g. We are fighting every night, can't function at work..."></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary" onclick="analyzeTool5()"><i class="fa-solid fa-map-location-dot"></i> Build Plan B Strategy</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+
+            <div id="out5" class="output-section">
+              <h3 class="output-title"><i class="fa-solid fa-paper-plane"></i> Practical Roadmap & Survival Permission</h3>
+              <div id="out5_content"></div>
+            </div>
+          </div>
+
+          <!-- History -->
+          <div class="history-section">
+            <div class="history-header">
+              <h4 style="color: var(--primary);">Saved Plan B Strategies</h4>
+              <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool5')">Clear History</button>
+            </div>
+            <div id="history5" class="history-list"></div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    For practical support purposes only. Not medical advice. Consult your pediatrician for medical sleep concerns. If you feel unable to care for your child safely due to exhaustion, seek immediate help.
+  </footer>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toastMsg">Copied to clipboard!</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    /* ===================================================
+       NAVIGATION & UI CONTROLS
+       =================================================== */
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const views = document.querySelectorAll('.view-section');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+
+    function switchView(targetId) {
+      // Hide all views
+      views.forEach(v => v.style.display = 'none');
+      // Show target
+      const targetView = document.getElementById(targetId + 'View');
+      if (targetView) targetView.style.display = 'block';
+
+      // Update Nav buttons
+      navBtns.forEach(btn => {
+        if (btn.getAttribute('data-target') === targetId) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Close mobile sidebar if open
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    navBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-target');
+        switchView(target);
+      });
+    });
+
+    hamburgerBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('open');
+    });
+
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    });
+
+    // Toast Notification
+    function showToast(msg = 'Copied to clipboard!') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    // Copy Text Utility
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Script copied to clipboard!');
+      }).catch(err => {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Script copied to clipboard!');
+      });
+    }
+
+    /* ===================================================
+       LOCAL STORAGE HISTORY MANAGEMENT
+       =================================================== */
+    const MAX_HISTORY = 30;
+
+    function saveToHistory(toolId, summary, fullHtml) {
+      const key = `sleepsurvival_history_${toolId}`;
+      let history = JSON.parse(localStorage.getItem(key) || '[]');
+      const timestamp = new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      
+      history.unshift({ timestamp, summary, fullHtml });
+      if (history.length > MAX_HISTORY) {
+        history = history.slice(0, MAX_HISTORY);
+      }
+      localStorage.setItem(key, JSON.stringify(history));
+      renderHistory(toolId);
+    }
+
+    function renderHistory(toolId) {
+      const key = `sleepsurvival_history_${toolId}`;
+      const history = JSON.parse(localStorage.getItem(key) || '[]');
+      const containerNum = toolId.replace('tool', '');
+      const container = document.getElementById(`history${containerNum}`);
+      if (!container) return;
+
+      if (history.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">No saved history yet.</p>';
+        return;
+      }
+
+      container.innerHTML = history.map((item, index) => `
+        <div class="history-item">
+          <div class="history-item-header" onclick="toggleHistoryItem('${toolId}', ${index})">
+            <span><i class="fa-regular fa-clock"></i> ${item.timestamp} — ${item.summary}</span>
+            <i class="fa-solid fa-chevron-down" id="histIcon_${toolId}_${index}"></i>
+          </div>
+          <div class="history-item-body" id="histBody_${toolId}_${index}">
+            ${item.fullHtml}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleHistoryItem(toolId, index) {
+      const body = document.getElementById(`histBody_${toolId}_${index}`);
+      const icon = document.getElementById(`histIcon_${toolId}_${index}`);
+      if (body.style.display === 'block') {
+        body.style.display = 'none';
+        icon.className = 'fa-solid fa-chevron-down';
+      } else {
+        body.style.display = 'block';
+        icon.className = 'fa-solid fa-chevron-up';
+      }
+    }
+
+    function clearToolHistory(toolId) {
+      const key = `sleepsurvival_history_${toolId}`;
+      localStorage.removeItem(key);
+      renderHistory(toolId);
+      showToast('History cleared.');
+    }
+
+    // Initial render of all histories
+    window.addEventListener('DOMContentLoaded', () => {
+      ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistory);
+    });
+
+    /* ===================================================
+       TOOL 1: SLEEP LOG LOGIC
+       =================================================== */
+    function loadSampleTool1() {
+      document.getElementById('t1_age').value = '6-12mo';
+      document.getElementById('t1_bedtime').value = '7:30pm';
+      document.getElementById('t1_wakeups').value = '5';
+      document.getElementById('t1_sleepSelf').value = '2-4hr';
+      document.getElementById('t1_sleepPartner').value = '2-4hr';
+      document.getElementById('t1_location').value = 'Bed-sharing';
+      document.getElementById('t1_triggers').value = 'Swollen gums, teething discomfort, constant waking when unlatched.';
+    }
+
+    function analyzeTool1() {
+      const age = document.getElementById('t1_age').value;
+      const bedtime = document.getElementById('t1_bedtime').value || 'Not specified';
+      const wakeups = parseInt(document.getElementById('t1_wakeups').value, 10) || 0;
+      const sleepSelf = document.getElementById('t1_sleepSelf').value;
+      const sleepPartner = document.getElementById('t1_sleepPartner').value;
+      const location = document.getElementById('t1_location').value;
+      const triggers = document.getElementById('t1_triggers').value;
+
+      // 1. Pattern Guess
+      let patternText = "";
+      if (age === '0-3mo') patternText = "Newborn circadian rhythm is still developing. Frequent waking for feeding and regulation is standard physiological behavior.";
+      else if (age === '3-6mo') patternText = "The 4-month sleep regression involves permanent changes to sleep architecture. Light sleep stages increase, causing frequent wakes between cycles.";
+      else if (age === '6-12mo') patternText = "8-10 month sleep regressions coincide with developmental milestones (crawling, pulling up, separation anxiety) and teething.";
+      else if (age === '1-2yr') patternText = "Toddler regressions often stem from rapid language acquisition, boundary testing, or fear of missing out (FOMO).";
+      else patternText = "Preschooler sleep disruptions often relate to active imaginations, nightmares, or changing daytime nap needs.";
+
+      // 2. Sleep Debt
+      let debtText = "";
+      if (sleepSelf === '0-2hr' || sleepPartner === '0-2hr') {
+        debtText = "CRITICAL SLEEP DEBT: Under 2 hours of sleep impairs cognitive function similarly to a 0.10% blood alcohol level. Immediate relief required.";
+      } else if (sleepSelf === '2-4hr' || sleepPartner === '2-4hr') {
+        debtText = "HIGH SLEEP DEBT: Consecutive nights of 2-4 hours drain emotional resilience and physical recovery. Priority should be a consolidated 4-hour block.";
+      } else {
+        debtText = "MODERATE SLEEP DEBT: Broken sleep still causes fatigue, but basic cognitive function remains intact. Focus on sleep efficiency.";
+      }
+
+      // 3. Parent Gap
+      let gapText = "";
+      if (sleepSelf === sleepPartner) {
+        gapText = "Both parents have symmetrical sleep debt. You are in the trenches together; prioritize shift work to give each other a solid sleep block.";
+      } else {
+        gapText = `Unequal sleep burden detected. One parent got ${sleepSelf} while the other got ${sleepPartner}. Rebalance night duties tonight to prevent burnout.`;
+      }
+
+      // 4. Environment Factor
+      let envText = "";
+      if (location === 'Bed-sharing' || location === 'Co-sleeping part of night') {
+        envText = "Co-sleeping / bed-sharing provides easy quick feeds but can lead to frequent light arousal cycles for both parent and child. Ensure safe co-sleeping guidelines (Firm mattress, no heavy blankets, non-smoking).";
+      } else {
+        envText = `Current setup (${location}): Ensure room environment is pitch dark and temperature remains stable around 68-72°F (20-22°C).`;
+      }
+
+      // 5. Medical Prompt
+      let medText = "";
+      if (wakeups >= 6) {
+        medText = "ALERT: 6+ wake-ups per night warrants a pediatrician check to rule out silent reflux, ear infection, tongue tie, or airway obstructions (e.g. mouth breathing/snoring).";
+      } else {
+        medText = "Monitor for physical flags: fever, ear pulling, heavy mouth breathing, or unusual distress. If absent, this waking pattern is likely behavioral/developmental.";
+      }
+
+      // 6. 3-Night Trend
+      const trendText = "Commit to logging 3 consecutive nights without changing your strategy midway. Single-night data can reflect random noise rather than real habits.";
+
+      const html = `
+        <div class="output-card">
+          <h4>The Pattern Guess</h4>
+          <p>${patternText}</p>
+        </div>
+        <div class="output-card ${sleepSelf==='0-2hr'?'alert':'warning'}">
+          <h4>The Sleep Debt</h4>
+          <p>${debtText}</p>
+        </div>
+        <div class="output-card">
+          <h4>The Parent Gap</h4>
+          <p>${gapText}</p>
+        </div>
+        <div class="output-card">
+          <h4>The Environment Factor</h4>
+          <p>${envText}</p>
+        </div>
+        <div class="output-card ${wakeups>=6?'alert':''}">
+          <h4>The Medical Prompt</h4>
+          <p>${medText}</p>
+        </div>
+        <div class="output-card success">
+          <h4>The 3-Night Trend Rule</h4>
+          <p>${trendText}</p>
+        </div>
+      `;
+
+      document.getElementById('out1_content').innerHTML = html;
+      document.getElementById('out1').style.display = 'block';
+
+      saveToHistory('tool1', `${age}, ${wakeups} wakes, ${sleepSelf} sleep`, html);
+    }
+
+    /* ===================================================
+       TOOL 2: SHIFT STRATEGY LOGIC
+       =================================================== */
+    function loadSampleTool2() {
+      document.getElementById('t2_split').value = 'Primary caregiver does all';
+      document.getElementById('t2_workA').value = 'Stay-at-home';
+      document.getElementById('t2_workB').value = 'Full-time out of home';
+      document.getElementById('t2_exA').value = 9;
+      document.getElementById('v2_a').innerText = '9';
+      document.getElementById('t2_exB').value = 9;
+      document.getElementById('v2_b').innerText = '9';
+      document.getElementById('t2_tried').value = 'Tried taking turns on weekends, but Partner B feels unsafe driving to work exhausted.';
+    }
+
+    function analyzeTool2() {
+      const split = document.getElementById('t2_split').value;
+      const workA = document.getElementById('t2_workA').value;
+      const workB = document.getElementById('t2_workB').value;
+      const exA = parseInt(document.getElementById('t2_exA').value, 10);
+      const exB = parseInt(document.getElementById('t2_exB').value, 10);
+
+      // 1. Fairness Check
+      let fairness = "";
+      if (workA === 'Stay-at-home' && (split.includes('Primary') || split.includes('90%'))) {
+        fairness = "FAIRNESS WARNING: Staying home with a child while chronically sleep-deprived carries significant safety risks. Both working out of home and caring for a baby at home require acute mental alertness. Night duty should be shared regardless of who earns an income.";
+      } else {
+        fairness = "Your current setup requires alignment. Unbalanced night duty quickly breeds resentment. Aim for equal uninterrupted sleep chunks rather than equal night wakes.";
+      }
+
+      // 2. Shift Options
+      const shiftModels = `
+        <strong>Option 1: Split Shift (Recommended)</strong><br/>
+        • Shift 1 (8:00 PM – 1:30 AM): Partner A sleeps in a separate room with earplugs while Partner B handles baby.<br/>
+        • Shift 2 (1:30 AM – 7:00 AM): Swap. Partner B sleeps uninterrupted while Partner A handles baby.<br/><br/>
+        <strong>Option 2: Alternating Nights</strong><br/>
+        Parent 1 does Sunday/Tuesday/Thursday; Parent 2 does Monday/Wednesday/Friday. Weekends rotated.<br/><br/>
+        <strong>Option 3: Primary + Relief Engine</strong><br/>
+        Working parent handles initial bedtime to 1:00 AM. Stay-at-home parent handles 1:00 AM onwards, then gets a guaranteed nap block on weekends.
+      `;
+
+      // 3. Weekend Catchup
+      const weekendText = "The working parent takes full duty Saturday morning (6:00 AM – 10:00 AM) allowing the at-home parent 4 hours of deep recovery sleep in a quiet, dark room.";
+
+      // 4. Nap Protocol
+      const napText = "Minimum effective nap: 90 minutes (one full sleep cycle) between 1:00 PM and 3:00 PM. Avoid naps over 2 hours or after 4:00 PM to protect nighttime sleep drive.";
+
+      // 5. Resentment Script
+      const scriptText = `"I love you and our child, but I am operating at a breaking point with sleep. When I do night shifts alone, I feel resentful and overwhelmed. Can we try a strict 5-hour split-shift system for the next 4 nights to keep us both functioning?"`;
+
+      // 6. Emergency Tag-Out
+      let emergencyText = "";
+      if (exA >= 9 || exB >= 9) {
+        emergencyText = "CRITICAL ALERT: Exhaustion levels at 9-10/10 increase risk of dropping baby or falling asleep unsafely on couch. Establish an absolute 'Tag-Out Code Word' immediately. When uttered, the other partner MUST step in without argument for 20 minutes.";
+      } else {
+        emergencyText = "Set a baseline rule: If either parent feels overwhelming frustration at 3:00 AM, place baby in a safe crib on their back and walk out for 5 minutes to reset.";
+      }
+
+      const html = `
+        <div class="output-card warning">
+          <h4>The Fairness Check</h4>
+          <p>${fairness}</p>
+        </div>
+        <div class="output-card">
+          <h4>3 Scheduling Models</h4>
+          <p>${shiftModels}</p>
+        </div>
+        <div class="output-card">
+          <h4>Weekend Catch-Up Protocol</h4>
+          <p>${weekendText}</p>
+        </div>
+        <div class="output-card">
+          <h4>Daytime Nap Protocol</h4>
+          <p>${napText}</p>
+        </div>
+        <div class="output-card">
+          <h4>The Resentment Release Script</h4>
+          <div class="script-box">
+            ${scriptText}
+            <button class="btn btn-outline btn-sm copy-btn" onclick="copyToClipboard(\`${scriptText.replace(/"/g, '&quot;')}\`)"><i class="fa-regular fa-copy"></i> Copy</button>
+          </div>
+        </div>
+        <div class="output-card ${exA>=9||exB>=9?'alert':'success'}">
+          <h4>Emergency Tag-Out Rule</h4>
+          <p>${emergencyText}</p>
+        </div>
+      `;
+
+      document.getElementById('out2_content').innerHTML = html;
+      document.getElementById('out2').style.display = 'block';
+
+      saveToHistory('tool2', `Exhaustion ${exA}/${exB}, ${split}`, html);
+    }
+
+    /* ===================================================
+       TOOL 3: ENVIRONMENT AUDIT LOGIC
+       =================================================== */
+    function loadSampleTool3() {
+      document.getElementById('t3_darkness').value = 'Bright';
+      document.getElementById('t3_temp').value = 'Too warm';
+      document.getElementById('t3_sound').value = 'Silence';
+      document.getElementById('t3_wear').value = 'Transitioning';
+      document.getElementById('t3_feed').value = 'Nursing';
+      document.getElementById('t3_routine').value = 'Inconsistent';
+    }
+
+    function analyzeTool3() {
+      const darkness = document.getElementById('t3_darkness').value;
+      const temp = document.getElementById('t3_temp').value;
+      const sound = document.getElementById('t3_sound').value;
+      const wear = document.getElementById('t3_wear').value;
+      const feed = document.getElementById('t3_feed').value;
+      const routine = document.getElementById('t3_routine').value;
+
+      let score = 100;
+      let quickWins = [];
+
+      if (darkness !== 'Pitch black') {
+        score -= 20;
+        quickWins.push("Install total blackout curtains or paper shades. Even tiny light leaks inhibit melatonin production.");
+      }
+      if (temp !== 'Comfortable') {
+        score -= 15;
+        quickWins.push("Adjust room temperature to 68-72°F (20-22°C). Overheating increases waking frequency and SIDS risk.");
+      }
+      if (sound !== 'White noise machine') {
+        score -= 15;
+        quickWins.push("Use a continuous pink/white noise machine set to ~60-65dB (about the volume of a running shower) to mask household noises.");
+      }
+      if (routine === 'Inconsistent' || routine === 'None') {
+        score -= 25;
+        quickWins.push("Establish a strict, predictable 20-30 minute bedtime routine performed in the same order every night.");
+      }
+
+      if (quickWins.length === 0) {
+        quickWins.push("Your environment setup is already highly optimized! Focus on daytime wake windows and consistency.");
+      }
+
+      // Routine Template
+      const routineTemplate = `
+        <strong>Ideal 25-Minute Bedtime Sequence:</strong><br/>
+        1. Warm Bath / Washcloth Wipe (5 min)<br/>
+        2. Fresh Diaper & Sleep Sack / Wearable Blanket (5 min)<br/>
+        3. Feed in dim lighting outside bedroom (10 min)<br/>
+        4. Book / Short Song + White Noise On (5 min)<br/>
+        5. Place in crib calm but awake.
+      `;
+
+      // Transition Tip
+      let transitionText = "";
+      if (wear === 'Transitioning') {
+        transitionText = "Swaddle Transition: Switch to an arms-free sleep sack. Expect 3-5 days of adjustment as the startle reflex settles.";
+      } else {
+        transitionText = "Ensure sleepwear matches Tog rating for room temp. Avoid loose blankets or bulky fleece beneath sleep sacks.";
+      }
+
+      // Feeding Check
+      let feedText = "";
+      if (feed === 'Nursing' || feed === 'Bottle') {
+        feedText = "Feeding right before sleeping can create a strong Feed-to-Sleep association. Try ending the last feed 20-30 minutes before laying down.";
+      } else {
+        feedText = "Feeding timing looks solid! Ensure adequate calories during daytime to avoid genuine hunger wakes.";
+      }
+
+      // Consistency Rule
+      const consistencyText = "A predictable routine prepares the brain for sleep by triggering cue-based neurotransmitters. Predictability beats perfection every time.";
+
+      const html = `
+        <div class="output-card ${score<60?'alert':(score<85?'warning':'success')}">
+          <h4>Environment Optimization Score: ${score} / 100</h4>
+          <p>Higher scores mean fewer sensory disruptions triggering unwanted wake-ups.</p>
+        </div>
+        <div class="output-card warning">
+          <h4>Top Quick Wins (Highest Impact)</h4>
+          <p>• ${quickWins.join('<br/>• ')}</p>
+        </div>
+        <div class="output-card">
+          <h4>Bedtime Routine Blueprint</h4>
+          <p>${routineTemplate}</p>
+        </div>
+        <div class="output-card">
+          <h4>Transition & Clothing Tip</h4>
+          <p>${transitionText}</p>
+        </div>
+        <div class="output-card">
+          <h4>Feeding Association Check</h4>
+          <p>${feedText}</p>
+        </div>
+        <div class="output-card success">
+          <h4>The Golden Rule</h4>
+          <p>${consistencyText}</p>
+        </div>
+      `;
+
+      document.getElementById('out3_content').innerHTML = html;
+      document.getElementById('out3').style.display = 'block';
+
+      saveToHistory('tool3', `Score ${score}/100, ${darkness}, ${routine} routine`, html);
+    }
+
+    /* ===================================================
+       TOOL 4: SANITY SAVER LOGIC
+       =================================================== */
+    function loadSampleTool4() {
+      document.getElementById('t4_mood').value = 'Numb';
+      const checkboxes = document.querySelectorAll('input[name="t4_supp"]');
+      checkboxes.forEach(cb => cb.checked = false);
+      document.querySelector('input[name="t4_supp"][value="None"]').checked = true;
+      document.getElementById('t4_lastSleep').value = "Can't remember";
+      document.getElementById('t4_fear').value = "I feel like I'm losing my mind and damaging my relationship beyond repair.";
+      document.getElementById('t4_givenup').value = "Eating full meals, showers, talking to friends, basic hygiene.";
+    }
+
+    function analyzeTool4() {
+      const mood = document.getElementById('t4_mood').value;
+      const lastSleep = document.getElementById('t4_lastSleep').value;
+      const fear = document.getElementById('t4_fear').value || "None specified";
+      const givenup = document.getElementById('t4_givenup').value || "None specified";
+
+      const suppBoxes = document.querySelectorAll('input[name="t4_supp"]:checked');
+      const supports = Array.from(suppBoxes).map(cb => cb.value);
+
+      // Exhaustion level
+      let exText = "";
+      let isCritical = false;
+      if (mood === 'Rage' || mood === 'Dissociated' || mood === 'Depressed' || lastSleep === "Can't remember") {
+        isCritical = true;
+        exText = "CRITICAL BURNOUT: You are in extreme fatigue territory. Your brain is firing distress signals. This is not a personal failure; it is neurochemical depletion.";
+      } else {
+        exText = "HIGH FATIGUE: You are functioning under severe strain. Immediate emotional and physical offloading is necessary.";
+      }
+
+      // Safety check
+      const safetyText = `
+        <strong>Mandatory Safety Protocol:</strong><br/>
+        If you feel overwhelming frustration, rage, or temptation to shake/harm the baby: <br/>
+        1. Place the baby safely on their back in an empty crib.<br/>
+        2. Close the door and walk into another room.<br/>
+        3. Take 10 slow, deep breaths. Crying in a crib will NOT harm your baby. Falling asleep or losing control WILL.<br/>
+        4. Call a family member, friend, or helpline immediately.
+      `;
+
+      // Help Ladder
+      let ladderText = "Order of Support Execution:<br/>";
+      if (supports.includes('Partner')) ladderText += "1. **Partner:** Initiate emergency shift division tonight.<br/>";
+      if (supports.includes('Family nearby')) ladderText += "2. **Family:** Call immediately to request a 3-hour daytime baby-holding shift.<br/>";
+      if (supports.includes('Friends')) ladderText += "3. **Friends:** Ask them to drop off cooked meals or mind the baby while you nap.<br/>";
+      if (supports.includes('Sitter') || supports.includes('Daycare')) ladderText += "4. **Paid Support:** Book extra hours without guilt.<br/>";
+      if (supports.length === 0 || supports.includes('None')) {
+        ladderText += "1. Reach out to local postpartum support networks or crisis hotlines.<br/>2. Hire short-term night help if financially possible.<br/>3. Consult your GP or pediatrician for community resources.";
+      }
+
+      // 2-Hour Break
+      const breakText = "To get an immediate 2-hour recovery block: Partner/Family member takes baby outdoors in stroller or car while you put on noise-canceling headphones in dark bedroom.";
+
+      // Self Forgiveness
+      const forgivenessText = `"You are not failing. You are underslept. Your patience, joy, and emotional regulation are sleep-dependent resources. You do not have a personality defect; you have a sleep deficit."`;
+
+      // Partner Check-in
+      const checkinText = "What partner/support needs to notice: Look for flat affect, withdrawal, sudden outbursts, or refusal to eat. Intervene proactively by taking baby without asking.";
+
+      const html = `
+        <div class="output-card ${isCritical?'alert':'warning'}">
+          <h4>Exhaustion & Burnout Status</h4>
+          <p>${exText}</p>
+        </div>
+        <div class="output-card alert">
+          <h4>Safe Care Emergency Protocol</h4>
+          <p>${safetyText}</p>
+        </div>
+        <div class="output-card">
+          <h4>Your Support Action Ladder</h4>
+          <p>${ladderText}</p>
+        </div>
+        <div class="output-card success">
+          <h4>The 2-Hour Recovery Block</h4>
+          <p>${breakText}</p>
+        </div>
+        <div class="output-card">
+          <h4>The Self-Forgiveness Reframe</h4>
+          <div class="script-box">
+            ${forgivenessText}
+            <button class="btn btn-outline btn-sm copy-btn" onclick="copyToClipboard(\`${forgivenessText.replace(/"/g, '&quot;')}\`)"><i class="fa-regular fa-copy"></i> Copy</button>
+          </div>
+        </div>
+        <div class="output-card">
+          <h4>Partner Warning Flags</h4>
+          <p>${checkinText}</p>
+        </div>
+      `;
+
+      document.getElementById('out4_content').innerHTML = html;
+      document.getElementById('out4').style.display = 'block';
+
+      saveToHistory('tool4', `Mood: ${mood}, Sleep: ${lastSleep}`, html);
+    }
+
+    /* ===================================================
+       TOOL 5: THE PLAN B LOGIC
+       =================================================== */
+    function loadSampleTool5() {
+      document.getElementById('t5_philosophy').value = 'Gentle methods only';
+      const checkboxes = document.querySelectorAll('input[name="t5_tried"]');
+      checkboxes.forEach(cb => cb.checked = false);
+      ['Ferber', 'Pick up put down', 'Bed-sharing', 'Pacifier'].forEach(val => {
+        const el = document.querySelector(`input[name="t5_tried"][value="${val}"]`);
+        if (el) el.checked = true;
+      });
+      document.getElementById('t5_stopped').value = 'Baby cried intensely for 45 mins, I couldn’t handle the distress and gave in.';
+      document.getElementById('t5_temp').value = 'High needs';
+      document.getElementById('t5_breaking').value = 'We are arguing every single night and I cannot perform at my job.';
+    }
+
+    function analyzeTool5() {
+      const philosophy = document.getElementById('t5_philosophy').value;
+      const stopped = document.getElementById('t5_stopped').value || "Inconsistency due to stress";
+      const temp = document.getElementById('t5_temp').value;
+      const breaking = document.getElementById('t5_breaking').value || "Near collapse";
+
+      const triedBoxes = document.querySelectorAll('input[name="t5_tried"]:checked');
+      const triedList = Array.from(triedBoxes).map(cb => cb.value);
+
+      // Consistency Diagnosis
+      let diagText = "";
+      if (triedList.length >= 3) {
+        diagText = "METHOD HOPPING DETECTED: Trying multiple sleep training methods in short succession confuses the child and reinforces protest crying. Success comes from 10-14 days of unwavering consistency on ONE chosen approach.";
+      } else {
+        diagText = "Your primary challenge is finding an approach compatible with your emotional tolerance so you can remain 100% consistent.";
+      }
+
+      // Realistic Timeline
+      const timelineText = "Expect 3-5 rough nights before initial improvements, and 10-14 days for consolidated sleep habits. Night 3 is historically the most intense resistance night.";
+
+      // Gentle Bridge
+      let bridgeText = "";
+      if (philosophy.includes('Gentle') || philosophy.includes('Against')) {
+        bridgeText = "<strong>The Camping Out / Chair Method (Gentle Bridge):</strong><br/>Sit next to crib while child falls asleep, providing calm verbal/physical reassurance. Move chair 1 foot closer to door every 3 nights. Zero abandoned crying, but gradual independence.";
+      } else if (philosophy.includes('CIO') || philosophy.includes('open')) {
+        bridgeText = "<strong>Modified Ferber / Graduated Extinction:</strong><br/>Check on baby at timed intervals (3min, 5min, 10min, 15min) for brief 15-second calm verbal reassurances without picking up.";
+      } else {
+        bridgeText = "<strong>The Sleep Association Ladder:</strong><br/>Gradually reduce assistance step-by-step: Nursing -> Rocking -> Patting in crib -> Shushing alongside crib.";
+      }
+
+      // Safe Co-sleeping
+      const cosleepText = "If bed-sharing is your emergency survival mechanism, practice strict Harm Reduction (The Safe Sleep Seven): Firm mattress, no duvets/pillows near baby, light clothing, no alcohol/medication, baby on back.";
+
+      // Professional Escalation
+      const escalationText = "Consult a pediatric sleep consultant or doctor if: Baby wakes >8 times nightly after 14 days of consistent practice, shows breathing distress/snoring, or if parental mental health is severely compromised.";
+
+      // Permission Slip
+      const permissionText = `"SURVIVAL PERMISSION SLIP: You have permission to do whatever gets your family safe sleep tonight — feed to sleep, bed-share safely, or use a pacifier. Sleep philosophy is secondary to parental mental integrity. This is a temporary season."`;
+
+      const html = `
+        <div class="output-card warning">
+          <h4>Consistency & Method Diagnosis</h4>
+          <p>${diagText}</p>
+        </div>
+        <div class="output-card">
+          <h4>Realistic Timeline Expectation</h4>
+          <p>${timelineText}</p>
+        </div>
+        <div class="output-card success">
+          <h4>Recommended Strategy Bridge</h4>
+          <p>${bridgeText}</p>
+        </div>
+        <div class="output-card">
+          <h4>Safe Co-Sleeping / Bed-Sharing Harm Reduction</h4>
+          <p>${cosleepText}</p>
+        </div>
+        <div class="output-card alert">
+          <h4>When to Seek Professional Escalation</h4>
+          <p>${escalationText}</p>
+        </div>
+        <div class="output-card">
+          <h4>Your Survival Permission Slip</h4>
+          <div class="script-box">
+            ${permissionText}
+            <button class="btn btn-outline btn-sm copy-btn" onclick="copyToClipboard(\`${permissionText.replace(/"/g, '&quot;')}\`)"><i class="fa-regular fa-copy"></i> Copy</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('out5_content').innerHTML = html;
+      document.getElementById('out5').style.display = 'block';
+
+      saveToHistory('tool5', `${philosophy}, ${temp} temperament`, html);
+    }
+  </script>
+</body>
+</html>

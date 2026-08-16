@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OverwhelmedCouple — Friction-Reduction Toolkit</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* CSS RESET & VARIABLES */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-teal: #264653;
+            --primary-teal-light: #2A9D8F;
+            --warm-amber: #E9C46A;
+            --warm-amber-dark: #D4A373;
+            --coral: #F4A261;
+            --terracotta: #E76F51;
+            --bg-gradient-start: #F8F9FA;
+            --bg-gradient-end: #FFF3E0;
+            --card-bg: #FFFFFF;
+            --text-main: #2B2D42;
+            --text-muted: #6C757D;
+            --border-color: #E9ECEF;
+            --sidebar-width: 260px;
+            --radius-xl: 1rem;
+            --radius-lg: 0.75rem;
+            --radius-md: 0.5rem;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --transition-fast: 0.2s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* LAYOUT */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform var(--transition-fast);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--primary-teal);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary-teal);
+            line-height: 1.2;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background-color: #F1F5F9;
+            color: var(--primary-teal);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-teal);
+            color: white;
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* MOBILE HEADER & OVERLAY */
+        .mobile-header {
+            display: none;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .mobile-toggle {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--primary-teal);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        /* MAIN CONTENT AREA */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* FOOTER */
+        .app-footer {
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            background-color: rgba(255,255,255,0.4);
+            margin-top: auto;
+        }
+
+        /* UI CARDS & PANELS */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .view-panel {
+            display: none;
+        }
+
+        .view-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* TYPOGRAPHY & HEADINGS */
+        .hero-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary-teal);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-tagline {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: var(--primary-teal);
+            margin-bottom: 0.25rem;
+        }
+
+        .section-header p.problem-statement {
+            font-size: 0.95rem;
+            color: var(--terracotta);
+            font-weight: 500;
+            background-color: #FDF2E9;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-md);
+            display: inline-block;
+        }
+
+        /* DASHBOARD GRID */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-teal-light);
+        }
+
+        .dash-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            background-color: #E8F1F2;
+            color: var(--primary-teal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            color: var(--primary-teal);
+        }
+
+        .dash-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* FORMS & INPUTS */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            color: var(--text-main);
+            background-color: #FAFAFA;
+            transition: border-color var(--transition-fast);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-teal-light);
+            background-color: #FFF;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.35rem 0;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-teal);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1D3557;
+        }
+
+        .btn-secondary {
+            background-color: #E9ECEF;
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background-color: #DEE2E6;
+        }
+
+        .btn-amber {
+            background-color: var(--warm-amber);
+            color: #4A3E10;
+        }
+
+        .btn-amber:hover {
+            background-color: var(--warm-amber-dark);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.35rem 0.65rem;
+            font-size: 0.8rem;
+        }
+
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        /* TASK MATRIX (LOAD SPLITTER) */
+        .task-matrix {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .task-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.65rem 0.85rem;
+            background-color: #F8F9FA;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .task-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .task-options {
+            display: flex;
+            gap: 0.25rem;
+            background: #E9ECEF;
+            padding: 0.2rem;
+            border-radius: var(--radius-md);
+        }
+
+        .task-opt-btn {
+            padding: 0.3rem 0.55rem;
+            font-size: 0.75rem;
+            border: none;
+            background: none;
+            border-radius: calc(var(--radius-md) - 2px);
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.15s;
+        }
+
+        .task-opt-btn.selected {
+            background-color: var(--primary-teal);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* OUTPUT CONTAINERS & RESULTS */
+        .results-panel {
+            display: none;
+            background: #FFFFFF;
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--primary-teal-light);
+            margin-top: 2rem;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .results-panel.active {
+            display: block;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #F1F5F9;
+        }
+
+        .results-header h3 {
+            color: var(--primary-teal);
+            font-size: 1.25rem;
+        }
+
+        .output-block {
+            margin-bottom: 1.5rem;
+            background-color: #F8F9FA;
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            border-left: 4px solid var(--primary-teal);
+        }
+
+        .output-block h4 {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary-teal);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .output-block p, .output-block ul {
+            font-size: 0.92rem;
+            color: var(--text-main);
+        }
+
+        .output-block ul {
+            padding-left: 1.25rem;
+        }
+
+        .output-block li {
+            margin-bottom: 0.35rem;
+        }
+
+        /* CUSTOM VISUALIZERS */
+        /* Progress/Split Bar */
+        .split-bar-container {
+            margin: 1rem 0;
+        }
+
+        .split-bar {
+            height: 24px;
+            width: 100%;
+            background-color: #E9ECEF;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .split-bar-segment {
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .seg-me { background-color: var(--primary-teal); }
+        .seg-partner { background-color: var(--coral); }
+        .seg-split { background-color: var(--warm-amber-dark); }
+        .seg-nobody { background-color: #94A3B8; }
+
+        .split-legend {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Script Box with Copy Button */
+        .script-box {
+            background-color: #282C34;
+            color: #ABB2BF;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            font-family: monospace;
+            font-size: 0.88rem;
+            position: relative;
+            margin-top: 0.5rem;
+            white-space: pre-wrap;
+        }
+
+        .btn-copy {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255,255,255,0.15);
+            color: #FFF;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-copy:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #2B2D42;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            font-size: 0.875rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ACCORDION / HISTORY */
+        .history-section {
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .history-header h4 {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .history-item {
+            background: #F8F9FA;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            background: #EDF2F7;
+        }
+
+        /* SLIDER COMPONENT */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider-container input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary-teal);
+        }
+
+        .slider-val {
+            font-weight: 700;
+            width: 28px;
+            text-align: center;
+            color: var(--primary-teal);
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+
+            .task-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .task-options {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .task-opt-btn {
+                flex: 1;
+                text-align: center;
+            }
+
+            .hero-title {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MOBILE HEADER -->
+    <header class="mobile-header">
+        <div style="display:flex; align-items:center; gap: 0.5rem;">
+            <i class="fa-solid fa-heart-crack" style="color: var(--primary-teal);"></i>
+            <span style="font-weight:700; color: var(--primary-teal);">OverwhelmedCouple</span>
+        </div>
+        <button class="mobile-toggle" id="mobileMenuBtn" aria-label="Toggle menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-hands-holding-circle"></i>
+                <h1>Overwhelmed<br>Couple</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-target="dashboard">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </button>
+                <button class="nav-item" data-target="tool1">
+                    <i class="fa-solid fa-scale-unbalanced"></i> Load Splitter
+                </button>
+                <button class="nav-item" data-target="tool2">
+                    <i class="fa-solid fa-clock"></i> Time Negotiator
+                </button>
+                <button class="nav-item" data-target="tool3">
+                    <i class="fa-solid fa-wallet"></i> Money Meeting
+                </button>
+                <button class="nav-item" data-target="tool4">
+                    <i class="fa-solid fa-briefcase"></i> Career Check
+                </button>
+                <button class="nav-item" data-target="tool5">
+                    <i class="fa-solid fa-comments-comments"></i> Argument Decoder
+                </button>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="main-wrapper">
+            <main class="main-content">
+
+                <!-- DASHBOARD VIEW -->
+                <div id="dashboard" class="view-panel active">
+                    <div style="text-align: center; margin-bottom: 2.5rem; margin-top: 1rem;">
+                        <h1 class="hero-title">The Overwhelmed Couple</h1>
+                        <p class="hero-tagline">Make your relationship work in real life, not just in theory.</p>
+                    </div>
+
+                    <div class="dash-grid">
+                        <div class="dash-card" onclick="switchTab('tool1')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-scale-unbalanced"></i></div>
+                            <h3>Load Splitter</h3>
+                            <p>Rebalance invisible mental load and daily chores without endless nagging.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchTab('tool2')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-clock"></i></div>
+                            <h3>Time Negotiator</h3>
+                            <p>Find micro-windows of genuine connection around brutal work schedules.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchTab('tool3')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-wallet"></i></div>
+                            <h3>Money Meeting</h3>
+                            <p>Turn financial friction into a calm, structured 15-minute sync.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchTab('tool4')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-briefcase"></i></div>
+                            <h3>Career Check</h3>
+                            <p>Navigate competing ambitions, promotions, and time commitments fairly.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchTab('tool5')">
+                            <div class="dash-card-icon"><i class="fa-solid fa-comments"></i></div>
+                            <h3>Argument Decoder</h3>
+                            <p>De-escalate recurring fights and uncover the real unmet need underneath.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 1: LOAD SPLITTER -->
+                <div id="tool1" class="view-panel">
+                    <div class="section-header">
+                        <h2>Load Splitter</h2>
+                        <p class="problem-statement">Problem: "The mental load is crushing one of us."</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="actions-bar">
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">Assign all 12 operational & emotional tasks:</span>
+                            <button class="btn btn-amber btn-sm" onclick="loadSampleTool1()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <div class="task-matrix" id="t1-task-matrix">
+                            <!-- Tasks populated by JS -->
+                        </div>
+
+                        <button class="btn btn-primary" style="width: 100%;" onclick="processTool1()">
+                            <i class="fa-solid fa-chart-pie"></i> Analyze Mental Load & Redistribute
+                        </button>
+                    </div>
+
+                    <div id="t1-results" class="results-panel">
+                        <div class="results-header">
+                            <h3>Load Splitter Diagnostics</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="printOrSave('t1')"><i class="fa-solid fa-print"></i> Save Summary</button>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-chart-bar"></i> The Load Split</h4>
+                            <div class="split-bar-container">
+                                <div class="split-bar" id="t1-split-bar"></div>
+                                <div class="split-legend">
+                                    <span style="color: var(--primary-teal);">Me: <span id="t1-pct-me">0%</span></span>
+                                    <span style="color: var(--coral);">Partner: <span id="t1-pct-partner">0%</span></span>
+                                    <span style="color: var(--warm-amber-dark);">Split: <span id="t1-pct-split">0%</span></span>
+                                    <span style="color: #94A3B8;">Nobody: <span id="t1-pct-nobody">0%</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-triangle-exclamation"></i> Mental Load Alert</h4>
+                            <p id="t1-alert-text"></p>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-handshake"></i> Fair Redistribution</h4>
+                            <ul id="t1-redist-list"></ul>
+                        </div>
+
+                        <div class="output-block" style="border-left-color: var(--warm-amber-dark);">
+                            <h4><i class="fa-solid fa-flask"></i> One Experiment</h4>
+                            <p id="t1-experiment-text"></p>
+                        </div>
+                    </div>
+
+                    <div class="history-section" id="t1-history-section">
+                        <div class="history-header">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Load Assessments</h4>
+                            <button class="btn btn-secondary btn-sm" onclick="clearHistory('tool1')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="t1-history-list"></div>
+                    </div>
+                </div>
+
+                <!-- TOOL 2: TIME NEGOTIATOR -->
+                <div id="tool2" class="view-panel">
+                    <div class="section-header">
+                        <h2>Time Negotiator</h2>
+                        <p class="problem-statement">Problem: "We live together but never actually spend time together."</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="actions-bar">
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">Map your energy and availability:</span>
+                            <button class="btn btn-amber btn-sm" onclick="loadSampleTool2()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <div class="grid-2col">
+                            <div class="form-group">
+                                <label for="t2-partnerA-hours">Partner A Work Hours:</label>
+                                <input type="text" id="t2-partnerA-hours" class="form-control" placeholder="e.g. 8:00 AM - 6:00 PM">
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-partnerB-hours">Partner B Work Hours:</label>
+                                <input type="text" id="t2-partnerB-hours" class="form-control" placeholder="e.g. 9:00 AM - 7:00 PM">
+                            </div>
+                        </div>
+
+                        <div class="grid-2col">
+                            <div class="form-group">
+                                <label for="t2-partnerA-energy">Partner A Energy Peak:</label>
+                                <select id="t2-partnerA-energy" class="form-control">
+                                    <option value="Morning">Morning</option>
+                                    <option value="Midday">Midday</option>
+                                    <option value="Evening">Evening</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-partnerB-energy">Partner B Energy Peak:</label>
+                                <select id="t2-partnerB-energy" class="form-control">
+                                    <option value="Morning">Morning</option>
+                                    <option value="Midday">Midday</option>
+                                    <option value="Evening">Evening</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid-2col">
+                            <div class="form-group">
+                                <label>Children or Dependents?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2-dependents" value="Yes" checked> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t2-dependents" value="No"> No</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-pref-time">Preferred Connection Time:</label>
+                                <select id="t2-pref-time" class="form-control">
+                                    <option value="10 min">10 min</option>
+                                    <option value="15 min">15 min</option>
+                                    <option value="30 min">30 min</option>
+                                    <option value="1 hour">1 hour</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t2-recharge">What recharges you both?</label>
+                            <textarea id="t2-recharge" class="form-control" placeholder="e.g. Quiet coffee, walks outside, watching a comedy, cooking without rush"></textarea>
+                        </div>
+
+                        <button class="btn btn-primary" style="width: 100%;" onclick="processTool2()">
+                            <i class="fa-solid fa-calendar-check"></i> Generate Connection Schedule
+                        </button>
+                    </div>
+
+                    <div id="t2-results" class="results-panel">
+                        <div class="results-header">
+                            <h3>Time & Energy Blueprint</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="printOrSave('t2')"><i class="fa-solid fa-print"></i> Save Summary</button>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-map-location-dot"></i> Schedule Overlap Map</h4>
+                            <p id="t2-overlap-map"></p>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-calendar-days"></i> 7-Day Connection Plan</h4>
+                            <ul id="t2-plan-list"></ul>
+                        </div>
+
+                        <div class="output-block" style="border-left-color: var(--terracotta);">
+                            <h4><i class="fa-solid fa-ban"></i> No-Go Zones</h4>
+                            <p id="t2-nogo-text"></p>
+                        </div>
+
+                        <div class="output-block" style="border-left-color: var(--warm-amber-dark);">
+                            <h4><i class="fa-solid fa-gavel"></i> One Sacred Rule</h4>
+                            <p id="t2-rule-text"><strong>"No logistics talk after 9:00 PM."</strong> Reserve late hours strictly for decompression or rest—not task management.</p>
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Time Plans</h4>
+                            <button class="btn btn-secondary btn-sm" onclick="clearHistory('tool2')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="t2-history-list"></div>
+                    </div>
+                </div>
+
+                <!-- TOOL 3: MONEY MEETING -->
+                <div id="tool3" class="view-panel">
+                    <div class="section-header">
+                        <h2>Money Meeting</h2>
+                        <p class="problem-statement">Problem: "We fight about money because we never actually look at it together."</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="actions-bar">
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">Enter monthly financial baseline ($):</span>
+                            <button class="btn btn-amber btn-sm" onclick="loadSampleTool3()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <div class="grid-2col">
+                            <div class="form-group">
+                                <label for="t3-income">Combined Monthly Net Income ($):</label>
+                                <input type="number" id="t3-income" class="form-control" placeholder="8000">
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-fixed">Fixed Expenses (Rent, Bills, Ins) ($):</label>
+                                <input type="number" id="t3-fixed" class="form-control" placeholder="4200">
+                            </div>
+                        </div>
+
+                        <div class="grid-2col">
+                            <div class="form-group">
+                                <label for="t3-variable">Variable Expenses (Food, Fun, Transport) ($):</label>
+                                <input type="number" id="t3-variable" class="form-control" placeholder="2200">
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-discretionaryA">Partner A Guilt-Free Spending ($):</label>
+                                <input type="number" id="t3-discretionaryA" class="form-control" placeholder="400">
+                            </div>
+                        </div>
+
+                        <div class="grid-2col">
+                            <div class="form-group">
+                                <label for="t3-discretionaryB">Partner B Guilt-Free Spending ($):</label>
+                                <input type="number" id="t3-discretionaryB" class="form-control" placeholder="400">
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-savings-goal">Shared Savings Goal:</label>
+                                <input type="text" id="t3-savings-goal" class="form-control" placeholder="e.g. $10k Emergency Fund / Vacation">
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="width: 100%;" onclick="processTool3()">
+                            <i class="fa-solid fa-calculator"></i> Run Money Snapshot
+                        </button>
+                    </div>
+
+                    <div id="t3-results" class="results-panel">
+                        <div class="results-header">
+                            <h3>Financial Alignment Breakdown</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="printOrSave('t3')"><i class="fa-solid fa-print"></i> Save Summary</button>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-file-invoice-dollar"></i> Money Snapshot</h4>
+                            <p id="t3-snapshot-text"></p>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-pie-chart"></i> Where The Money Goes</h4>
+                            <p id="t3-breakdown-text"></p>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-list-check"></i> 3 Action Items</h4>
+                            <ul id="t3-action-list"></ul>
+                        </div>
+
+                        <div class="output-block" style="border-left-color: var(--primary-teal-light);">
+                            <h4><i class="fa-regular fa-calendar-plus"></i> Next Money Meeting Agenda</h4>
+                            <p id="t3-agenda-text"></p>
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Money Audits</h4>
+                            <button class="btn btn-secondary btn-sm" onclick="clearHistory('tool3')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="t3-history-list"></div>
+                    </div>
+                </div>
+
+                <!-- TOOL 4: CAREER CHECK -->
+                <div id="tool4" class="view-panel">
+                    <div class="section-header">
+                        <h2>Career Check</h2>
+                        <p class="problem-statement">Problem: "Whose career matters more right now?"</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="actions-bar">
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">Compare career demands & trajectory:</span>
+                            <button class="btn btn-amber btn-sm" onclick="loadSampleTool4()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <div class="grid-2col">
+                            <div class="form-group">
+                                <label for="t4-hoursA">Partner A Work Hours/Week:</label>
+                                <input type="number" id="t4-hoursA" class="form-control" placeholder="50">
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-hoursB">Partner B Work Hours/Week:</label>
+                                <input type="number" id="t4-hoursB" class="form-control" placeholder="40">
+                            </div>
+                        </div>
+
+                        <div class="grid-2col">
+                            <div class="form-group">
+                                <label>Partner A Ambition Level (1-10):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t4-ambitionA" min="1" max="10" value="8" oninput="document.getElementById('valA').innerText=this.value">
+                                    <span class="slider-val" id="valA">8</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Partner B Ambition Level (1-10):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t4-ambitionB" min="1" max="10" value="7" oninput="document.getElementById('valB').innerText=this.value">
+                                    <span class="slider-val" id="valB">7</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid-2col">
+                            <div class="form-group">
+                                <label for="t4-travel">Frequent Travel Required?</label>
+                                <select id="t4-travel" class="form-control">
+                                    <option value="Neither">Neither</option>
+                                    <option value="Partner A">Partner A</option>
+                                    <option value="Partner B">Partner B</option>
+                                    <option value="Both">Both</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-promo">Promotion/Raise expected in 12 mo?</label>
+                                <select id="t4-promo" class="form-control">
+                                    <option value="Neither">Neither</option>
+                                    <option value="Partner A">Partner A</option>
+                                    <option value="Partner B">Partner B</option>
+                                    <option value="Both">Both</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-frustration">Biggest Career Frustration Right Now:</label>
+                            <textarea id="t4-frustration" class="form-control" placeholder="e.g., Partner A feels resentful over solo parenting during travel; Partner B feels stuck in role."></textarea>
+                        </div>
+
+                        <button class="btn btn-primary" style="width: 100%;" onclick="processTool4()">
+                            <i class="fa-solid fa-compass"></i> Align Dual-Career Priorities
+                        </button>
+                    </div>
+
+                    <div id="t4-results" class="results-panel">
+                        <div class="results-header">
+                            <h3>Dual-Career Balance Framework</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="printOrSave('t4')"><i class="fa-solid fa-print"></i> Save Summary</button>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-scale-balanced"></i> The Career Tension Summary</h4>
+                            <p id="t4-conflict-text"></p>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-shield-halved"></i> What Each Person Is Protecting</h4>
+                            <p id="t4-protecting-text"></p>
+                        </div>
+
+                        <div class="output-block" style="border-left-color: var(--terracotta);">
+                            <h4><i class="fa-solid fa-arrows-split-up-and-left"></i> Where The Trade-Off Is</h4>
+                            <p id="t4-tradeoff-text"></p>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-lightbulb"></i> 3 Possible Compromises</h4>
+                            <ul id="t4-compromises-list"></ul>
+                        </div>
+
+                        <div class="output-block" style="border-left-color: var(--primary-teal-light);">
+                            <h4><i class="fa-solid fa-comment-dots"></i> Conversation Opener</h4>
+                            <div class="script-box" id="t4-script-box">
+                                <button class="btn-copy" onclick="copyScript('t4-script-box')"><i class="fa-regular fa-copy"></i> Copy</button>
+                                <span id="t4-script-text"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Previous Career Reviews</h4>
+                            <button class="btn btn-secondary btn-sm" onclick="clearHistory('tool4')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="t4-history-list"></div>
+                    </div>
+                </div>
+
+                <!-- TOOL 5: ARGUMENT DECODER -->
+                <div id="tool5" class="view-panel">
+                    <div class="section-header">
+                        <h2>Argument Decoder</h2>
+                        <p class="problem-statement">Problem: "We keep fighting about the same things but never resolve them."</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="actions-bar">
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">Deconstruct a recent disagreement:</span>
+                            <button class="btn btn-amber btn-sm" onclick="loadSampleTool5()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t5-trigger">What triggered the fight? (Surface topic)</label>
+                            <input type="text" id="t5-trigger" class="form-control" placeholder="e.g. Unwashed dishes left in the sink overnight.">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t5-said">What did you each say or do?</label>
+                            <textarea id="t5-said" class="form-control" placeholder="e.g. I snapped 'I do everything here!' and they slammed the door and stayed silent."></textarea>
+                        </div>
+
+                        <div class="grid-2col">
+                            <div class="form-group">
+                                <label for="t5-hurt">What underlying feeling hurt you?</label>
+                                <input type="text" id="t5-hurt" class="form-control" placeholder="e.g. Feeling taken for granted / Unappreciated / Disrespected">
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-needed">What did you actually need instead?</label>
+                                <input type="text" id="t5-needed" class="form-control" placeholder="e.g. Acknowledgment of my effort and a reliable routine.">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t5-ended">How did the interaction end?</label>
+                            <select id="t5-ended" class="form-control">
+                                <option value="Someone walked away">Someone walked away</option>
+                                <option value="We dropped it">We dropped it / Cold silence</option>
+                                <option value="One apologized half-heartedly">One apologized half-heartedly</option>
+                                <option value="We made up genuinely">We made up genuinely</option>
+                                <option value="Still unresolved and tense">Still unresolved and tense</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-primary" style="width: 100%;" onclick="processTool5()">
+                            <i class="fa-solid fa-key"></i> Decode Underlying Conflict
+                        </button>
+                    </div>
+
+                    <div id="t5-results" class="results-panel">
+                        <div class="results-header">
+                            <h3>De-escalation & Repair Blueprint</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="printOrSave('t5')"><i class="fa-solid fa-print"></i> Save Summary</button>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-magnifying-glass-glass"></i> What This Fight Was Really About</h4>
+                            <p id="t5-about-text"></p>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-heart-pulse"></i> What Each Person Needed</h4>
+                            <p id="t5-needs-text"></p>
+                        </div>
+
+                        <div class="output-block" style="border-left-color: var(--terracotta);">
+                            <h4><i class="fa-solid fa-infinity"></i> The Recurring Pattern</h4>
+                            <p id="t5-pattern-text"></p>
+                        </div>
+
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-user-check"></i> Micro Commitments</h4>
+                            <ul id="t5-commitments-list"></ul>
+                        </div>
+
+                        <div class="output-block" style="border-left-color: var(--primary-teal-light);">
+                            <h4><i class="fa-solid fa-handshake-simple"></i> Tonight's 5-Minute Repair Script</h4>
+                            <div class="script-box" id="t5-script-box">
+                                <button class="btn-copy" onclick="copyScript('t5-script-box')"><i class="fa-regular fa-copy"></i> Copy</button>
+                                <span id="t5-script-text"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Decoded Fights History</h4>
+                            <button class="btn btn-secondary btn-sm" onclick="clearHistory('tool5')">Clear History</button>
+                        </div>
+                        <div class="history-list" id="t5-history-list"></div>
+                    </div>
+                </div>
+
+            </main>
+
+            <footer class="app-footer">
+                For entertainment and reflection purposes only. Not therapy or professional advice.
+            </footer>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">Copied to clipboard!</div>
+
+    <script>
+        /* APP INITIALIZATION & NAVIGATION */
+        const TASKS_LIST = [
+            "Meal planning", "Cooking", "Grocery shopping", "Cleaning",
+            "Laundry", "Bill paying", "Appointment scheduling", "Home repairs",
+            "Social planning", "Car/transport logistics", "Childcare/school",
+            "Emotional labor (checking in, remembering dates)"
+        ];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initNavigation();
+            initTool1Matrix();
+            loadAllHistories();
+        });
+
+        function initNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const target = item.getAttribute('data-target');
+                    switchTab(target);
+                    closeMobileSidebar();
+                });
+            });
+
+            // Mobile menu toggles
+            const mobileBtn = document.getElementById('mobileMenuBtn');
+            const overlay = document.getElementById('sidebarOverlay');
+            const sidebar = document.getElementById('sidebar');
+
+            mobileBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('active');
+            });
+
+            overlay.addEventListener('click', closeMobileSidebar);
+        }
+
+        function closeMobileSidebar() {
+            document.getElementById('sidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        function switchTab(toolId) {
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-target') === toolId);
+            });
+            document.querySelectorAll('.view-panel').forEach(panel => {
+                panel.classList.toggle('active', panel.id === toolId);
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showToast(msg = "Copied to clipboard!") {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function copyScript(containerId) {
+            const box = document.getElementById(containerId);
+            const text = box.querySelector('span').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Script copied!");
+            });
+        }
+
+        function printOrSave(toolPrefix) {
+            window.print();
+        }
+
+        /* LOCALSTORAGE HISTORY MANAGER */
+        function saveHistory(toolId, summaryText, fullData) {
+            const key = `overwhelmed_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            const entry = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' }),
+                summary: summaryText,
+                data: fullData
+            };
+            history.unshift(entry);
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistoryUI(toolId);
+        }
+
+        function loadAllHistories() {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistoryUI);
+        }
+
+        function renderHistoryUI(toolId) {
+            const key = `overwhelmed_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const listEl = document.getElementById(`${toolId.replace('tool', 't')}-history-list`);
+            if (!listEl) return;
+
+            if (history.length === 0) {
+                listEl.innerHTML = `<div style="font-size:0.85rem; color:var(--text-muted); font-style:italic;">No saved entries yet.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = history.map(item => `
+                <div class="history-item" onclick="restoreHistory('${toolId}', ${item.id})">
+                    <span><strong>${item.date}</strong> — ${escapeHtml(item.summary)}</span>
+                    <i class="fa-solid fa-chevron-right" style="font-size:0.75rem; color:var(--text-muted);"></i>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory(toolId) {
+            localStorage.removeItem(`overwhelmed_history_${toolId}`);
+            renderHistoryUI(toolId);
+            showToast("History cleared");
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        /* TOOL 1 LOGIC: LOAD SPLITTER */
+        function initTool1Matrix() {
+            const container = document.getElementById('t1-task-matrix');
+            container.innerHTML = TASKS_LIST.map((task, idx) => `
+                <div class="task-row" data-idx="${idx}">
+                    <span class="task-name">${task}</span>
+                    <div class="task-options">
+                        <button type="button" class="task-opt-btn" onclick="selectTaskOpt(this, 'Me')">Me</button>
+                        <button type="button" class="task-opt-btn" onclick="selectTaskOpt(this, 'Partner')">Partner</button>
+                        <button type="button" class="task-opt-btn selected" onclick="selectTaskOpt(this, 'Split')">Split</button>
+                        <button type="button" class="task-opt-btn" onclick="selectTaskOpt(this, 'Nobody')">Nobody</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectTaskOpt(btn, val) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.task-opt-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        function loadSampleTool1() {
+            const sampleSelections = ["Me", "Partner", "Me", "Me", "Me", "Me", "Me", "Partner", "Me", "Partner", "Me", "Me"];
+            const rows = document.querySelectorAll('#t1-task-matrix .task-row');
+            rows.forEach((row, idx) => {
+                const targetVal = sampleSelections[idx];
+                const btns = row.querySelectorAll('.task-opt-btn');
+                btns.forEach(b => {
+                    if (b.innerText.trim() === targetVal) selectTaskOpt(b, targetVal);
+                });
+            });
+            showToast("Sample loaded: High lopsided mental load");
+        }
+
+        function processTool1() {
+            const rows = document.querySelectorAll('#t1-task-matrix .task-row');
+            let counts = { Me: 0, Partner: 0, Split: 0, Nobody: 0 };
+            let meTasks = [], partnerTasks = [];
+
+            rows.forEach((row, idx) => {
+                const selectedBtn = row.querySelector('.task-opt-btn.selected');
+                const val = selectedBtn ? selectedBtn.innerText.trim() : 'Split';
+                counts[val] = (counts[val] || 0) + 1;
+                if (val === 'Me') meTasks.push(TASKS_LIST[idx]);
+                if (val === 'Partner') partnerTasks.push(TASKS_LIST[idx]);
+            });
+
+            const total = TASKS_LIST.length;
+            const pctMe = Math.round((counts.Me / total) * 100);
+            const pctPartner = Math.round((counts.Partner / total) * 100);
+            const pctSplit = Math.round((counts.Split / total) * 100);
+            const pctNobody = Math.round((counts.Nobody / total) * 100);
+
+            // Render Split Bar
+            const bar = document.getElementById('t1-split-bar');
+            bar.innerHTML = `
+                <div class="split-bar-segment seg-me" style="width:${pctMe}%">${pctMe > 8 ? pctMe+'%' : ''}</div>
+                <div class="split-bar-segment seg-partner" style="width:${pctPartner}%">${pctPartner > 8 ? pctPartner+'%' : ''}</div>
+                <div class="split-bar-segment seg-split" style="width:${pctSplit}%">${pctSplit > 8 ? pctSplit+'%' : ''}</div>
+                <div class="split-bar-segment seg-nobody" style="width:${pctNobody}%">${pctNobody > 8 ? pctNobody+'%' : ''}</div>
+            `;
+            document.getElementById('t1-pct-me').innerText = pctMe + '%';
+            document.getElementById('t1-pct-partner').innerText = pctPartner + '%';
+            document.getElementById('t1-pct-split').innerText = pctSplit + '%';
+            document.getElementById('t1-pct-nobody').innerText = pctNobody + '%';
+
+            // Diagnostic logic
+            let alertMsg = "";
+            let redistItems = [];
+            let experiment = "";
+
+            if (pctMe > 60 || pctPartner > 60) {
+                const heavyOne = pctMe > 60 ? "You are" : "Your partner is";
+                alertMsg = `<strong>CRITICAL imbalance detected!</strong> ${heavyOne} carrying over 60% of daily operational and emotional labor. This correlates directly with burnout and resentment.`;
+                redistItems.push("<strong>Complete Handoff:</strong> Transfer 2 mental-load heavy tasks (e.g., Appointment Scheduling & Bill Paying) entirely to the other partner—including planning, memory, and execution.");
+                redistItems.push("<strong>Drop Unnecessary Standards:</strong> Tasks marked 'Nobody' or low priority should stay dropped for 14 days without comment.");
+                experiment = "Choose ONE task currently marked 'Me' (e.g. Grocery Shopping). Hand over full ownership to your partner for 7 days. Rule: You cannot remind, check in, or critique how it gets done.";
+            } else if (pctNobody > 25) {
+                alertMsg = "<strong>Neglect Alert:</strong> Over a quarter of essential household logistics are marked 'Nobody'. This leads to fire-fighting crises when things break or deadlines are missed.";
+                redistItems.push("Divide neglected tasks immediately into single-owner categories.");
+                redistItems.push("Automate bill payments and recurring grocery orders to eliminate manual friction.");
+                experiment = "Set a 15-minute timer on Sunday evening to explicitly assign 'Nobody' tasks for the upcoming week.";
+            } else {
+                alertMsg = "<strong>Fairly balanced distribution!</strong> Workload is shared reasonably, but beware of subtle friction in high-cognitive tasks like emotional labor and scheduling.";
+                redistItems.push("Maintain current division, but review emotional labor tasks monthly.");
+                redistItems.push("Ensure 'Split' tasks have a primary driver so neither partner feels responsible for nagging.");
+                experiment = "Swap two routine tasks for one week just to build empathy for each other's daily routines.";
+            }
+
+            document.getElementById('t1-alert-text').innerHTML = alertMsg;
+            document.getElementById('t1-redist-list').innerHTML = redistItems.map(item => `<li>${item}</li>`).join('');
+            document.getElementById('t1-experiment-text').innerHTML = experiment;
+
+            document.getElementById('t1-results').classList.add('active');
+
+            saveHistory('tool1', `Load Split: Me ${pctMe}% | Partner ${pctPartner}%`, { counts, pctMe, pctPartner });
+        }
+
+        /* TOOL 2 LOGIC: TIME NEGOTIATOR */
+        function loadSampleTool2() {
+            document.getElementById('t2-partnerA-hours').value = "7:30 AM - 6:30 PM";
+            document.getElementById('t2-partnerB-hours').value = "8:30 AM - 7:00 PM";
+            document.getElementById('t2-partnerA-energy').value = "Morning";
+            document.getElementById('t2-partnerB-energy').value = "Evening";
+            document.querySelector('input[name="t2-dependents"][value="Yes"]').checked = true;
+            document.getElementById('t2-pref-time').value = "15 min";
+            document.getElementById('t2-recharge').value = "Quiet coffee together, walking the dog, short TV show without phones.";
+            showToast("Sample loaded: Mismatched energy & busy workdays");
+        }
+
+        function processTool2() {
+            const hA = document.getElementById('t2-partnerA-hours').value || "Standard Work Hours";
+            const hB = document.getElementById('t2-partnerB-hours').value || "Standard Work Hours";
+            const eA = document.getElementById('t2-partnerA-energy').value;
+            const eB = document.getElementById('t2-partnerB-energy').value;
+            const duration = document.getElementById('t2-pref-time').value;
+            const recharge = document.getElementById('t2-recharge').value || "a shared quiet moment";
+
+            let overlap = "";
+            let plan = [];
+            let nogo = "";
+
+            if (eA !== eB) {
+                overlap = `Energy levels are asynchronous (Partner A: <strong>${eA}</strong>, Partner B: <strong>${eB}</strong>). Your primary connection window exists in transitional zones—early morning or right after work before total exhaustion sets in.`;
+                nogo = `Avoid scheduling meaningful connection or heavy conversations in late evening when Partner A is drained, or early morning when Partner B is groggy.`;
+            } else {
+                overlap = `Energy peaks are aligned in the <strong>${eA}</strong>. This is a major structural advantage—reserve this window for high-value togetherness.`;
+                nogo = `Do not squander your shared high-energy ${eA} hours on household logistics or scrolling on phones.`;
+            }
+
+            plan = [
+                `<strong>Monday:</strong> ${duration} morning coffee check-in—no phone zone. Focus on: "${recharge}"`,
+                `<strong>Tuesday:</strong> 10-minute post-work wind-down. Sit together before starting evening chores.`,
+                `<strong>Wednesday:</strong> Mid-week reset—15 mins sharing 'One good thing & one stressor'.`,
+                `<strong>Thursday:</strong> Micro-date night at home—30 mins shared dessert or tea after duties.`,
+                `<strong>Friday:</strong> Transition ritual—symbolically close laptops together at day's end.`,
+                `<strong>Saturday:</strong> Morning walk or recharge activity for 30 minutes without agenda.`,
+                `<strong>Sunday:</strong> 15-minute weekly calendar preview & energy budget review.`
+            ];
+
+            document.getElementById('t2-overlap-map').innerHTML = overlap;
+            document.getElementById('t2-plan-list').innerHTML = plan.map(item => `<li>${item}</li>`).join('');
+            document.getElementById('t2-nogo-text').innerText = nogo;
+
+            document.getElementById('t2-results').classList.add('active');
+
+            saveHistory('tool2', `Time Plan: ${duration} daily target (${eA}/${eB} energy)`, { duration });
+        }
+
+        /* TOOL 3 LOGIC: MONEY MEETING */
+        function loadSampleTool3() {
+            document.getElementById('t3-income').value = 8500;
+            document.getElementById('t3-fixed').value = 4600;
+            document.getElementById('t3-variable').value = 2400;
+            document.getElementById('t3-discretionaryA').value = 350;
+            document.getElementById('t3-discretionaryB').value = 350;
+            document.getElementById('t3-savings-goal').value = "House downpayment & $10k safety cushion";
+            showToast("Sample loaded: Tight discretionary margin");
+        }
+
+        function processTool3() {
+            const income = parseFloat(document.getElementById('t3-income').value) || 0;
+            const fixed = parseFloat(document.getElementById('t3-fixed').value) || 0;
+            const variable = parseFloat(document.getElementById('t3-variable').value) || 0;
+            const discA = parseFloat(document.getElementById('t3-discretionaryA').value) || 0;
+            const discB = parseFloat(document.getElementById('t3-discretionaryB').value) || 0;
+            const goal = document.getElementById('t3-savings-goal').value || "Shared Financial Goals";
+
+            const totalOutflow = fixed + variable + discA + discB;
+            const netSurplus = income - totalOutflow;
+
+            let snapshot = "";
+            let breakdown = "";
+            let actions = [];
+
+            if (netSurplus < 0) {
+                snapshot = `<strong style="color:var(--terracotta);">DEFICIT DETECTED: -$${Math.abs(netSurplus).toFixed(0)}/month.</strong> Outflows exceed monthly income. Financial strain is actively contributing to relationship friction.`;
+                actions.push(`<strong>Immediate Fixed Audit:</strong> Audit recurring subscriptions and fixed utility packages to cut $${(Math.abs(netSurplus)/2).toFixed(0)} immediately.`);
+                actions.push(`<strong>Cap Variable Spending:</strong> Temporarily cap variable expenses at $${(variable - Math.abs(netSurplus)/2).toFixed(0)}.`);
+                actions.push(`<strong>Pause Discretionary:</strong> Uniformly adjust personal spending limits until surplus is restored.`);
+            } else {
+                snapshot = `<strong style="color:var(--primary-teal-light);">SURPLUS AVAILABLE: +$${netSurplus.toFixed(0)}/month.</strong> Net income covers all expenses with remaining cash flow for savings goals.`;
+                actions.push(`<strong>Automate Savings:</strong> Set up an automatic transfer of $${(netSurplus * 0.7).toFixed(0)} on payday towards: "${goal}".`);
+                actions.push(`<strong>Maintain No-Guilt Spending:</strong> Retain $${discA} (Partner A) and $${discB} (Partner B) as no-questions-asked personal allowances.`);
+                actions.push(`<strong>Buffer Fund:</strong> Keep $${(netSurplus * 0.3).toFixed(0)} in a liquid buffer account for unexpected variable surges.`);
+            }
+
+            const fixedPct = income > 0 ? Math.round((fixed / income) * 100) : 0;
+            const varPct = income > 0 ? Math.round((variable / income) * 100) : 0;
+            const discPct = income > 0 ? Math.round(((discA + discB) / income) * 100) : 0;
+
+            breakdown = `Fixed Costs: <strong>${fixedPct}%</strong> | Variable Expenses: <strong>${varPct}%</strong> | Guilt-Free Personal: <strong>${discPct}%</strong> | Net Surplus/Savings: <strong>${income > 0 ? Math.round((netSurplus/income)*100) : 0}%</strong>`;
+
+            const agenda = `<strong>15-Minute Monthly Sync Agenda:</strong><br>1. Review income & total spent last month (5 mins).<br>2. Celebrate progress on '${goal}' (3 mins).<br>3. Adjust variable allocations for upcoming month without judgment (7 mins).`;
+
+            document.getElementById('t3-snapshot-text').innerHTML = snapshot;
+            document.getElementById('t3-breakdown-text').innerHTML = breakdown;
+            document.getElementById('t3-action-list').innerHTML = actions.map(a => `<li>${a}</li>`).join('');
+            document.getElementById('t3-agenda-text').innerHTML = agenda;
+
+            document.getElementById('t3-results').classList.add('active');
+
+            saveHistory('tool3', `Money Snapshot: ${netSurplus >= 0 ? '+$'+netSurplus : '-$'+Math.abs(netSurplus)} Surplus`, { income, netSurplus });
+        }
+
+        /* TOOL 4 LOGIC: CAREER CHECK */
+        function loadSampleTool4() {
+            document.getElementById('t4-hoursA').value = 55;
+            document.getElementById('t4-hoursB').value = 42;
+            document.getElementById('t4-ambitionA').value = 9;
+            document.getElementById('valA').innerText = 9;
+            document.getElementById('t4-ambitionB').value = 7;
+            document.getElementById('valB').innerText = 7;
+            document.getElementById('t4-travel').value = "Partner A";
+            document.getElementById('t4-promo').value = "Partner A";
+            document.getElementById('t4-frustration').value = "Partner A is up for a promotion requiring relocation; Partner B feels anchored by local support network and career stability.";
+            showToast("Sample loaded: Relocation & Promotion tension");
+        }
+
+        function processTool4() {
+            const hA = parseInt(document.getElementById('t4-hoursA').value) || 40;
+            const hB = parseInt(document.getElementById('t4-hoursB').value) || 40;
+            const ambA = document.getElementById('t4-ambitionA').value;
+            const ambB = document.getElementById('t4-ambitionB').value;
+            const travel = document.getElementById('t4-travel').value;
+            const promo = document.getElementById('t4-promo').value;
+            const frustration = document.getElementById('t4-frustration').value || "Navigating competing priorities.";
+
+            let conflict = `Partner A works <strong>${hA} hrs/wk</strong> (Ambition: ${ambA}/10), while Partner B works <strong>${hB} hrs/wk</strong> (Ambition: ${ambB}/10). Key friction points include travel demand (${travel}) and promotion timing (${promo}).`;
+            let protecting = `<strong>Partner A</strong> is protecting professional growth, financial upside, and career momentum.<br><strong>Partner B</strong> is protecting lifestyle stability, personal wellness, and equitable home involvement.`;
+            let tradeoff = `The fundamental tension is time & presence vs. ambition & trajectory. High work hours without domestic offset creates systemic resentment.`;
+
+            let compromises = [
+                "<strong>Season Strategy:</strong> Agree on a defined 12-month 'sprint season' where one career takes priority, with an explicit agreement to flip priorities or re-evaluate after 365 days.",
+                "<strong>Outsource Household Debt:</strong> Use income gains from promotions/overtime to hire external help (cleaning, meal delivery, laundry) to offset lost household hours.",
+                "<strong>Hard Time Boundaries:</strong> Establish non-negotiable weekend blackout windows where work email and business travel are strictly off-limits."
+            ];
+
+            let script = `"I value your ambition and want us both to thrive professionally. Right now, I'm feeling overwhelmed by how our work schedules impact our home life. Can we sit down this weekend and look at the next 6-12 months as a temporary 'season' so we can support each other without burning out?"`;
+
+            document.getElementById('t4-conflict-text').innerHTML = conflict;
+            document.getElementById('t4-protecting-text').innerHTML = protecting;
+            document.getElementById('t4-tradeoff-text').innerHTML = tradeoff;
+            document.getElementById('t4-compromises-list').innerHTML = compromises.map(c => `<li>${c}</li>`).join('');
+            document.getElementById('t4-script-text').innerText = script;
+
+            document.getElementById('t4-results').classList.add('active');
+
+            saveHistory('tool4', `Career Check: Season Strategy (${hA}h vs ${hB}h)`, { hA, hB });
+        }
+
+        /* TOOL 5 LOGIC: ARGUMENT DECODER */
+        function loadSampleTool5() {
+            document.getElementById('t5-trigger').value = "Unwashed dishes left in the sink overnight";
+            document.getElementById('t5-said').value = "Partner A: 'I do everything around here!' Partner B: 'You always complain, nothing I do is ever good enough!'";
+            document.getElementById('t5-hurt').value = "Feeling unappreciated, overwhelmed, and isolated in home logistics";
+            document.getElementById('t5-needed').value = "Acknowlegment of effort, consistent teamwork, and quiet downtime";
+            document.getElementById('t5-ended').value = "Still unresolved and tense";
+            showToast("Sample loaded: Dishes fight covering underlying exhaustion");
+        }
+
+        function processTool5() {
+            const trigger = document.getElementById('t5-trigger').value || "a minor disagreement";
+            const hurt = document.getElementById('t5-hurt').value || "feeling unheard or overwhelmed";
+            const needed = document.getElementById('t5-needed').value || "reassurance and practical support";
+            const ended = document.getElementById('t5-ended').value;
+
+            let about = `Surface fight: <em>"${trigger}"</em>.<br><strong>Real Core Theme:</strong> This argument was not about dishes or tasks—it was about <strong>emotional safety, appreciation, and perceived fairness</strong>. Underneath the frustration is: <em>"${hurt}"</em>.`;
+            
+            let needs = `<strong>What was missing:</strong> Clear requests instead of criticisms. Both partners needed validation before trying to solve the problem. Expression of need: <em>"${needed}"</em>.`;
+
+            let pattern = `The Classic Exhaustion Trap: Trigger occurs → Criticism voiced ('You always/never') → Defensive counter-attack or withdrawal → Resolution status: <strong>${ended}</strong> → Resentment accumulates.`;
+
+            let commitments = [
+                "<strong>Partner A:</strong> Soften the opening. Replace 'You never help' with 'I'm feeling overwhelmed right now, can you assist with X?'",
+                "<strong>Partner B:</strong> Validate before reacting. Respond with 'I hear that you're stressed' before defending your actions."
+            ];
+
+            let script = `"Hey, things got heated earlier over ${trigger.toLowerCase()}. I don't want us to fight about this. What I was really feeling was ${hurt.toLowerCase()}. I love you and I want us to be on the same team. Can we reset and talk about this calmly?"`;
+
+            document.getElementById('t5-about-text').innerHTML = about;
+            document.getElementById('t5-needs-text').innerHTML = needs;
+            document.getElementById('t5-pattern-text').innerHTML = pattern;
+            document.getElementById('t5-commitments-list').innerHTML = commitments.map(c => `<li>${c}</li>`).join('');
+            document.getElementById('t5-script-text').innerText = script;
+
+            document.getElementById('t5-results').classList.add('active');
+
+            saveHistory('tool5', `Decoded Argument: ${trigger.substring(0,25)}...`, { trigger, hurt });
+        }
+
+        /* RESTORE HISTORY CALLBACKS */
+        function restoreHistory(toolId, id) {
+            const history = JSON.parse(localStorage.getItem(`overwhelmed_history_${toolId}`) || '[]');
+            const entry = history.find(e => e.id === id);
+            if (!entry) return;
+
+            showToast("Restored historical entry");
+            // Highlight tool tab
+            switchTab(toolId);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Confidence Builder</title>
+    
+    <!-- Google Fonts & Font Awesome CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS Styling -->
+    <style>
+        :root {
+            --ocean-teal: #006D77;
+            --ocean-teal-dark: #004d54;
+            --ocean-teal-light: #e6f0f1;
+            --soft-coral: #FFDDD2;
+            --soft-coral-dark: #e0a392;
+            --bg-gradient-start: #EDF6F9;
+            --bg-gradient-end: #FFF0F3;
+            --text-main: #2B2D42;
+            --text-muted: #6C757D;
+            --card-bg: #FFFFFF;
+            --border-color: #E9ECEF;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* App Container Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--ocean-teal);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--ocean-teal);
+            line-height: 1.2;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: var(--ocean-teal-light);
+            color: var(--ocean-teal);
+        }
+
+        .nav-item.active {
+            background-color: var(--ocean-teal-light);
+            color: var(--ocean-teal);
+            border-left-color: var(--ocean-teal);
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Mobile Header & Overlay */
+        .mobile-header {
+            display: none;
+            background-color: var(--card-bg);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            box-shadow: var(--shadow);
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--ocean-teal);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 95;
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 800px;
+            flex: 1;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Component */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Headings & Text */
+        h1 {
+            font-size: 2rem;
+            color: var(--ocean-teal);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            margin-bottom: 24px;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: var(--ocean-teal);
+            margin-bottom: 6px;
+        }
+
+        .problem-statement {
+            background-color: #FFF9F5;
+            border-left: 4px solid var(--soft-coral-dark);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: #5A4035;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        /* Form Components */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #FAFAFA;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--ocean-teal);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(0, 109, 119, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 400;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .checkbox-label input, .radio-label input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--ocean-teal);
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--ocean-teal);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--ocean-teal-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--soft-coral);
+            color: #4A281E;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--soft-coral-dark);
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background-color: #F8F9FA;
+            color: var(--text-main);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .dashboard-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.08);
+            border-color: var(--ocean-teal);
+        }
+
+        .dashboard-card .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background-color: var(--ocean-teal-light);
+            color: var(--ocean-teal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+        }
+
+        .dashboard-card h3 {
+            font-size: 1.1rem;
+            color: var(--ocean-teal);
+            margin-bottom: 8px;
+        }
+
+        .dashboard-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Analysis Output Cards */
+        .output-container {
+            margin-top: 32px;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .output-block {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 5px solid var(--ocean-teal);
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .output-block.accent {
+            border-left-color: var(--soft-coral-dark);
+        }
+
+        .output-block h4 {
+            font-size: 1rem;
+            color: var(--ocean-teal);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-block.accent h4 {
+            color: #8C432F;
+        }
+
+        .output-block p, .output-block ul {
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .output-block ul {
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+
+        .output-block li {
+            margin-bottom: 6px;
+        }
+
+        .copy-box {
+            background-color: #F8F9FA;
+            border: 1px dashed var(--border-color);
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        /* History Section Accordion */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .history-header h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .history-item-header {
+            padding: 12px 16px;
+            background-color: #FAFAFA;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .history-item-header:hover {
+            background-color: #F0F0F0;
+        }
+
+        .history-item-body {
+            padding: 16px;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .history-item.open .history-item-body {
+            display: block;
+        }
+
+        .empty-history {
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #2B2D42;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Footer */
+        .app-footer {
+            margin-top: 40px;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background-color: rgba(255, 255, 255, 0.5);
+            width: 100%;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px 16px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-compass" style="color: var(--ocean-teal); font-size: 1.2rem;"></i>
+            <span style="font-weight: 700; color: var(--ocean-teal);">Work Confidence Builder</span>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-compass"></i>
+                <h2>Work Confidence<br>Builder</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-item active" data-tool="dashboard">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a class="nav-item" data-tool="tool1">
+                    <i class="fa-solid fa-box-archive"></i>
+                    <span>Evidence Collector</span>
+                </a>
+                <a class="nav-item" data-tool="tool2">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>Inner Critic Decoder</span>
+                </a>
+                <a class="nav-item" data-tool="tool3">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>Meeting Planner</span>
+                </a>
+                <a class="nav-item" data-tool="tool4">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                    <span>Skill Gap Check</span>
+                </a>
+                <a class="nav-item" data-tool="tool5">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>Small Wins Generator</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-container">
+
+                <!-- DASHBOARD VIEW -->
+                <section id="dashboard" class="view-section active">
+                    <h1>Work Confidence Builder</h1>
+                    <p class="tagline">The evidence is on your side. Let's find it together.</p>
+
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card" onclick="switchTool('tool1')">
+                            <div class="icon-wrapper"><i class="fa-solid fa-box-archive"></i></div>
+                            <h3>Evidence Collector</h3>
+                            <p>Collect raw facts to counter the feeling that you haven't accomplished anything real.</p>
+                        </div>
+
+                        <div class="dashboard-card" onclick="switchTool('tool2')">
+                            <div class="icon-wrapper"><i class="fa-solid fa-brain"></i></div>
+                            <h3>Inner Critic Decoder</h3>
+                            <p>Decode negative self-talk and rewrite it into grounded, objective narratives.</p>
+                        </div>
+
+                        <div class="dashboard-card" onclick="switchTool('tool3')">
+                            <div class="icon-wrapper"><i class="fa-solid fa-comments"></i></div>
+                            <h3>Meeting Contribution Planner</h3>
+                            <p>Prepare low-risk ways to speak up, ask questions, and recover from interruptions.</p>
+                        </div>
+
+                        <div class="dashboard-card" onclick="switchTool('tool4')">
+                            <div class="icon-wrapper"><i class="fa-solid fa-scale-balanced"></i></div>
+                            <h3>Skill Gap Reality Check</h3>
+                            <p>Separate natural tenure learning curves from true competency deficits.</p>
+                        </div>
+
+                        <div class="dashboard-card" onclick="switchTool('tool5')">
+                            <div class="icon-wrapper"><i class="fa-solid fa-trophy"></i></div>
+                            <h3>Small Wins Generator</h3>
+                            <p>Build real momentum through manageable, actionable progressive challenges.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: EVIDENCE COLLECTOR -->
+                <section id="tool1" class="view-section">
+                    <div class="section-header">
+                        <h2>Evidence Collector</h2>
+                        <div class="problem-statement">
+                            "I feel like a fraud but I can't remember anything I've done well."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool1">
+                            <div class="form-group">
+                                <label for="t1-accomplish">What did you accomplish this week?</label>
+                                <textarea id="t1-accomplish" class="form-control" placeholder="E.g., Finished the monthly report, answered customer queries..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-feedback">What positive feedback have you received?</label>
+                                <textarea id="t1-feedback" class="form-control" placeholder="E.g., Boss said 'thanks', peer mentioned my help..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-solved">What problem did you solve that others couldn't or didn't?</label>
+                                <textarea id="t1-solved" class="form-control" placeholder="E.g., Unstuck a bottleneck, fixed a formula..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-learned">What did you learn recently?</label>
+                                <textarea id="t1-learned" class="form-control" placeholder="E.g., Shortcut in Excel, new workflow tool..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t1-team">What would your team say you're good at?</label>
+                                <textarea id="t1-team" class="form-control" placeholder="E.g., Staying calm, organizing files, listening..."></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleScenario('tool1')">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-magnifying-glass"></i> Analyze Evidence
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Box -->
+                    <div id="output-tool1" class="output-container">
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-file-contract"></i> YOUR EVIDENCE FILE</h4>
+                            <p id="t1-out-reframed"></p>
+                        </div>
+                        <div class="output-block accent">
+                            <h4><i class="fa-solid fa-filter"></i> THE FRAUD FILTER</h4>
+                            <p id="t1-out-filter"></p>
+                        </div>
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-folder-open"></i> EXTERNAL PROOF ARCHIVE</h4>
+                            <p id="t1-out-proof"></p>
+                        </div>
+                        <div class="output-block">
+                            <h4>
+                                <span><i class="fa-solid fa-clipboard-list"></i> THE BRAG DOCUMENT TEMPLATE</span>
+                                <button class="btn btn-outline btn-sm" onclick="copyToClipboard('t1-out-brag-text')"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </h4>
+                            <div id="t1-out-brag-text" class="copy-box"></div>
+                        </div>
+                        <div class="output-block accent">
+                            <h4><i class="fa-solid fa-calendar-check"></i> WEEKLY HABIT</h4>
+                            <p id="t1-out-habit"></p>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h3>Saved Analysis History</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool1')">Clear History</button>
+                        </div>
+                        <div id="history-tool1" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: INNER CRITIC DECODER -->
+                <section id="tool2" class="view-section">
+                    <div class="section-header">
+                        <h2>Inner Critic Decoder</h2>
+                        <div class="problem-statement">
+                            "There's a voice in my head that says I'm not good enough."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool2">
+                            <div class="form-group">
+                                <label for="t2-voice">What does the voice say?</label>
+                                <textarea id="t2-voice" class="form-control" placeholder="E.g., Everyone knows more than you. You got lucky."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-loudest">When is it loudest?</label>
+                                <select id="t2-loudest" class="form-control">
+                                    <option value="Before presentations">Before presentations</option>
+                                    <option value="After mistakes">After mistakes</option>
+                                    <option value="When comparing to others">When comparing to others</option>
+                                    <option value="When receiving praise">When receiving praise</option>
+                                    <option value="All the time">All the time</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-who">Whose voice does it sound like?</label>
+                                <select id="t2-who" class="form-control">
+                                    <option value="Parent">Parent</option>
+                                    <option value="Former boss">Former boss</option>
+                                    <option value="Teacher">Teacher</option>
+                                    <option value="My own">My own</option>
+                                    <option value="A bully">A bully</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-evidence">What evidence actually supports what it says?</label>
+                                <textarea id="t2-evidence" class="form-control" placeholder="Be objective. Facts only, not feelings."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t2-friend">What would you say to a friend who said this about themselves?</label>
+                                <textarea id="t2-friend" class="form-control" placeholder="E.g., You're being way too hard on yourself..."></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleScenario('tool2')">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-key"></i> Decode Voice
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Box -->
+                    <div id="output-tool2" class="output-container">
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-shield-halved"></i> CRITIC PROFILE</h4>
+                            <p id="t2-out-profile"></p>
+                        </div>
+                        <div class="output-block accent">
+                            <h4><i class="fa-solid fa-gavel"></i> THE CROSS-EXAMINATION</h4>
+                            <ul id="t2-out-exam"></ul>
+                        </div>
+                        <div class="output-block">
+                            <h4>
+                                <span><i class="fa-solid fa-pen-fancy"></i> REFRAME SCRIPT</span>
+                                <button class="btn btn-outline btn-sm" onclick="copyToClipboard('t2-out-script-text')"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </h4>
+                            <div id="t2-out-script-text" class="copy-box"></div>
+                        </div>
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-sliders"></i> VOLUME CONTROL</h4>
+                            <p id="t2-out-volume"></p>
+                        </div>
+                        <div class="output-block accent">
+                            <h4><i class="fa-solid fa-anchor"></i> ONE MANTRA</h4>
+                            <p id="t2-out-mantra" style="font-weight: 600; font-size: 1.05rem; color: var(--ocean-teal);"></p>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h3>Saved Analysis History</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool2')">Clear History</button>
+                        </div>
+                        <div id="history-tool2" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: MEETING CONTRIBUTION PLANNER -->
+                <section id="tool3" class="view-section">
+                    <div class="section-header">
+                        <h2>Meeting Contribution Planner</h2>
+                        <div class="problem-statement">
+                            "I'm afraid to speak up in meetings so my ideas stay invisible."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool3">
+                            <div class="form-group">
+                                <label for="t3-size">How many people are usually in your meetings?</label>
+                                <select id="t3-size" class="form-control">
+                                    <option value="2-5">2-5 people</option>
+                                    <option value="6-10">6-10 people</option>
+                                    <option value="11-20">11-20 people</option>
+                                    <option value="20+">20+ people</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>What stops you from speaking? (Check all that apply)</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-stops" value="Fear of sounding stupid"> Fear of sounding stupid</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-stops" value="Someone always interrupts"> Someone always interrupts</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-stops" value="I don't have the 'right' title"> I don't have the 'right' title</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-stops" value="My idea isn't fully formed"> My idea isn't fully formed</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-stops" value="I freeze"> I freeze</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-stops" value="I prefer to listen"> I prefer to listen</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Do you prepare before meetings?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t3-prep" value="Always"> Always</label>
+                                    <label class="radio-label"><input type="radio" name="t3-prep" value="Sometimes" checked> Sometimes</label>
+                                    <label class="radio-label"><input type="radio" name="t3-prep" value="Never"> Never</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="t3-say">What would you want to say if you weren't afraid?</label>
+                                <textarea id="t3-say" class="form-control" placeholder="E.g., I think this timeline is unrealistic given our capacity."></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleScenario('tool3')">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-bullhorn"></i> Build Action Plan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Box -->
+                    <div id="output-tool3" class="output-container">
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-list-check"></i> PRE-MEETING PREP TEMPLATE</h4>
+                            <p id="t3-out-prep"></p>
+                        </div>
+                        <div class="output-block accent">
+                            <h4><i class="fa-solid fa-door-open"></i> LOW-RISK OPENINGS</h4>
+                            <ul id="t3-out-openings"></ul>
+                        </div>
+                        <div class="output-block">
+                            <h4>
+                                <span><i class="fa-solid fa-hand"></i> INTERRUPTION RECOVERY SCRIPTS</span>
+                                <button class="btn btn-outline btn-sm" onclick="copyToClipboard('t3-out-interrupt-text')"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </h4>
+                            <div id="t3-out-interrupt-text" class="copy-box"></div>
+                        </div>
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-circle-question"></i> ASKING HIGH-VALUE QUESTIONS</h4>
+                            <p id="t3-out-questions"></p>
+                        </div>
+                        <div class="output-block accent">
+                            <h4><i class="fa-solid fa-flag-checkered"></i> ONE COMMITMENT</h4>
+                            <p id="t3-out-commitment" style="font-weight: 600; color: var(--ocean-teal);"></p>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h3>Saved Analysis History</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool3')">Clear History</button>
+                        </div>
+                        <div id="history-tool3" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: SKILL GAP REALITY CHECK -->
+                <section id="tool4" class="view-section">
+                    <div class="section-header">
+                        <h2>Skill Gap Reality Check</h2>
+                        <div class="problem-statement">
+                            "Maybe I actually AM underqualified and everyone will find out."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool4">
+                            <div class="form-group">
+                                <label for="t4-reqs">Your current role requirements:</label>
+                                <textarea id="t4-reqs" class="form-control" placeholder="E.g., Manage projects, report to stakeholders, cross-functional alignment..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-have">Skills you have:</label>
+                                <textarea id="t4-have" class="form-control" placeholder="E.g., Clear writing, organizing tasks, empathy, timeline tracking..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-unsure">Skills you're unsure about:</label>
+                                <textarea id="t4-unsure" class="form-control" placeholder="E.g., Advanced data analytics, budget forecasting..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t4-tenure">How long have you been in this role?</label>
+                                <select id="t4-tenure" class="form-control">
+                                    <option value="<3mo">&lt; 3 months</option>
+                                    <option value="3-6mo">3-6 months</option>
+                                    <option value="6-12mo">6-12 months</option>
+                                    <option value="1-2yr">1-2 years</option>
+                                    <option value="2yr+">2+ years</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Have you received negative feedback about skills?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t4-feedback" value="Yes"> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t4-feedback" value="No" checked> No</label>
+                                    <label class="radio-label"><input type="radio" name="t4-feedback" value="Not directly"> Not directly</label>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleScenario('tool4')">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-chart-pie"></i> Perform Reality Check
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Box -->
+                    <div id="output-tool4" class="output-container">
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-magnifying-glass-chart"></i> GAP ANALYSIS</h4>
+                            <p id="t4-out-gap"></p>
+                        </div>
+                        <div class="output-block accent">
+                            <h4><i class="fa-solid fa-graduation-cap"></i> THE LEARNING PLAN</h4>
+                            <p id="t4-out-plan"></p>
+                        </div>
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-hourglass-half"></i> THE GRACE PERIOD</h4>
+                            <p id="t4-out-grace"></p>
+                        </div>
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-triangle-exclamation"></i> COMPARISON TRAP</h4>
+                            <p id="t4-out-trap"></p>
+                        </div>
+                        <div class="output-block accent">
+                            <h4><i class="fa-solid fa-bullseye"></i> ONE SKILL TO BUILD (30-DAY FOCUS)</h4>
+                            <p id="t4-out-focus" style="font-weight: 600; color: var(--ocean-teal);"></p>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h3>Saved Analysis History</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool4')">Clear History</button>
+                        </div>
+                        <div id="history-tool4" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: SMALL WINS GENERATOR -->
+                <section id="tool5" class="view-section">
+                    <div class="section-header">
+                        <h2>Small Wins Generator</h2>
+                        <div class="problem-statement">
+                            "I need to build confidence through action, not affirmations."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool5">
+                            <div class="form-group">
+                                <label for="t5-role">Your role:</label>
+                                <input type="text" id="t5-role" class="form-control" placeholder="E.g., Software Developer, Marketing Manager...">
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-hardest">What feels hardest right now?</label>
+                                <textarea id="t5-hardest" class="form-control" placeholder="E.g., Code reviews, presenting strategies..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-easy">What feels easy that others struggle with?</label>
+                                <textarea id="t5-easy" class="form-control" placeholder="E.g., Debugging complex issues, writing clear emails..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-style">How do you prefer to learn?</label>
+                                <select id="t5-style" class="form-control">
+                                    <option value="By doing">By doing</option>
+                                    <option value="By watching">By watching</option>
+                                    <option value="By reading">By reading</option>
+                                    <option value="By teaching others">By teaching others</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t5-avoiding">One thing you've been avoiding:</label>
+                                <textarea id="t5-avoiding" class="form-control" placeholder="E.g., Giving a technical presentation to the team..."></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleScenario('tool5')">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-stairs"></i> Generate Confidence Ladder
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Output Box -->
+                    <div id="output-tool5" class="output-container">
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-stairs"></i> CONFIDENCE LADDER</h4>
+                            <ul id="t5-out-ladder" style="list-style-type: none; padding-left: 0;"></ul>
+                        </div>
+                        <div class="output-block accent">
+                            <h4><i class="fa-solid fa-bolt"></i> THE QUICK WIN (TODAY)</h4>
+                            <p id="t5-out-quick" style="font-weight: 600; color: var(--ocean-teal);"></p>
+                        </div>
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-user-group"></i> ACCOUNTABILITY PAIR STRATEGY</h4>
+                            <p id="t5-out-pair"></p>
+                        </div>
+                        <div class="output-block">
+                            <h4><i class="fa-solid fa-lightbulb"></i> REFLECTION PROMPT</h4>
+                            <p id="t5-out-reflect"></p>
+                        </div>
+                        <div class="output-block accent">
+                            <h4><i class="fa-solid fa-party-horn"></i> CELEBRATION RULE</h4>
+                            <p id="t5-out-celebrate"></p>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section">
+                        <div class="history-header">
+                            <h3>Saved Analysis History</h3>
+                            <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool5')">Clear History</button>
+                        </div>
+                        <div id="history-tool5" class="history-list"></div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Mandatory Footer -->
+            <footer class="app-footer">
+                For self-reflection and professional development only. Not therapy or mental health treatment. If imposter feelings are severely impacting your wellbeing, consult a licensed professional.
+            </footer>
+        </main>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check" style="color: #4EBA6F;"></i>
+        <span id="toast-message">Copied!</span>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Global Navigation & UI Management
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            initFormSubmitListeners();
+            loadAllHistories();
+        });
+
+        function initNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const toolId = item.getAttribute('data-tool');
+                    switchTool(toolId);
+                    
+                    // Close mobile menu if open
+                    sidebar.classList.remove('mobile-open');
+                    sidebarOverlay.classList.remove('mobile-open');
+                });
+            });
+
+            hamburgerBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-open');
+                sidebarOverlay.classList.toggle('mobile-open');
+            });
+
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('mobile-open');
+                sidebarOverlay.classList.remove('mobile-open');
+            });
+        }
+
+        function switchTool(toolId) {
+            // Update nav styles
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                if(nav.getAttribute('data-tool') === toolId) {
+                    nav.classList.add('active');
+                } else {
+                    nav.classList.remove('active');
+                }
+            });
+
+            // Update views
+            document.querySelectorAll('.view-section').forEach(view => {
+                if(view.id === toolId) {
+                    view.classList.add('active');
+                } else {
+                    view.classList.remove('active');
+                }
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied to clipboard!');
+            }).catch(err => {
+                showToast('Failed to copy');
+            });
+        }
+
+        // SAMPLE SCENARIOS DATA
+        const sampleScenarios = {
+            tool1: {
+                accomplish: "Cleaned up the quarterly reporting spreadsheet and fixed broken formulas.",
+                feedback: "My boss said 'Good job getting this done today' in Slack.",
+                solved: "Resolved a data discrepancy issue that had been delaying team sign-off.",
+                learned: "Learned how to use XLOOKUP in Excel to automate mapping.",
+                team: "Being reliable, detail-oriented, and easy to reach when things break."
+            },
+            tool2: {
+                voice: "I only got lucky. If they actually test my core technical knowledge, they'll see I don't belong here.",
+                loudest: "When receiving praise",
+                who: "Former boss",
+                evidence: "No direct evidence. I was hired after 3 rounds of interviews, but I still feel like a fluke.",
+                friend: "I would tell them they're being totally unfair to themselves. You passed the interviews and you deliver every week."
+            },
+            tool3: {
+                size: "6-10",
+                stops: ["Fear of sounding stupid", "Someone always interrupts"],
+                prep: "Sometimes",
+                say: "I think our current project timeline is missing 2 weeks of buffer for testing, and we risk missing our deadline."
+            },
+            tool4: {
+                reqs: "Manage project timelines, align cross-functional teams, track budgets, and report status.",
+                have: "Strong organization, clear written communication, and ability to build team rapport.",
+                unsure: "Advanced financial budgeting and deep data analytics.",
+                tenure: "6-12mo",
+                feedback: "No"
+            },
+            tool5: {
+                role: "Software Developer",
+                hardest: "Code reviews felt intimidating when senior devs point out my mistakes.",
+                easy: "Debugging obscure edge-case issues and writing unit tests.",
+                style: "By doing",
+                avoiding: "Giving a 10-minute technical overview of my module to the engineering team."
+            }
+        };
+
+        function loadSampleScenario(toolId) {
+            const data = sampleScenarios[toolId];
+            if (!data) return;
+
+            if (toolId === 'tool1') {
+                document.getElementById('t1-accomplish').value = data.accomplish;
+                document.getElementById('t1-feedback').value = data.feedback;
+                document.getElementById('t1-solved').value = data.solved;
+                document.getElementById('t1-learned').value = data.learned;
+                document.getElementById('t1-team').value = data.team;
+            } else if (toolId === 'tool2') {
+                document.getElementById('t2-voice').value = data.voice;
+                document.getElementById('t2-loudest').value = data.loudest;
+                document.getElementById('t2-who').value = data.who;
+                document.getElementById('t2-evidence').value = data.evidence;
+                document.getElementById('t2-friend').value = data.friend;
+            } else if (toolId === 'tool3') {
+                document.getElementById('t3-size').value = data.size;
+                document.querySelectorAll('input[name="t3-stops"]').forEach(cb => {
+                    cb.checked = data.stops.includes(cb.value);
+                });
+                document.querySelectorAll('input[name="t3-prep"]').forEach(rb => {
+                    rb.checked = (rb.value === data.prep);
+                });
+                document.getElementById('t3-say').value = data.say;
+            } else if (toolId === 'tool4') {
+                document.getElementById('t4-reqs').value = data.reqs;
+                document.getElementById('t4-have').value = data.have;
+                document.getElementById('t4-unsure').value = data.unsure;
+                document.getElementById('t4-tenure').value = data.tenure;
+                document.querySelectorAll('input[name="t4-feedback"]').forEach(rb => {
+                    rb.checked = (rb.value === data.feedback);
+                });
+            } else if (toolId === 'tool5') {
+                document.getElementById('t5-role').value = data.role;
+                document.getElementById('t5-hardest').value = data.hardest;
+                document.getElementById('t5-easy').value = data.easy;
+                document.getElementById('t5-style').value = data.style;
+                document.getElementById('t5-avoiding').value = data.avoiding;
+            }
+
+            showToast("Sample scenario loaded!");
+        }
+
+        // TOOL FORM SUBMISSION HANDLERS
+        function initFormSubmitListeners() {
+            document.getElementById('form-tool1').addEventListener('submit', (e) => {
+                e.preventDefault();
+                processTool1();
+            });
+
+            document.getElementById('form-tool2').addEventListener('submit', (e) => {
+                e.preventDefault();
+                processTool2();
+            });
+
+            document.getElementById('form-tool3').addEventListener('submit', (e) => {
+                e.preventDefault();
+                processTool3();
+            });
+
+            document.getElementById('form-tool4').addEventListener('submit', (e) => {
+                e.preventDefault();
+                processTool4();
+            });
+
+            document.getElementById('form-tool5').addEventListener('submit', (e) => {
+                e.preventDefault();
+                processTool5();
+            });
+        }
+
+        // TOOL 1 LOGIC
+        function processTool1() {
+            const acc = document.getElementById('t1-accomplish').value || "Completed weekly routine tasks.";
+            const fb = document.getElementById('t1-feedback').value || "Acknowledged as helpful.";
+            const solved = document.getElementById('t1-solved').value || "Addressed an ongoing team pain point.";
+            const learned = document.getElementById('t1-learned').value || "Expanded domain understanding.";
+            const team = document.getElementById('t1-team').value || "Dependable and steady.";
+
+            const reframed = `You demonstrated concrete competence this week. You completed "${acc}" and actively solved a problem by "${solved}". Furthermore, your team relies on you for "${team}". Competence isn't about being flawless; it's demonstrated by these exact daily actions.`;
+            
+            const filter = `Imposter feelings naturally discount these achievements as "nothing special," "just my job," or "luck." Notice how you minimized receiving praise like "${fb}". Your brain is filtering out evidence of success while magnifying routine friction.`;
+
+            const proof = `Create a dedicated "Kudos" folder in your email or document drive. Save the feedback: "${fb}". When imposter thoughts spike, consult this folder as cold, objective data.`;
+
+            const bragText = `Date: ${new Date().toLocaleDateString()}\n• Key Accomplishment: ${acc}\n• Problem Solved: ${solved}\n• Skill/Tool Learned: ${learned}\n• Direct Feedback Received: ${fb}`;
+
+            const habit = `Set a recurring calendar reminder for 4:30 PM every Friday: Write down 3 facts from the week before logging off. Make evidence collection a systemic habit.`;
+
+            document.getElementById('t1-out-reframed').innerText = reframed;
+            document.getElementById('t1-out-filter').innerText = filter;
+            document.getElementById('t1-out-proof').innerText = proof;
+            document.getElementById('t1-out-brag-text').innerText = bragText;
+            document.getElementById('t1-out-habit').innerText = habit;
+
+            document.getElementById('output-tool1').classList.add('active');
+
+            saveToHistory('tool1', {
+                title: `Evidence Log: ${acc.substring(0, 30)}...`,
+                date: new Date().toLocaleString(),
+                reframed, filter, bragText
+            });
+        }
+
+        // TOOL 2 LOGIC
+        function processTool2() {
+            const voice = document.getElementById('t2-voice').value || "I don't know what I'm doing.";
+            const loudest = document.getElementById('t2-loudest').value;
+            const who = document.getElementById('t2-who').value;
+            const evidence = document.getElementById('t2-evidence').value || "None provided.";
+            const friend = document.getElementById('t2-friend').value || "You're capable and doing fine.";
+
+            const profile = `This critic voice ("${voice}") is acting as a protective defense mechanism, likely internalized from a ${who}. It triggers most intensely during "${loudest}" to shield you from unexpected failure or criticism by criticizing you first.`;
+
+            const exam = [
+                `Is this thought ("${voice}") based on verifiable facts or an emotional reaction?`,
+                `Does feeling uncertain mean I am actually incompetent, or simply that I am facing a complex task?`,
+                `What actual evidence exists against this voice? (E.g., You survived prior challenges without failing).`
+            ];
+
+            const scriptText = `When my inner critic says: "${voice}"\n\nI will pause and remind myself:\n"${friend} Uncertainty is a normal part of growth, not evidence of fraud."`;
+
+            const volume = `When this voice spikes during "${loudest}", treat it like background static. Acknowledge it ("I hear you trying to protect me"), but do not let it drive your decisions. Override it with objective execution.`;
+
+            const mantra = `Internalized standards from a ${who} do not define my current reality.`;
+
+            document.getElementById('t2-out-profile').innerText = profile;
+            
+            const examUl = document.getElementById('t2-out-exam');
+            examUl.innerHTML = '';
+            exam.forEach(q => {
+                const li = document.createElement('li');
+                li.innerText = q;
+                examUl.appendChild(li);
+            });
+
+            document.getElementById('t2-out-script-text').innerText = scriptText;
+            document.getElementById('t2-out-volume').innerText = volume;
+            document.getElementById('t2-out-mantra').innerText = mantra;
+
+            document.getElementById('output-tool2').classList.add('active');
+
+            saveToHistory('tool2', {
+                title: `Critic Decoded: "${voice.substring(0, 25)}..."`,
+                date: new Date().toLocaleString(),
+                profile, scriptText, mantra
+            });
+        }
+
+        // TOOL 3 LOGIC
+        function processTool3() {
+            const size = document.getElementById('t3-size').value;
+            const selectedStops = Array.from(document.querySelectorAll('input[name="t3-stops"]:checked')).map(cb => cb.value);
+            const prep = document.querySelector('input[name="t3-prep"]:checked').value;
+            const say = document.getElementById('t3-say').value || "I have a point regarding our project strategy.";
+
+            const prepText = `In a ${size}-person meeting, spend 3 minutes beforehand writing down your core point in 1-2 concise sentences. Point: "${say}". Having your thoughts written lowers cognitive load if you freeze.`;
+
+            const openings = [
+                `"Building on what [Name] mentioned, I wanted to point out..."`,
+                `"From an operational perspective, one thing to consider is..."`,
+                `"I have a quick question about [Topic] before we finalize this..."`
+            ];
+
+            let interruptScript = `If interrupted, hold your ground calmly:\n\nOption A: "I'd like to finish this thought briefly."\nOption B: "Hold on a sec, let me just wrap up this point."`;
+            if (selectedStops.includes("Someone always interrupts")) {
+                interruptScript += `\n\nPro-tip: Keep hand gestures slightly raised or stay unmuted to maintain speaker momentum.`;
+            }
+
+            const questions = `If you feel uncomfortable making declarative statements, ask high-value clarifying questions. E.g., "How does this decision affect our timeline for Q3?" Questions show engagement and build authority without requiring you to have all answers.`;
+
+            const commitment = `In your next meeting (${size} people), contribute within the first 15 minutes—either with a low-risk opening or a clarifying question.`;
+
+            document.getElementById('t3-out-prep').innerText = prepText;
+            
+            const openUl = document.getElementById('t3-out-openings');
+            openUl.innerHTML = '';
+            openings.forEach(op => {
+                const li = document.createElement('li');
+                li.innerText = op;
+                openUl.appendChild(li);
+            });
+
+            document.getElementById('t3-out-interrupt-text').innerText = interruptScript;
+            document.getElementById('t3-out-questions').innerText = questions;
+            document.getElementById('t3-out-commitment').innerText = commitment;
+
+            document.getElementById('output-tool3').classList.add('active');
+
+            saveToHistory('tool3', {
+                title: `Meeting Plan (${size} people)`,
+                date: new Date().toLocaleString(),
+                prepText, commitment
+            });
+        }
+
+        // TOOL 4 LOGIC
+        function processTool4() {
+            const reqs = document.getElementById('t4-reqs').value || "General duties.";
+            const have = document.getElementById('t4-have').value || "Basic skills.";
+            const unsure = document.getElementById('t4-unsure').value || "Advanced domain knowledge.";
+            const tenure = document.getElementById('t4-tenure').value;
+            const feedback = document.querySelector('input[name="t4-feedback"]:checked').value;
+
+            const gap = `Your core strengths ("${have}") align with the foundation of your role. Unsure areas ("${unsure}") are often perceived gaps rather than total deficiencies. Since you answered "${feedback}" to receiving negative feedback, your team likely views your performance as on track.`;
+
+            const plan = `To address "${unsure}", dedicate 15 minutes a day to focused upskilling (documentation, structured tutorials, or observing a peer). Do not try to learn everything at once.`;
+
+            let grace = "";
+            if(tenure === "<3mo" || tenure === "3-6mo") {
+                grace = `At ${tenure} in this role, you are expected to be in absorbing and learning mode. Total mastery is an unreasonable expectation right now.`;
+            } else if(tenure === "6-12mo") {
+                grace = `At 6-12 months, independence grows, but consulting colleagues on complex edge cases is standard practice.`;
+            } else {
+                grace = `With ${tenure} of experience, feeling a gap usually signals role evolution or changing scope, not personal failure.`;
+            }
+
+            const trap = `Comparing your internal doubts to the external confidence of 10-year veterans is irrational. You are comparing your unedited behind-the-scenes footage to their highlight reel.`;
+
+            const focus = `Focus exclusively on improving: "${unsure.split(',')[0]}". Build a 30-day learning goal around this single area.`;
+
+            document.getElementById('t4-out-gap').innerText = gap;
+            document.getElementById('t4-out-plan').innerText = plan;
+            document.getElementById('t4-out-grace').innerText = grace;
+            document.getElementById('t4-out-trap').innerText = trap;
+            document.getElementById('t4-out-focus').innerText = focus;
+
+            document.getElementById('output-tool4').classList.add('active');
+
+            saveToHistory('tool4', {
+                title: `Skill Check (${tenure})`,
+                date: new Date().toLocaleString(),
+                gap, focus
+            });
+        }
+
+        // TOOL 5 LOGIC
+        function processTool5() {
+            const role = document.getElementById('t5-role').value || "Employee";
+            const hardest = document.getElementById('t5-hardest').value || "Difficult tasks";
+            const easy = document.getElementById('t5-easy').value || "Routine tasks";
+            const style = document.getElementById('t5-style').value;
+            const avoiding = document.getElementById('t5-avoiding').value || "A challenging task";
+
+            const ladder = [
+                `Step 1 (Low Risk): Leverage your strength in "${easy}" to help a peer or organize a task.`,
+                `Step 2 (Micro Step): Review "${avoiding}" for just 10 minutes by breakdown, not execution.`,
+                `Step 3 (Low Pressure): Shadow or consult someone who handles "${hardest}" smoothly (${style} learning).`,
+                `Step 4 (Targeted Action): Complete one small piece of "${avoiding}" without aiming for perfection.`,
+                `Step 5 (Stretch Win): Fully execute "${avoiding}" and log the outcome in your Evidence Collector.`
+            ];
+
+            const quick = `Today's Quick Win: Spend 10 minutes outlining a simple structure for "${avoiding}". That's it—stop when 10 minutes are up.`;
+
+            const pair = `Identify a trusted colleague. Say: "I'm focusing on improving my skills with ${avoiding.substring(0,20)}... mind if I share my draft with you for 2 minutes of feedback?"`;
+
+            const reflect = `Notice: Did the worst-case scenario happen? How much did your anxiety drop once action was taken?`;
+
+            const celebrate = `Rule: When you complete a step, acknowledge it explicitly. Do not instantly move the goalposts to the next task. Take 30 seconds to log it in your brag document.`;
+
+            const ladderUl = document.getElementById('t5-out-ladder');
+            ladderUl.innerHTML = '';
+            ladder.forEach((step, idx) => {
+                const li = document.createElement('li');
+                li.style.padding = '8px 12px';
+                li.style.marginBottom = '6px';
+                li.style.backgroundColor = '#FAFAFA';
+                li.style.borderRadius = '6px';
+                li.style.borderLeft = '3px solid var(--ocean-teal)';
+                li.innerText = step;
+                ladderUl.appendChild(li);
+            });
+
+            document.getElementById('t5-out-quick').innerText = quick;
+            document.getElementById('t5-out-pair').innerText = pair;
+            document.getElementById('t5-out-reflect').innerText = reflect;
+            document.getElementById('t5-out-celebrate').innerText = celebrate;
+
+            document.getElementById('output-tool5').classList.add('active');
+
+            saveToHistory('tool5', {
+                title: `Ladder for: ${role}`,
+                date: new Date().toLocaleString(),
+                quick, avoiding
+            });
+        }
+
+        // LOCALSTORAGE & HISTORY SYSTEM
+        function getStorageKey(toolId) {
+            return `confidence_history_${toolId}`;
+        }
+
+        function saveToHistory(toolId, data) {
+            const key = getStorageKey(toolId);
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem(key)) || [];
+            } catch(e) {
+                history = [];
+            }
+
+            history.unshift(data);
+            if (history.length > 30) {
+                history = history.slice(0, 30);
+            }
+
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function loadAllHistories() {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistory);
+        }
+
+        function renderHistory(toolId) {
+            const key = getStorageKey(toolId);
+            const container = document.getElementById(`history-${toolId}`);
+            if(!container) return;
+
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem(key)) || [];
+            } catch(e) {
+                history = [];
+            }
+
+            if (history.length === 0) {
+                container.innerHTML = `<div class="empty-history">No saved entries yet. Run an analysis above to save entries automatically.</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            history.forEach((item, index) => {
+                const historyEl = document.createElement('div');
+                historyEl.className = 'history-item';
+                
+                let detailsHtml = '';
+                Object.keys(item).forEach(k => {
+                    if (k !== 'title' && k !== 'date') {
+                        detailsHtml += `<p><strong>${k.toUpperCase()}:</strong> ${item[k]}</p><br>`;
+                    }
+                });
+
+                historyEl.innerHTML = `
+                    <div class="history-item-header" onclick="toggleHistoryAccordion(this)">
+                        <span>${item.title || 'Saved Analysis'}</span>
+                        <span style="color: var(--text-muted); font-size: 0.8rem;">${item.date} <i class="fa-solid fa-chevron-down" style="margin-left:6px;"></i></span>
+                    </div>
+                    <div class="history-item-body">
+                        ${detailsHtml}
+                    </div>
+                `;
+                container.appendChild(historyEl);
+            });
+        }
+
+        function toggleHistoryAccordion(headerEl) {
+            const parent = headerEl.parentElement;
+            parent.classList.toggle('open');
+        }
+
+        function clearToolHistory(toolId) {
+            const key = getStorageKey(toolId);
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+    </script>
+</body>
+</html>

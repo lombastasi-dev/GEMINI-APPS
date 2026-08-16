@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClarityBuilder - Workplace Communication Toolkit</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --steel-blue: #457B9D;
+            --steel-blue-dark: #2A4D6C;
+            --steel-blue-light: #EBF3F8;
+            --warm-sand: #D4A373;
+            --warm-sand-light: #F9F3EC;
+            --bg-gradient-start: #F1FAEE;
+            --bg-gradient-end: #FDF6EC;
+            --text-main: #2D3748;
+            --text-muted: #718096;
+            --white: #FFFFFF;
+            --border-color: #E2E8F0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius-xl: 1rem;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            color: var(--text-main);
+            display: flex;
+            line-height: 1.6;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--white);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--steel-blue);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--steel-blue);
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.925rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background-color: var(--steel-blue-light);
+            color: var(--steel-blue);
+        }
+
+        .nav-item.active {
+            background-color: var(--steel-blue);
+            color: var(--white);
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Mobile Header & Overlay */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 1.25rem;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.35rem;
+            color: var(--steel-blue);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 95;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Main Content Layout */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .content-container {
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+            flex: 1;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.825rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0,0,0,0.06);
+            margin-top: auto;
+            background: rgba(255,255,255,0.4);
+        }
+
+        /* UI Card Components */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        /* Dashboard View Styling */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--steel-blue) 0%, var(--steel-blue-dark) 100%);
+            color: var(--white);
+            padding: 2.5rem 2rem;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            width: 180px;
+            height: 180px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            max-width: 600px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .tool-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.25 ease;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--steel-blue);
+        }
+
+        .tool-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            background: var(--steel-blue-light);
+            color: var(--steel-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .tool-card-desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .tool-card-btn {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--steel-blue);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* Tool Forms & Elements */
+        .tool-header {
+            margin-bottom: 1.75rem;
+        }
+
+        .tool-title-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tool-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--steel-blue-dark);
+        }
+
+        .tool-problem {
+            background: var(--warm-sand-light);
+            border-left: 4px solid var(--warm-sand);
+            padding: 0.85rem 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            font-size: 0.925rem;
+            color: #7A5229;
+            font-style: italic;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 0.9rem;
+            font-size: 0.925rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background-color: var(--white);
+            color: var(--text-main);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--steel-blue);
+            box-shadow: 0 0 0 3px rgba(69, 123, 157, 0.15);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 85px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+        .radio-label input[type="radio"] {
+            accent-color: var(--steel-blue);
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--steel-blue);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--steel-blue-dark);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary {
+            background-color: var(--warm-sand-light);
+            color: #8C592B;
+            border: 1px solid rgba(212, 163, 115, 0.4);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--warm-sand);
+            color: var(--white);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background: #F8FAFC;
+            color: var(--text-main);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        /* Output Cards */
+        .output-container {
+            margin-top: 2rem;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .output-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--steel-blue-light);
+        }
+
+        .output-header h3 {
+            color: var(--steel-blue-dark);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .output-block {
+            background: var(--white);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .output-block-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--steel-blue);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .script-box {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: #334155;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .copy-btn {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            color: var(--steel-blue);
+            border-color: var(--steel-blue);
+        }
+
+        .ordered-list, .bullet-list {
+            padding-left: 1.25rem;
+            font-size: 0.925rem;
+        }
+
+        .ordered-list li, .bullet-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #2D3748;
+            color: var(--white);
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 200;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 3rem;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .history-item {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+
+        .history-header {
+            padding: 0.75rem 1rem;
+            background: #FAFAFA;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .history-header:hover {
+            background: #F1F5F9;
+        }
+
+        .history-body {
+            padding: 1rem;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            background: var(--white);
+        }
+
+        .history-body.open {
+            display: block;
+        }
+
+        /* Utilities */
+        .view-pane {
+            display: none;
+        }
+
+        .view-pane.active {
+            display: block;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 60px;
+            }
+
+            .content-container {
+                padding: 1.25rem 1rem;
+            }
+
+            .hero-title {
+                font-size: 1.75rem;
+            }
+
+            .hero-tagline {
+                font-size: 0.95rem;
+            }
+
+            .toast {
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+                text-align: center;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Top Navigation Header -->
+    <header class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <i class="fa-solid fa-compass" style="color: var(--steel-blue); font-size: 1.25rem;"></i>
+            <span style="font-weight: 700; color: var(--steel-blue); font-size: 1.1rem;">ClarityBuilder</span>
+        </div>
+        <button class="hamburger-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Navigation Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-compass"></i>
+            <h1>ClarityBuilder</h1>
+        </div>
+        <nav class="sidebar-nav">
+            <a class="nav-item active" data-target="dashboard">
+                <i class="fa-solid fa-table-columns"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="nav-item" data-target="tool1">
+                <i class="fa-solid fa-circle-question"></i>
+                <span>The Question Frame</span>
+            </a>
+            <a class="nav-item" data-target="tool2">
+                <i class="fa-solid fa-file-signature"></i>
+                <span>The Proposal Method</span>
+            </a>
+            <a class="nav-item" data-target="tool3">
+                <i class="fa-solid fa-bullseye"></i>
+                <span>The Success Definition</span>
+            </a>
+            <a class="nav-item" data-target="tool4">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Documentation Shield</span>
+            </a>
+            <a class="nav-item" data-target="tool5">
+                <i class="fa-solid fa-comments"></i>
+                <span>Self-Advocacy Script</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <main class="content-container">
+
+            <!-- DASHBOARD VIEW -->
+            <section id="dashboard" class="view-pane active">
+                <div class="hero-banner">
+                    <h2 class="hero-title">Clarity Builder</h2>
+                    <p class="hero-tagline">Turn "just fix it" into a blueprint you can actually build.</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="tool-card" onclick="navigateTo('tool1')">
+                        <div>
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-circle-question"></i>
+                            </div>
+                            <h3 class="tool-card-title">1. The Question Frame</h3>
+                            <p class="tool-card-desc">Formulate surgical, trust-building questions when you receive vague directives.</p>
+                        </div>
+                        <div class="tool-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+
+                    <div class="tool-card" onclick="navigateTo('tool2')">
+                        <div>
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-file-signature"></i>
+                            </div>
+                            <h3 class="tool-card-title">2. The Proposal Method</h3>
+                            <p class="tool-card-desc">Shift from asking endless questions to proposing a precise action plan.</p>
+                        </div>
+                        <div class="tool-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+
+                    <div class="tool-card" onclick="navigateTo('tool3')">
+                        <div>
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-bullseye"></i>
+                            </div>
+                            <h3 class="tool-card-title">3. The Success Definition</h3>
+                            <p class="tool-card-desc">Align on exact "good" vs "bad" criteria before investing deep work.</p>
+                        </div>
+                        <div class="tool-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+
+                    <div class="tool-card" onclick="navigateTo('tool4')">
+                        <div>
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <h3 class="tool-card-title">4. Documentation Shield</h3>
+                            <p class="tool-card-desc">Protect yourself from shifting goalposts with proactive paper trails.</p>
+                        </div>
+                        <div class="tool-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+
+                    <div class="tool-card" onclick="navigateTo('tool5')">
+                        <div>
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-comments"></i>
+                            </div>
+                            <h3 class="tool-card-title">5. Self-Advocacy Script</h3>
+                            <p class="tool-card-desc">Address recurring vague communication constructively without attacking your boss.</p>
+                        </div>
+                        <div class="tool-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 1: THE QUESTION FRAME -->
+            <section id="tool1" class="view-pane">
+                <div class="tool-header">
+                    <div class="tool-title-wrapper">
+                        <h2 class="tool-title">The Question Frame</h2>
+                        <button class="btn btn-secondary btn-sm" onclick="loadSample(1)">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+                    <div class="tool-problem">
+                        "I don't even know what questions to ask when instructions are vague."
+                    </div>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool1" onsubmit="event.preventDefault(); generateTool1();">
+                        <div class="form-group">
+                            <label class="form-label" for="t1-told">What were you told to do?</label>
+                            <textarea id="t1-told" class="form-control" placeholder="e.g. 'Make the presentation better'" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t1-unclear">What was unclear?</label>
+                            <select id="t1-unclear" class="form-control" required>
+                                <option value="The goal">The goal</option>
+                                <option value="The audience">The audience</option>
+                                <option value="The format">The format</option>
+                                <option value="The deadline">The deadline</option>
+                                <option value="The criteria for success">The criteria for success</option>
+                                <option value="All of it">All of it</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t1-tried">What have you tried so far?</label>
+                            <textarea id="t1-tried" class="form-control" placeholder="e.g. Added more data slides and formatted charts"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t1-afraid">What are you afraid will happen if you ask for clarity?</label>
+                            <textarea id="t1-afraid" class="form-control" placeholder="e.g. Seeming incompetent or lacking initiative"></textarea>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-gears"></i> Generate Communication Strategy
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tool 1 Outputs -->
+                <div id="output-tool1" class="output-container">
+                    <div class="output-header">
+                        <h3>Strategy & Scripts</h3>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-list-check"></i> The Question Set</span>
+                        </div>
+                        <ol class="ordered-list" id="t1-out-questions"></ol>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-arrow-down-1-9"></i> The Order (Ask First)</span>
+                        </div>
+                        <p id="t1-out-order" style="font-size:0.925rem; color:#334155;"></p>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-envelope"></i> The Email Version</span>
+                            <button class="copy-btn" onclick="copyText('t1-out-email')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t1-out-email"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-comments"></i> The In-Person Version</span>
+                            <button class="copy-btn" onclick="copyText('t1-out-inperson')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t1-out-inperson"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-check-double"></i> The Follow-Up</span>
+                            <button class="copy-btn" onclick="copyText('t1-out-followup')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t1-out-followup"></div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-title">
+                        <span><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                        <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool1')">Clear History</button>
+                    </div>
+                    <div id="history-tool1"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 2: THE PROPOSAL METHOD -->
+            <section id="tool2" class="view-pane">
+                <div class="tool-header">
+                    <div class="tool-title-wrapper">
+                        <h2 class="tool-title">The Proposal Method</h2>
+                        <button class="btn btn-secondary btn-sm" onclick="loadSample(2)">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+                    <div class="tool-problem">
+                        "Rather than ask endless questions, I should propose a specific approach and get approval."
+                    </div>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool2" onsubmit="event.preventDefault(); generateTool2();">
+                        <div class="form-group">
+                            <label class="form-label" for="t2-understanding">Your understanding of the task:</label>
+                            <textarea id="t2-understanding" class="form-control" placeholder="e.g. Improve client onboarding process" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t2-proposal">Your proposed approach:</label>
+                            <textarea id="t2-proposal" class="form-control" placeholder="e.g. Add a 2-minute welcome video and a interactive setup checklist" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t2-unsure">What you're unsure about:</label>
+                            <textarea id="t2-unsure" class="form-control" placeholder="e.g. Unsure if budget exists for video production software"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t2-timeline">Timeline you need:</label>
+                            <input type="text" id="t2-timeline" class="form-control" placeholder="e.g. 2 weeks" required>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-gears"></i> Generate Proposal Package
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tool 2 Outputs -->
+                <div id="output-tool2" class="output-container">
+                    <div class="output-header">
+                        <h3>Proposal Package</h3>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-paper-plane"></i> The Proposal Email</span>
+                            <button class="copy-btn" onclick="copyText('t2-out-email')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t2-out-email"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-clipboard-check"></i> The Assumptions List</span>
+                        </div>
+                        <ul class="bullet-list" id="t2-out-assumptions"></ul>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-life-ring"></i> The Escape Hatch</span>
+                            <button class="copy-btn" onclick="copyText('t2-out-escape')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t2-out-escape"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-align-left"></i> The Visual Aid Outline</span>
+                        </div>
+                        <div class="script-box" id="t2-out-visual"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-rotate-left"></i> If They Reject It (Pivot Script)</span>
+                            <button class="copy-btn" onclick="copyText('t2-out-reject')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t2-out-reject"></div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-title">
+                        <span><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                        <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool2')">Clear History</button>
+                    </div>
+                    <div id="history-tool2"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 3: THE SUCCESS DEFINITION -->
+            <section id="tool3" class="view-pane">
+                <div class="tool-header">
+                    <div class="tool-title-wrapper">
+                        <h2 class="tool-title">The Success Definition</h2>
+                        <button class="btn btn-secondary btn-sm" onclick="loadSample(3)">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+                    <div class="tool-problem">
+                        "We need to agree on what 'good' looks like before I start."
+                    </div>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool3" onsubmit="event.preventDefault(); generateTool3();">
+                        <div class="form-group">
+                            <label class="form-label" for="t3-task">The task or project:</label>
+                            <textarea id="t3-task" class="form-control" placeholder="e.g. Redesign website homepage" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t3-happy">What would make your boss happy?</label>
+                            <textarea id="t3-happy" class="form-control" placeholder="e.g. Clean, modern look with clear CTA" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t3-disappointed">What would make your boss disappointed?</label>
+                            <textarea id="t3-disappointed" class="form-control" placeholder="e.g. Looking like the current clutter or outdated style"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Have you delivered something similar before?</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="t3-history" value="Yes, they loved it"> Yes, they loved it
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="t3-history" value="Yes, they changed everything" checked> Yes, they changed everything
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="t3-history" value="No"> No
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="t3-history" value="Not sure"> Not sure
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-gears"></i> Define Success Criteria
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tool 3 Outputs -->
+                <div id="output-tool3" class="output-container">
+                    <div class="output-header">
+                        <h3>Alignment Framework</h3>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-square-check"></i> The Criteria Checklist</span>
+                        </div>
+                        <ul class="bullet-list" id="t3-out-checklist"></ul>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-lightbulb"></i> The Example Request</span>
+                            <button class="copy-btn" onclick="copyText('t3-out-example')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t3-out-example"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-ban"></i> The Anti-Example Request</span>
+                            <button class="copy-btn" onclick="copyText('t3-out-antiexample')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t3-out-antiexample"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-file-contract"></i> The Sign-Off Email</span>
+                            <button class="copy-btn" onclick="copyText('t3-out-signoff')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t3-out-signoff"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-bars-staggered"></i> The Iteration Check-In Plan</span>
+                        </div>
+                        <div class="script-box" id="t3-out-iteration"></div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-title">
+                        <span><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                        <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool3')">Clear History</button>
+                    </div>
+                    <div id="history-tool3"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 4: THE DOCUMENTATION SHIELD -->
+            <section id="tool4" class="view-pane">
+                <div class="tool-header">
+                    <div class="tool-title-wrapper">
+                        <h2 class="tool-title">Documentation Shield</h2>
+                        <button class="btn btn-secondary btn-sm" onclick="loadSample(4)">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+                    <div class="tool-problem">
+                        "When the outcome fails, they blame me for not reading their mind."
+                    </div>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool4" onsubmit="event.preventDefault(); generateTool4();">
+                        <div class="form-group">
+                            <label class="form-label" for="t4-wrong">What went wrong last time?</label>
+                            <textarea id="t4-wrong" class="form-control" placeholder="e.g. Delivered written report, but boss wanted interactive dashboard" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Were instructions given in writing?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t4-writing" value="Yes"> Yes</label>
+                                <label class="radio-label"><input type="radio" name="t4-writing" value="No" checked> No</label>
+                                <label class="radio-label"><input type="radio" name="t4-writing" value="Partially"> Partially</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Did you ask for clarification?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t4-asked" value="Yes"> Yes</label>
+                                <label class="radio-label"><input type="radio" name="t4-asked" value="No"> No</label>
+                                <label class="radio-label"><input type="radio" name="t4-asked" value="Was afraid to" checked> Was afraid to / Got vague response</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t4-others">Who else was involved?</label>
+                            <textarea id="t4-others" class="form-control" placeholder="e.g. No one else involved / Marketing team"></textarea>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-gears"></i> Build Protection System
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tool 4 Outputs -->
+                <div id="output-tool4" class="output-container">
+                    <div class="output-header">
+                        <h3>Shield Architecture</h3>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-receipt"></i> The Paper Trail Template</span>
+                            <button class="copy-btn" onclick="copyText('t4-out-papertrail')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t4-out-papertrail"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-flag"></i> The 25 / 50 / 75 Checkpoint System</span>
+                        </div>
+                        <div class="script-box" id="t4-out-checkpoints"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-lock"></i> The Scope Lock Protocol</span>
+                            <button class="copy-btn" onclick="copyText('t4-out-scopelock')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t4-out-scopelock"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-user-shield"></i> If Blamed Anyway (De-escalation Response)</span>
+                            <button class="copy-btn" onclick="copyText('t4-out-blamed')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t4-out-blamed"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-book"></i> The Pattern Learning Log</span>
+                        </div>
+                        <div class="script-box" id="t4-out-log"></div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-title">
+                        <span><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                        <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool4')">Clear History</button>
+                    </div>
+                    <div id="history-tool4"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 5: THE SELF-ADVOCACY SCRIPT -->
+            <section id="tool5" class="view-pane">
+                <div class="tool-header">
+                    <div class="tool-title-wrapper">
+                        <h2 class="tool-title">Self-Advocacy Script</h2>
+                        <button class="btn btn-secondary btn-sm" onclick="loadSample(5)">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                        </button>
+                    </div>
+                    <div class="tool-problem">
+                        "I need to address the pattern of vague instructions without attacking my boss."
+                    </div>
+                </div>
+
+                <div class="card">
+                    <form id="form-tool5" onsubmit="event.preventDefault(); generateTool5();">
+                        <div class="form-group">
+                            <label class="form-label" for="t5-frequency">How often does this happen?</label>
+                            <select id="t5-frequency" class="form-control" required>
+                                <option value="Daily">Daily</option>
+                                <option value="Weekly">Weekly</option>
+                                <option value="Occasionally">Occasionally</option>
+                                <option value="Every project" selected>Every project</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="t5-impact">The impact on your work:</label>
+                            <textarea id="t5-impact" class="form-control" placeholder="e.g. Causes significant rework, wasted time, and missed deadlines" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Your relationship with your boss:</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t5-rel" value="Strong"> Strong</label>
+                                <label class="radio-label"><input type="radio" name="t5-rel" value="Neutral" checked> Neutral</label>
+                                <label class="radio-label"><input type="radio" name="t5-rel" value="Strained"> Strained</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Your primary goal:</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="t5-goal" value="Better instructions" checked> Better upfront instructions</label>
+                                <label class="radio-label"><input type="radio" name="t5-goal" value="Less blame"> Less blame / clear accountability</label>
+                                <label class="radio-label"><input type="radio" name="t5-goal" value="More autonomy"> More autonomy in execution</label>
+                                <label class="radio-label"><input type="radio" name="t5-goal" value="Protection"> Documentation protection</label>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-gears"></i> Generate Advocacy Framework
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tool 5 Outputs -->
+                <div id="output-tool5" class="output-container">
+                    <div class="output-header">
+                        <h3>Advocacy Strategy</h3>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-comments"></i> The Pattern Conversation Script</span>
+                            <button class="copy-btn" onclick="copyText('t5-out-script')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <div class="script-box" id="t5-out-script"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-bullseye"></i> Collaborative Framing Strategy</span>
+                        </div>
+                        <div class="script-box" id="t5-out-framing"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-sliders"></i> Proposed System Solution</span>
+                        </div>
+                        <div class="script-box" id="t5-out-system"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-handshake"></i> Implementation Plan (If Receptive)</span>
+                        </div>
+                        <div class="script-box" id="t5-out-receptive"></div>
+                    </div>
+
+                    <div class="output-block">
+                        <div class="output-block-title">
+                            <span><i class="fa-solid fa-shield-cat"></i> Self-Protection Protocol (If Defensive)</span>
+                        </div>
+                        <div class="script-box" id="t5-out-defensive"></div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="history-title">
+                        <span><i class="fa-solid fa-clock-rotate-left"></i> History</span>
+                        <button class="btn btn-outline btn-sm" onclick="clearToolHistory('tool5')">Clear History</button>
+                    </div>
+                    <div id="history-tool5"></div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Persistent Footer -->
+        <footer>
+            For workplace communication improvement only. Not a substitute for management training. For persistent communication failures, consult HR or a career coach.
+        </footer>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check" style="color: #4ADE80;"></i>
+        <span id="toast-message">Copied!</span>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. NAVIGATION & LAYOUT LOGIC
+           ========================================================================== */
+        const navItems = document.querySelectorAll('.nav-item');
+        const viewPanes = document.querySelectorAll('.view-pane');
+        const sidebar = document.getElementById('sidebar');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        function navigateTo(targetId) {
+            // Update nav active styling
+            navItems.forEach(item => {
+                if (item.getAttribute('data-target') === targetId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Toggle view visibility
+            viewPanes.forEach(pane => {
+                if (pane.id === targetId) {
+                    pane.classList.add('active');
+                } else {
+                    pane.classList.remove('active');
+                }
+            });
+
+            // Close mobile menu if open
+            closeMobileSidebar();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const target = item.getAttribute('data-target');
+                navigateTo(target);
+            });
+        });
+
+        function toggleMobileSidebar() {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('open');
+        }
+
+        function closeMobileSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('open');
+        }
+
+        mobileMenuBtn.addEventListener('click', toggleMobileSidebar);
+        sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+        /* ==========================================================================
+           2. UTILITY FUNCTIONS (Toast & Copy)
+           ========================================================================== */
+        function showToast(message = "Copied!") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyText(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const textToCopy = el.innerText || el.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(err => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = textToCopy;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast("Copied!");
+            });
+        }
+
+        /* ==========================================================================
+           3. SAMPLE SCENARIOS LOADERS
+           ========================================================================== */
+        function loadSample(toolNumber) {
+            if (toolNumber === 1) {
+                document.getElementById('t1-told').value = "Make the presentation better";
+                document.getElementById('t1-unclear').value = "The criteria for success";
+                document.getElementById('t1-tried').value = "Added more data slides and formatted charts";
+                document.getElementById('t1-afraid').value = "Seeming incompetent or lacking initiative";
+            } else if (toolNumber === 2) {
+                document.getElementById('t2-understanding').value = "Improve client onboarding experience";
+                document.getElementById('t2-proposal').value = "Add a 2-minute welcome video and a interactive setup checklist for new users";
+                document.getElementById('t2-unsure').value = "Unsure if budget exists for video production tools";
+                document.getElementById('t2-timeline').value = "2 weeks";
+            } else if (toolNumber === 3) {
+                document.getElementById('t3-task').value = "Redesign website homepage layout";
+                document.getElementById('t3-happy').value = "A clean, modern look that clearly highlights our core CTA and builds trust";
+                document.getElementById('t3-disappointed').value = "A cluttered design that feels like our current outdated page";
+                const radios = document.getElementsByName('t3-history');
+                radios.forEach(r => { if (r.value === "Yes, they changed everything") r.checked = true; });
+            } else if (toolNumber === 4) {
+                document.getElementById('t4-wrong').value = "Delivered written summary report, but boss expected a live interactive dashboard";
+                const writingRadios = document.getElementsByName('t4-writing');
+                writingRadios.forEach(r => { if (r.value === "No") r.checked = true; });
+                const askedRadios = document.getElementsByName('t4-asked');
+                askedRadios.forEach(r => { if (r.value === "Was afraid to") r.checked = true; });
+                document.getElementById('t4-others').value = "No one else involved";
+            } else if (toolNumber === 5) {
+                document.getElementById('t5-frequency').value = "Every project";
+                document.getElementById('t5-impact').value = "Causes major rework, wasted hours, and tight crunch periods near deadlines";
+                const relRadios = document.getElementsByName('t5-rel');
+                relRadios.forEach(r => { if (r.value === "Neutral") r.checked = true; });
+                const goalRadios = document.getElementsByName('t5-goal');
+                goalRadios.forEach(r => { if (r.value === "Better instructions") r.checked = true; });
+            }
+            showToast("Sample Scenario Loaded!");
+        }
+
+        /* ==========================================================================
+           4. GENERATION LOGIC - TOOL 1 (THE QUESTION FRAME)
+           ========================================================================== */
+        function generateTool1() {
+            const told = document.getElementById('t1-told').value.trim();
+            const unclear = document.getElementById('t1-unclear').value;
+            const tried = document.getElementById('t1-tried').value.trim() || "Reviewed initial options";
+            const afraid = document.getElementById('t1-afraid').value.trim() || "asking unnecessary questions";
+
+            const qSet = [
+                `What is the primary outcome or decision that this update needs to drive?`,
+                `Who is the target audience or key stakeholder reviewing this outcome?`,
+                `Are there 1–2 key benchmark examples or formats you'd recommend referencing?`,
+                `What specific element should I prioritize first to ensure alignment on direction?`,
+                `What would make this a total success versus a missed mark in your eyes?`
+            ];
+
+            const qListEl = document.getElementById('t1-out-questions');
+            qListEl.innerHTML = qSet.map(q => `<li>${q}</li>`).join('');
+
+            document.getElementById('t1-out-order').innerHTML = 
+                `<strong>Start with Question 1 or 4:</strong> Anchor the conversation on the primary goal or priority first. This shows strategic initiative and protects against feeling like you are asking for hand-holding.`;
+
+            document.getElementById('t1-out-email').innerText = 
+`Hi [Name],
+
+I'm working on "${told}". To ensure this hits the mark without wasting time on misaligned iterations, I've outlined a brief direction based on what I've done so far (${tried}).
+
+Could you clarify:
+1. What is the single most important priority for this (${unclear.toLowerCase()})?
+2. Do you have a preferred format or reference example in mind?
+
+I'll proceed with my draft and send a quick check-in once initial structure is locked.
+
+Best regards,
+[Your Name]`;
+
+            document.getElementById('t1-out-inperson').innerText = 
+`"Hey [Name], I'm diving into '${told}'. I want to make sure I deliver exactly what you're looking for regarding ${unclear.toLowerCase()}. So far, I've ${tried}. To make sure we're 100% aligned, what's the primary success criteria or target format you have in mind for this?"`;
+
+            document.getElementById('t1-out-followup').innerText = 
+`"Thanks for the direction, [Name]! Just to confirm I've got it right: I will focus on [Insert Answer], prioritizing [Key Priority], and share a quick draft by [Date/Time]. Let me know if I missed anything."`;
+
+            document.getElementById('output-tool1').style.display = 'block';
+            
+            saveHistory('tool1', {
+                title: told,
+                date: new Date().toLocaleDateString(),
+                data: { told, unclear, tried, afraid }
+            });
+        }
+
+        /* ==========================================================================
+           5. GENERATION LOGIC - TOOL 2 (THE PROPOSAL METHOD)
+           ========================================================================== */
+        function generateTool2() {
+            const understanding = document.getElementById('t2-understanding').value.trim();
+            const proposal = document.getElementById('t2-proposal').value.trim();
+            const unsure = document.getElementById('t2-unsure').value.trim() || "Resource constraints or exact budget";
+            const timeline = document.getElementById('t2-timeline').value.trim();
+
+            document.getElementById('t2-out-email').innerText = 
+`Subject: Proposed Plan & Timeline: ${understanding}
+
+Hi [Name],
+
+To address "${understanding}", I have put together a recommended action plan so we can move forward efficiently.
+
+Proposed Approach:
+${proposal}
+
+Key Assumptions & Timeline:
+- Target Completion: ${timeline}
+- Key Dependency/Unsure Factor: ${unsure}
+
+Unless you'd like to make adjustments, I will proceed with this plan starting [Day/Tomorrow]. Please let me know if you'd like any tweaks!
+
+Best,
+[Your Name]`;
+
+            const assumptions = [
+                `Assumption 1: The primary goal is ${understanding}.`,
+                `Assumption 2: Execution will follow the approach: ${proposal}.`,
+                `Assumption 3: Resource/Constraint status regarding "${unsure}" will be validated during initial phase.`,
+                `Assumption 4: A timeframe of ${timeline} aligns with high-level expectations.`
+            ];
+            document.getElementById('t2-out-assumptions').innerHTML = assumptions.map(a => `<li>${a}</li>`).join('');
+
+            document.getElementById('t2-out-escape').innerText = 
+`"I will begin executing on this plan on [Date] unless I hear otherwise from you. If priorities shift or direction changes down the road, I can pause and pivot immediately."`;
+
+            document.getElementById('t2-out-visual').innerText = 
+`PROJECT OUTLINE: ${understanding.toUpperCase()}
+│
+├── 1. OBJECTIVE: ${understanding}
+├── 2. PROPOSED METHOD: ${proposal}
+├── 3. KNOWN UNCERTAINTIES: ${unsure}
+└── 4. TARGET TIMELINE: ${timeline}`;
+
+            document.getElementById('t2-out-reject').innerText = 
+`"Understood! Thank you for the feedback. To adjust quickly: which specific part of the proposed plan should I tweak to better fit your vision—the approach, the scope, or the timeline?"`;
+
+            document.getElementById('output-tool2').style.display = 'block';
+
+            saveHistory('tool2', {
+                title: understanding,
+                date: new Date().toLocaleDateString(),
+                data: { understanding, proposal, unsure, timeline }
+            });
+        }
+
+        /* ==========================================================================
+           6. GENERATION LOGIC - TOOL 3 (THE SUCCESS DEFINITION)
+           ========================================================================== */
+        function generateTool3() {
+            const task = document.getElementById('t3-task').value.trim();
+            const happy = document.getElementById('t3-happy').value.trim();
+            const disappointed = document.getElementById('t3-disappointed').value.trim() || "Missed expectations or excessive iterations";
+            const history = document.querySelector('input[name="t3-history"]:checked').value;
+
+            const checklist = [
+                `Goal Alignment: Does the deliverable achieve: "${happy}"?`,
+                `Boundary Check: Does it avoid: "${disappointed}"?`,
+                `Format Standard: Is the output structured as expected?`,
+                `Stakeholder Approval: Who needs to sign off before finalization?`,
+                `Historical Reflection: Addressed past risk factors (${history})?`
+            ];
+            document.getElementById('t3-out-checklist').innerHTML = checklist.map(c => `<li>${c}</li>`).join('');
+
+            document.getElementById('t3-out-example').innerText = 
+`"Hey [Name], to make sure I hit the exact mark for '${task}', do you have 1 or 2 past examples of deliverables in our company that you consider gold standards for this?"`;
+
+            document.getElementById('t3-out-antiexample').innerText = 
+`"To save us time and avoid unnecessary revisions, are there any past versions or approaches to '${task}' that you disliked and definitely want me to avoid?"`;
+
+            document.getElementById('t3-out-signoff').innerText = 
+`Hi [Name],
+
+Before I dive fully into executing '${task}', I want to confirm our definition of success:
+- High Success: ${happy}
+- Things to Avoid: ${disappointed}
+
+If this matches your expectations, reply 'Looks good' and I will proceed immediately!
+
+Best,
+[Your Name]`;
+
+            document.getElementById('t3-out-iteration').innerText = 
+`CHECK-IN MILESTONES:
+- Check-in 1 (25% progress): Outline & structural review.
+- Check-in 2 (50% progress): Rough draft / initial prototype review.
+- Check-in 3 (90% progress): Final polish and minor adjustments before sign-off.`;
+
+            document.getElementById('output-tool3').style.display = 'block';
+
+            saveHistory('tool3', {
+                title: task,
+                date: new Date().toLocaleDateString(),
+                data: { task, happy, disappointed, history }
+            });
+        }
+
+        /* ==========================================================================
+           7. GENERATION LOGIC - TOOL 4 (DOCUMENTATION SHIELD)
+           ========================================================================== */
+        function generateTool4() {
+            const wrong = document.getElementById('t4-wrong').value.trim();
+            const writing = document.querySelector('input[name="t4-writing"]:checked').value;
+            const asked = document.querySelector('input[name="t4-asked"]:checked').value;
+            const others = document.getElementById('t4-others').value.trim() || "None";
+
+            document.getElementById('t4-out-papertrail').innerText = 
+`Subject: Summary & Next Steps: [Project/Task Name]
+
+Hi [Name],
+
+Thanks for the conversation today. To ensure we are fully aligned following our meeting, here is a recap of agreed next steps:
+
+- Task Objective: Resolve/deliver key outcome
+- Confirmed Format/Direction: [Insert Details]
+- Target Deadline: [Date]
+
+I'll keep you updated as I reach key milestones!
+
+Best,
+[Your Name]`;
+
+            document.getElementById('t4-out-checkpoints').innerText = 
+`STAGED CHECKPOINT SYSTEM:
+- 25% Mark: Send high-level skeleton/outline via email. ("Confirming direction before building full details...")
+- 50% Mark: Brief 3-minute sync or quick screenshot. ("Verifying initial structure aligns with vision...")
+- 75% Mark: Pre-final version submission. ("Final sanity check prior to polishing...")`;
+
+            document.getElementById('t4-out-scopelock').innerText = 
+`"Hi [Name], I've completed the original scope agreed upon on [Date]. If we'd like to add [New Request], I can certainly do that! It will adjust our timeline by [X days/hours]. Should I prioritize this new element over the existing timeline?"`;
+
+            document.getElementById('t4-out-blamed').innerText = 
+`"I understand your concern with the current outcome. Looking back at our recap on [Date], my understanding was [stated objective]. I want to make sure I capture your updated vision—let's document the new target so I can pivot effectively."`;
+
+            document.getElementById('t4-out-log').innerText = 
+`LOG RECORD:
+- Prior Gap: ${wrong}
+- Communication Style: Instructions were ${writing.toLowerCase()} written. Clarification asked: ${asked}.
+- Preventive Fix: Always send written recap within 1 hour of verbal instruction.`;
+
+            document.getElementById('output-tool4').style.display = 'block';
+
+            saveHistory('tool4', {
+                title: wrong,
+                date: new Date().toLocaleDateString(),
+                data: { wrong, writing, asked, others }
+            });
+        }
+
+        /* ==========================================================================
+           8. GENERATION LOGIC - TOOL 5 (SELF-ADVOCACY SCRIPT)
+           ========================================================================== */
+        function generateTool5() {
+            const frequency = document.getElementById('t5-frequency').value;
+            const impact = document.getElementById('t5-impact').value.trim();
+            const rel = document.querySelector('input[name="t5-rel"]:checked').value;
+            const goal = document.querySelector('input[name="t5-goal"]:checked').value;
+
+            document.getElementById('t5-out-script').innerText = 
+`"Hey [Name], I wanted to ask for a quick 5-minute chat about optimizing our project kickoffs. I've noticed that on a few recent projects (${frequency.toLowerCase()}), we've run into unexpected rework because initial direction was broad. 
+
+This often leads to ${impact}. I want to deliver top-tier work for you efficiently without wasting time. Moving forward, could we try using a 3-point brief format at the start of new assignments?"`;
+
+            document.getElementById('t5-out-framing').innerText = 
+`STRATEGIC FRAMING:
+- Position as: Time-saving efficiency for THEM, not extra work.
+- Key Mantra: "I want to protect your time and maximize our output."
+- Avoid: "You never give me clear instructions."
+- Use: "To ensure I hit your exact vision on the first attempt..."`;
+
+            document.getElementById('t5-out-system').innerText = 
+`PROPOSED SYSTEM: 3-POINT PROJECT KICKOFF BRIEF
+1. Core Deliverable & Goal (What does done look like?)
+2. Primary Audience / Constraints (Who is it for / what to avoid?)
+3. Review Milestone (When do we do a 2-minute checkpoint?)`;
+
+            document.getElementById('t5-out-receptive').innerText = 
+`NEXT STEPS (IF RECEPTIVE):
+1. Thank them for supporting your proactive workflow.
+2. Share a lightweight 1-page template or Slack memo format.
+3. Offer to draft the initial brief for the next project yourself for them to quickly approve.`;
+
+            document.getElementById('t5-out-defensive').innerText = 
+`SELF-PROTECTION PROTOCOL (IF DEFENSIVE):
+1. De-escalate immediately: "My goal is purely to make sure I'm giving you what you need faster."
+2. Take ownership of the process: "I will start sending brief summary emails after our task chats to confirm understanding before I dive in."
+3. Consistently enforce the Paper Trail Shield (Tool 4).`;
+
+            document.getElementById('output-tool5').style.display = 'block';
+
+            saveHistory('tool5', {
+                title: `Advocacy Plan (${frequency})`,
+                date: new Date().toLocaleDateString(),
+                data: { frequency, impact, rel, goal }
+            });
+        }
+
+        /* ==========================================================================
+           9. LOCALSTORAGE HISTORY MANAGEMENT
+           ========================================================================== */
+        function getHistory(toolId) {
+            const key = `clarity_history_${toolId}`;
+            try {
+                return JSON.parse(localStorage.getItem(key)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveHistory(toolId, record) {
+            const key = `clarity_history_${toolId}`;
+            let history = getHistory(toolId);
+            history.unshift(record);
+            if (history.length > 30) {
+                history = history.slice(0, 30);
+            }
+            try {
+                localStorage.setItem(key, JSON.stringify(history));
+            } catch (e) {
+                console.error("Failed to save to localStorage", e);
+            }
+            renderHistory(toolId);
+        }
+
+        function clearToolHistory(toolId) {
+            const key = `clarity_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared!");
+        }
+
+        function renderHistory(toolId) {
+            const container = document.getElementById(`history-${toolId}`);
+            if (!container) return;
+            const history = getHistory(toolId);
+
+            if (history.length === 0) {
+                container.innerHTML = `<p style="font-size:0.85rem; color:var(--text-muted); italic;">No saved history yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = history.map((item, index) => `
+                <div class="history-item">
+                    <div class="history-header" onclick="toggleHistoryItem('${toolId}', ${index})">
+                        <span><strong>${item.title || 'Saved Scenario'}</strong> - ${item.date}</span>
+                        <i class="fa-solid fa-chevron-down" id="hist-icon-${toolId}-${index}"></i>
+                    </div>
+                    <div class="history-body" id="hist-body-${toolId}-${index}">
+                        <pre style="white-space: pre-wrap; font-size: 0.8rem; background:#F8FAFC; padding:0.5rem; border-radius:0.25rem;">${JSON.stringify(item.data, null, 2)}</pre>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistoryItem(toolId, index) {
+            const body = document.getElementById(`hist-body-${toolId}-${index}`);
+            const icon = document.getElementById(`hist-icon-${toolId}-${index}`);
+            if (body.classList.contains('open')) {
+                body.classList.remove('open');
+                icon.className = 'fa-solid fa-chevron-down';
+            } else {
+                body.classList.add('open');
+                icon.className = 'fa-solid fa-chevron-up';
+            }
+        }
+
+        // Initialize history views on load
+        window.addEventListener('DOMContentLoaded', () => {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(id => renderHistory(id));
+        });
+    </script>
+</body>
+</html>

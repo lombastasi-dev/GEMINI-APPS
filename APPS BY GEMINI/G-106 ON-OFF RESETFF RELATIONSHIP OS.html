@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnOffReset — Decision Toolkit for Repeat Cycles</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS RESET & VARIABLES */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --deep-charcoal: #2B2D42;
+            --electric-blue: #4361EE;
+            --electric-blue-hover: #3451D1;
+            --bg-gradient-start: #F8F9FA;
+            --bg-gradient-end: #F0F4FF;
+            --card-bg: #FFFFFF;
+            --text-main: #2B2D42;
+            --text-muted: #6C757D;
+            --border-color: #E9ECEF;
+            --sidebar-width: 260px;
+            --radius-xl: 1rem;
+            --shadow-sm: 0 2px 8px rgba(43, 45, 66, 0.06);
+            --shadow-md: 0 4px 16px rgba(43, 45, 66, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* LAYOUT STYLES */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* SIDEBAR NAVIGATION */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand-logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--deep-charcoal);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .brand-logo span {
+            color: var(--electric-blue);
+        }
+
+        .close-sidebar-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: none;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item button:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+            color: var(--electric-blue);
+        }
+
+        .nav-item button.active {
+            background-color: var(--electric-blue);
+            color: white;
+        }
+
+        .nav-item button i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* MOBILE HEADER & NAVIGATION OVERLAY */
+        .mobile-header {
+            display: none;
+            background-color: var(--card-bg);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--deep-charcoal);
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* MAIN CONTENT AREA */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        /* CARD COMPONENT */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        /* HERO SECTION */
+        .hero {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, var(--deep-charcoal), #1D1E2C);
+            color: white;
+            border-radius: var(--radius-xl);
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #E0E6ED;
+            font-weight: 400;
+        }
+
+        /* DASHBOARD GRID */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .dash-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(67, 97, 238, 0.3);
+        }
+
+        .dash-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--electric-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            color: var(--deep-charcoal);
+        }
+
+        .dash-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* FORM ELEMENTS */
+        .tool-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-header h2 {
+            font-size: 1.5rem;
+            color: var(--deep-charcoal);
+            margin-bottom: 0.25rem;
+        }
+
+        .tool-problem {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-sample {
+            background-color: rgba(67, 97, 238, 0.08);
+            color: var(--electric-blue);
+            border: 1px solid rgba(67, 97, 238, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-sample:hover {
+            background-color: rgba(67, 97, 238, 0.15);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--deep-charcoal);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #FAFAFA;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .form-control:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--electric-blue);
+            background-color: #FFFFFF;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.25rem;
+        }
+
+        .radio-label, .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            cursor: pointer;
+            font-weight: normal;
+            margin-bottom: 0;
+        }
+
+        .radio-label input, .checkbox-label input {
+            accent-color: var(--electric-blue);
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background-color: var(--electric-blue);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--electric-blue-hover);
+        }
+
+        /* OUTPUT RESULTS SECTION */
+        .analysis-output {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .output-header {
+            font-size: 1.25rem;
+            color: var(--deep-charcoal);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .analysis-block {
+            background-color: #FAFAFA;
+            border-left: 4px solid var(--electric-blue);
+            padding: 1rem 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin-bottom: 1rem;
+        }
+
+        .analysis-block h4 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--electric-blue);
+            margin-bottom: 0.35rem;
+        }
+
+        .analysis-block p {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            white-space: pre-line;
+        }
+
+        /* SCRIPT CONTAINER WITH COPY */
+        .script-box {
+            position: relative;
+            background-color: #212529;
+            color: #F8F9FA;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-top: 0.5rem;
+            white-space: pre-wrap;
+        }
+
+        .btn-copy {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            padding: 0.35rem 0.65rem;
+            border-radius: 0.35rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .btn-copy:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* ACCORDION HISTORY */
+        .history-section {
+            margin-top: 2.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .history-header h3 {
+            font-size: 1.1rem;
+            color: var(--deep-charcoal);
+        }
+
+        .btn-clear-history {
+            background: none;
+            border: none;
+            color: #DC3545;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .history-item {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background: var(--card-bg);
+        }
+
+        .history-item-header {
+            padding: 0.875rem 1rem;
+            background-color: #FAFAFA;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .history-item-header:hover {
+            background-color: #F0F4FF;
+        }
+
+        .history-item-body {
+            padding: 1rem;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            background-color: #FFFFFF;
+        }
+
+        .history-item.open .history-item-body {
+            display: block;
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--deep-charcoal);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* FOOTER */
+        .app-footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background-color: rgba(255, 255, 255, 0.5);
+            width: 100%;
+        }
+
+        /* VIEW SWITCHING UTILITY */
+        .view-panel {
+            display: none;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .close-sidebar-btn {
+                display: block;
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+                opacity: 1;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 1.75rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MOBILE HEADER -->
+    <header class="mobile-header">
+        <div class="brand-logo">
+            <i class="fa-solid fa-rotate-left"></i> OnOff<span>Reset</span>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open Navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- SIDEBAR OVERLAY FOR MOBILE -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <!-- FIXED SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="brand-logo" onclick="switchView('dashboard'); return false;">
+                    <i class="fa-solid fa-rotate-left"></i> OnOff<span>Reset</span>
+                </a>
+                <button class="close-sidebar-btn" id="closeSidebarBtn" aria-label="Close Navigation">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <button class="active" data-view="dashboard" onclick="switchView('dashboard')">
+                        <i class="fa-solid fa-chart-pie"></i> Dashboard
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-view="tool1" onclick="switchView('tool1')">
+                        <i class="fa-solid fa-diagram-project"></i> Pattern Map
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-view="tool2" onclick="switchView('tool2')">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i> Breakup Audit
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-view="tool3" onclick="switchView('tool3')">
+                        <i class="fa-solid fa-scale-balanced"></i> Stay / Go Decider
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-view="tool4" onclick="switchView('tool4')">
+                        <i class="fa-solid fa-comment-slash"></i> Final Conversation
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button data-view="tool5" onclick="switchView('tool5')">
+                        <i class="fa-solid fa-shield-halved"></i> Rebuild Plan
+                    </button>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <div class="content-container">
+
+                <!-- VIEW 0: DASHBOARD -->
+                <section id="dashboard" class="view-panel active">
+                    <div class="hero">
+                        <h1>On-Off Relationship OS</h1>
+                        <p>Break the loop or break it clean. Either way, decide.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dash-card" onclick="switchView('tool1')">
+                            <div class="dash-card-icon">
+                                <i class="fa-solid fa-diagram-project"></i>
+                            </div>
+                            <h3>1. The Pattern Map</h3>
+                            <p>Identify your breakup triggers, reunion drivers, and structural loop costs.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool2')">
+                            <div class="dash-card-icon">
+                                <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            </div>
+                            <h3>2. Last Breakup Audit</h3>
+                            <p>Audit past promises against actual behavioral changes to test reality.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool3')">
+                            <div class="dash-card-icon">
+                                <i class="fa-solid fa-scale-balanced"></i>
+                            </div>
+                            <h3>3. Stay or Go Decider</h3>
+                            <p>Evaluate non-negotiable conditions, fears, and objective friend wisdom.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool4')">
+                            <div class="dash-card-icon">
+                                <i class="fa-solid fa-comment-slash"></i>
+                            </div>
+                            <h3>4. Final Conversation</h3>
+                            <p>Generate precise scripts and boundary protocols for permanent separation.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool5')">
+                            <div class="dash-card-icon">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <h3>5. The Rebuild Plan</h3>
+                            <p>Establish trigger mapping, urge protocols, and a concrete week-1 recovery plan.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 1: THE PATTERN MAP -->
+                <section id="tool1" class="view-panel">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2>Tool 1 — The Pattern Map</h2>
+                            <p class="tool-problem">"We've broken up and gotten back together so many times I've lost count."</p>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-sample" onclick="loadSampleTool1()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                        <form id="formTool1" onsubmit="handleTool1Submit(event)">
+                            <div class="form-group">
+                                <label for="t1_cycles">How many cycles have you gone through?</label>
+                                <select id="t1_cycles" required>
+                                    <option value="">Select cycles...</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6+">6+</option>
+                                    <option value="I lost count">I lost count</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Who usually initiates the breakup?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t1_breakup_init" value="Me" required> Me</label>
+                                    <label class="radio-label"><input type="radio" name="t1_breakup_init" value="Them"> Them</label>
+                                    <label class="radio-label"><input type="radio" name="t1_breakup_init" value="We both say it"> We both say it</label>
+                                    <label class="radio-label"><input type="radio" name="t1_breakup_init" value="It just happens"> It just happens</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Who usually initiates getting back together?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t1_reunion_init" value="Me" required> Me</label>
+                                    <label class="radio-label"><input type="radio" name="t1_reunion_init" value="Them"> Them</label>
+                                    <label class="radio-label"><input type="radio" name="t1_reunion_init" value="Mutual"> Mutual</label>
+                                    <label class="radio-label"><input type="radio" name="t1_reunion_init" value="Random"> Random</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1_triggers">What triggers the breakups?</label>
+                                <textarea id="t1_triggers" placeholder="e.g., Fights over commitment, feeling ignored, mistrust..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1_pulls">What brings you back?</label>
+                                <textarea id="t1_pulls" placeholder="e.g., Loneliness, late night texting, physical chemistry, fear of being alone..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1_off_duration">How long do the "off" periods usually last?</label>
+                                <select id="t1_off_duration" required>
+                                    <option value="">Select duration...</option>
+                                    <option value="Days">Days</option>
+                                    <option value="Weeks">Weeks</option>
+                                    <option value="Months">Months</option>
+                                    <option value="Years">Years</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-primary"><i class="fa-solid fa-calculator"></i> Analyze Pattern</button>
+                        </form>
+
+                        <div id="outputTool1" class="analysis-output" style="display: none;"></div>
+
+                        <div class="history-section">
+                            <div class="history-header">
+                                <h3>Saved Pattern Analyses</h3>
+                                <button class="btn-clear-history" onclick="clearHistory('tool1')">Clear History</button>
+                            </div>
+                            <div id="historyTool1" class="history-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 2: THE LAST BREAKUP AUDIT -->
+                <section id="tool2" class="view-panel">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2>Tool 2 — The Last Breakup Audit</h2>
+                            <p class="tool-problem">"If we got back together again, what would actually be different?"</p>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-sample" onclick="loadSampleTool2()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                        <form id="formTool2" onsubmit="handleTool2Submit(event)">
+                            <div class="form-group">
+                                <label for="t2_reason">What was the reason for the most recent breakup?</label>
+                                <textarea id="t2_reason" placeholder="e.g., Lack of commitment, breach of trust, communication breakdown..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Has that reason been resolved?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2_resolved" value="Yes" required> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t2_resolved" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t2_resolved" value="Partially"> Partially</label>
+                                    <label class="radio-label"><input type="radio" name="t2_resolved" value="We never talked about it"> We never talked about it</label>
+                                    <label class="radio-label"><input type="radio" name="t2_resolved" value="It got worse"> It got worse</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2_promises">What did each of you promise last time?</label>
+                                <textarea id="t2_promises" placeholder="e.g., Promised to communicate better, go to therapy, stop avoiding hard topics..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2_kept">Which promises were actually kept?</label>
+                                <textarea id="t2_kept" placeholder="List promises kept or state none..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2_same">What is still exactly the same?</label>
+                                <textarea id="t2_same" placeholder="e.g., Same defensiveness, same emotional distance, same triggers..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Audit Reality</button>
+                        </form>
+
+                        <div id="outputTool2" class="analysis-output" style="display: none;"></div>
+
+                        <div class="history-section">
+                            <div class="history-header">
+                                <h3>Saved Breakup Audits</h3>
+                                <button class="btn-clear-history" onclick="clearHistory('tool2')">Clear History</button>
+                            </div>
+                            <div id="historyTool2" class="history-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: STAY OR GO DECIDER -->
+                <section id="tool3" class="view-panel">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2>Tool 3 — Stay or Go Decider</h2>
+                            <p class="tool-problem">"I don't know if we should try again or finally end it."</p>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-sample" onclick="loadSampleTool3()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                        <form id="formTool3" onsubmit="handleTool3Submit(event)">
+                            <div class="form-group">
+                                <label for="t3_love">What do you love about them?</label>
+                                <textarea id="t3_love" placeholder="e.g., Humor, chemistry, shared history, intense connection..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3_hurts">What hurts about being with them?</label>
+                                <textarea id="t3_hurts" placeholder="e.g., Inconsistency, anxiety, unpredictable emotional availability..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3_scares_leaving">What scares you about leaving permanently?</label>
+                                <textarea id="t3_scares_leaving" placeholder="e.g., Fear of regret, fear of being alone, fear of seeing them with someone else..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3_scares_staying">What scares you about staying?</label>
+                                <textarea id="t3_scares_staying" placeholder="e.g., Wasting my best years, losing self-respect, perpetual instability..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3_friend_advice">If your best friend were in this exact situation, what would you tell them?</label>
+                                <textarea id="t3_friend_advice" placeholder="Be brutally honest with what you'd advise them to do..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-primary"><i class="fa-solid fa-scale-balanced"></i> Weigh Options</button>
+                        </form>
+
+                        <div id="outputTool3" class="analysis-output" style="display: none;"></div>
+
+                        <div class="history-section">
+                            <div class="history-header">
+                                <h3>Saved Decider Reports</h3>
+                                <button class="btn-clear-history" onclick="clearHistory('tool3')">Clear History</button>
+                            </div>
+                            <div id="historyTool3" class="history-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: THE FINAL CONVERSATION -->
+                <section id="tool4" class="view-panel">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2>Tool 4 — The Final Conversation</h2>
+                            <p class="tool-problem">"If I'm ending it for good, I need to say it in a way that sticks."</p>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-sample" onclick="loadSampleTool4()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                        <form id="formTool4" onsubmit="handleTool4Submit(event)">
+                            <div class="form-group">
+                                <label for="t4_understand">What do you want them to understand?</label>
+                                <textarea id="t4_understand" placeholder="e.g., That our overall pattern is fundamentally unhealthy and cannot continue..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4_avoid">What do you NOT want to happen during the exit?</label>
+                                <select id="t4_avoid" required>
+                                    <option value="">Select main fear...</option>
+                                    <option value="Them begging">Them begging</option>
+                                    <option value="Them getting angry">Them getting angry</option>
+                                    <option value="Them going silent">Them going silent</option>
+                                    <option value="Them turning it around on me">Them turning it around on me</option>
+                                    <option value="Me weakening">Me weakening</option>
+                                    <option value="Us sleeping together">Us sleeping together</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4_closure_need">What closure do you need?</label>
+                                <textarea id="t4_closure_need" placeholder="e.g., Accepting that closure comes from my choice, not their answers..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4_closure_offer">What closure do you want to offer them?</label>
+                                <textarea id="t4_closure_offer" placeholder="e.g., Respect for the past, but certainty that the door is closed..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-primary"><i class="fa-solid fa-file-pen"></i> Generate Exit Protocol</button>
+                        </form>
+
+                        <div id="outputTool4" class="analysis-output" style="display: none;"></div>
+
+                        <div class="history-section">
+                            <div class="history-header">
+                                <h3>Saved Exit Protocols</h3>
+                                <button class="btn-clear-history" onclick="clearHistory('tool4')">Clear History</button>
+                            </div>
+                            <div id="historyTool4" class="history-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 5: THE REBUILD PLAN -->
+                <section id="tool5" class="view-panel">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2>Tool 5 — The Rebuild Plan</h2>
+                            <p class="tool-problem">"If we don't get back together, how do I actually stay gone?"</p>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-sample" onclick="loadSampleTool5()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                        </div>
+                        <form id="formTool5" onsubmit="handleTool5Submit(event)">
+                            <div class="form-group">
+                                <label>What triggers remind you of them?</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_reminders" value="Places"> Places</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_reminders" value="Songs"> Songs</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_reminders" value="Apps"> Social Media / Apps</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_reminders" value="Mutual friends"> Mutual friends</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_reminders" value="Photos"> Photos</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_reminders" value="Gifts"> Gifts / Items</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_reminders" value="Routine"> Shared Routine</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t5_reminders" value="Everything"> Everything</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5_miss_action">What do you currently do when you miss them?</label>
+                                <textarea id="t5_miss_action" placeholder="e.g., Check their social media, scroll through old text threads, drink alcohol..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5_support">What real support system do you have?</label>
+                                <textarea id="t5_support" placeholder="e.g., Close friend Sarah, therapist, sibling, support group..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5_sacrifices">What did you give up for this relationship?</label>
+                                <textarea id="t5_sacrifices" placeholder="e.g., Fitness routine, personal hobbies, connection with old friends, career goals..." required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-primary"><i class="fa-solid fa-compass"></i> Build Rebuild Plan</button>
+                        </form>
+
+                        <div id="outputTool5" class="analysis-output" style="display: none;"></div>
+
+                        <div class="history-section">
+                            <div class="history-header">
+                                <h3>Saved Rebuild Plans</h3>
+                                <button class="btn-clear-history" onclick="clearHistory('tool5')">Clear History</button>
+                            </div>
+                            <div id="historyTool5" class="history-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- FOOTER ON EVERY SCREEN -->
+            <footer class="app-footer">
+                For self-guided reflection and decision support only. Not therapy or professional advice.
+            </footer>
+        </main>
+    </div>
+
+    <!-- TOAST ELEMENT -->
+    <div id="toast" class="toast">Copied to clipboard!</div>
+
+    <!-- APPLICATION LOGIC -->
+    <script>
+        /* UI VIEW NAVIGATION & MOBILE SIDEBAR TOGGLE */
+        function switchView(viewId) {
+            // Hide all views
+            const views = document.querySelectorAll('.view-panel');
+            views.forEach(v => v.classList.remove('active'));
+
+            // Show target view
+            const target = document.getElementById(viewId);
+            if (target) {
+                target.classList.add('active');
+            }
+
+            // Update sidebar nav state
+            const navBtns = document.querySelectorAll('.nav-list button');
+            navBtns.forEach(b => {
+                if (b.getAttribute('data-view') === viewId) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+
+            // Close mobile menu if open
+            closeMobileSidebar();
+
+            // Load tool history
+            if (viewId !== 'dashboard') {
+                renderHistory(viewId);
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function openMobileSidebar() {
+            sidebar.classList.add('mobile-open');
+            sidebarOverlay.classList.add('mobile-open');
+        }
+
+        function closeMobileSidebar() {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('mobile-open');
+        }
+
+        if (hamburgerBtn) hamburgerBtn.addEventListener('click', openMobileSidebar);
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeMobileSidebar);
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+        /* TOAST UTILITY */
+        function showToast(msg = "Copied!") {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const text = el.innerText || el.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy");
+            });
+        }
+
+        /* LOCAL STORAGE HISTORY MANAGER */
+        function getHistory(toolId) {
+            const key = `onoff_history_${toolId}`;
+            try {
+                return JSON.parse(localStorage.getItem(key)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveHistory(toolId, item) {
+            const key = `onoff_history_${toolId}`;
+            let history = getHistory(toolId);
+            history.unshift(item);
+            if (history.length > 30) {
+                history = history.slice(0, 30);
+            }
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function clearHistory(toolId) {
+            if (confirm("Are you sure you want to clear history for this tool?")) {
+                const key = `onoff_history_${toolId}`;
+                localStorage.removeItem(key);
+                renderHistory(toolId);
+                showToast("History cleared");
+            }
+        }
+
+        function renderHistory(toolId) {
+            const container = document.getElementById(`history${toolId.charAt(0).toUpperCase() + toolId.slice(1)}`);
+            if (!container) return;
+            const history = getHistory(toolId);
+
+            if (history.length === 0) {
+                container.innerHTML = `<p style="font-size: 0.85rem; color: var(--text-muted);">No saved analyses yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = history.map((item, index) => {
+                return `
+                    <div class="history-item" id="hist_${toolId}_${index}">
+                        <div class="history-item-header" onclick="toggleHistoryItem('hist_${toolId}_${index}')">
+                            <span><i class="fa-regular fa-clock"></i> ${item.timestamp} — ${item.summary}</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="history-item-body">
+                            ${item.htmlContent}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleHistoryItem(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.toggle('open');
+            }
+        }
+
+        /* TOOL 1: THE PATTERN MAP */
+        function loadSampleTool1() {
+            document.getElementById('t1_cycles').value = "4";
+            document.querySelector('input[name="t1_breakup_init"][value="Them"]').checked = true;
+            document.querySelector('input[name="t1_reunion_init"][value="Me"]').checked = true;
+            document.getElementById('t1_triggers').value = "Fights about long-term commitment and emotional availability. They pull back whenever things get serious.";
+            document.getElementById('t1_pulls').value = "Severe loneliness, physical chemistry, missing their company, and hope that 'this time they realize what they lost'.";
+            document.getElementById('t1_off_duration').value = "Weeks";
+        }
+
+        function handleTool1Submit(e) {
+            e.preventDefault();
+            const cycles = document.getElementById('t1_cycles').value;
+            const breakupInit = document.querySelector('input[name="t1_breakup_init"]:checked')?.value || 'Unknown';
+            const reunionInit = document.querySelector('input[name="t1_reunion_init"]:checked')?.value || 'Unknown';
+            const triggers = document.getElementById('t1_triggers').value.trim();
+            const pulls = document.getElementById('t1_pulls').value.trim();
+            const duration = document.getElementById('t1_off_duration').value;
+
+            // Pattern Type Logic
+            let patternType = "Mutual Chaos";
+            if (breakupInit === "Them" && reunionInit === "Me") {
+                patternType = "Pursuer-Distancer (One leaves, one begs back)";
+            } else if (breakupInit === "Me" && reunionInit === "Them") {
+                patternType = "Distancer-Pursuer (You exit, they pull you back in)";
+            } else if (breakupInit === "We both say it" || reunionInit === "Mutual") {
+                patternType = "Volatile Mutual Friction";
+            }
+
+            const html = `
+                <div class="output-header">
+                    <span>Pattern Analysis</span>
+                    <small style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">${new Date().toLocaleDateString()}</small>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>YOUR CYCLE</h4>
+                    <p>You have repeated this loop <strong>${cycles} times</strong>. The breakup is typically initiated by <strong>${breakupInit}</strong>, followed by an 'off' period lasting roughly <strong>${duration}</strong> before <strong>${reunionInit}</strong> initiates a reunion.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE BREAKUP TRIGGER</h4>
+                    <p>The core disruption is triggered by: "${triggers}". This is not an accidental misunderstanding; it is the natural endpoint of your dynamic when sustained over time.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE REUNION DRUG</h4>
+                    <p>The force drawing you back is driven by: "${pulls}". This reflects temporary distress relief (soothing loneliness/anxiety or chemical familiarity) rather than structural resolution of the underlying problems.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE PATTERN TYPE</h4>
+                    <p><strong>${patternType}</strong>. The repetition proves that the breakup-reunion dynamic itself has become the operating model of the relationship.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE COST</h4>
+                    <p>Every cycle consumes months of emotional focus, degrades self-trust, creates chronic nervous system dysregulation, and blocks you from finding a stable, non-cyclical partnership.</p>
+                </div>
+            `;
+
+            const outContainer = document.getElementById('outputTool1');
+            outContainer.innerHTML = html;
+            outContainer.style.display = 'flex';
+
+            saveHistory('tool1', {
+                timestamp: new Date().toLocaleString(),
+                summary: `${cycles} cycles (${patternType})`,
+                htmlContent: html
+            });
+
+            outContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* TOOL 2: LAST BREAKUP AUDIT */
+        function loadSampleTool2() {
+            document.getElementById('t2_reason').value = "They refused to discuss future plans or commit to moving in together after 2 years.";
+            document.querySelector('input[name="t2_resolved"][value="No"]').checked = true;
+            document.getElementById('t2_promises').value = "They promised to 'work on their fear of commitment' and be more open.";
+            document.getElementById('t2_kept').value = "None. Avoidance resumed within three weeks of getting back together.";
+            document.getElementById('t2_same').value = "The exact same avoidance, defensiveness when bringing up the future, and emotional distance.";
+        }
+
+        function handleTool2Submit(e) {
+            e.preventDefault();
+            const reason = document.getElementById('t2_reason').value.trim();
+            const resolved = document.querySelector('input[name="t2_resolved"]:checked')?.value || 'No';
+            const promises = document.getElementById('t2_promises').value.trim();
+            const kept = document.getElementById('t2_kept').value.trim();
+            const same = document.getElementById('t2_same').value.trim();
+
+            const html = `
+                <div class="output-header">
+                    <span>Audit Results</span>
+                    <small style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">${new Date().toLocaleDateString()}</small>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE REASON: STILL VALID OR EXPIRED?</h4>
+                    <p>Primary issue: "${reason}". Status: <strong>${resolved}</strong>. A reason that remains unresolved is a guaranteed trigger for the next breakup.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE PROMISE AUDIT</h4>
+                    <p><strong>Promised:</strong> "${promises}"<br><strong>Kept:</strong> "${kept}"<br>The gap between what was promised and what was executed shows that reconciliation was driven by emotional relief, not behavioral change.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE UNCHANGED CORE</h4>
+                    <p>Unchanged factors: "${same}". Without fundamental structural change, returning to the relationship means agreeing to accept this exact reality indefinitely.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>ONE CHANGE REQUIRED</h4>
+                    <p>The core issue ("${reason}") must be completely resolved via verified, consistent behavior before any contact or consideration of a relationship resumes.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>REALITY CHECK</h4>
+                    <p>Based on past data, the likelihood of this change occurring inside the current dynamic is minimal. Patterns repeat until conditions change fundamentally.</p>
+                </div>
+            `;
+
+            const outContainer = document.getElementById('outputTool2');
+            outContainer.innerHTML = html;
+            outContainer.style.display = 'flex';
+
+            saveHistory('tool2', {
+                timestamp: new Date().toLocaleString(),
+                summary: `Status: ${resolved} (${reason.substring(0, 30)}...)`,
+                htmlContent: html
+            });
+
+            outContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* TOOL 3: STAY OR GO DECIDER */
+        function loadSampleTool3() {
+            document.getElementById('t3_love').value = "Great physical chemistry, sense of humor, familiar comfort, deeply affectionate during good periods.";
+            document.getElementById('t3_hurts').value = "Unpredictability, emotional hot-and-cold behavior, feeling walking on eggshells, constant anxiety.";
+            document.getElementById('t3_scares_leaving').value = "Fear of being alone, fear that they will change for someone else, losing shared social circle.";
+            document.getElementById('t3_scares_staying').value = "Wasting another 2 years in uncertainty, losing my self-worth, living in chronic stress.";
+            document.getElementById('t3_friend_advice').value = "I would tell them to walk away immediately. The anxiety and inconsistency are destroying their peace.";
+        }
+
+        function handleTool3Submit(e) {
+            e.preventDefault();
+            const love = document.getElementById('t3_love').value.trim();
+            const hurts = document.getElementById('t3_hurts').value.trim();
+            const scaresLeaving = document.getElementById('t3_scares_leaving').value.trim();
+            const scaresStaying = document.getElementById('t3_scares_staying').value.trim();
+            const friendAdvice = document.getElementById('t3_friend_advice').value.trim();
+
+            const html = `
+                <div class="output-header">
+                    <span>Decider Analysis</span>
+                    <small style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">${new Date().toLocaleDateString()}</small>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE LOVE LIST</h4>
+                    <p>What keeps you attached: "${love}". Notice if these elements are based on potential/past moments or current day-to-day reality.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE PAIN LIST</h4>
+                    <p>What you are tolerating: "${hurts}". Love does not neutralize or erase these ongoing costs.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE FEAR AUDIT</h4>
+                    <p><strong>Fear of leaving:</strong> "${scaresLeaving}" (often driven by temporary discomfort/withdrawal).<br><strong>Fear of staying:</strong> "${scaresStaying}" (driven by permanent structural consequences).</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE FRIEND TEST</h4>
+                    <p>Your objective advice to someone you love: <strong>"${friendAdvice}"</strong>. You already hold the answer when detached from the immediate emotional hook.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE DECISION FRAME</h4>
+                    <p>Do not ask "Do I love them?" Ask: "Is this environment capable of offering consistency, psychological safety, and mutual respect without constant crisis?"</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>ONE NON-NEGOTIABLE</h4>
+                    <p>Zero tolerance for hot-and-cold commitment. Either full, consistent, proactive investment or total disengagement.</p>
+                </div>
+            `;
+
+            const outContainer = document.getElementById('outputTool3');
+            outContainer.innerHTML = html;
+            outContainer.style.display = 'flex';
+
+            saveHistory('tool3', {
+                timestamp: new Date().toLocaleString(),
+                summary: `Friend Advice: "${friendAdvice.substring(0, 35)}..."`,
+                htmlContent: html
+            });
+
+            outContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* TOOL 4: THE FINAL CONVERSATION */
+        function loadSampleTool4() {
+            document.getElementById('t4_understand').value = "This isn't about one argument. Our cycle as a whole is unhealthy for both of us and I am exiting it permanently.";
+            document.getElementById('t4_avoid').value = "Me weakening";
+            document.getElementById('t4_closure_need').value = "Accepting that finality comes from my decision, not getting them to agree or take responsibility.";
+            document.getElementById('t4_closure_offer').value = "I appreciate the genuine good times we had, but I am completely done trying to make this work.";
+        }
+
+        function handleTool4Submit(e) {
+            e.preventDefault();
+            const understand = document.getElementById('t4_understand').value.trim();
+            const avoid = document.getElementById('t4_avoid').value;
+            const closureNeed = document.getElementById('t4_closure_need').value.trim();
+            const closureOffer = document.getElementById('t4_closure_offer').value.trim();
+
+            const scriptText = `I am reaching out to give you absolute clarity. Our pattern of breaking up and getting back together is fundamentally unhealthy, and I am stepping out of this cycle permanently. ${understand} I appreciate the good times we shared (${closureOffer}), but I am done trying to make this work. Please respect my boundary and do not contact me. I wish you the best.`;
+
+            const html = `
+                <div class="output-header">
+                    <span>Exit Protocol & Scripts</span>
+                    <small style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">${new Date().toLocaleDateString()}</small>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>YOUR SCRIPT</h4>
+                    <p>Send this message in writing or deliver it concisely without opening a debate:</p>
+                    <div class="script-box" id="t4_script_box">
+                        <button class="btn-copy" onclick="copyToClipboard('t4_script_box')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        ${scriptText}
+                    </div>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE NO-CONTACT RULE</h4>
+                    <p>Minimum 90 days of complete zero contact (blocking text, calls, and socials). Any contact resets your nervous system recovery back to day zero.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>IF THEY BEG</h4>
+                    <p><strong>Script:</strong> "My decision is final. Reopening this loop is not an option. Please respect my space."</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>IF THEY GET ANGRY</h4>
+                    <p><strong>Script:</strong> "I won't participate in an argument. The decision is made. Goodbye." (Then block/disengage immediately).</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>IF YOU WEAKEN (${avoid.toUpperCase()})</h4>
+                    <p><strong>Reminder:</strong> Reaching out will not grant you new clarity or relief. It will only restart the pain loop you have already paid for repeatedly.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE BLOCK PROTOCOL</h4>
+                    <p>Block immediately upon sending: Phone number, Instagram, WhatsApp, TikTok, Email filters. Remove shared location tracking.</p>
+                </div>
+            `;
+
+            const outContainer = document.getElementById('outputTool4');
+            outContainer.innerHTML = html;
+            outContainer.style.display = 'flex';
+
+            saveHistory('tool4', {
+                timestamp: new Date().toLocaleString(),
+                summary: `Focus: Avoid ${avoid}`,
+                htmlContent: html
+            });
+
+            outContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /* TOOL 5: THE REBUILD PLAN */
+        function loadSampleTool5() {
+            const checkboxes = document.querySelectorAll('input[name="t5_reminders"]');
+            checkboxes.forEach(cb => {
+                if (['Places', 'Songs', 'Apps', 'Photos', 'Routine'].includes(cb.value)) {
+                    cb.checked = true;
+                } else {
+                    cb.checked = false;
+                }
+            });
+            document.getElementById('t5_miss_action').value = "I check their Instagram profile, re-read old love letters, and stare at my phone waiting for a text.";
+            document.getElementById('t5_support').value = "My close friend Alex, my sister, and my weekly therapy session on Thursdays.";
+            document.getElementById('t5_sacrifices').value = "My regular gym routine, weekend hikes, spending time with old college friends, and my peace of mind.";
+        }
+
+        function handleTool5Submit(e) {
+            e.preventDefault();
+            const selectedReminders = Array.from(document.querySelectorAll('input[name="t5_reminders"]:checked')).map(cb => cb.value);
+            const missAction = document.getElementById('t5_miss_action').value.trim();
+            const support = document.getElementById('t5_support').value.trim();
+            const sacrifices = document.getElementById('t5_sacrifices').value.trim();
+
+            const triggersStr = selectedReminders.length > 0 ? selectedReminders.join(', ') : 'General day-to-day items';
+
+            const html = `
+                <div class="output-header">
+                    <span>Rebuild Plan</span>
+                    <small style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">${new Date().toLocaleDateString()}</small>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE TRIGGER MAP</h4>
+                    <p>Key triggers identified: <strong>${triggersStr}</strong>.<br>Action: Archive/delete photo albums, mute shared acquaintances, change routine paths, and hide physical items in a sealed box out of sight.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE URGE PROTOCOL</h4>
+                    <p>Current habit when missing them: "${missAction}".<br><strong>Replacement Protocol:</strong> When the urge strikes, DO NOT text them. Instantly text/call <strong>${support}</strong>. If unavailable, open a voice note app, record your urge for 2 minutes, then wait 2 hours before taking any action.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>YOUR RECLAMATION LIST</h4>
+                    <p>Reclaim what you sacrificed: "${sacrifices}". Block out dedicated time on your calendar this week to restart these exact activities.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>WEEK 1 CHECKLIST</h4>
+                    <p>
+                        • Day 1: Complete Block Protocol on all platforms.<br>
+                        • Day 2: Pack away physical triggers/gifts into storage.<br>
+                        • Day 3: Re-engage one sacrificed activity or hobby.<br>
+                        • Day 4: Schedule a social hangout or call with support (${support}).<br>
+                        • Day 5: Clean living space; change bedroom setup.<br>
+                        • Day 6-7: Full digital detox weekend. No checking profiles.
+                    </p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>THE RELAPSE PLAN</h4>
+                    <p>If you slip and make contact: Do not indulge in shame or assume all progress is lost. Treat it like a physical stumble. Do not engage further, re-establish the block immediately, and log what emotional state triggered the lapse.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h4>WHEN YOU'RE READY</h4>
+                    <p>You are moving on when their name produces emotional neutrality rather than spike in anxiety, anger, or longing.</p>
+                </div>
+            `;
+
+            const outContainer = document.getElementById('outputTool5');
+            outContainer.innerHTML = html;
+            outContainer.style.display = 'flex';
+
+            saveHistory('tool5', {
+                timestamp: new Date().toLocaleString(),
+                summary: `Triggers: ${triggersStr.substring(0, 30)}...`,
+                htmlContent: html
+            });
+
+            outContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize view on load
+        document.addEventListener('DOMContentLoaded', () => {
+            switchView('dashboard');
+        });
+    </script>
+</body>
+</html>

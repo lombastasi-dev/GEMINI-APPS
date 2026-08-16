@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdultingOS — Practical Life-Management Toolkit</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* CSS RESET & VARIABLES */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --navy: #1D3557;
+            --navy-light: #2A4D7C;
+            --peach: #F4A261;
+            --peach-light: #F8B88B;
+            --bg-start: #F1FAEE;
+            --bg-end: #FFF5EB;
+            --text-dark: #2D3748;
+            --text-muted: #718096;
+            --white: #FFFFFF;
+            --border: #E2E8F0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --radius-md: 8px;
+            --radius-xl: 16px;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* LAYOUT */
+        #app {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--navy);
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .brand i {
+            color: var(--peach);
+            font-size: 1.5rem;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-y: auto;
+        }
+
+        .nav-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-dark);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item button:hover {
+            background-color: rgba(244, 162, 97, 0.15);
+            color: var(--navy);
+        }
+
+        .nav-item button.active {
+            background-color: var(--navy);
+            color: var(--white);
+        }
+
+        .nav-item button.active i {
+            color: var(--peach);
+        }
+
+        .nav-item button i {
+            width: 20px;
+            text-align: center;
+            color: var(--text-muted);
+            transition: color 0.2s ease;
+        }
+
+        /* MOBILE OVERLAY & HAMBURGER */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--navy);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* MAIN CONTENT AREA */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px 20px;
+            max-width: 860px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* VIEWS & PANELS */
+        .view-panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* CARDS & UI COMPONENTS */
+        .card {
+            background-color: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+            color: var(--white);
+            text-align: center;
+            padding: 40px 24px;
+        }
+
+        .hero-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--white);
+        }
+
+        .hero-tagline {
+            font-size: 1.1rem;
+            color: var(--peach);
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* DASHBOARD GRID */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .tool-card-btn {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: 100%;
+        }
+
+        .tool-card-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--peach);
+        }
+
+        .tool-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background-color: rgba(244, 162, 97, 0.15);
+            color: var(--peach);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .tool-card-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--navy);
+        }
+
+        .tool-card-desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* FORMS & INPUTS */
+        .tool-header {
+            margin-bottom: 24px;
+        }
+
+        .tool-title {
+            font-size: 1.75rem;
+            color: var(--navy);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .problem-statement {
+            background-color: #FFF5EB;
+            border-left: 4px solid var(--peach);
+            padding: 12px 16px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--navy);
+            margin-bottom: 8px;
+        }
+
+        .form-control, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            background-color: #FAFAFA;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .form-control:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--navy);
+            background-color: var(--white);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            user-select: none;
+            background: #FAFAFA;
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--navy);
+            cursor: pointer;
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .range-slider {
+            flex: 1;
+            accent-color: var(--navy);
+        }
+
+        .range-value {
+            font-weight: 700;
+            color: var(--navy);
+            width: 32px;
+            text-align: right;
+        }
+
+        /* BUTTONS */
+        .btn-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--navy);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--navy-light);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #E2E8F0;
+            color: var(--navy);
+        }
+
+        .btn-secondary:hover {
+            background-color: #CBD5E1;
+        }
+
+        .btn-copy {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-copy:hover {
+            color: var(--navy);
+            border-color: var(--navy);
+        }
+
+        /* OUTPUT RESULTS SECTION */
+        .output-section {
+            display: none;
+            margin-top: 32px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .output-section.active {
+            display: block;
+        }
+
+        .output-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--peach);
+            padding-bottom: 8px;
+        }
+
+        .output-title {
+            font-size: 1.4rem;
+            color: var(--navy);
+            font-weight: 700;
+        }
+
+        .output-card {
+            background-color: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--navy);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+
+        .output-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .output-card-title {
+            font-weight: 700;
+            color: var(--navy);
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .output-card-body {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .output-card-body ul {
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+
+        .output-card-body li {
+            margin-bottom: 6px;
+        }
+
+        /* SPECIFIC OUTPUT STYLES */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .calendar-item {
+            background: var(--bg-start);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .calendar-item .date {
+            font-weight: 700;
+            color: var(--peach);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .calendar-item .bill {
+            font-weight: 600;
+            color: var(--navy);
+            margin-top: 4px;
+        }
+
+        /* HISTORY SECTION */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .history-title {
+            font-size: 1.1rem;
+            color: var(--navy);
+            font-weight: 700;
+        }
+
+        .accordion-item {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 12px 16px;
+            background: #FAFAFA;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--navy);
+        }
+
+        .accordion-header:hover {
+            background: #F1F5F9;
+        }
+
+        .accordion-content {
+            padding: 16px;
+            display: none;
+            border-top: 1px solid var(--border);
+            font-size: 0.875rem;
+            background-color: var(--white);
+        }
+
+        .accordion-item.open .accordion-content {
+            display: block;
+        }
+
+        /* FOOTER */
+        .app-footer {
+            margin-top: auto;
+            background-color: var(--white);
+            border-top: 1px solid var(--border);
+            padding: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--navy);
+            color: var(--white);
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* RESPONSIVE MEDIA QUERIES */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 60px;
+            }
+
+            .main-content {
+                padding: 20px 16px;
+            }
+
+            .hero-title {
+                font-size: 1.75rem;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- MOBILE HEADER -->
+        <header class="mobile-header">
+            <a href="#" class="brand" onclick="switchView('dashboard'); return false;">
+                <i class="fa-solid fa-compass"></i> AdultingOS
+            </a>
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </header>
+
+        <!-- SIDEBAR OVERLAY -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- FIXED SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="brand" onclick="switchView('dashboard'); return false;">
+                    <i class="fa-solid fa-compass"></i> AdultingOS
+                </a>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <button class="nav-btn active" data-target="dashboard">
+                        <i class="fa-solid fa-house"></i> Dashboard
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-btn" data-target="life-admin">
+                        <i class="fa-solid fa-folder-open"></i> Life Admin
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-btn" data-target="money-basics">
+                        <i class="fa-solid fa-wallet"></i> Money Basics
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-btn" data-target="home-skills">
+                        <i class="fa-solid fa-screwdriver-wrench"></i> Home Skills
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-btn" data-target="social-survival">
+                        <i class="fa-solid fa-users"></i> Social Survival
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-btn" data-target="future-sketch">
+                        <i class="fa-solid fa-map"></i> Future Sketch
+                    </button>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="main-wrapper">
+            <main class="main-content">
+
+                <!-- DASHBOARD VIEW -->
+                <div id="dashboard" class="view-panel active">
+                    <div class="card hero-card">
+                        <h1 class="hero-title">Adulting OS</h1>
+                        <p class="hero-tagline">Nobody gave you a manual. Here's the next best thing.</p>
+                    </div>
+
+                    <div class="tools-grid">
+                        <div class="tool-card-btn" onclick="switchView('life-admin')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-folder-open"></i></div>
+                            <div class="tool-card-title">Life Admin</div>
+                            <div class="tool-card-desc">Tame bills, document chaos, due dates, and insurance gaps before they pile up.</div>
+                        </div>
+
+                        <div class="tool-card-btn" onclick="switchView('money-basics')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-wallet"></i></div>
+                            <div class="tool-card-title">Money Basics</div>
+                            <div class="tool-card-desc">Master cash flow, simple budgeting, emergency funds, and basic debt priority.</div>
+                        </div>
+
+                        <div class="tool-card-btn" onclick="switchView('home-skills')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                            <div class="tool-card-title">Home Skills</div>
+                            <div class="tool-card-desc">Simple meal prep, quick cleaning systems, laundry rules, and landlord fixes.</div>
+                        </div>
+
+                        <div class="tool-card-btn" onclick="switchView('social-survival')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-users"></i></div>
+                            <div class="tool-card-title">Social Survival</div>
+                            <div class="tool-card-desc">Build an adult friend group, lower plan anxiety, and connect locally without awkwardness.</div>
+                        </div>
+
+                        <div class="tool-card-btn" onclick="switchView('future-sketch')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-map"></i></div>
+                            <div class="tool-card-title">Future Sketch</div>
+                            <div class="tool-card-desc">Unstuck your career path with low-stress 90-day goals and small skill stacks.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL 1: LIFE ADMIN -->
+                <div id="life-admin" class="view-panel">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-folder-open"></i> Life Admin</h2>
+                        <div class="problem-statement">
+                            "I have bills, paperwork, and deadlines coming from everywhere and I keep forgetting things."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-life-admin">
+                            <div class="form-group">
+                                <label class="form-label" for="la-bills">Monthly fixed bills (one per line):</label>
+                                <textarea id="la-bills" placeholder="e.g. Rent: $1200&#10;Electric: $80&#10;Internet: $60"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="la-due-dates">Bill due dates (e.g., Rent 1st, Electric 15th):</label>
+                                <textarea id="la-due-dates" placeholder="e.g. Rent on 1st&#10;Electric on 15th&#10;Phone on 22nd"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="la-system">Current organizational system:</label>
+                                <select id="la-system">
+                                    <option value="Calendar app">Calendar app</option>
+                                    <option value="Paper planner">Paper planner</option>
+                                    <option value="Notes on phone">Notes on phone</option>
+                                    <option value="Memory">Memory</option>
+                                    <option value="Panic">Panic</option>
+                                    <option value="Nothing">Nothing</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="la-missed">Missed payments last 3 months:</label>
+                                <input type="number" id="la-missed" min="0" value="0" class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Insurance types held:</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="la-ins" value="Health"> Health</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="la-ins" value="Renters"> Renters</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="la-ins" value="Car"> Car</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="la-ins" value="Dental"> Dental</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="la-ins" value="Vision"> Vision</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="la-ins" value="None"> None</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="la-ins" value="Not sure"> Not sure</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="la-docs">Important documents location:</label>
+                                <select id="la-docs">
+                                    <option value="Filed">Filed nicely in folder/binder</option>
+                                    <option value="Drawer pile">Random drawer pile</option>
+                                    <option value="Digital">Digital scans on drive</option>
+                                    <option value="Don't have">Don't have them</option>
+                                    <option value="Don't know what I need">Don't know what I need</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-gears"></i> Generate Admin Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleLifeAdmin()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-life-admin" class="output-section"></div>
+                    <div id="history-life-admin" class="history-section"></div>
+                </div>
+
+                <!-- TOOL 2: MONEY BASICS -->
+                <div id="money-basics" class="view-panel">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-wallet"></i> Money Basics</h2>
+                        <div class="problem-statement">
+                            "I don't know how much I can spend, how much to save, or what an emergency fund is."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-money-basics">
+                            <div class="form-group">
+                                <label class="form-label" for="mb-income">Monthly take-home income ($):</label>
+                                <input type="number" id="mb-income" placeholder="2800" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="mb-fixed">Monthly fixed expenses ($):</label>
+                                <input type="number" id="mb-fixed" placeholder="1800" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="mb-variable">Monthly variable spending guess ($):</label>
+                                <input type="number" id="mb-variable" placeholder="500" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="mb-savings">Current savings ($):</label>
+                                <input type="number" id="mb-savings" placeholder="500" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Debts currently holding:</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="mb-debt" value="Student loans"> Student loans</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="mb-debt" value="Credit card"> Credit card</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="mb-debt" value="Car"> Car loan</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="mb-debt" value="Medical"> Medical bill</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="mb-debt" value="Personal loan"> Personal loan</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="mb-debt" value="None"> None</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="mb-personality">Money personality:</label>
+                                <select id="mb-personality">
+                                    <option value="Spender">Spender (Money burns a hole in my pocket)</option>
+                                    <option value="Avoider">Avoider (I prefer not looking at my balance)</option>
+                                    <option value="Saver">Saver (Anxious about spending anything)</option>
+                                    <option value="Overwhelmed">Overwhelmed (I don't know where to start)</option>
+                                    <option value="Don't know">Don't know</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-pie"></i> Calculate Cash Flow</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleMoneyBasics()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-money-basics" class="output-section"></div>
+                    <div id="history-money-basics" class="history-section"></div>
+                </div>
+
+                <!-- TOOL 3: HOME SKILLS -->
+                <div id="home-skills" class="view-panel">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-screwdriver-wrench"></i> Home Skills</h2>
+                        <div class="problem-statement">
+                            "I don't know how to feed myself, keep a place clean, or fix basic things."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-home-skills">
+                            <div class="form-group">
+                                <label class="form-label" for="hs-cooking">Current cooking ability:</label>
+                                <select id="hs-cooking">
+                                    <option value="Microwave only">Microwave & instant meals only</option>
+                                    <option value="Basic">Basic (Eggs, pasta, simple stir-fry)</option>
+                                    <option value="Can follow recipes">Can follow recipes if guided</option>
+                                    <option value="Comfortable">Comfortable in the kitchen</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="hs-cleaning">Current cleaning routine:</label>
+                                <select id="hs-cleaning">
+                                    <option value="When it's bad">Only when it gets really bad</option>
+                                    <option value="Weekly">Weekly reset</option>
+                                    <option value="Daily">Daily light maintenance</option>
+                                    <option value="Never">Never / Avoid it</option>
+                                    <option value="Roommate does it">Roommate handles most of it</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="hs-laundry">Laundry status:</label>
+                                <select id="hs-laundry">
+                                    <option value="Regular">Regular scheduled laundry</option>
+                                    <option value="When I run out">Only when I run out of underwear</option>
+                                    <option value="Send out">Send out / Laundromat run</option>
+                                    <option value="Parent used to do it">Parent used to handle it</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="hs-maintenance">Current maintenance issues (e.g. leaky faucet, squeaky door):</label>
+                                <textarea id="hs-maintenance" placeholder="Describe any annoying broken stuff or things you don't know how to fix..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="hs-roommate">Roommate situation:</label>
+                                <select id="hs-roommate">
+                                    <option value="Alone">Living alone</option>
+                                    <option value="Partner">Living with partner</option>
+                                    <option value="Roommate(s)">Living with roommate(s)</option>
+                                    <option value="Family">Living with family</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-house-chimney"></i> Build Home Routine</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleHomeSkills()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-home-skills" class="output-section"></div>
+                    <div id="history-home-skills" class="history-section"></div>
+                </div>
+
+                <!-- TOOL 4: SOCIAL SURVIVAL -->
+                <div id="social-survival" class="view-panel">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-users"></i> Social Survival</h2>
+                        <div class="problem-statement">
+                            "I moved out and suddenly I'm isolated. I don't know how to make friends as an adult."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-social-survival">
+                            <div class="form-group">
+                                <label class="form-label" for="ss-circle">Current primary social circle:</label>
+                                <select id="ss-circle">
+                                    <option value="High school friends">High school friends (mostly distant/online)</option>
+                                    <option value="College friends">College friends drifting away</option>
+                                    <option value="Work friends">Work acquaintances only</option>
+                                    <option value="Family">Family nearby</option>
+                                    <option value="Online only">Online gaming/community friends</option>
+                                    <option value="Isolated">Isolated / Virtually none nearby</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Social anxiety level (1 = Chill, 10 = Terrified):</label>
+                                <div class="range-container">
+                                    <input type="range" id="ss-anxiety" min="1" max="10" value="5" class="range-slider" oninput="document.getElementById('ss-anxiety-val').textContent = this.value">
+                                    <span id="ss-anxiety-val" class="range-value">5</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="ss-interests">Interests, hobbies, or things you enjoy:</label>
+                                <textarea id="ss-interests" placeholder="e.g. Board games, hiking, coffee shops, indie music, gaming, cooking"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="ss-neighbors">Neighborhood connection:</label>
+                                <select id="ss-neighbors">
+                                    <option value="Know neighbors">Know my neighbors by name</option>
+                                    <option value="Wave">Quick wave in hallway/street</option>
+                                    <option value="Nothing">Complete strangers</option>
+                                    <option value="Avoidant">Actively avoid eye contact</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="ss-weekend">Typical weekend routine:</label>
+                                <textarea id="ss-weekend" placeholder="e.g. Scrolling social media, watching YouTube, sleeping in, feeling lonely"></textarea>
+                            </div>
+
+                            <div class="btn-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-comments"></i> Get Connection Blueprint</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleSocialSurvival()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-social-survival" class="output-section"></div>
+                    <div id="history-social-survival" class="history-section"></div>
+                </div>
+
+                <!-- TOOL 5: FUTURE SKETCH -->
+                <div id="future-sketch" class="view-panel">
+                    <div class="tool-header">
+                        <h2 class="tool-title"><i class="fa-solid fa-map"></i> Future Sketch</h2>
+                        <div class="problem-statement">
+                            "I feel like I'm just surviving month to month with no direction."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-future-sketch">
+                            <div class="form-group">
+                                <label class="form-label" for="fs-job">Current job or career status:</label>
+                                <textarea id="fs-job" placeholder="e.g. Retail associate, junior dev, barista, entry-level admin, unemployed"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Job satisfaction (1 = Miserable, 10 = Loving it):</label>
+                                <div class="range-container">
+                                    <input type="range" id="fs-satisfaction" min="1" max="10" value="4" class="range-slider" oninput="document.getElementById('fs-satisfaction-val').textContent = this.value">
+                                    <span id="fs-satisfaction-val" class="range-value">4</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="fs-1year">One-year realistic goal (if any):</label>
+                                <textarea id="fs-1year" placeholder="e.g. Get a $2/hr raise, move to a safer apartment, start a side project"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="fs-5year">Five-year dream (if any):</label>
+                                <textarea id="fs-5year" placeholder="e.g. Remote work in design, owning a dog, living in another city"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="fs-blocker">Main factor blocking clarity:</label>
+                                <select id="fs-blocker">
+                                    <option value="Too overwhelmed">Too overwhelmed by daily survival</option>
+                                    <option value="No exposure to options">Don't know what career options exist</option>
+                                    <option value="Fear of choosing wrong">Fear of choosing the wrong path</option>
+                                    <option value="Family pressure">Family expectations / pressure</option>
+                                    <option value="Financial necessity">Financial necessity (can't take risks)</option>
+                                    <option value="Mental health">Mental health or burnout</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="fs-edu">Education/Training status:</label>
+                                <select id="fs-edu">
+                                    <option value="Finished">Finished high school / degree</option>
+                                    <option value="In school">Currently in school or college</option>
+                                    <option value="Considering">Considering going back to study</option>
+                                    <option value="Trade">Interested in trades or certifications</option>
+                                    <option value="Unclear">Unclear / Self-teaching</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-compass-drafting"></i> Sketch My Path</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleFutureSketch()"><i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-future-sketch" class="output-section"></div>
+                    <div id="history-future-sketch" class="history-section"></div>
+                </div>
+
+            </main>
+
+            <!-- FOOTER ON EVERY VIEW -->
+            <footer class="app-footer">
+                For practical planning purposes only. Not legal, financial, or professional advice.
+            </footer>
+        </div>
+    </div>
+
+    <!-- TOAST ELEMENT -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* ==========================================================================
+           1. NAVIGATION & INITIALIZATION
+           ========================================================================== */
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            initFormListeners();
+            initMobileMenu();
+            loadAllHistories();
+        });
+
+        function switchView(targetId) {
+            // Update active panel
+            document.querySelectorAll('.view-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            const selectedPanel = document.getElementById(targetId);
+            if (selectedPanel) {
+                selectedPanel.classList.add('active');
+            }
+
+            // Update sidebar buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-target') === targetId);
+            });
+
+            // Close mobile menu
+            closeMobileMenu();
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function initNavigation() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.getAttribute('data-target');
+                    switchView(target);
+                });
+            });
+        }
+
+        function initMobileMenu() {
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            hamburgerBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('active');
+            });
+
+            overlay.addEventListener('click', closeMobileMenu);
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('sidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        /* ==========================================================================
+           2. UTILITY & LOCALSTORAGE FUNCTIONS
+           ========================================================================== */
+        function showToast(message = "Copied!") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => showToast());
+            } else {
+                // Fallback for non-https or older browsers
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast();
+                } catch (err) {
+                    console.error('Copy failed', err);
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function saveHistoryItem(toolId, inputData, outputHtml) {
+            const key = `adulting_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                summary: getHistorySummary(toolId, inputData),
+                outputHtml: outputHtml
+            };
+
+            history.unshift(newItem); // Add to top
+            if (history.length > 30) history = history.slice(0, 30); // Max 30 items
+
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistoryUI(toolId);
+        }
+
+        function getHistorySummary(toolId, data) {
+            switch(toolId) {
+                case 'life-admin': return `Admin Plan (${data.billsCount || 0} bills, ${data.system})`;
+                case 'money-basics': return `Budget Plan ($${data.income} Inc / $${data.fixed} Fixed)`;
+                case 'home-skills': return `Home Plan (${data.cooking} cooking, ${data.roommate})`;
+                case 'social-survival': return `Social Plan (Anxiety: ${data.anxiety}/10)`;
+                case 'future-sketch': return `Future Sketch (${data.edu}, Sat: ${data.satisfaction}/10)`;
+                default: return 'Saved Plan';
+            }
+        }
+
+        function renderHistoryUI(toolId) {
+            const container = document.getElementById(`history-${toolId}`);
+            if (!container) return;
+
+            const key = `adulting_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+            if (history.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <div class="history-header">
+                    <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Plans</div>
+                    <button class="btn btn-copy" onclick="clearToolHistory('${toolId}')">Clear History</button>
+                </div>
+            `;
+
+            history.forEach(item => {
+                html += `
+                    <div class="accordion-item" id="acc-${item.id}">
+                        <div class="accordion-header" onclick="toggleAccordion('acc-${item.id}')">
+                            <span>${item.summary} — <small style="color: var(--text-muted);">${item.timestamp}</small></span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            ${item.outputHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleAccordion(id) {
+            const item = document.getElementById(id);
+            if (item) {
+                item.classList.toggle('open');
+            }
+        }
+
+        function clearToolHistory(toolId) {
+            localStorage.removeItem(`adulting_history_${toolId}`);
+            renderHistoryUI(toolId);
+            showToast("History cleared");
+        }
+
+        function loadAllHistories() {
+            ['life-admin', 'money-basics', 'home-skills', 'social-survival', 'future-sketch'].forEach(renderHistoryUI);
+        }
+
+        /* ==========================================================================
+           3. FORM LISTENERS & GENERATORS
+           ========================================================================== */
+        function initFormListeners() {
+            // Life Admin Form
+            document.getElementById('form-life-admin').addEventListener('submit', function(e) {
+                e.preventDefault();
+                generateLifeAdminOutput();
+            });
+
+            // Money Basics Form
+            document.getElementById('form-money-basics').addEventListener('submit', function(e) {
+                e.preventDefault();
+                generateMoneyBasicsOutput();
+            });
+
+            // Home Skills Form
+            document.getElementById('form-home-skills').addEventListener('submit', function(e) {
+                e.preventDefault();
+                generateHomeSkillsOutput();
+            });
+
+            // Social Survival Form
+            document.getElementById('form-social-survival').addEventListener('submit', function(e) {
+                e.preventDefault();
+                generateSocialSurvivalOutput();
+            });
+
+            // Future Sketch Form
+            document.getElementById('form-future-sketch').addEventListener('submit', function(e) {
+                e.preventDefault();
+                generateFutureSketchOutput();
+            });
+        }
+
+        /* ==========================================================================
+           TOOL 1: LIFE ADMIN LOGIC
+           ========================================================================== */
+        function loadSampleLifeAdmin() {
+            document.getElementById('la-bills').value = "Rent: $1,200\nCell Phone: $80\nInternet: $60\nStudent Loans: $150";
+            document.getElementById('la-due-dates').value = "Rent: 1st\nCell Phone: 12th\nInternet: 18th\nStudent Loans: 25th";
+            document.getElementById('la-system').value = "Memory";
+            document.getElementById('la-missed').value = "2";
+            document.getElementById('la-docs').value = "Drawer pile";
+
+            // Uncheck all, check none
+            document.querySelectorAll('input[name="la-ins"]').forEach(cb => cb.checked = false);
+            showToast("Sample data loaded");
+        }
+
+        function generateLifeAdminOutput() {
+            const billsText = document.getElementById('la-bills').value.trim();
+            const datesText = document.getElementById('la-due-dates').value.trim();
+            const system = document.getElementById('la-system').value;
+            const missed = parseInt(document.getElementById('la-missed').value) || 0;
+            const docs = document.getElementById('la-docs').value;
+
+            const selectedIns = [];
+            document.querySelectorAll('input[name="la-ins"]:checked').forEach(cb => selectedIns.push(cb.value));
+
+            // Calendar Parsing
+            const datesLines = datesText ? datesText.split('\n') : [];
+            let calendarItemsHtml = '';
+            if (datesLines.length > 0) {
+                datesLines.forEach(line => {
+                    if (line.trim()) {
+                        calendarItemsHtml += `
+                            <div class="calendar-item">
+                                <div class="date"><i class="fa-regular fa-calendar"></i> ${line.split(':')[1] || 'Monthly'}</div>
+                                <div class="bill">${line.split(':')[0] || line}</div>
+                            </div>
+                        `;
+                    }
+                });
+            } else {
+                calendarItemsHtml = '<div class="calendar-item"><div class="bill">No due dates listed yet. Add them above!</div></div>';
+            }
+
+            // Insurance Gap Logic
+            let insGapMessage = "";
+            if (selectedIns.includes('None') || selectedIns.length === 0) {
+                insGapMessage = "<strong>Critical Gap:</strong> You currently have no listed insurance. At minimum, look into <em>Renters Insurance</em> (often $10–$15/mo to protect thousands in belongings) and basic <em>Health Coverage</em> to avoid medical debt spiral.";
+            } else {
+                let missing = [];
+                if (!selectedIns.includes('Renters')) missing.push('Renters Insurance (protects laptop, furniture, theft)');
+                if (!selectedIns.includes('Health')) missing.push('Health Insurance');
+                insGapMessage = missing.length > 0 
+                    ? `You have key basics covered! Consider adding: <ul>${missing.map(m => `<li>${m}</li>`).join('')}</ul>`
+                    : "Excellent work! Your core insurance safety net is locked in.";
+            }
+
+            // Folder System Recommendation
+            let folderAdvice = "";
+            if (docs === "Drawer pile" || docs === "Don't know what I need") {
+                folderAdvice = "Grab 3 simple physical folders (or desktop folders): <strong>1. Identity</strong> (Passport, SSN, Birth Cert), <strong>2. Housing & Auto</strong> (Lease, car title, insurance), <strong>3. Financial/Tax</strong> (W2s, bank statements). Spend 10 minutes throwing paper into these 3 buckets.";
+            } else {
+                folderAdvice = "Your document storage is reasonably positioned! Audit it once every 6 months to remove expired policies or old receipts.";
+            }
+
+            const outputContainer = document.getElementById('output-life-admin');
+            const html = `
+                <div class="output-header">
+                    <h3 class="output-title"><i class="fa-solid fa-clipboard-check"></i> Your Admin Blueprint</h3>
+                    <button class="btn btn-copy" onclick="copyToClipboard(this.parentElement.nextElementSibling.innerText)">
+                        <i class="fa-regular fa-copy"></i> Copy Script
+                    </button>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-calendar-days" style="color:var(--peach);"></i> THE ADMIN DASHBOARD: Due Date Overview</span>
+                    </div>
+                    <div class="output-card-body">
+                        <div class="calendar-grid">
+                            ${calendarItemsHtml}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-shield-halved" style="color:var(--navy);"></i> THE INSURANCE GAP</span>
+                    </div>
+                    <div class="output-card-body">
+                        ${insGapMessage}
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-robot" style="color:var(--peach);"></i> THE AUTOMATION PLAN</span>
+                    </div>
+                    <div class="output-card-body">
+                        ${missed > 0 ? `Since you've had ${missed} late payment(s) recently, relying on memory isn't working—and that's totally normal!` : 'Keep your payment streak strong.'}
+                        <br><strong>Action Step:</strong> Set up <em>Auto-Pay</em> for fixed bills (Rent, Internet, Phone). For variable utilities, put a repeating Google/Apple Calendar event 3 days before the due date.
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-folder-tree" style="color:var(--navy);"></i> THE DOCUMENT CHECKLIST & SYSTEM</span>
+                    </div>
+                    <div class="output-card-body">
+                        ${folderAdvice}
+                        <br><br><strong>Essential Docs Checklist:</strong>
+                        <ul>
+                            <li>Birth Certificate & Social Security Card</li>
+                            <li>Government ID / Passport</li>
+                            <li>Current Lease Agreement</li>
+                            <li>Vehicle Title / Registration / Insurance Card</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-stopwatch" style="color:var(--peach);"></i> THE 10-MINUTE RULE</span>
+                    </div>
+                    <div class="output-card-body">
+                        Pick ONE day a week (e.g., Sunday at 5 PM). Set a timer for 10 minutes. Open mail, file loose papers, pay manual bills, and check account balances. When the timer rings, stop. Admin stress disappears with tiny, consistent passes.
+                    </div>
+                </div>
+            `;
+
+            outputContainer.innerHTML = html;
+            outputContainer.classList.add('active');
+
+            saveHistoryItem('life-admin', {
+                billsCount: billsText.split('\n').filter(Boolean).length,
+                system: system
+            }, html);
+        }
+
+        /* ==========================================================================
+           TOOL 2: MONEY BASICS LOGIC
+           ========================================================================== */
+        function loadSampleMoneyBasics() {
+            document.getElementById('mb-income').value = "2800";
+            document.getElementById('mb-fixed').value = "2200";
+            document.getElementById('mb-variable').value = "600";
+            document.getElementById('mb-savings').value = "200";
+            document.getElementById('mb-personality').value = "Overwhelmed";
+
+            document.querySelectorAll('input[name="mb-debt"]').forEach(cb => {
+                cb.checked = (cb.value === "Student loans" || cb.value === "Credit card");
+            });
+
+            showToast("Sample data loaded");
+        }
+
+        function generateMoneyBasicsOutput() {
+            const income = parseFloat(document.getElementById('mb-income').value) || 0;
+            const fixed = parseFloat(document.getElementById('mb-fixed').value) || 0;
+            const variable = parseFloat(document.getElementById('mb-variable').value) || 0;
+            const savings = parseFloat(document.getElementById('mb-savings').value) || 0;
+            const personality = document.getElementById('mb-personality').value;
+
+            const selectedDebts = [];
+            document.querySelectorAll('input[name="mb-debt"]:checked').forEach(cb => selectedDebts.push(cb.value));
+
+            // Math
+            const netCashFlow = income - fixed;
+            const discretionaryAfterVar = netCashFlow - variable;
+            
+            // 50/30/20 benchmark
+            const needs50 = (income * 0.50).toFixed(0);
+            const wants30 = (income * 0.30).toFixed(0);
+            const savings20 = (income * 0.20).toFixed(0);
+
+            // Emergency Fund (3x fixed expenses)
+            const eFundTarget = fixed * 3;
+            const eFundProgress = Math.min(100, Math.round((savings / eFundTarget) * 100));
+
+            // Personality advice
+            let personalityTip = "";
+            if (personality === "Overwhelmed" || personality === "Avoider") {
+                personalityTip = "Automation is your best friend. Set auto-transfers on payday so money moves to savings before you even look at your balance.";
+            } else if (personality === "Spender") {
+                personalityTip = "Try separate bank accounts: One checking account ONLY for fixed bills, and a separate debit card account loaded with your monthly 'fun' budget.";
+            } else {
+                personalityTip = "You're mindful of your numbers! Make sure you don't skimp on guilt-free enjoyment within your planned allowance.";
+            }
+
+            const outputContainer = document.getElementById('output-money-basics');
+            const html = `
+                <div class="output-header">
+                    <h3 class="output-title"><i class="fa-solid fa-calculator"></i> Your Financial Clarity Map</h3>
+                    <button class="btn btn-copy" onclick="copyToClipboard(this.parentElement.nextElementSibling.innerText)">
+                        <i class="fa-regular fa-copy"></i> Copy Script
+                    </button>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-arrows-left-right" style="color:var(--navy);"></i> THE CASH FLOW REALITY</span>
+                    </div>
+                    <div class="output-card-body">
+                        <ul>
+                            <li><strong>Take-Home Pay:</strong> $${income.toLocaleString()}</li>
+                            <li><strong>Fixed Commitments:</strong> $${fixed.toLocaleString()} (${Math.round((fixed/income)*100)}% of income)</li>
+                            <li><strong>Discretionary Remaining:</strong> $${netCashFlow.toLocaleString()}</li>
+                        </ul>
+                        ${discretionaryAfterVar < 0 
+                            ? `<p style="color:#C53030; margin-top:8px;"><strong>Notice:</strong> Your estimated spending ($${variable}) exceeds your discretionary balance by $${Math.abs(discretionaryAfterVar)}. Trimming $${Math.abs(discretionaryAfterVar)} from variable costs will stop monthly debt creep.</p>`
+                            : `<p style="color:#2F855A; margin-top:8px;"><strong>Positive Margin:</strong> You have roughly $${discretionaryAfterVar.toLocaleString()} unallocated per month after variable spending!</p>`}
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-chart-pie" style="color:var(--peach);"></i> THE 50/30/20 BENCHMARK VS. YOUR NUMBERS</span>
+                    </div>
+                    <div class="output-card-body">
+                        Traditional 50/30/20 target for $${income.toLocaleString()}/mo:
+                        <ul>
+                            <li><strong>Needs (50% target = $${needs50}):</strong> You currently spend $${fixed.toLocaleString()}</li>
+                            <li><strong>Wants (30% target = $${wants30}):</strong> Your estimated flexible spending is $${variable.toLocaleString()}</li>
+                            <li><strong>Savings/Debt (20% target = $${savings20}):</strong> Available margin: $${Math.max(0, discretionaryAfterVar).toLocaleString()}</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-piggy-bank" style="color:var(--navy);"></i> THE EMERGENCY FUND TARGET</span>
+                    </div>
+                    <div class="output-card-body">
+                        Target (3 months essential expenses): <strong>$${eFundTarget.toLocaleString()}</strong><br>
+                        Current Savings: <strong>$${savings.toLocaleString()}</strong> (${eFundProgress}% of goal)<br>
+                        <small>An emergency fund prevents an unexpected car repair or medical bill from putting you into debt.</small>
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-arrow-down-short-wide" style="color:var(--peach);"></i> THE DEBT PRIORITY STRATEGY</span>
+                    </div>
+                    <div class="output-card-body">
+                        ${selectedDebts.includes('Credit card') 
+                            ? "<strong>High Priority:</strong> Focus extra payments on your High-Interest Credit Card first (Avalanche Method). Pay minimums on student loans/car payments while crushing high-interest debt."
+                            : "<strong>Snowball/Avalanche:</strong> Pay minimums on all obligations, then channel extra dollars into either the smallest balance (for quick emotional wins) or highest interest rate."}
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-building-columns" style="color:var(--navy);"></i> THE ONE ACCOUNT RULE & CREDIT BUILDER</span>
+                    </div>
+                    <div class="output-card-body">
+                        <strong>Account Setup:</strong> Maintain 1 Checking (Bills & debit card) + 1 High-Yield Savings Account (Emergency fund). ${personalityTip}
+                        <br><br><strong>Credit Building Rule:</strong> Put 1 small recurring bill (like Netflix) on a credit card, turn on Auto-Pay for the FULL statement balance every month. Never treat a credit card as extra money.
+                    </div>
+                </div>
+            `;
+
+            outputContainer.innerHTML = html;
+            outputContainer.classList.add('active');
+
+            saveHistoryItem('money-basics', { income, fixed }, html);
+        }
+
+        /* ==========================================================================
+           TOOL 3: HOME SKILLS LOGIC
+           ========================================================================== */
+        function loadSampleHomeSkills() {
+            document.getElementById('hs-cooking').value = "Microwave only";
+            document.getElementById('hs-cleaning').value = "When it's bad";
+            document.getElementById('hs-laundry').value = "When I run out";
+            document.getElementById('hs-maintenance').value = "Bathroom sink drains super slowly and kitchen faucet leaks slightly.";
+            document.getElementById('hs-roommate').value = "Alone";
+
+            showToast("Sample data loaded");
+        }
+
+        function generateHomeSkillsOutput() {
+            const cooking = document.getElementById('hs-cooking').value;
+            const cleaning = document.getElementById('hs-cleaning').value;
+            const laundry = document.getElementById('hs-laundry').value;
+            const maintenance = document.getElementById('hs-maintenance').value.trim();
+            const roommate = document.getElementById('hs-roommate').value;
+
+            // Recipe selection
+            let recipes = [];
+            if (cooking === "Microwave only" || cooking === "Basic") {
+                recipes = [
+                    "<strong>Sheet Pan Chicken & Veggies:</strong> Toss chopped chicken breast, broccoli, and sweet potatoes in olive oil + salt/pepper. Bake 425°F for 20 mins.",
+                    "<strong>10-Minute Quesadilla:</strong> Black beans, shredded cheese, salsa in a flour tortilla. Crisp on pan.",
+                    "<strong>Loaded Rotisserie Salad/Bowl:</strong> Store-bought rotisserie chicken over pre-washed greens, rice, and dressing.",
+                    "<strong>One-Pot Pasta:</strong> Pasta, jarred marinara, spinach, and frozen meatballs simmered together.",
+                    "<strong>Egg & Avocado Toast:</strong> 2 scrambled eggs, mashed avocado, slice of whole wheat toast."
+                ];
+            } else {
+                recipes = [
+                    "<strong>Turkey/Beef Taco Bowls:</strong> Brown ground meat with taco seasoning, serve with rice, corn, and avocado.",
+                    "<strong>Garlic Butter Salmon & Rice:</strong> Pan-seared salmon fillets with steam-in-bag jasmine rice.",
+                    "<strong>Chickpea Curry:</strong> Canned chickpeas, coconut milk, curry paste, cooked spinach.",
+                    "<strong>Stir-fry Noodles:</strong> Ramen noodles (discard packet), frozen stir-fry veg, soy sauce, sesame oil, chicken.",
+                    "<strong>Homemade Veggie Frittata:</strong> Whisk 6 eggs, pour over sautéed veggies and feta, bake at 350°F."
+                ];
+            }
+
+            const outputContainer = document.getElementById('output-home-skills');
+            const html = `
+                <div class="output-header">
+                    <h3 class="output-title"><i class="fa-solid fa-house-user"></i> Home Management Playbook</h3>
+                    <button class="btn btn-copy" onclick="copyToClipboard(this.parentElement.nextElementSibling.innerText)">
+                        <i class="fa-regular fa-copy"></i> Copy Script
+                    </button>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-utensils" style="color:var(--peach);"></i> THE 5-MEAL ROTATION</span>
+                    </div>
+                    <div class="output-card-body">
+                        Simple, low-friction meals matched to your cooking comfort:
+                        <ul>
+                            ${recipes.map(r => `<li>${r}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-broom" style="color:var(--navy);"></i> THE 15-MINUTE DAILY CLEANING CALENDAR</span>
+                    </div>
+                    <div class="output-card-body">
+                        Instead of wasting whole weekends cleaning:
+                        <ul>
+                            <li><strong>Monday:</strong> Wipe high-touch surfaces (Kitchen counters, light switches).</li>
+                            <li><strong>Tuesday:</strong> Quick bathroom wipe down (sink, toilet).</li>
+                            <li><strong>Wednesday:</strong> Clear clutter hotspots (entryway, desk).</li>
+                            <li><strong>Thursday:</strong> Vacuum/Sweep high-traffic floors.</li>
+                            <li><strong>Friday:</strong> Trash & fridge purge before weekend.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-shirt" style="color:var(--peach);"></i> THE LAUNDRY SYSTEM</span>
+                    </div>
+                    <div class="output-card-body">
+                        ${laundry === "When I run out" ? "<strong>The Anti-Backlog Rule:</strong> Pick a fixed 'Laundry Night' (e.g., Sunday night). Never start a load unless you set a timer to fold it the moment the dryer stops. Put clothes away directly—don't let the 'clean hamper' sit." : "Keep up your regular schedule! Wash bedding every 2 weeks."}
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-wrench" style="color:var(--navy);"></i> MAINTENANCE 101 & LANDLORD RULES</span>
+                    </div>
+                    <div class="output-card-body">
+                        <strong>Your Issue Note:</strong> ${maintenance || "No current issues listed."}<br><br>
+                        <strong>Quick Rule:</strong> If it involves plumbing inside walls, gas, electrical breakers, or major leaks → <em>Call Landlord/Pro immediately</em>.<br>
+                        <strong>DIY Safe:</strong> Unclogging a drain with a hair-snake tool, resetting a GFCI outlet button, or tightening loose cabinet screws.
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-boxes-packing" style="color:var(--peach);"></i> ESSENTIAL SUPPLY CHECKLIST ${roommate !== 'Alone' ? '& ROOMMATE STARTER' : ''}</span>
+                    </div>
+                    <div class="output-card-body">
+                        <strong>Must-Have Kit:</strong> Plunger (accordion style), All-purpose spray, Microfiber cloths, Hammer, Screwdriver set, Band-aids, Pain reliever.<br>
+                        ${roommate !== 'Alone' ? '<br><strong>Roommate Tip:</strong> Agree on explicit quiet hours, shared supplies (toilet paper/dish soap fund), and a weekly rotating chore board.' : ''}
+                    </div>
+                </div>
+            `;
+
+            outputContainer.innerHTML = html;
+            outputContainer.classList.add('active');
+
+            saveHistoryItem('home-skills', { cooking, roommate }, html);
+        }
+
+        /* ==========================================================================
+           TOOL 4: SOCIAL SURVIVAL LOGIC
+           ========================================================================== */
+        function loadSampleSocialSurvival() {
+            document.getElementById('ss-circle').value = "College friends";
+            document.getElementById('ss-anxiety').value = "7";
+            document.getElementById('ss-anxiety-val').textContent = "7";
+            document.getElementById('ss-interests').value = "PC gaming, casual hiking, coffee roasting, board games.";
+            document.getElementById('ss-neighbors').value = "Nothing";
+            document.getElementById('ss-weekend').value = "Mostly scrolling social media, playing games alone, feeling a bit disconnected.";
+
+            showToast("Sample data loaded");
+        }
+
+        function generateSocialSurvivalOutput() {
+            const circle = document.getElementById('ss-circle').value;
+            const anxiety = parseInt(document.getElementById('ss-anxiety').value) || 5;
+            const interests = document.getElementById('ss-interests').value.trim();
+            const neighbors = document.getElementById('ss-neighbors').value;
+
+            let inviteScripts = [
+                "<strong>Low Stakes Invite 1 (Coffee/Tea):</strong> 'Hey! I'm checking out that new coffee spot downtown this Thursday around 3 PM. Let me know if you want to grab a quick cup!'",
+                "<strong>Low Stakes Invite 2 (Activity Focus):</strong> 'I'm hitting the hiking trail / board game cafe on Saturday morning. You're welcome to tag along if you're free!'",
+                "<strong>Low Stakes Invite 3 (Casual Digital/Group):</strong> 'Hey, a few of us are jumping on Discord / streaming a movie this evening around 8. Free to join if you want to chill!'"
+            ];
+
+            let neighborStep = "";
+            if (neighbors === "Avoidant" || neighbors === "Nothing") {
+                neighborStep = "Next time you see a neighbor, simply hold the elevator door or give a brief head nod and say 'Hey, how's it going?' No long conversation required. Step 1 is just establishing you are friendly.";
+            } else {
+                neighborStep = "You're already doing great! Next step: 'Hey, I'm [Name] in #3B by the way. Let me know if you ever need a package grabbed!'";
+            }
+
+            const outputContainer = document.getElementById('output-social-survival');
+            const html = `
+                <div class="output-header">
+                    <h3 class="output-title"><i class="fa-solid fa-heart-pulse"></i> Adult Connection Blueprint</h3>
+                    <button class="btn btn-copy" onclick="copyToClipboard(this.parentElement.nextElementSibling.innerText)">
+                        <i class="fa-regular fa-copy"></i> Copy Script
+                    </button>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-stairs" style="color:var(--navy);"></i> THE FRIENDSHIP LADDER</span>
+                    </div>
+                    <div class="output-card-body">
+                        Making adult friends takes regular, repeated, unplanned interactions:
+                        <ul>
+                            <li><strong>Rung 1 (Acquaintance):</strong> Say hi regularly at work, gym, or neighborhood.</li>
+                            <li><strong>Rung 2 (Activity Partner):</strong> Do ONE specific activity together (e.g., bouldering, gaming, study session).</li>
+                            <li><strong>Rung 3 (Friend):</strong> Hang out without a structured activity or talk about life personal stuff.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-paper-plane" style="color:var(--peach);"></i> LOW-STAKES INVITE TEMPLATES (Anxiety Level: ${anxiety}/10)</span>
+                    </div>
+                    <div class="output-card-body">
+                        Use these low-rejection scripts (always include a specific time & easy opt-out):
+                        <ul>
+                            ${inviteScripts.map(s => `<li>${s}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-bridge" style="color:var(--navy);"></i> THE HOBBY BRIDGE</span>
+                    </div>
+                    <div class="output-card-body">
+                        Based on your interests (<em>${interests || 'your hobbies'}</em>):<br>
+                        Search for 1 recurring local meetup (e.g., Meetup.com, local run club, game store board game night, or library group). Recurring events take away the pressure because you see the same faces automatically.
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-door-open" style="color:var(--peach);"></i> THE NEIGHBOR STARTER & ALONE TIME REFRAME</span>
+                    </div>
+                    <div class="output-card-body">
+                        <strong>Neighbor Connection:</strong> ${neighborStep}<br><br>
+                        <strong>Solitude vs. Isolation:</strong> Being alone is rest; isolation is feeling disconnected. Reframe solo weekend time by turning passive scrolling into intentional solo dates (e.g., reading in a park, solo museum visit).
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-user-check" style="color:var(--navy);"></i> THE WEEKLY CHECK-IN BUDDY</span>
+                    </div>
+                    <div class="output-card-body">
+                        Pick ONE old friend or family member. Set a repeating reminder every Sunday to send a low-pressure text: <em>"Hey! Thinking of you, hope you had a great week. How's life?"</em>
+                    </div>
+                </div>
+            `;
+
+            outputContainer.innerHTML = html;
+            outputContainer.classList.add('active');
+
+            saveHistoryItem('social-survival', { anxiety }, html);
+        }
+
+        /* ==========================================================================
+           TOOL 5: FUTURE SKETCH LOGIC
+           ========================================================================== */
+        function loadSampleFutureSketch() {
+            document.getElementById('fs-job').value = "Retail associate / Customer service representative";
+            document.getElementById('fs-satisfaction').value = "4";
+            document.getElementById('fs-satisfaction-val').textContent = "4";
+            document.getElementById('fs-1year').value = "Transition to an entry-level office/remote role with stable hours.";
+            document.getElementById('fs-5year').value = "Working in creative digital media or UX design, earning a comfortable living.";
+            document.getElementById('fs-blocker').value = "Too overwhelmed";
+            document.getElementById('fs-edu').value = "Finished";
+
+            showToast("Sample data loaded");
+        }
+
+        function generateFutureSketchOutput() {
+            const job = document.getElementById('fs-job').value.trim();
+            const satisfaction = parseInt(document.getElementById('fs-satisfaction').value) || 4;
+            const goal1 = document.getElementById('fs-1year').value.trim();
+            const dream5 = document.getElementById('fs-5year').value.trim();
+            const blocker = document.getElementById('fs-blocker').value;
+            const edu = document.getElementById('fs-edu').value;
+
+            let blockerAdvice = "";
+            if (blocker === "Too overwhelmed") {
+                blockerAdvice = "When daily survival takes 100% of your energy, long-term career planning feels impossible. Stop trying to plan 5 years ahead. Focus strictly on the next 90 days.";
+            } else if (blocker === "Fear of choosing wrong") {
+                blockerAdvice = "Remember: No career choice is permanent. You aren't choosing a lifetime destiny; you are just picking your next experiment for the next 12 months.";
+            } else {
+                blockerAdvice = "Acknowledge that financial necessity or external pressure is real, but small 15-minute daily skill steps can quietly build your exit ramp.";
+            }
+
+            const outputContainer = document.getElementById('output-future-sketch');
+            const html = `
+                <div class="output-header">
+                    <h3 class="output-title"><i class="fa-solid fa-compass"></i> Career & Direction Roadmap</h3>
+                    <button class="btn btn-copy" onclick="copyToClipboard(this.parentElement.nextElementSibling.innerText)">
+                        <i class="fa-regular fa-copy"></i> Copy Script
+                    </button>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-lightbulb" style="color:var(--peach);"></i> THE CLARITY CHECK</span>
+                    </div>
+                    <div class="output-card-body">
+                        Current Status: <strong>${job || 'Current role'}</strong> (Satisfaction: ${satisfaction}/10)<br>
+                        ${blockerAdvice}
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-bullseye" style="color:var(--navy);"></i> THE 90-DAY ACHIEVABLE MILESTONE</span>
+                    </div>
+                    <div class="output-card-body">
+                        Instead of worrying about: <em>"${dream5 || '5-year dream'}"</em><br>
+                        <strong>Your 90-Day Focus:</strong> ${goal1 ? `Work directly toward: "${goal1}"` : 'Update your resume, optimize LinkedIn, and reach out to 3 people working in roles you find interesting for a 15-minute chat.'}
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-flask" style="color:var(--peach);"></i> THE LOW-RISK EXPLORATION PLAN</span>
+                    </div>
+                    <div class="output-card-body">
+                        Test potential career fields without quitting your job:
+                        <ul>
+                            <li><strong>Informational Interviews:</strong> Send a polite message to someone on LinkedIn: "Hi! I admire your path in [Field]. Would you be open to a 10-min phone call about how you got started?"</li>
+                            <li><strong>Micro-Projects:</strong> Take a weekend course on Coursera, YouTube, or Udemy before committing money or degrees.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-layer-group" style="color:var(--navy);"></i> THE SKILL STACK & MENTAL HEALTH CHECK</span>
+                    </div>
+                    <div class="output-card-body">
+                        <strong>Skill Stack Addition:</strong> Pick ONE high-leverage skill to learn for free over the next month (e.g., Excel/Google Sheets mastery, basic SQL, Canva graphic design, or professional email writing). Combining a domain skill + communication = instant workplace advantage.<br><br>
+                        <strong>Mental Check:</strong> If brain fog or fatigue is making everything feel impossible, address sleep, diet, and mental health support first. You can't plan a future when running on empty.
+                    </div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-card-header">
+                        <span class="output-card-title"><i class="fa-solid fa-key" style="color:var(--peach);"></i> YOUR PERMISSION SLIP</span>
+                    </div>
+                    <div class="output-card-body" style="font-size: 1.05rem; font-weight: 600; color: var(--navy);">
+                        "You don't need to have it all figured out. You just need to take the single next step."
+                    </div>
+                </div>
+            `;
+
+            outputContainer.innerHTML = html;
+            outputContainer.classList.add('active');
+
+            saveHistoryItem('future-sketch', { satisfaction, edu }, html);
+        }
+    </script>
+</body>
+</html>

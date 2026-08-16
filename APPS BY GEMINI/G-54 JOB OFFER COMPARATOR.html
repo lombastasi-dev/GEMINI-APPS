@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Offer Comparator — Anti-FOMO Career Toolkit</title>
+    
+    <!-- Google Fonts & Font Awesome CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --slate-gray: #495057;
+            --slate-dark: #343a40;
+            --slate-light: #6c757d;
+            --sage-green: #81B29A;
+            --sage-dark: #64947d;
+            --sage-light: #f1f8f5;
+            --bg-gradient-start: #F8F9FA;
+            --bg-gradient-end: #F1F8F5;
+            --card-bg: #FFFFFF;
+            --border-color: #E9ECEF;
+            --text-main: #212529;
+            --text-muted: #6C757D;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--sage-green);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--slate-gray);
+            line-height: 1.2;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            color: var(--slate-gray);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item button i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+            color: var(--slate-light);
+        }
+
+        .nav-item button:hover {
+            background-color: var(--sage-light);
+            color: var(--slate-dark);
+        }
+
+        .nav-item.active button {
+            background-color: var(--slate-gray);
+            color: #ffffff;
+        }
+
+        .nav-item.active button i {
+            color: var(--sage-green);
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 20px;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: var(--slate-gray);
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: var(--slate-gray);
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 95;
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 860px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* UI Cards */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        /* Hero / Header Section */
+        .hero-section {
+            text-align: center;
+            padding: 32px 20px;
+            margin-bottom: 28px;
+        }
+
+        .hero-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--slate-gray);
+            margin-bottom: 8px;
+        }
+
+        .hero-tagline {
+            font-size: 1.1rem;
+            color: var(--slate-light);
+            font-weight: 400;
+        }
+
+        /* Dashboard Grid */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dash-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--sage-green);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+            border-color: rgba(129, 178, 154, 0.4);
+        }
+
+        .dash-card:hover::before {
+            opacity: 1;
+        }
+
+        .dash-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background-color: var(--sage-light);
+            color: var(--sage-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            color: var(--slate-gray);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .dash-card p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Tool Headers */
+        .tool-header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .tool-title-group h2 {
+            font-size: 1.6rem;
+            color: var(--slate-gray);
+            font-weight: 700;
+        }
+
+        .tool-problem {
+            font-size: 0.95rem;
+            color: var(--sage-dark);
+            font-style: italic;
+            margin-top: 4px;
+        }
+
+        /* Buttons & Controls */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--sage-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--sage-dark);
+        }
+
+        .btn-secondary {
+            background-color: #E9ECEF;
+            color: var(--slate-gray);
+        }
+
+        .btn-secondary:hover {
+            background-color: #DEE2E6;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--sage-green);
+            color: var(--sage-dark);
+        }
+
+        .btn-outline:hover {
+            background: var(--sage-light);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--slate-gray);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #CED4DA;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #FFF;
+            transition: border-color 0.15s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--sage-green);
+            box-shadow: 0 0 0 3px rgba(129, 178, 154, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .radio-label, .checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            cursor: pointer;
+            background: var(--bg-gradient-start);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .radio-label input, .checkbox-label input {
+            accent-color: var(--sage-green);
+        }
+
+        .form-actions {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Analysis Output Cards */
+        .output-container {
+            margin-top: 32px;
+            display: none;
+        }
+
+        .output-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .output-header {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--slate-gray);
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--sage-green);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .analysis-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            border-left: 4px solid var(--sage-green);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+        }
+
+        .analysis-card.warning {
+            border-left-color: #E07A5F;
+        }
+
+        .analysis-card.neutral {
+            border-left-color: var(--slate-light);
+        }
+
+        .analysis-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--slate-gray);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .analysis-body {
+            font-size: 0.92rem;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Comparison Tables & Matrix */
+        .comp-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+
+        .comp-table th, .comp-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comp-table th {
+            background-color: var(--sage-light);
+            color: var(--slate-gray);
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-low { background: #D8F3DC; color: #1B4332; }
+        .badge-medium { background: #FFF3BF; color: #744210; }
+        .badge-high { background: #FFD8A8; color: #78350F; }
+        .badge-very-high { background: #FFC9C9; color: #900C3F; }
+
+        /* Script Output Box */
+        .script-box {
+            background: #F8F9FA;
+            border: 1px solid #DEE2E6;
+            border-radius: 6px;
+            padding: 14px;
+            font-family: monospace, sans-serif;
+            font-size: 0.88rem;
+            color: #212529;
+            margin: 10px 0;
+            position: relative;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: white;
+            border: 1px solid #CED4DA;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            color: var(--slate-gray);
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--sage-light);
+            color: var(--sage-dark);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--slate-dark);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Accordion / History Section */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            padding: 8px 0;
+        }
+
+        .history-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--slate-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-content {
+            display: none;
+            margin-top: 12px;
+        }
+
+        .history-content.active {
+            display: block;
+        }
+
+        .history-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .history-item-date {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        /* App Footer */
+        .app-footer {
+            margin-top: auto;
+            background-color: #FFFFFF;
+            border-top: 1px solid var(--border-color);
+            padding: 16px 24px;
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .mobile-header {
+                display: flex;
+            }
+            .overlay.active {
+                display: block;
+            }
+            .main-wrapper {
+                margin-left: 0;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+            .hero-title {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Top Header -->
+    <header class="mobile-header">
+        <div class="mobile-brand">
+            <i class="fa-solid fa-scale-balanced" style="color: var(--sage-green);"></i>
+            <span>Offer Comparator</span>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Navigation Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <h1>Job Offer<br><span style="font-weight:400; font-size:0.85rem; color:var(--slate-light);">Comparator</span></h1>
+            </div>
+            <nav style="flex: 1;">
+                <ul class="nav-list">
+                    <li class="nav-item active">
+                        <button onclick="switchScreen('dashboard')">
+                            <i class="fa-solid fa-house"></i>
+                            <span>Dashboard</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button onclick="switchScreen('tool1')">
+                            <i class="fa-solid fa-calculator"></i>
+                            <span>1. The Numbers</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button onclick="switchScreen('tool2')">
+                            <i class="fa-solid fa-briefcase"></i>
+                            <span>2. Role Comparison</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button onclick="switchScreen('tool3')">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>3. Risk Assessor</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button onclick="switchScreen('tool4')">
+                            <i class="fa-solid fa-handshake"></i>
+                            <span>4. Counter-Offer</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button onclick="switchScreen('tool5')">
+                            <i class="fa-solid fa-compass"></i>
+                            <span>5. The Decision</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="main-wrapper">
+            <main class="main-content">
+
+                <!-- DASHBOARD SCREEN -->
+                <section id="dashboard" class="screen active">
+                    <div class="hero-section">
+                        <h2 class="hero-title">Job Offer Comparator</h2>
+                        <p class="hero-tagline">Compare clearly. Decide calmly. Move intentionally.</p>
+                    </div>
+
+                    <div class="dash-grid">
+                        <div class="dash-card" onclick="switchScreen('tool1')">
+                            <div class="dash-icon"><i class="fa-solid fa-calculator"></i></div>
+                            <h3>The Numbers</h3>
+                            <p>Uncover true total compensation beyond just the base salary headlines.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchScreen('tool2')">
+                            <div class="dash-icon"><i class="fa-solid fa-briefcase"></i></div>
+                            <h3>Role Comparison</h3>
+                            <p>Evaluate daily reality, growth trajectory, and manager risk side-by-side.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchScreen('tool3')">
+                            <div class="dash-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h3>Risk Assessor</h3>
+                            <p>Analyze downside risks, safety nets, and new company stability logically.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchScreen('tool4')">
+                            <div class="dash-icon"><i class="fa-solid fa-handshake"></i></div>
+                            <h3>Counter-Offer</h3>
+                            <p>Determine whether to leverage the offer internally or make a clean exit.</p>
+                        </div>
+
+                        <div class="dash-card" onclick="switchScreen('tool5')">
+                            <div class="dash-icon"><i class="fa-solid fa-compass"></i></div>
+                            <h3>The Decision</h3>
+                            <p>Synthesize factors into a final weighted score with script generation.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: THE NUMBERS -->
+                <section id="tool1" class="screen">
+                    <div class="tool-header">
+                        <div class="tool-title-group">
+                            <h2>Tool 1: The Numbers</h2>
+                            <p class="tool-problem">"The salary is higher, but what about the total package?"</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSampleTool1()">
+                            <i class="fa-solid fa-flask"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="formTool1" onsubmit="analyzeTool1(event)">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="t1_curr_base">Current Base Salary ($/yr)</label>
+                                    <input type="number" id="t1_curr_base" required min="0" placeholder="e.g. 65000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="t1_off_base">Offer Base Salary ($/yr)</label>
+                                    <input type="number" id="t1_off_base" required min="0" placeholder="e.g. 78000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="t1_curr_benefits">Current Bonus / Annual Benefits Value ($)</label>
+                                    <input type="number" id="t1_curr_benefits" required min="0" placeholder="e.g. 8000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="t1_off_benefits">Offer Bonus / Annual Benefits Value ($)</label>
+                                    <input type="number" id="t1_off_benefits" required min="0" placeholder="e.g. 5000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="t1_curr_commute">Current Monthly Commute Cost ($)</label>
+                                    <input type="number" id="t1_curr_commute" required min="0" placeholder="e.g. 200">
+                                </div>
+                                <div class="form-group">
+                                    <label for="t1_off_commute">Offer Monthly Commute Cost ($)</label>
+                                    <input type="number" id="t1_off_commute" required min="0" placeholder="e.g. 400">
+                                </div>
+                                <div class="form-group">
+                                    <label for="t1_curr_401k">Current 401k Match / Pension details</label>
+                                    <input type="text" id="t1_curr_401k" required placeholder="e.g. 6% dollar-for-dollar">
+                                </div>
+                                <div class="form-group">
+                                    <label for="t1_off_401k">Offer 401k Match / Pension details</label>
+                                    <input type="text" id="t1_off_401k" required placeholder="e.g. 3% match">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-pie"></i> Analyze Compensation</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="outTool1" class="output-container">
+                        <div class="output-header">
+                            <span>Financial Analysis</span>
+                        </div>
+                        <div id="outTool1Content"></div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('t1')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Tool 1 Analyses</span>
+                            <i class="fa-solid fa-chevron-down" id="t1_arrow"></i>
+                        </div>
+                        <div class="history-content" id="t1_history_content">
+                            <ul class="history-list" id="t1_history_list"></ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: THE ROLE COMPARISON -->
+                <section id="tool2" class="screen">
+                    <div class="tool-header">
+                        <div class="tool-title-group">
+                            <h2>Tool 2: The Role Comparison</h2>
+                            <p class="tool-problem">"Will this job actually be better day-to-day?"</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSampleTool2()">
+                            <i class="fa-solid fa-flask"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="formTool2" onsubmit="analyzeTool2(event)">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="t2_curr_title">Current Role Title</label>
+                                    <input type="text" id="t2_curr_title" required placeholder="e.g. Senior Analyst">
+                                </div>
+                                <div class="form-group">
+                                    <label for="t2_off_title">Offer Role Title</label>
+                                    <input type="text" id="t2_off_title" required placeholder="e.g. Lead Analyst">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="t2_curr_day">Current Day-to-Day Reality</label>
+                                    <textarea id="t2_curr_day" required placeholder="Main responsibilities, routine tasks, balance..."></textarea>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="t2_off_day">Offered Day-to-Day Expectations</label>
+                                    <textarea id="t2_off_day" required placeholder="Expected responsibilities, autonomy, intensity..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="t2_curr_growth">Current Growth Trajectory</label>
+                                    <select id="t2_curr_growth" required>
+                                        <option value="Clear">Clear</option>
+                                        <option value="Unclear">Unclear</option>
+                                        <option value="Stalled">Stalled</option>
+                                        <option value="Declining">Declining</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="t2_off_growth">Offered Growth Trajectory</label>
+                                    <select id="t2_off_growth" required>
+                                        <option value="Clear">Clear</option>
+                                        <option value="Unclear">Unclear</option>
+                                        <option value="Stalled">Stalled</option>
+                                        <option value="Declining">Declining</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="t2_curr_mgr">Current Manager Quality</label>
+                                    <select id="t2_curr_mgr" required>
+                                        <option value="Great">Great</option>
+                                        <option value="Good">Good</option>
+                                        <option value="Okay">Okay</option>
+                                        <option value="Poor">Poor</option>
+                                        <option value="Terrible">Terrible</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="t2_off_mgr">Offered Manager Quality</label>
+                                    <select id="t2_off_mgr" required>
+                                        <option value="Great">Great</option>
+                                        <option value="Good">Good</option>
+                                        <option value="Okay">Okay</option>
+                                        <option value="Poor">Poor</option>
+                                        <option value="Unknown">Unknown</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-layer-group"></i> Compare Roles</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="outTool2" class="output-container">
+                        <div class="output-header">
+                            <span>Role Qualitative Matrix</span>
+                        </div>
+                        <div id="outTool2Content"></div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('t2')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Tool 2 Analyses</span>
+                            <i class="fa-solid fa-chevron-down" id="t2_arrow"></i>
+                        </div>
+                        <div class="history-content" id="t2_history_content">
+                            <ul class="history-list" id="t2_history_list"></ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: THE RISK ASSESSOR -->
+                <section id="tool3" class="screen">
+                    <div class="tool-header">
+                        <div class="tool-title-group">
+                            <h2>Tool 3: The Risk Assessor</h2>
+                            <p class="tool-problem">"What could go wrong if I take this offer?"</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSampleTool3()">
+                            <i class="fa-solid fa-flask"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="formTool3" onsubmit="analyzeTool3(event)">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="t3_stage">New Company Stage</label>
+                                    <select id="t3_stage" required>
+                                        <option value="Startup">Early Startup (High Volatility)</option>
+                                        <option value="Growth">Growth Phase (Scaling Rapidly)</option>
+                                        <option value="Established">Established / Enterprise</option>
+                                        <option value="Declining">Declining / Turnaround</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="t3_nature">New Role Is:</label>
+                                    <select id="t3_nature" required>
+                                        <option value="Newly created">Newly Created</option>
+                                        <option value="Backfill">Backfill (Replacing someone)</option>
+                                        <option value="Expansion">Expansion (Team scaling)</option>
+                                        <option value="Restructuring">Restructuring / Reorg</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="t3_cushion">Your Financial Cushion</label>
+                                    <select id="t3_cushion" required>
+                                        <option value="6mo+">6+ Months Living Expenses</option>
+                                        <option value="3-6mo">3-6 Months Expenses</option>
+                                        <option value="1-3mo">1-3 Months Expenses</option>
+                                        <option value="None">Less than 1 Month / None</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="t3_tolerance">Your Risk Tolerance</label>
+                                    <select id="t3_tolerance" required>
+                                        <option value="High">High (Comfortable with uncertainty)</option>
+                                        <option value="Medium">Medium (Balanced approach)</option>
+                                        <option value="Low">Low (Values stability highly)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="t3_leaving">What You'd Be Leaving Behind (Seniority, capital, flexibility, relationships)</label>
+                                    <textarea id="t3_leaving" required placeholder="e.g. 4 years accrued tenure, great team rapport, flexible work hours..."></textarea>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-shield-cat"></i> Assess Risk Profile</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="outTool3" class="output-container">
+                        <div class="output-header">
+                            <span>Downside Risk Evaluation</span>
+                        </div>
+                        <div id="outTool3Content"></div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('t3')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Tool 3 Analyses</span>
+                            <i class="fa-solid fa-chevron-down" id="t3_arrow"></i>
+                        </div>
+                        <div class="history-content" id="t3_history_content">
+                            <ul class="history-list" id="t3_history_list"></ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: COUNTER-OFFER CALCULATOR -->
+                <section id="tool4" class="screen">
+                    <div class="tool-header">
+                        <div class="tool-title-group">
+                            <h2>Tool 4: Counter-Offer Calculator</h2>
+                            <p class="tool-problem">"Should I use this offer to get a raise here, or just leave?"</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSampleTool4()">
+                            <i class="fa-solid fa-flask"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="formTool4" onsubmit="analyzeTool4(event)">
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label>Have you asked for a raise before at your current job?</label>
+                                    <div class="radio-group">
+                                        <label class="radio-label"><input type="radio" name="t4_asked" value="Yes and got it" required> Yes, and received it</label>
+                                        <label class="radio-label"><input type="radio" name="t4_asked" value="Yes and denied"> Yes, but was denied</label>
+                                        <label class="radio-label"><input type="radio" name="t4_asked" value="No"> No, never asked</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="t4_retention">Current Company Retention History</label>
+                                    <select id="t4_retention" required>
+                                        <option value="Fights for people">Fights hard to keep talent</option>
+                                        <option value="Sometimes counters">Sometimes offers counter-offers</option>
+                                        <option value="Lets people go easily">Lets people leave without counter</option>
+                                        <option value="Unknown">Unknown / Unpredictable</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Relationship with Current Manager</label>
+                                    <div class="radio-group">
+                                        <label class="radio-label"><input type="radio" name="t4_boss" value="Strong" required> Strong / Supportive</label>
+                                        <label class="radio-label"><input type="radio" name="t4_boss" value="Neutral"> Neutral / Transactional</label>
+                                        <label class="radio-label"><input type="radio" name="t4_boss" value="Strained"> Strained / Difficult</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label>Primary Drivers for Wanting to Leave (Check all that apply):</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label"><input type="checkbox" name="t4_reasons" value="Money"> Money / Compensation</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="t4_reasons" value="Growth"> Career Growth</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="t4_reasons" value="Culture"> Company Culture</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="t4_reasons" value="Manager"> Manager Relationship</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="t4_reasons" value="Commute"> Commute / Location</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="t4_reasons" value="Work-life balance"> Work-Life Balance</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="t4_reasons" value="Boredom"> Boredom / Lack of Challenge</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label>Would you stay at your current job if they matched the offer?</label>
+                                    <div class="radio-group">
+                                        <label class="radio-label"><input type="radio" name="t4_stay" value="Yes" required> Yes, definitely</label>
+                                        <label class="radio-label"><input type="radio" name="t4_stay" value="Maybe"> Maybe, under right conditions</label>
+                                        <label class="radio-label"><input type="radio" name="t4_stay" value="No"> No, my mind is made up</label>
+                                        <label class="radio-label"><input type="radio" name="t4_stay" value="Not sure"> Not sure</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-comments"></i> Calculate Strategy</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="outTool4" class="output-container">
+                        <div class="output-header">
+                            <span>Counter-Offer Dynamics & Strategy</span>
+                        </div>
+                        <div id="outTool4Content"></div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('t4')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Tool 4 Analyses</span>
+                            <i class="fa-solid fa-chevron-down" id="t4_arrow"></i>
+                        </div>
+                        <div class="history-content" id="t4_history_content">
+                            <ul class="history-list" id="t4_history_list"></ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: THE DECISION -->
+                <section id="tool5" class="screen">
+                    <div class="tool-header">
+                        <div class="tool-title-group">
+                            <h2>Tool 5: The Decision</h2>
+                            <p class="tool-problem">"I have all the information and I still can't decide."</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadSampleTool5()">
+                            <i class="fa-solid fa-flask"></i> Load Sample Scenario
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <form id="formTool5" onsubmit="analyzeTool5(event)">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="t5_gut">Your Initial Gut Feeling</label>
+                                    <select id="t5_gut" required>
+                                        <option value="Take it">Leaning toward taking the offer</option>
+                                        <option value="Stay">Leaning toward staying put</option>
+                                        <option value="Terrified either way">Terrified / Paralyzed either way</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="t5_fear">What Are You Most Afraid Of?</label>
+                                    <select id="t5_fear" required>
+                                        <option value="Regret">Regret (Missing out on potential)</option>
+                                        <option value="Financial loss">Financial Loss or Instability</option>
+                                        <option value="Starting over">Starting Over / Losing Capital</option>
+                                        <option value="Leaving comfort">Leaving Comfort / Familiarity</option>
+                                        <option value="Making wrong impression">Making a Bad Impression</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="t5_friend">If a close friend in your exact shoes asked for advice, what would you tell them?</label>
+                                    <textarea id="t5_friend" required placeholder="Write candidly as if advising someone you care about..."></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Is there an urgent deadline on the offer?</label>
+                                    <div class="radio-group">
+                                        <label class="radio-label"><input type="radio" name="t5_deadline" value="Yes, urgent" required> Yes, urgent (&lt; 48 hours)</label>
+                                        <label class="radio-label"><input type="radio" name="t5_deadline" value="Yes, but flexible"> Yes, standard flexible</label>
+                                        <label class="radio-label"><input type="radio" name="t5_deadline" value="No"> No strict deadline set</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="t5_obvious">What single piece of information or condition would make this decision obvious?</label>
+                                    <textarea id="t5_obvious" required placeholder="e.g. Knowing my direct manager at the new role is supportive..."></textarea>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check-double"></i> Synthesize Final Decision</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="outTool5" class="output-container">
+                        <div class="output-header">
+                            <span>Final Decision Synthesis & Communication Scripts</span>
+                        </div>
+                        <div id="outTool5Content"></div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-header" onclick="toggleHistory('t5')">
+                            <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Tool 5 Analyses</span>
+                            <i class="fa-solid fa-chevron-down" id="t5_arrow"></i>
+                        </div>
+                        <div class="history-content" id="t5_history_content">
+                            <ul class="history-list" id="t5_history_list"></ul>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Global Responsive Footer -->
+            <footer class="app-footer">
+                For career decision-making only. Not financial or legal advice. For contract review, consult an attorney. For major financial decisions, consult a financial advisor.
+            </footer>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">Copied to clipboard!</div>
+
+    <!-- Application Scripting -->
+    <script>
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const overlay = document.getElementById('overlay');
+        const toast = document.getElementById('toast');
+
+        // Navigation Toggle
+        hamburgerBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+
+        function switchScreen(screenId) {
+            // Screen Switch Logic
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+
+            // Sidebar Active State Sync
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const targetBtn = document.querySelector(`.nav-item button[onclick*="${screenId}"]`);
+            if (targetBtn) {
+                targetBtn.parentElement.classList.add('active');
+            }
+
+            // Close Mobile Nav if open
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+
+            // Scroll Top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Refresh History rendering
+            if (screenId.startsWith('tool')) {
+                const toolKey = screenId.replace('tool', 't');
+                renderHistory(toolKey);
+            }
+        }
+
+        // Utility: Copy to Clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            });
+        }
+
+        // Utility: History Management (localStorage)
+        function saveToHistory(toolId, summary, fullData) {
+            const key = `offer_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                summary: summary,
+                data: fullData
+            };
+
+            history.unshift(newItem);
+            if (history.length > 30) history = history.slice(0, 30); // max 30 items
+
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = `offer_history_${toolId}`;
+            const listEl = document.getElementById(`${toolId}_history_list`);
+            if (!listEl) return;
+
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            listEl.innerHTML = '';
+
+            if (history.length === 0) {
+                listEl.innerHTML = '<li class="history-item" style="color:var(--text-muted);">No history saved yet.</li>';
+                return;
+            }
+
+            history.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                li.innerHTML = `
+                    <div>
+                        <strong>${escapeHtml(item.summary)}</strong>
+                        <div class="history-item-date">${item.date}</div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="loadHistoryItem('${toolId}', ${item.id})">Restore</button>
+                `;
+                listEl.appendChild(li);
+            });
+        }
+
+        function toggleHistory(toolId) {
+            const content = document.getElementById(`${toolId}_history_content`);
+            const arrow = document.getElementById(`${toolId}_arrow`);
+            content.classList.toggle('active');
+            if (content.classList.contains('active')) {
+                arrow.className = 'fa-solid fa-chevron-up';
+            } else {
+                arrow.className = 'fa-solid fa-chevron-down';
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        /* ----------------------------------------------------
+           TOOL 1 LOGIC & SAMPLES
+        ---------------------------------------------------- */
+        function loadSampleTool1() {
+            document.getElementById('t1_curr_base').value = 65000;
+            document.getElementById('t1_off_base').value = 78000;
+            document.getElementById('t1_curr_benefits').value = 8000;
+            document.getElementById('t1_off_benefits').value = 5000;
+            document.getElementById('t1_curr_commute').value = 200;
+            document.getElementById('t1_off_commute').value = 400;
+            document.getElementById('t1_curr_401k').value = "6% match";
+            document.getElementById('t1_off_401k').value = "3% match";
+        }
+
+        function analyzeTool1(e) {
+            e.preventDefault();
+            const currBase = parseFloat(document.getElementById('t1_curr_base').value) || 0;
+            const offBase = parseFloat(document.getElementById('t1_off_base').value) || 0;
+            const currBen = parseFloat(document.getElementById('t1_curr_benefits').value) || 0;
+            const offBen = parseFloat(document.getElementById('t1_off_benefits').value) || 0;
+            const currCom = parseFloat(document.getElementById('t1_curr_commute').value) || 0;
+            const offCom = parseFloat(document.getElementById('t1_off_commute').value) || 0;
+            const curr401k = document.getElementById('t1_curr_401k').value;
+            const off401k = document.getElementById('t1_off_401k').value;
+
+            // Calculations
+            const currAnnualCommute = currCom * 12;
+            const offAnnualCommute = offCom * 12;
+
+            const currTotalNet = (currBase + currBen) - currAnnualCommute;
+            const offTotalNet = (offBase + offBen) - offAnnualCommute;
+
+            const baseDiff = offBase - currBase;
+            const netDiffAnnual = offTotalNet - currTotalNet;
+            const netDiffMonthly = (netDiffAnnual / 12).toFixed(0);
+
+            const commDiffAnnual = offAnnualCommute - currAnnualCommute;
+
+            // Template Output Generation
+            let html = `
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-scale-unbalanced"></i> TOTAL COMPARISON</div>
+                    <div class="analysis-body">
+                        <table class="comp-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Current Role</th>
+                                    <th>New Offer</th>
+                                    <th>Variance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Base Salary</td>
+                                    <td>$${currBase.toLocaleString()}</td>
+                                    <td>$${offBase.toLocaleString()}</td>
+                                    <td><strong style="color: ${baseDiff >= 0 ? 'var(--sage-dark)' : '#E07A5F'};">${baseDiff >= 0 ? '+' : ''}$${baseDiff.toLocaleString()}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Benefits & Bonus Value</td>
+                                    <td>$${currBen.toLocaleString()}</td>
+                                    <td>$${offBen.toLocaleString()}</td>
+                                    <td>$${(offBen - currBen).toLocaleString()}</td>
+                                </tr>
+                                <tr>
+                                    <td>Annual Commute Cost</td>
+                                    <td>$${currAnnualCommute.toLocaleString()}</td>
+                                    <td>$${offAnnualCommute.toLocaleString()}</td>
+                                    <td>-$${commDiffAnnual.toLocaleString()}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Effective Total Package</strong></td>
+                                    <td><strong>$${currTotalNet.toLocaleString()}</strong></td>
+                                    <td><strong>$${offTotalNet.toLocaleString()}</strong></td>
+                                    <td><strong style="color: ${netDiffAnnual >= 0 ? 'var(--sage-dark)' : '#E07A5F'};">${netDiffAnnual >= 0 ? '+' : ''}$${netDiffAnnual.toLocaleString()}/yr</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="analysis-card ${netDiffAnnual > 0 ? '' : 'warning'}">
+                    <div class="analysis-title"><i class="fa-solid fa-sack-dollar"></i> THE REAL DIFFERENCE</div>
+                    <div class="analysis-body">
+                        Headline base salary is misleading by <strong>$${Math.abs(baseDiff - netDiffAnnual).toLocaleString()}</strong>. 
+                        While the headline salary change is <strong>${baseDiff >= 0 ? '+' : ''}$${baseDiff.toLocaleString()}</strong>, 
+                        after factoring in bonus erosion and extra commute expense, your actual monthly take-home bump is approximately 
+                        <strong>${netDiffMonthly >= 0 ? '+' : ''}$${netDiffMonthly}/month</strong>.
+                    </div>
+                </div>
+
+                <div class="analysis-card neutral">
+                    <div class="analysis-title"><i class="fa-solid fa-bullseye"></i> THE BREAK-EVEN</div>
+                    <div class="analysis-body">
+                        To maintain your exact current lifestyle equity without giving up retirement match or commute time, 
+                        the new job needs to pay a true baseline minimum of <strong>$${(currTotalNet + offAnnualCommute - offBen).toLocaleString()}</strong>.
+                        ${curr401k !== off401k ? `<br><br><strong>Note on 401(k):</strong> You are changing from <em>"${curr401k}"</em> to <em>"${off401k}"</em>. Lower employer contributions directly reduce long-term compound wealth.` : ''}
+                    </div>
+                </div>
+
+                <div class="analysis-card warning">
+                    <div class="analysis-title"><i class="fa-solid fa-ghost"></i> THE HIDDEN COSTS</div>
+                    <div class="analysis-body">
+                        <ul>
+                            ${commDiffAnnual > 0 ? `<li><strong>Commute Tax:</strong> Additional $${commDiffAnnual.toLocaleString()}/yr in fuel, maintenance, or transit fares + lost personal hours.</li>` : ''}
+                            <li><strong>Vesting Cliff:</strong> Factor in unvested 401(k) matches or equity left on the table at current company.</li>
+                            <li><strong>Ramp-up Stress:</strong> High cognitive energy spending during first 6 months reduces personal life bandwidth.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-comments-dollar"></i> THE NEGOTIATION LEVERAGE</div>
+                    <div class="analysis-body">
+                        Before accepting, bridge the package gap using this anchor:
+                        <div class="script-box">
+                            "I'm extremely aligned with the role vision. However, taking into account the higher transit costs and differing benefits structure ($${offBen.toLocaleString()} vs $${currBen.toLocaleString()}), the effective net increase is narrower than anticipated. If we can adjust the base to $${(offBase + Math.max(3000, commDiffAnnual)).toLocaleString()} or include a $${Math.max(3000, commDiffAnnual + 2000).toLocaleString()} sign-on bonus, I would be ready to sign today."
+                            <button class="copy-btn" onclick="copyToClipboard(this.parentElement.innerText.replace('Copy','').trim())">Copy Script</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('outTool1Content').innerHTML = html;
+            document.getElementById('outTool1').classList.add('active');
+
+            saveToHistory('t1', `$${currBase.toLocaleString()} vs $${offBase.toLocaleString()} Base`, { currBase, offBase, netDiffAnnual });
+        }
+
+        /* ----------------------------------------------------
+           TOOL 2 LOGIC & SAMPLES
+        ---------------------------------------------------- */
+        function loadSampleTool2() {
+            document.getElementById('t2_curr_title').value = "Senior Analyst";
+            document.getElementById('t2_off_title').value = "Senior Analyst";
+            document.getElementById('t2_curr_day').value = "Repetitive quarterly reporting, legacy spreadsheets, low autonomy, predictable 40-hour weeks.";
+            document.getElementById('t2_off_day').value = "Strategic cross-functional projects, modern data stack, higher visibility, expected fast pace.";
+            document.getElementById('t2_curr_growth').value = "Stalled";
+            document.getElementById('t2_off_growth').value = "Clear";
+            document.getElementById('t2_curr_mgr').value = "Okay";
+            document.getElementById('t2_off_mgr').value = "Unknown";
+        }
+
+        function analyzeTool2(e) {
+            e.preventDefault();
+            const currTitle = document.getElementById('t2_curr_title').value;
+            const offTitle = document.getElementById('t2_off_title').value;
+            const currDay = document.getElementById('t2_curr_day').value;
+            const offDay = document.getElementById('t2_off_day').value;
+            const currGrowth = document.getElementById('t2_curr_growth').value;
+            const offGrowth = document.getElementById('t2_off_growth').value;
+            const currMgr = document.getElementById('t2_curr_mgr').value;
+            const offMgr = document.getElementById('t2_off_mgr').value;
+
+            let html = `
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-table"></i> THE ROLE MATRIX</div>
+                    <div class="analysis-body">
+                        <table class="comp-table">
+                            <thead>
+                                <tr>
+                                    <th>Dimension</th>
+                                    <th>Current: ${escapeHtml(currTitle)}</th>
+                                    <th>Offer: ${escapeHtml(offTitle)}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Growth Trajectory</td>
+                                    <td><span class="badge badge-${currGrowth === 'Clear' ? 'low' : 'high'}">${currGrowth}</span></td>
+                                    <td><span class="badge badge-${offGrowth === 'Clear' ? 'low' : 'medium'}">${offGrowth}</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Manager Quality</td>
+                                    <td>${currMgr}</td>
+                                    <td>${offMgr} ${offMgr === 'Unknown' ? '<i class="fa-solid fa-triangle-exclamation" style="color:#E07A5F;" title="High Risk"></i>' : ''}</td>
+                                </tr>
+                                <tr>
+                                    <td>Daily Work Focus</td>
+                                    <td>${escapeHtml(currDay)}</td>
+                                    <td>${escapeHtml(offDay)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-arrow-up-right-dots"></i> THE GROWTH GAP</div>
+                    <div class="analysis-body">
+                        ${offGrowth === 'Clear' && currGrowth !== 'Clear' 
+                            ? "The new offer presents a compelling advancement vector. Staying in a 'Stalled' or 'Unclear' environment risks skill stagnation and market devaluation over time."
+                            : "Growth profiles appear similar. Ensure you aren't trading known friction for new, unproven friction."}
+                    </div>
+                </div>
+
+                <div class="analysis-card warning">
+                    <div class="analysis-title"><i class="fa-solid fa-user-ninja"></i> THE MANAGER RISK</div>
+                    <div class="analysis-body">
+                        ${offMgr === 'Unknown' 
+                            ? "<strong>Warning: Manager quality is the #1 driver of job satisfaction and retention.</strong> Moving to an 'Unknown' manager is a blind spot. Before signing, request an informal 15-minute conversation with 1-2 prospective peers on the team to ask: <em>'What is their leadership style under deadline pressure?'</em>" 
+                            : `Transitioning from a ${currMgr} manager to a ${offMgr} manager.`}
+                    </div>
+                </div>
+
+                <div class="analysis-card neutral">
+                    <div class="analysis-title"><i class="fa-solid fa-id-card"></i> THE TITLE TRAP</div>
+                    <div class="analysis-body">
+                        ${currTitle === offTitle 
+                            ? "Titles are identical. Focus strictly on scope of responsibility, budget oversight, and tech stack rather than external status." 
+                            : `Moving from '${escapeHtml(currTitle)}' to '${escapeHtml(offTitle)}'. Ensure the title correlates with genuine industry-standard responsibilities, not inflated titles masking extra hours.`}
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-hourglass-half"></i> THE 2-YEAR TEST</div>
+                    <div class="analysis-body">
+                        In 24 months, which role leaves a stronger story on your resume? 
+                        <strong>${offGrowth === 'Clear' ? 'The Offered Role' : 'Current Role'}</strong> appears better positioned to expand your marketable resume bullet points.
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('outTool2Content').innerHTML = html;
+            document.getElementById('outTool2').classList.add('active');
+
+            saveToHistory('t2', `${currTitle} vs ${offTitle}`, { currTitle, offTitle, offGrowth });
+        }
+
+        /* ----------------------------------------------------
+           TOOL 3 LOGIC & SAMPLES
+        ---------------------------------------------------- */
+        function loadSampleTool3() {
+            document.getElementById('t3_stage').value = "Growth";
+            document.getElementById('t3_nature').value = "Newly created";
+            document.getElementById('t3_cushion').value = "3-6mo";
+            document.getElementById('t3_tolerance').value = "Medium";
+            document.getElementById('t3_leaving').value = "Leaving stable team, good reputation, flexible work schedule, 3 years tenure.";
+        }
+
+        function analyzeTool3(e) {
+            e.preventDefault();
+            const stage = document.getElementById('t3_stage').value;
+            const nature = document.getElementById('t3_nature').value;
+            const cushion = document.getElementById('t3_cushion').value;
+            const tolerance = document.getElementById('t3_tolerance').value;
+            const leaving = document.getElementById('t3_leaving').value;
+
+            // Score Calculation
+            let riskScore = 0;
+            if (stage === 'Startup') riskScore += 3;
+            if (stage === 'Growth') riskScore += 2;
+            if (stage === 'Declining') riskScore += 4;
+
+            if (nature === 'Newly created') riskScore += 2;
+            if (nature === 'Restructuring') riskScore += 3;
+
+            if (cushion === 'None') riskScore += 4;
+            if (cushion === '1-3mo') riskScore += 2;
+
+            if (tolerance === 'Low') riskScore += 2;
+
+            let badgeClass = 'badge-low';
+            let riskLevel = 'LOW';
+            if (riskScore >= 4) { riskLevel = 'MEDIUM'; badgeClass = 'badge-medium'; }
+            if (riskScore >= 7) { riskLevel = 'HIGH'; badgeClass = 'badge-high'; }
+            if (riskScore >= 9) { riskLevel = 'VERY HIGH'; badgeClass = 'badge-very-high'; }
+
+            let html = `
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-gauge-high"></i> RISK SCORE: <span class="badge ${badgeClass}">${riskLevel}</span></div>
+                    <div class="analysis-body">
+                        Your combined structural risk profile is rated <strong>${riskLevel}</strong> based on target company stage (${stage}), role creation context (${nature}), and personal safety net (${cushion}).
+                    </div>
+                </div>
+
+                <div class="analysis-card warning">
+                    <div class="analysis-title"><i class="fa-solid fa-skull-crossbones"></i> THE WORST CASE</div>
+                    <div class="analysis-body">
+                        ${nature === 'Newly created' ? "Newly created roles carry 'definition risk' — expectations can shift rapidly if leadership is misaligned." : ""}
+                        ${stage === 'Startup' || stage === 'Declining' ? "Company instability could result in sudden reorganizations or budget freezes within 6-12 months." : "Underperformance during the transition could lead to early probation pressure."}
+                    </div>
+                </div>
+
+                <div class="analysis-card neutral">
+                    <div class="analysis-title"><i class="fa-solid fa-life-ring"></i> THE RECOVERY PLAN</div>
+                    <div class="analysis-body">
+                        With a <strong>${cushion}</strong> financial cushion:
+                        ${cushion === 'None' || cushion === '1-3mo' ? "<strong>Priority Action:</strong> Do not resign until you build at least 3 months of emergency expenses to mitigate transition shocks." : "You have adequate runway to navigate unexpected friction without emergency financial duress."}
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-calendar-check"></i> THE PROBATION MINDSET</div>
+                    <div class="analysis-body">
+                        Treat the first 90 days as a <strong>mutual evaluation period</strong>. You are interviewing them just as much as they are onboarding you. Set clear bi-weekly check-ins with your manager to lock down success metrics.
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-brain"></i> THE GUT CHECK</div>
+                    <div class="analysis-body">
+                        You noted leaving behind: <em>"${escapeHtml(leaving)}"</em>.<br><br>
+                        Ask yourself: <strong>Is your hesitation driven by genuine operational risk, or simple fear of leaving your comfort zone?</strong> Discomfort is a necessary tax for professional expansion.
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('outTool3Content').innerHTML = html;
+            document.getElementById('outTool3').classList.add('active');
+
+            saveToHistory('t3', `Risk: ${riskLevel} (${stage} / ${nature})`, { riskLevel, stage, nature });
+        }
+
+        /* ----------------------------------------------------
+           TOOL 4 LOGIC & SAMPLES
+        ---------------------------------------------------- */
+        function loadSampleTool4() {
+            const askedBtns = document.getElementsByName('t4_asked');
+            for(let b of askedBtns) if(b.value === "Yes and denied") b.checked = true;
+
+            document.getElementById('t4_retention').value = "Sometimes counters";
+
+            const bossBtns = document.getElementsByName('t4_boss');
+            for(let b of bossBtns) if(b.value === "Neutral") b.checked = true;
+
+            const reasonsBoxes = document.getElementsByName('t4_reasons');
+            for(let box of reasonsBoxes) {
+                box.checked = ["Money", "Growth", "Manager"].includes(box.value);
+            }
+
+            const stayBtns = document.getElementsByName('t4_stay');
+            for(let b of stayBtns) if(b.value === "Not sure") b.checked = true;
+        }
+
+        function analyzeTool4(e) {
+            e.preventDefault();
+            const asked = document.querySelector('input[name="t4_asked"]:checked')?.value || 'No';
+            const retention = document.getElementById('t4_retention').value;
+            const boss = document.querySelector('input[name="t4_boss"]:checked')?.value || 'Neutral';
+            const stay = document.querySelector('input[name="t4_stay"]:checked')?.value || 'Not sure';
+
+            const selectedReasons = Array.from(document.querySelectorAll('input[name="t4_reasons"]:checked')).map(cb => cb.value);
+
+            // Counter odds calculation
+            let odds = "Moderate";
+            if (retention === 'Fights for people' && boss === 'Strong') odds = "High";
+            if (retention === 'Lets people go easily' || asked === 'Yes and denied') odds = "Low";
+
+            let html = `
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-chart-line"></i> THE COUNTER-OFFER ODDS: <span class="badge ${odds === 'High' ? 'badge-low' : 'badge-high'}">${odds} Likelihood</span></div>
+                    <div class="analysis-body">
+                        Based on company retention history and past raise requests, the probability of receiving a counter-offer is <strong>${odds}</strong>.
+                    </div>
+                </div>
+
+                <div class="analysis-card warning">
+                    <div class="analysis-title"><i class="fa-solid fa-triangle-exclamation"></i> THE STAY RISK</div>
+                    <div class="analysis-body">
+                        Industry studies show that <strong>over 70% of employees who accept a counter-offer leave or are let go within 12 months</strong>.<br>
+                        ${selectedReasons.length > 1 && selectedReasons.includes('Culture') || selectedReasons.includes('Manager') ? "<strong>Crucial Insight:</strong> You listed reasons like <em>" + selectedReasons.join(', ') + "</em>. A counter-offer only fixes money — it almost never fixes culture or management friction." : "Money alone rarely resolves underlying career boredom or trajectory blocks."}
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-comments"></i> THE CONVERSATION SCRIPT</div>
+                    <div class="analysis-body">
+                        If you choose to discuss with your manager before handing in formal resignation:
+                        <div class="script-box">
+                            "Thank you for taking the time to meet. I've recently received an unsolicited offer that aligns closely with my long-term career trajectory around [Growth/Compensation]. Out of respect for our relationship, I wanted to share this with you before making a final decision, as I value my time here."
+                            <button class="copy-btn" onclick="copyToClipboard(this.parentElement.innerText.replace('Copy','').trim())">Copy Script</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analysis-card neutral">
+                    <div class="analysis-title"><i class="fa-solid fa-door-open"></i> IF THEY DON'T COUNTER</div>
+                    <div class="analysis-body">
+                        Resign gracefully with a 2-week notice script:
+                        <div class="script-box">
+                            "Please accept this letter as formal notification that I am resigning from my position. My last day will be [Date]. I am grateful for the opportunities I’ve had here and am committed to ensuring a seamless transition of my duties."
+                            <button class="copy-btn" onclick="copyToClipboard(this.parentElement.innerText.replace('Copy','').trim())">Copy Script</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-bridge"></i> THE BURN BRIDGE TEST</div>
+                    <div class="analysis-body">
+                        ${asked === 'Yes and denied' ? "Since you previously asked for a raise and were denied, pursuing an external offer is logical and professional. It is unlikely to damage your standing if handled calmly." : "Ensure you frame your move around career growth, not complaints, to preserve long-term professional references."}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('outTool4Content').innerHTML = html;
+            document.getElementById('outTool4').classList.add('active');
+
+            saveToHistory('t4', `Counter Odds: ${odds} (Stay: ${stay})`, { odds, stay });
+        }
+
+        /* ----------------------------------------------------
+           TOOL 5 LOGIC & SAMPLES
+        ---------------------------------------------------- */
+        function loadSampleTool5() {
+            document.getElementById('t5_gut').value = "Terrified either way";
+            document.getElementById('t5_fear').value = "Regret";
+            document.getElementById('t5_friend').value = "I'd tell them to take the new role because staying put out of fear of the unknown leads to resentment.";
+            
+            const dBtns = document.getElementsByName('t5_deadline');
+            for(let b of dBtns) if(b.value === "Yes, but flexible") b.checked = true;
+
+            document.getElementById('t5_obvious').value = "Knowing that the team culture at the new company is genuinely supportive and not toxic.";
+        }
+
+        function analyzeTool5(e) {
+            e.preventDefault();
+            const gut = document.getElementById('t5_gut').value;
+            const fear = document.getElementById('t5_fear').value;
+            const friend = document.getElementById('t5_friend').value;
+            const deadline = document.querySelector('input[name="t5_deadline"]:checked')?.value || 'No';
+            const obvious = document.getElementById('t5_obvious').value;
+
+            // Synthesis logic
+            let recommendedAction = "TAKE THE OFFER";
+            if (gut === 'Stay') recommendedAction = "STAY IN CURRENT ROLE";
+            if (gut === 'Terrified either way') recommendedAction = "PREFER MOVE (ACT ON FRIEND ADVICE)";
+
+            let html = `
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-balance-scale"></i> SYNTHESIS DIRECTION: <span class="badge badge-low">${recommendedAction}</span></div>
+                    <div class="analysis-body">
+                        Your gut feeling leans <strong>${gut}</strong>, with a primary fear centered around <strong>${fear}</strong>.
+                    </div>
+                </div>
+
+                <div class="analysis-card warning">
+                    <div class="analysis-title"><i class="fa-solid fa-user-check"></i> THE THIRD-PERSON TEST (FRIEND ADVICE)</div>
+                    <div class="analysis-body">
+                        You stated you would advise a friend: <em>"${escapeHtml(friend)}"</em><br><br>
+                        <strong>Insight:</strong> We give friends rational, courage-based advice while giving ourselves fear-based advice. Honor the wisdom you'd give a friend.
+                    </div>
+                </div>
+
+                <div class="analysis-card neutral">
+                    <div class="analysis-title"><i class="fa-solid fa-puzzle-piece"></i> THE INFORMATION GAP</div>
+                    <div class="analysis-body">
+                        You noted that this would make the choice obvious: <em>"${escapeHtml(obvious)}"</em>.<br>
+                        <strong>Next Step:</strong> Can you resolve this gap with 1 email or phone call to the hiring manager before signing?
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-file-signature"></i> ACCEPTANCE SCRIPT (WITH ENTHUSIASM)</div>
+                    <div class="analysis-body">
+                        Use this script to accept while negotiating start date:
+                        <div class="script-box">
+                            "Dear [Hiring Manager], I am thrilled to formally accept the offer for [Role Title] at [Company]! I am confident this is the right mutual fit. To ensure a thorough transition at my current company, I would like to set my start date as [Date]. Please send over the final paperwork."
+                            <button class="copy-btn" onclick="copyToClipboard(this.parentElement.innerText.replace('Copy','').trim())">Copy Script</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-title"><i class="fa-solid fa-envelope-open-text"></i> DECLINE SCRIPT (GRACIOUS EXIT)</div>
+                    <div class="analysis-body">
+                        If you choose to stay, decline without burning bridges:
+                        <div class="script-box">
+                            "Dear [Hiring Manager], Thank you so much for the offer to join [Company]. After deep reflection, I have decided to stay in my current role for now. I was tremendously impressed by your team and hope our paths cross again in the future."
+                            <button class="copy-btn" onclick="copyToClipboard(this.parentElement.innerText.replace('Copy','').trim())">Copy Script</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('outTool5Content').innerHTML = html;
+            document.getElementById('outTool5').classList.add('active');
+
+            saveToHistory('t5', `Decision: ${recommendedAction}`, { gut, fear, recommendedAction });
+        }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistory('t1');
+        });
+    </script>
+</body>
+</html>

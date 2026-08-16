@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Friendship Reality Check</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* ==========================================================================
+       CSS VARIABLES & BASE STYLES
+       ========================================================================== */
+    :root {
+      --color-slate: #457B9D;
+      --color-slate-hover: #366380;
+      --color-lavender: #C77DAD;
+      --color-lavender-light: #F3E8F0;
+      --color-bg-start: #F8F9FA;
+      --color-bg-end: #F8F5FA;
+      --color-text-main: #2D3748;
+      --color-text-muted: #718096;
+      --color-card-bg: #FFFFFF;
+      --color-border: #E2E8F0;
+      --sidebar-width: 250px;
+      --radius-xl: 1rem;
+      --radius-lg: 0.75rem;
+      --radius-md: 0.5rem;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+      --transition-fast: 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--color-bg-start), var(--color-bg-end));
+      color: var(--color-text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* ==========================================================================
+       LAYOUT STRUCTURE
+       ========================================================================== */
+    .app-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--color-card-bg);
+      border-right: 1px solid var(--color-border);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-header i {
+      font-size: 1.5rem;
+      color: var(--color-lavender);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-slate);
+      line-height: 1.2;
+    }
+
+    .sidebar-nav {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 0.875rem 1.5rem;
+      color: var(--color-text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      border-left: 4px solid transparent;
+    }
+
+    .nav-item:hover {
+      background-color: #F7FAFC;
+      color: var(--color-slate);
+    }
+
+    .nav-item.active {
+      background-color: var(--color-lavender-light);
+      color: var(--color-slate);
+      border-left-color: var(--color-slate);
+      font-weight: 600;
+    }
+
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Mobile Header / Toggle */
+    .mobile-header {
+      display: none;
+      background: var(--color-card-bg);
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 1.35rem;
+      color: var(--color-slate);
+      cursor: pointer;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 95;
+    }
+
+    /* Main Content Area */
+    .main-wrapper {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      width: calc(100% - var(--sidebar-width));
+    }
+
+    .main-content {
+      flex: 1;
+      width: 100%;
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    /* ==========================================================================
+       UI COMPONENTS & CARDS
+       ========================================================================== */
+    .view-section {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background-color: var(--color-card-bg);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--color-border);
+      margin-bottom: 1.5rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--color-slate);
+      margin-bottom: 0.35rem;
+    }
+
+    .page-subtitle {
+      color: var(--color-text-muted);
+      font-size: 1.05rem;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--color-text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--color-text-main);
+      background-color: #FAFAFA;
+      transition: var(--transition-fast);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--color-slate);
+      background-color: #FFF;
+      box-shadow: 0 0 0 3px rgba(69, 123, 157, 0.15);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .slider-container input[type="range"] {
+      flex: 1;
+      accent-color: var(--color-slate);
+    }
+
+    .slider-value {
+      font-weight: 700;
+      color: var(--color-slate);
+      min-width: 2.5rem;
+      text-align: right;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--color-slate);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--color-slate-hover);
+    }
+
+    .btn-secondary {
+      background-color: #EDF2F7;
+      color: var(--color-text-main);
+    }
+
+    .btn-secondary:hover {
+      background-color: #E2E8F0;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--color-slate);
+      color: var(--color-slate);
+    }
+
+    .btn-outline:hover {
+      background-color: rgba(69, 123, 157, 0.08);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    /* Analysis Output Display */
+    .output-container {
+      margin-top: 2rem;
+      display: none;
+    }
+
+    .output-container.active {
+      display: block;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .output-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .output-box {
+      background-color: #FFF;
+      border-left: 4px solid var(--color-slate);
+      padding: 1.25rem;
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .output-box.accent-lavender {
+      border-left-color: var(--color-lavender);
+    }
+
+    .output-box-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .output-box-content {
+      font-size: 1.025rem;
+      font-weight: 600;
+      color: var(--color-text-main);
+      margin-bottom: 0.35rem;
+    }
+
+    .output-box-desc {
+      font-size: 0.925rem;
+      color: #4A5568;
+      line-height: 1.5;
+    }
+
+    /* Script Cards (Copyable) */
+    .script-box {
+      background-color: #F7FAFC;
+      border: 1px dashed var(--color-slate);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-top: 0.75rem;
+      position: relative;
+    }
+
+    .script-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      color: #2D3748;
+      white-space: pre-wrap;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Accordion / History */
+    .history-section {
+      margin-top: 2.5rem;
+      border-top: 1px solid var(--color-border);
+      padding-top: 1.5rem;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      cursor: pointer;
+    }
+
+    .history-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--color-text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .history-item {
+      background: #FFF;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 0.875rem 1rem;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history-date {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .dash-card {
+      background: #FFF;
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-slate);
+    }
+
+    .dash-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-lg);
+      background: var(--color-lavender-light);
+      color: var(--color-slate);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .dash-card-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--color-text-main);
+    }
+
+    .dash-card-desc {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      line-height: 1.4;
+    }
+
+    /* Data Tracker Table for Initiation Tool */
+    .tracker-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .tracker-table th, .tracker-table td {
+      border: 1px solid var(--color-border);
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+    }
+
+    .tracker-table th {
+      background-color: #F7FAFC;
+      font-weight: 600;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--color-text-main);
+      color: #FFF;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.825rem;
+      color: var(--color-text-muted);
+      border-top: 1px solid var(--color-border);
+      background-color: rgba(255,255,255,0.5);
+      margin-top: auto;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE MEDIA QUERIES
+       ========================================================================== */
+    @media (max-width: 768px) {
+      .mobile-header {
+        display: flex;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay.open {
+        display: block;
+      }
+
+      .main-wrapper {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .main-content {
+        padding: 1.5rem 1rem;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Top Header -->
+  <header class="mobile-header">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <i class="fa-solid fa-scale-balanced" style="color: var(--color-lavender); font-size: 1.2rem;"></i>
+      <span style="font-weight: 700; color: var(--color-slate);">Reality Check</span>
+    </div>
+    <button class="hamburger-btn" id="mobile-menu-btn" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="app-container">
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-scale-balanced"></i>
+        <h1>Friendship<br>Reality Check</h1>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-tool="dashboard">
+          <i class="fa-solid fa-house"></i> Dashboard
+        </a>
+        <a class="nav-item" data-tool="audit">
+          <i class="fa-solid fa-clipboard-check"></i> Friendship Audit
+        </a>
+        <a class="nav-item" data-tool="initiation">
+          <i class="fa-solid fa-hourglass-half"></i> Initiation Test
+        </a>
+        <a class="nav-item" data-tool="conversation">
+          <i class="fa-solid fa-comments"></i> The Conversation
+        </a>
+        <a class="nav-item" data-tool="lettinggo">
+          <i class="fa-solid fa-feather"></i> Letting Go
+        </a>
+        <a class="nav-item" data-tool="reciprocal">
+          <i class="fa-solid fa-seedling"></i> Reciprocal Builder
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Container -->
+    <div class="main-wrapper">
+      <main class="main-content">
+
+        <!-- DASHBOARD VIEW -->
+        <section id="view-dashboard" class="view-section active">
+          <div class="card" style="background: linear-gradient(135deg, #FFF, var(--color-lavender-light)); border: none;">
+            <h2 class="page-title" style="font-size: 2.1rem;">Friendship Reality Check</h2>
+            <p class="page-subtitle" style="color: var(--color-slate); font-weight: 500;">
+              Not every friendship is meant to be equal. But some should be.
+            </p>
+            <p style="margin-top: 0.8rem; font-size: 0.95rem; color: #4A5568;">
+              A practical, grounded toolkit for navigating one-sided dynamics—helping you gain clarity, lower anxiety, and decide your next steps without unnecessary drama.
+            </p>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="dash-card" onclick="switchTool('audit')">
+              <div class="dash-card-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+              <div class="dash-card-title">Friendship Audit</div>
+              <div class="dash-card-desc">Evaluate the give/take ratio across 5 key dimensions to see where you stand.</div>
+            </div>
+
+            <div class="dash-card" onclick="switchTool('initiation')">
+              <div class="dash-card-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+              <div class="dash-card-title">The Initiation Test</div>
+              <div class="dash-card-desc">Design a calm experiment to see what happens when you stop reaching out first.</div>
+            </div>
+
+            <div class="dash-card" onclick="switchTool('conversation')">
+              <div class="dash-card-icon"><i class="fa-solid fa-comments"></i></div>
+              <div class="dash-card-title">The Conversation</div>
+              <div class="dash-card-desc">Script a clear, low-pressure conversation to express your needs without ending things.</div>
+            </div>
+
+            <div class="dash-card" onclick="switchTool('lettinggo')">
+              <div class="dash-card-icon"><i class="fa-solid fa-feather"></i></div>
+              <div class="dash-card-title">Letting Go</div>
+              <div class="dash-card-desc">Construct a graceful plan to step back, manage guilt, and navigate shared social circles.</div>
+            </div>
+
+            <div class="dash-card" onclick="switchTool('reciprocal')">
+              <div class="dash-card-icon"><i class="fa-solid fa-seedling"></i></div>
+              <div class="dash-card-title">Reciprocal Builder</div>
+              <div class="dash-card-desc">Identify green flags and cultivate new connections where support flows both ways.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOOL 1: FRIENDSHIP AUDIT -->
+        <section id="view-audit" class="view-section">
+          <div class="page-header">
+            <h2 class="page-title">Friendship Audit</h2>
+            <p class="page-subtitle">"I feel like I'm giving more than I'm getting, but I want clarity on the whole picture."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-audit" onsubmit="event.preventDefault(); processAudit();">
+              <div class="form-group">
+                <label class="form-label" for="audit-name">Friend's Name:</label>
+                <input type="text" id="audit-name" class="form-control" placeholder="e.g. Sarah" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="audit-initiates">Who initiates contact?</label>
+                <select id="audit-initiates" class="form-control">
+                  <option value="5">Always me</option>
+                  <option value="4">Mostly me</option>
+                  <option value="3">Equal</option>
+                  <option value="2">Mostly them</option>
+                  <option value="1">Always them</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="audit-plans">Who plans activities & hangouts?</label>
+                <select id="audit-plans" class="form-control">
+                  <option value="5">Always me</option>
+                  <option value="4">Mostly me</option>
+                  <option value="3">Equal</option>
+                  <option value="2">Mostly them</option>
+                  <option value="1">Always them</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="audit-support">Who provides emotional support & listening?</label>
+                <select id="audit-support" class="form-control">
+                  <option value="5">Always me</option>
+                  <option value="4">Mostly me</option>
+                  <option value="3">Equal</option>
+                  <option value="2">Mostly them</option>
+                  <option value="1">Always them</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="audit-practical">Who helps in practical ways (favors, rides, advice)?</label>
+                <select id="audit-practical" class="form-control">
+                  <option value="5">Always me</option>
+                  <option value="4">Mostly me</option>
+                  <option value="3">Equal</option>
+                  <option value="2">Mostly them</option>
+                  <option value="1">Always them</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="audit-checked">Last time they checked in on you just to see how you were:</label>
+                <select id="audit-checked" class="form-control">
+                  <option value="recently">Recently</option>
+                  <option value="awhile">A while ago</option>
+                  <option value="only_reach">Only when I reach out first</option>
+                  <option value="only_need">Only when they need something</option>
+                  <option value="cant_remember">Can't remember</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="audit-feeling">How you usually feel after spending time with them:</label>
+                <select id="audit-feeling" class="form-control">
+                  <option value="Energized">Energized</option>
+                  <option value="Neutral">Neutral</option>
+                  <option value="Drained">Drained</option>
+                  <option value="Resentful">Resentful</option>
+                  <option value="Used">Used</option>
+                  <option value="Happy">Happy</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-chart-pie"></i> Run Audit</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleAudit()"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-audit" class="output-container">
+            <h3 style="color: var(--color-slate); margin-bottom: 1rem;">Audit Results</h3>
+            <div class="output-grid">
+              <div class="output-box">
+                <div class="output-box-title">The Balance Score</div>
+                <div class="output-box-content" id="out-audit-score">--</div>
+                <div class="output-box-desc" id="out-audit-score-desc">--</div>
+              </div>
+
+              <div class="output-box accent-lavender">
+                <div class="output-box-title">Friendship Dynamic Type</div>
+                <div class="output-box-content" id="out-audit-type">--</div>
+                <div class="output-box-desc" id="out-audit-type-desc">--</div>
+              </div>
+
+              <div class="output-box">
+                <div class="output-box-title">The Your-Part Check</div>
+                <div class="output-box-content">Overgiving vs. Under-receiving</div>
+                <div class="output-box-desc" id="out-audit-yourpart">--</div>
+              </div>
+
+              <div class="output-box accent-lavender">
+                <div class="output-box-title">The Emotional & Energy Cost</div>
+                <div class="output-box-content">Impact on You</div>
+                <div class="output-box-desc" id="out-audit-cost">--</div>
+              </div>
+
+              <div class="output-box" style="border-left-color: #319795;">
+                <div class="output-box-title">Recommended Decision Branch</div>
+                <div class="output-box-content" id="out-audit-branch">--</div>
+                <div class="output-box-desc" id="out-audit-branch-desc">--</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- History Accordion -->
+          <div class="history-section">
+            <div class="history-header" onclick="toggleHistory('audit')">
+              <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Audits</span>
+              <i class="fa-solid fa-chevron-down" id="history-icon-audit"></i>
+            </div>
+            <div id="history-list-audit" class="history-list" style="display: none;"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 2: THE INITIATION TEST -->
+        <section id="view-initiation" class="view-section">
+          <div class="page-header">
+            <h2 class="page-title">The Initiation Test</h2>
+            <p class="page-subtitle">"I want to know what happens if I stop reaching out first—without spiraling."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-initiation" onsubmit="event.preventDefault(); processInitiation();">
+              <div class="form-group">
+                <label class="form-label" for="init-freq">Your current initiation frequency:</label>
+                <select id="init-freq" class="form-control">
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly">Weekly</option>
+                  <option value="Few times a month">A few times a month</option>
+                  <option value="Monthly">Monthly</option>
+                  <option value="Only when they reach out">Only when they reach out</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="init-last">How long since THEY initiated reaching out to you?</label>
+                <select id="init-last" class="form-control">
+                  <option value="Recently">Recently</option>
+                  <option value="1-2 weeks">1–2 weeks</option>
+                  <option value="1 month">1 month</option>
+                  <option value="3 months">3 months</option>
+                  <option value="6+ months">6+ months</option>
+                  <option value="Never">Never</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="init-fear">Your primary fear if you stop reaching out:</label>
+                <textarea id="init-fear" class="form-control" placeholder="e.g. I'm afraid they will never speak to me again and the friendship will instantly die."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="init-learn">What do you hope to learn from this test?</label>
+                <select id="init-learn" class="form-control">
+                  <option value="Whether they care">Whether they care enough to check in</option>
+                  <option value="Whether I'm overthinking">Whether I'm overthinking the balance</option>
+                  <option value="Whether the friendship is real">Whether the connection exists without my effort</option>
+                  <option value="Nothing, I already know">Nothing, I already know the answer</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="init-risk">Willingness to risk a pause or fade in contact (1 to 10):</label>
+                <div class="slider-container">
+                  <input type="range" id="init-risk" min="1" max="10" value="6" oninput="document.getElementById('init-risk-val').textContent = this.value">
+                  <span id="init-risk-val" class="slider-value">6</span>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-flask"></i> Design Test Protocol</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleInitiation()"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-initiation" class="output-container">
+            <h3 style="color: var(--color-slate); margin-bottom: 1rem;">Test Design & Protocol</h3>
+            <div class="output-grid">
+              <div class="output-box">
+                <div class="output-box-title">The Test Protocol</div>
+                <div class="output-box-content" id="out-init-protocol-title">--</div>
+                <div class="output-box-desc" id="out-init-protocol-desc">--</div>
+              </div>
+
+              <div class="output-box accent-lavender">
+                <div class="output-box-title">Fear Reality Check</div>
+                <div class="output-box-content">Reframing the Outcome</div>
+                <div class="output-box-desc" id="out-init-reframe">--</div>
+              </div>
+
+              <div class="output-box">
+                <div class="output-box-title">Self-Soothing Plan</div>
+                <div class="output-box-content">Managing Anxiety During the Pause</div>
+                <div class="output-box-desc" id="out-init-soothe">--</div>
+              </div>
+
+              <div class="output-box accent-lavender">
+                <div class="output-box-title">Data Tracker Template</div>
+                <div class="output-box-content">Keep It Objective</div>
+                <div class="output-box-desc">Use this simple mental log while testing:</div>
+                <table class="tracker-table">
+                  <thead>
+                    <tr><th>Date</th><th>Initiated By</th><th>Type / Topic</th><th>Notes</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Week 1</td><td>---</td><td>---</td><td>Observed baseline</td></tr>
+                    <tr><td>Week 2</td><td>---</td><td>---</td><td>Resisted urge to text</td></tr>
+                    <tr><td>Week 3</td><td>---</td><td>---</td><td>Note any incoming check-in</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="output-box" style="border-left-color: #319795;">
+                <div class="output-box-title">Interpreting Results</div>
+                <div class="output-box-content">What Silence vs. Outreach Means</div>
+                <div class="output-box-desc" id="out-init-interpret">--</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- History Accordion -->
+          <div class="history-section">
+            <div class="history-header" onclick="toggleHistory('initiation')">
+              <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Tests</span>
+              <i class="fa-solid fa-chevron-down" id="history-icon-initiation"></i>
+            </div>
+            <div id="history-list-initiation" class="history-list" style="display: none;"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 3: THE CONVERSATION -->
+        <section id="view-conversation" class="view-section">
+          <div class="page-header">
+            <h2 class="page-title">The Conversation</h2>
+            <p class="page-subtitle">"I want to address the imbalance directly without sounding needy or causing unnecessary drama."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-conversation" onsubmit="event.preventDefault(); processConversation();">
+              <div class="form-group">
+                <label class="form-label" for="conv-want">What core point do you want to convey?</label>
+                <textarea id="conv-want" class="form-control" placeholder="e.g. I feel like I am always initiating our hangouts and checking in on you, but it rarely comes back my way."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="conv-reaction">Their likely response style:</label>
+                <select id="conv-reaction" class="form-control">
+                  <option value="Defensive">Defensive / Reversal ("Well you're busy too!")</option>
+                  <option value="Dismissive">Dismissive ("You're making a big deal out of nothing")</option>
+                  <option value="Apologetic">Apologetic ("I'm so sorry, I've been overwhelmed")</option>
+                  <option value="Surprised">Surprised ("I genuinely didn't realize")</option>
+                  <option value="Pull away">They'll pull away / Cold shoulder</option>
+                  <option value="Improve briefly">They'll improve briefly then relapse</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="conv-goal">Your primary goal:</label>
+                <select id="conv-goal" class="form-control">
+                  <option value="More reciprocity">Establish better reciprocity going forward</option>
+                  <option value="Just to be heard">Just to express myself and be heard</option>
+                  <option value="Understand state">To understand what's happening in their life</option>
+                  <option value="Decide to stay">To see if this friendship is worth saving</option>
+                  <option value="End gracefully">To bring clear closure and end gracefully</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="conv-importance">How important is this relationship to you?</label>
+                <select id="conv-importance" class="form-control">
+                  <option value="Essential">Essential inner-circle friend</option>
+                  <option value="Important">Important / Close friend</option>
+                  <option value="Casual">Casual / Social friend</option>
+                  <option value="Historical">Historical / Longtime friend</option>
+                  <option value="Unsure">Unsure right now</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="conv-style">Your typical conflict style:</label>
+                <select id="conv-style" class="form-control">
+                  <option value="Direct">Direct & Straightforward</option>
+                  <option value="Hinting">Hinting / Passive</option>
+                  <option value="Avoidant">Avoidant / Conflict-averse</option>
+                  <option value="Aggressive">High-emotion / Aggressive</option>
+                  <option value="Accommodating">Accommodating / Quick to smooth things over</option>
+                </select>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Scripts</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleConversation()"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-conversation" class="output-container">
+            <h3 style="color: var(--color-slate); margin-bottom: 1rem;">Conversation Framework & Scripts</h3>
+            <div class="output-grid">
+
+              <div class="output-box">
+                <div class="output-box-title">Option A: The Direct Approach Script</div>
+                <div class="output-box-desc">Clear, honest, and grounded. Best for close or essential friends.</div>
+                <div class="script-box">
+                  <div class="script-text" id="out-conv-script-direct">--</div>
+                  <button class="btn btn-outline btn-sm" onclick="copyToClipboard('out-conv-script-direct')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+              </div>
+
+              <div class="output-box accent-lavender">
+                <div class="output-box-title">Option B: The Soft Nudge Script</div>
+                <div class="output-box-desc">Low-pressure, casual phrasing focused on opening the door to talk.</div>
+                <div class="script-box">
+                  <div class="script-text" id="out-conv-script-soft">--</div>
+                  <button class="btn btn-outline btn-sm" onclick="copyToClipboard('out-conv-script-soft')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+              </div>
+
+              <div class="output-box">
+                <div class="output-box-title">Language Shift: Observation vs. Accusation</div>
+                <div class="output-box-desc" id="out-conv-shift">--</div>
+              </div>
+
+              <div class="output-box accent-lavender">
+                <div class="output-box-title">Response Playbook</div>
+                <div class="output-box-content">Handling Their Reaction</div>
+                <div class="output-box-desc" id="out-conv-playbook">--</div>
+              </div>
+
+              <div class="output-box" style="border-left-color: #319795;">
+                <div class="output-box-title">Post-Talk Acceptance Plan</div>
+                <div class="output-box-content">Knowing When You've Done Your Part</div>
+                <div class="output-box-desc" id="out-conv-posttalk">--</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- History Accordion -->
+          <div class="history-section">
+            <div class="history-header" onclick="toggleHistory('conversation')">
+              <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Scripts</span>
+              <i class="fa-solid fa-chevron-down" id="history-icon-conversation"></i>
+            </div>
+            <div id="history-list-conversation" class="history-list" style="display: none;"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 4: LETTING GO -->
+        <section id="view-lettinggo" class="view-section">
+          <div class="page-header">
+            <h2 class="page-title">Letting Go & Distancing</h2>
+            <p class="page-subtitle">"I need to step back from a friendship that drains me without starting a fight."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-lettinggo" onsubmit="event.preventDefault(); processLettingGo();">
+              <div class="form-group">
+                <label class="form-label" for="let-why">Why are you pulling back?</label>
+                <textarea id="let-why" class="form-control" placeholder="e.g. Constant one-sided emotional dumping, negativity, and zero support when I go through difficult moments."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="let-target">Desired long-term distance:</label>
+                <select id="let-target" class="form-control">
+                  <option value="Casual acquaintance">Casual acquaintance (say hi in groups, no 1-on-1)</option>
+                  <option value="Occasional contact">Occasional contact (few times a year)</option>
+                  <option value="Social media only">Social media connection only</option>
+                  <option value="Complete cut">Complete cut / No contact</option>
+                  <option value="Just stop initiating">Just stop initiating and let it find its natural level</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="let-mutual">Shared social circle / mutual friends:</label>
+                <select id="let-mutual" class="form-control">
+                  <option value="Many">Many mutual close friends</option>
+                  <option value="Some">Some overlapping friends</option>
+                  <option value="None">None / Completely separate circles</option>
+                  <option value="We share a community">We share a workplace, hobby group, or community</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="let-grief">What do you feel most sad about losing?</label>
+                <textarea id="let-grief" class="form-control" placeholder="e.g. Grieving the closeness we used to have a few years ago and the memories we built."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="let-guilt">Level of guilt about stepping back (1 to 10):</label>
+                <div class="slider-container">
+                  <input type="range" id="let-guilt" min="1" max="10" value="7" oninput="document.getElementById('let-guilt-val').textContent = this.value">
+                  <span id="let-guilt-val" class="slider-value">7</span>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-compass"></i> Create Distance Strategy</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleLettingGo()"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-lettinggo" class="output-container">
+            <h3 style="color: var(--color-slate); margin-bottom: 1rem;">Transition Plan</h3>
+            <div class="output-grid">
+
+              <div class="output-box">
+                <div class="output-box-title">The Slow Fade Strategy</div>
+                <div class="output-box-content">Actionable Boundary Adjustments</div>
+                <div class="output-box-desc" id="out-let-fade">--</div>
+              </div>
+
+              <div class="output-box accent-lavender">
+                <div class="output-box-title">Mutual Friend & Group Navigation</div>
+                <div class="output-box-content">Protecting Group Dynamics</div>
+                <div class="output-box-desc" id="out-let-mutual">--</div>
+              </div>
+
+              <div class="output-box">
+                <div class="output-box-title">Guilt Antidote</div>
+                <div class="output-box-content">"You are not required to set yourself on fire to keep others warm."</div>
+                <div class="output-box-desc" id="out-let-guilt">--</div>
+              </div>
+
+              <div class="output-box accent-lavender">
+                <div class="output-box-title">Honoring the Grief</div>
+                <div class="output-box-content">Mourning What Was or What Could Have Been</div>
+                <div class="output-box-desc" id="out-let-grief-desc">--</div>
+              </div>
+
+              <div class="output-box" style="border-left-color: #319795;">
+                <div class="output-box-title">If Direct Closure Is Needed</div>
+                <div class="output-box-desc">Clear, clean statement script if they ask directly what changed:</div>
+                <div class="script-box">
+                  <div class="script-text" id="out-let-direct-script">--</div>
+                  <button class="btn btn-outline btn-sm" onclick="copyToClipboard('out-let-direct-script')"><i class="fa-regular fa-copy"></i> Copy Script</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- History Accordion -->
+          <div class="history-section">
+            <div class="history-header" onclick="toggleHistory('lettinggo')">
+              <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Distance Plans</span>
+              <i class="fa-solid fa-chevron-down" id="history-icon-lettinggo"></i>
+            </div>
+            <div id="history-list-lettinggo" class="history-list" style="display: none;"></div>
+          </div>
+        </section>
+
+        <!-- TOOL 5: RECIPROCAL BUILDER -->
+        <section id="view-reciprocal" class="view-section">
+          <div class="page-header">
+            <h2 class="page-title">Reciprocal Friendship Builder</h2>
+            <p class="page-subtitle">"I want to find and nurture healthy friendships where support and effort flow both ways."</p>
+          </div>
+
+          <div class="card">
+            <form id="form-reciprocal" onsubmit="event.preventDefault(); processReciprocal();">
+              <div class="form-group">
+                <label class="form-label" for="rec-current">Current friendships that feel balanced (if any):</label>
+                <textarea id="rec-current" class="form-control" placeholder="e.g. My coworker Alex, or my old college roommate Maya."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="rec-places">Where do you usually interact with or meet people?</label>
+                <textarea id="rec-places" class="form-control" placeholder="e.g. Local climbing gym, work projects, community garden group."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="rec-strengths">Your key friendship strengths (what you give):</label>
+                <textarea id="rec-strengths" class="form-control" placeholder="e.g. Great listener, reliable when plans are made, thoughtful with check-ins."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="rec-needs">What you need most from a friend right now:</label>
+                <textarea id="rec-needs" class="form-control" placeholder="e.g. Someone who checks in on me without me asking, and shows mutual curiosity about my life."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="rec-energy">Your social bandwidth / energy level:</label>
+                <select id="rec-energy" class="form-control">
+                  <option value="High">High (looking for frequent hangouts)</option>
+                  <option value="Moderate">Moderate (weekly or bi-weekly connection)</option>
+                  <option value="Low">Low (busy schedule, monthly/casual contact)</option>
+                  <option value="Variable">Variable (fluctuates with stress/work)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="rec-vuln">Willingness to share vulnerability with new contacts (1 to 10):</label>
+                <div class="slider-container">
+                  <input type="range" id="rec-vuln" min="1" max="10" value="5" oninput="document.getElementById('rec-vuln-val').textContent = this.value">
+                  <span id="rec-vuln-val" class="slider-value">5</span>
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-tree"></i> Build Reciprocity Blueprint</button>
+                <button type="button" class="btn btn-secondary" onclick="loadSampleReciprocal()"><i class="fa-solid fa-folder-open"></i> Load Sample Scenario</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="output-reciprocal" class="output-container">
+            <h3 style="color: var(--color-slate); margin-bottom: 1rem;">Reciprocity Blueprint</h3>
+            <div class="output-grid">
+
+              <div class="output-box">
+                <div class="output-box-title">Green Flags of Balanced Friendship</div>
+                <div class="output-box-content">What to Look For Early On</div>
+                <div class="output-box-desc" id="out-rec-greenflags">--</div>
+              </div>
+
+              <div class="output-box accent-lavender">
+                <div class="output-box-title">The Vulnerability Test</div>
+                <div class="output-box-content">Safe Micro-Disclosure Steps</div>
+                <div class="output-box-desc" id="out-rec-vulntest">--</div>
+              </div>
+
+              <div class="output-box">
+                <div class="output-box-title">Friendship Seeds</div>
+                <div class="output-box-content">Opportunities in Your Environment</div>
+                <div class="output-box-desc" id="out-rec-seeds">--</div>
+              </div>
+
+              <div class="output-box accent-lavender">
+                <div class="output-box-title">Pacing & Overgiving Guardrails</div>
+                <div class="output-box-content">Protecting Your Balance</div>
+                <div class="output-box-desc" id="out-rec-pacing">--</div>
+              </div>
+
+              <div class="output-box" style="border-left-color: #319795;">
+                <div class="output-box-title">Core Affirmation</div>
+                <div class="output-box-content" style="font-size: 1.1rem; color: var(--color-slate);">
+                  "You deserve friendships that fill you up, not just ones you prop up."
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- History Accordion -->
+          <div class="history-section">
+            <div class="history-header" onclick="toggleHistory('reciprocal')">
+              <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Blueprints</span>
+              <i class="fa-solid fa-chevron-down" id="history-icon-reciprocal"></i>
+            </div>
+            <div id="history-list-reciprocal" class="history-list" style="display: none;"></div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Global Disclaimer Footer -->
+      <footer>
+        <p>For entertainment and reflection purposes only. Not therapy or professional advice.</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Toast Notification element -->
+  <div id="toast" class="toast"><i class="fa-solid fa-check-circle"></i> <span id="toast-message">Copied!</span></div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT APPLICATION LOGIC
+       ========================================================================== -->
+  <script>
+    /* --------------------------------------------------------------------------
+       1. NAVIGATION & LAYOUT MANAGEMENT
+       -------------------------------------------------------------------------- */
+    const navItems = document.querySelectorAll('.nav-item');
+    const viewSections = document.querySelectorAll('.view-section');
+    const sidebar = document.getElementById('sidebar');
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+    function switchTool(toolId) {
+      // Update nav active styling
+      navItems.forEach(item => {
+        if (item.getAttribute('data-tool') === toolId) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
+      // Update visible section
+      viewSections.forEach(section => {
+        if (section.id === `view-${toolId}`) {
+          section.classList.add('active');
+        } else {
+          section.classList.remove('active');
+        }
+      });
+
+      // Close mobile drawer if open
+      closeMobileSidebar();
+
+      // Scroll to top of content
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const tool = item.getAttribute('data-tool');
+        switchTool(tool);
+      });
+    });
+
+    function toggleMobileSidebar() {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('open');
+    }
+
+    function closeMobileSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    }
+
+    mobileMenuBtn.addEventListener('click', toggleMobileSidebar);
+    sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+    /* --------------------------------------------------------------------------
+       2. UTILITIES: TOAST, COPY, LOCALSTORAGE
+       -------------------------------------------------------------------------- */
+    function showToast(msg = "Copied!") {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    function copyToClipboard(elementId) {
+      const text = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Copied to clipboard!");
+      }).catch(err => {
+        showToast("Failed to copy");
+      });
+    }
+
+    function saveToHistory(toolId, summaryTitle, dataObj) {
+      const key = `friendshipcheck_history_${toolId}`;
+      let history = JSON.parse(localStorage.getItem(key) || "[]");
+      
+      const newItem = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        title: summaryTitle,
+        data: dataObj
+      };
+
+      // Keep max 30 items
+      history.unshift(newItem);
+      if (history.length > 30) history.pop();
+
+      localStorage.getItem(key);
+      localStorage.setItem(key, JSON.stringify(history));
+      renderHistory(toolId);
+    }
+
+    function toggleHistory(toolId) {
+      const list = document.getElementById(`history-list-${toolId}`);
+      const icon = document.getElementById(`history-icon-${toolId}`);
+      if (list.style.display === 'none' || list.style.display === '') {
+        list.style.display = 'flex';
+        icon.className = 'fa-solid fa-chevron-up';
+        renderHistory(toolId);
+      } else {
+        list.style.display = 'none';
+        icon.className = 'fa-solid fa-chevron-down';
+      }
+    }
+
+    function renderHistory(toolId) {
+      const key = `friendshipcheck_history_${toolId}`;
+      const listContainer = document.getElementById(`history-list-${toolId}`);
+      let history = JSON.parse(localStorage.getItem(key) || "[]");
+
+      if (history.length === 0) {
+        listContainer.innerHTML = `<div style="font-size:0.875rem; color:var(--color-text-muted); padding:0.5rem 0;">No saved history yet.</div>`;
+        return;
+      }
+
+      let html = '';
+      history.forEach(item => {
+        html += `
+          <div class="history-item">
+            <div class="history-meta">
+              <span style="font-weight:600; color:var(--color-text-main);">${escapeHtml(item.title)}</span>
+              <span class="history-date">${item.date}</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick='loadHistoryItem("${toolId}", ${item.id})'>View</button>
+          </div>
+        `;
+      });
+
+      html += `<button class="btn btn-outline btn-sm" style="margin-top:0.5rem; align-self:flex-start;" onclick="clearHistory('${toolId}')"><i class="fa-solid fa-trash"></i> Clear History</button>`;
+      listContainer.innerHTML = html;
+    }
+
+    function clearHistory(toolId) {
+      const key = `friendshipcheck_history_${toolId}`;
+      localStorage.removeItem(key);
+      renderHistory(toolId);
+      showToast("History cleared");
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    /* --------------------------------------------------------------------------
+       3. TOOL 1: FRIENDSHIP AUDIT LOGIC
+       -------------------------------------------------------------------------- */
+    function loadSampleAudit() {
+      document.getElementById('audit-name').value = "Sarah";
+      document.getElementById('audit-initiates').value = "5"; // Always me
+      document.getElementById('audit-plans').value = "5"; // Always me
+      document.getElementById('audit-support').value = "5"; // Always me
+      document.getElementById('audit-practical').value = "5"; // Always me
+      document.getElementById('audit-checked').value = "only_need";
+      document.getElementById('audit-feeling').value = "Drained";
+      processAudit();
+    }
+
+    function processAudit() {
+      const name = document.getElementById('audit-name').value || "Your friend";
+      const initVal = parseInt(document.getElementById('audit-initiates').value);
+      const planVal = parseInt(document.getElementById('audit-plans').value);
+      const suppVal = parseInt(document.getElementById('audit-support').value);
+      const pracVal = parseInt(document.getElementById('audit-practical').value);
+      const checked = document.getElementById('audit-checked').value;
+      const feeling = document.getElementById('audit-feeling').value;
+
+      const totalScore = initVal + planVal + suppVal + pracVal; // max 20, min 4
+
+      // Give/Take Ratio Calculation
+      let givePercent = Math.round((totalScore / 20) * 100);
+      let takePercent = 100 - givePercent;
+      let scoreText = `${givePercent}% Your Effort / ${takePercent}% Their Effort`;
+
+      // Determine Friendship Type
+      let type = "Seasonal";
+      let typeDesc = "";
+      let scoreDesc = "";
+
+      if (givePercent >= 85) {
+        if (checked === 'only_need') {
+          type = "Parasitic / Transactional";
+          typeDesc = `${name} interacts primarily when they require support, attention, or practical help, offering very little investment when you are in need.`;
+        } else {
+          type = "Convenience Friendship";
+          typeDesc = `${name} enjoys your company when you make it frictionless, but rarely extends effort to maintain the bond independently.`;
+        }
+        scoreDesc = "Heavy structural imbalance. You are carrying almost the entire framework of this relationship.";
+      } else if (givePercent >= 65) {
+        type = "Asymmetrical / One-Sided";
+        typeDesc = "You are doing the heavy lifting in initiating and organizing, though they may occasionally participate positively when prompted.";
+        scoreDesc = "Moderate to heavy imbalance. The relationship relies disproportionately on your momentum.";
+      } else if (givePercent >= 45) {
+        type = "Reciprocal & Balanced";
+        typeDesc = "Effort and emotional availability flow smoothly both ways with normal natural fluctuations.";
+        scoreDesc = "Healthy baseline balance across initiation, planning, and emotional support.";
+      } else {
+        type = "Mentorship or Passive Connection";
+        typeDesc = "They are currently initiating or driving more of the interactions, or you may be taking a back seat.";
+        scoreDesc = "You are giving less than you receive in this current dynamic.";
+      }
+
+      // Your Part
+      let yourPart = "";
+      if (givePercent >= 75) {
+        yourPart = `You may have trained ${name} to expect 100% effort from you by stepping in immediately whenever there's silence or an unplanned gap. Overgiving can inadvertently build passive habits in friends.`;
+      } else {
+        yourPart = "You are offering regular support without completely over-functioning, but the return effort remains lower than what feels nourishing.";
+      }
+
+      // Cost
+      let cost = "";
+      if (feeling === 'Drained' || feeling === 'Resentful' || feeling === 'Used') {
+        cost = `High emotional tax. Leaving interactions feeling ${feeling.toLowerCase()} indicates that your generosity is compounding into unspoken resentment, taking energy away from healthier areas of your life.`;
+      } else {
+        cost = `Low to moderate immediate strain, but long-term imbalance usually leads to quiet emotional detachment over time.`;
+      }
+
+      // Decision Branch
+      let branch = "Distance / Lower Investment";
+      let branchDesc = "Step back to a low-investment boundary while redirecting energy toward reciprocal relationships.";
+
+      if (givePercent < 60) {
+        branch = "Accept & Enjoy";
+        branchDesc = "This relationship shows healthy signs. Maintain current open communication.";
+      } else if (givePercent >= 60 && givePercent < 80) {
+        branch = "Repair / Direct Talk";
+        branchDesc = `Worth addressing with ${name} to express how you feel and give them an opportunity to step up.`;
+      } else if (checked === 'only_need' || feeling === 'Used') {
+        branch = "Distance or Slow Fade";
+        branchDesc = "Protect your energy. Stop initiating and let the connection find its natural level without confrontation.";
+      }
+
+      // Render Outputs
+      document.getElementById('out-audit-score').textContent = scoreText;
+      document.getElementById('out-audit-score-desc').textContent = scoreDesc;
+      document.getElementById('out-audit-type').textContent = type;
+      document.getElementById('out-audit-type-desc').textContent = typeDesc;
+      document.getElementById('out-audit-yourpart').textContent = yourPart;
+      document.getElementById('out-audit-cost').textContent = cost;
+      document.getElementById('out-audit-branch').textContent = branch;
+      document.getElementById('out-audit-branch-desc').textContent = branchDesc;
+
+      document.getElementById('output-audit').classList.add('active');
+
+      // Save to history
+      saveToHistory('audit', `Audit: ${name} (${type})`, { name, givePercent, type, branch });
+    }
+
+    function loadHistoryItem_audit(data) {
+      document.getElementById('audit-name').value = data.name || '';
+      processAudit();
+    }
+
+    /* --------------------------------------------------------------------------
+       4. TOOL 2: THE INITIATION TEST LOGIC
+       -------------------------------------------------------------------------- */
+    function loadSampleInitiation() {
+      document.getElementById('init-freq').value = "Weekly";
+      document.getElementById('init-last').value = "3 months";
+      document.getElementById('init-fear').value = "I'm afraid if I stop texting first, weeks will go by, confirming they don't care at all and the friendship was a lie.";
+      document.getElementById('init-learn').value = "Whether the friendship is real";
+      document.getElementById('init-risk').value = "6";
+      document.getElementById('init-risk-val').textContent = "6";
+      processInitiation();
+    }
+
+    function processInitiation() {
+      const freq = document.getElementById('init-freq').value;
+      const last = document.getElementById('init-last').value;
+      const fear = document.getElementById('init-fear').value || "They won't reach out.";
+      const learn = document.getElementById('init-learn').value;
+      const risk = parseInt(document.getElementById('init-risk').value);
+
+      // Protocol duration based on baseline frequency
+      let waitTime = "2 to 3 weeks";
+      if (freq === 'Daily') waitTime = "7 to 10 days";
+      if (freq === 'Weekly') waitTime = "3 to 4 weeks";
+      if (freq === 'Few times a month') waitTime = "5 to 6 weeks";
+      if (freq === 'Monthly') waitTime = "2 months";
+
+      let protocolTitle = `Recommended Pause: ${waitTime}`;
+      let protocolDesc = `Based on your usual ${freq.toLowerCase()} contact, pause all first-initiations (texts, calls, sending memes, organizing hangouts) for exactly ${waitTime}. Do not announce the test. Respond normally and warmly if they reach out first.`;
+
+      // Reframe fear
+      let reframe = `Your fear: "${fear}" \n\nRealistic Reframe: If silence follows your pause, it does not mean you were foolish for caring. It simply reveals that their current life bandwidth or commitment level does not match yours. Silence is data, not a personal verdict on your worth.`;
+
+      // Self soothing
+      let soothe = `When you feel the itch to break the pause and text them:\n` +
+        `1. Pause & Name: Acknowledge the urge stems from discomfort with uncertainty.\n` +
+        `2. Divert: Text a friend who actively reciprocates or focus on a physical task.\n` +
+        `3. Remind: "Reaching out right now gives me temporary relief, but deprives me of the long-term truth I need."`;
+
+      // Interpretation
+      let interpret = `• Outcome A (They reach out within ${waitTime}): Great! They may have just been accustomed to you taking the lead. Respond with warmth and notice if they follow through on planning.\n\n` +
+        `• Outcome B (Silence past ${waitTime}): They are likely a low-effort or situational friend right now. You can comfortably drop initiation down to match theirs without guilt.`;
+
+      document.getElementById('out-init-protocol-title').textContent = protocolTitle;
+      document.getElementById('out-init-protocol-desc').textContent = protocolDesc;
+      document.getElementById('out-init-reframe').textContent = reframe;
+      document.getElementById('out-init-soothe').textContent = soothe;
+      document.getElementById('out-init-interpret').textContent = interpret;
+
+      document.getElementById('output-initiation').classList.add('active');
+
+      saveToHistory('initiation', `Initiation Test (${waitTime} pause)`, { freq, last, waitTime });
+    }
+
+    /* --------------------------------------------------------------------------
+       5. TOOL 3: THE CONVERSATION LOGIC
+       -------------------------------------------------------------------------- */
+    function loadSampleConversation() {
+      document.getElementById('conv-want').value = "I feel like I'm always the one reaching out and planning, and I'd love more mutual effort.";
+      document.getElementById('conv-reaction').value = "Dismissive";
+      document.getElementById('conv-goal').value = "More reciprocity";
+      document.getElementById('conv-importance').value = "Important";
+      document.getElementById('conv-style').value = "Hinting";
+      processConversation();
+    }
+
+    function processConversation() {
+      const want = document.getElementById('conv-want').value || "I'd like more balance in our contact.";
+      const reaction = document.getElementById('conv-reaction').value;
+      const goal = document.getElementById('conv-goal').value;
+
+      // Direct Script
+      let directScript = `Hey! I was thinking about us recently and wanted to share something openly. I really value our friendship, but lately I've noticed that I've been doing almost all the reaching out and planning. It's made me feel a bit disconnected. I'd love to see more mutual effort from both of us because you matter to me. How do you feel about how things have been going between us?`;
+
+      // Soft Nudge Script
+      let softScript = `Hey! Miss hanging out with you. I realized I'm usually the one proposing plans or checking in, so I wanted to pause and check in—how are things on your end? Would love it if you wanted to pick our next hangout spot whenever you have space!`;
+
+      // Language Shift
+      let shift = `Instead of saying: "You never check on me or plan anything." (Triggers defensive walls)\n\n` +
+        `Try saying: "I've noticed I'm usually driving our plans. I love our time together, but I want to make sure it feels equally important to both of us."`;
+
+      // Response Playbook
+      let playbook = "";
+      if (reaction === 'Defensive') {
+        playbook = `If they get defensive ("I'm busy!"):\n` +
+          `Stay calm. Say: "I completely understand life gets crazy—I don't expect perfection. I just wanted to express how I was feeling so we can stay close."`;
+      } else if (reaction === 'Dismissive') {
+        playbook = `If they dismiss you ("You're overthinking this"):\n` +
+          `Hold your ground firmly: "It might seem small, but it matters to me. I'm telling you because I value us, not to start an argument."`;
+      } else {
+        playbook = `If they are apologetic or surprised:\n` +
+          `Receive it gracefully: "Thank you for hearing me out. I really appreciate you listening, and I'm excited to hang out soon."`;
+      }
+
+      // Post-Talk Plan
+      let posttalk = `After expressing your goal ("${goal}"):\n` +
+        `Give them space to show, not just tell. Do not immediately step back into over-organizing. Allow them room to take initiative in the coming weeks.`;
+
+      document.getElementById('out-conv-script-direct').textContent = directScript;
+      document.getElementById('out-conv-script-soft').textContent = softScript;
+      document.getElementById('out-conv-shift').textContent = shift;
+      document.getElementById('out-conv-playbook').textContent = playbook;
+      document.getElementById('out-conv-posttalk').textContent = posttalk;
+
+      document.getElementById('output-conversation').classList.add('active');
+
+      saveToHistory('conversation', `Script: Goal (${goal})`, { goal, reaction });
+    }
+
+    /* --------------------------------------------------------------------------
+       6. TOOL 4: LETTING GO LOGIC
+       -------------------------------------------------------------------------- */
+    function loadSampleLettingGo() {
+      document.getElementById('let-why').value = "One-sided emotional dumping and zero support when I go through difficult moments.";
+      document.getElementById('let-target').value = "Occasional contact";
+      document.getElementById('let-mutual').value = "Many";
+      document.getElementById('let-grief').value = "Grieving the close friendship we used to have a few years ago.";
+      document.getElementById('let-guilt').value = "7";
+      document.getElementById('let-guilt-val').textContent = "7";
+      processLettingGo();
+    }
+
+    function processLettingGo() {
+      const why = document.getElementById('let-why').value || "The relationship has become exhausting.";
+      const target = document.getElementById('let-target').value;
+      const mutual = document.getElementById('let-mutual').value;
+      const grief = document.getElementById('let-grief').value || "Losing the connection.";
+      const guilt = parseInt(document.getElementById('let-guilt').value);
+
+      // Slow Fade Strategy
+      let fade = `To move toward "${target}":\n` +
+        `1. Response Latency: Increase your response time to non-urgent texts (e.g. reply in hours/next day, not minutes).\n` +
+        `2. Boundary on Emotional Depth: Keep replies polite, friendly, but concise. Avoid deep personal venting.\n` +
+        `3. Availability: Decline 1-on-1 invitations gracefully ("My calendar is pretty full this week, but hope you're doing well!").`;
+
+      // Mutual Friend Navigation
+      let mutualNav = "";
+      if (mutual === 'Many' || mutual === 'We share a community') {
+        mutualNav = `High mutual overlap. Keep group interactions completely warm and civil. Do not ask mutual friends to take sides or gossip about the shift. If asked, say simply: "We're both just busy with different things right now, but all good!"`;
+      } else {
+        mutualNav = `Minimal social overlap. You can transition smoothly without worrying about group dynamics.`;
+      }
+
+      // Guilt Antidote
+      let guiltText = `Guilt Level: ${guilt}/10.\n` +
+        `Remember: Pulling back energy from a connection that drains you is not a punishment to them; it is self-preservation for you. You are entitled to choose where your limited social capacity goes.`;
+
+      // Grief
+      let griefDesc = `Honoring: "${grief}"\n` +
+        `It is completely normal to mourn the loss of what this friendship was or what you hoped it would become. Acknowledge that the memories were real, even if the present dynamic no longer serves you.`;
+
+      // Direct Script
+      let directScript = `Hey, I want to be honest with you. I've realized I need to step back and focus on my own bandwidth right now. I care about the times we've shared, but I don't have the capacity for the same level of closeness moving forward. I wish you nothing but the best.`;
+
+      document.getElementById('out-let-fade').textContent = fade;
+      document.getElementById('out-let-mutual').textContent = mutualNav;
+      document.getElementById('out-let-guilt').textContent = guiltText;
+      document.getElementById('out-let-grief-desc').textContent = griefDesc;
+      document.getElementById('out-let-direct-script').textContent = directScript;
+
+      document.getElementById('output-lettinggo').classList.add('active');
+
+      saveToHistory('lettinggo', `Distance Plan (${target})`, { target, guilt });
+    }
+
+    /* --------------------------------------------------------------------------
+       7. TOOL 5: RECIPROCAL BUILDER LOGIC
+       -------------------------------------------------------------------------- */
+    function loadSampleReciprocal() {
+      document.getElementById('rec-current').value = "My coworker Alex, who always asks how my weekend was and remembers small details.";
+      document.getElementById('rec-places').value = "Work projects, local climbing gym, weekend run club.";
+      document.getElementById('rec-strengths').value = "Loyalty, active listening, showing up when someone is down.";
+      document.getElementById('rec-needs').value = "Someone who checks on me without prompting and initiates plans half the time.";
+      document.getElementById('rec-energy').value = "Moderate";
+      document.getElementById('rec-vuln').value = "5";
+      document.getElementById('rec-vuln-val').textContent = "5";
+      processReciprocal();
+    }
+
+    function processReciprocal() {
+      const places = document.getElementById('rec-places').value || "Community events, interest groups";
+      const needs = document.getElementById('rec-needs').value || "Mutual effort and empathy";
+      const energy = document.getElementById('rec-energy').value;
+      const vuln = parseInt(document.getElementById('rec-vuln').value);
+
+      // Green Flags
+      let greenflags = `• Curiosity: They ask follow-up questions about your life without immediately pivoting back to themselves.\n` +
+        `• Equal Initiative: They reach out or suggest hangouts without waiting for you to lead every time.\n` +
+        `• Reliability: Their actions match their words; when they commit to plans, they follow through.`;
+
+      // Vulnerability Test
+      let vulntest = `With your vulnerability score at ${vuln}/10:\n` +
+        `Use the "Micro-Disclosure" test: Share a small, genuine piece of news or personal feeling (e.g. "Work was pretty stressful this week"). Observe if they meet you with empathy and sharing of their own, or if they dismiss/ignore it.`;
+
+      // Seeds
+      let seeds = `Based on your spots (${places}):\n` +
+        `1. Identify 1–2 consistent acquaintances in these settings who display low-ego, warm energy.\n` +
+        `2. Extend ONE low-stakes invitation (e.g. grabbing coffee right after run club or gym).\n` +
+        `3. Then wait and see if they initiate the second interaction.`;
+
+      // Pacing
+      let pacing = `Energy Level: ${energy}.\n` +
+        `To prevent overgiving: Match their effort level like a game of tennis. Serve the ball (reach out once), then wait for them to return it before serving again. Do not double-serve.`;
+
+      document.getElementById('out-rec-greenflags').textContent = greenflags;
+      document.getElementById('out-rec-vulntest').textContent = vulntest;
+      document.getElementById('out-rec-seeds').textContent = seeds;
+      document.getElementById('out-rec-pacing').textContent = pacing;
+
+      document.getElementById('output-reciprocal').classList.add('active');
+
+      saveToHistory('reciprocal', `Blueprint (${energy} Energy)`, { energy, vuln });
+    }
+
+    /* --------------------------------------------------------------------------
+       8. GENERAL HISTORY ROUTER
+       -------------------------------------------------------------------------- */
+    function loadHistoryItem(toolId, itemId) {
+      const key = `friendshipcheck_history_${toolId}`;
+      let history = JSON.parse(localStorage.getItem(key) || "[]");
+      const found = history.find(i => i.id === itemId);
+      if (!found) return;
+
+      if (toolId === 'audit' && found.data) loadHistoryItem_audit(found.data);
+      if (toolId === 'initiation') processInitiation();
+      if (toolId === 'conversation') processConversation();
+      if (toolId === 'lettinggo') processLettingGo();
+      if (toolId === 'reciprocal') processReciprocal();
+
+      showToast("Loaded saved entry");
+    }
+
+    // Initialize default view
+    document.addEventListener('DOMContentLoaded', () => {
+      switchTool('dashboard');
+    });
+  </script>
+</body>
+</html>

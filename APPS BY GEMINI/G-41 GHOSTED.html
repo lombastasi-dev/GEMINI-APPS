@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghosted — Practical Recovery Toolkit</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --slate-deep: #457B9D;
+            --slate-dark: #1D3557;
+            --rose-warm: #E07A5F;
+            --rose-light: #F4A261;
+            --bg-start: #F8F9FA;
+            --bg-end: #FEF1F0;
+            --card-bg: #FFFFFF;
+            --text-main: #2B2D42;
+            --text-muted: #6C757D;
+            --border-color: #E9ECEF;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            --radius-xl: 1rem;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* Layout */
+        #app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Styles */
+        #sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--rose-warm);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--slate-dark);
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 1rem 0.75rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            margin-bottom: 0.35rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.925rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 1.25rem;
+            text-align: center;
+        }
+
+        .nav-link:hover {
+            background-color: #F1F5F9;
+            color: var(--slate-deep);
+        }
+
+        .nav-link.active {
+            background-color: var(--slate-deep);
+            color: white;
+        }
+
+        .nav-link.active i {
+            color: white;
+        }
+
+        /* Mobile Header & Hamburger */
+        .mobile-header {
+            display: none;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            color: var(--slate-dark);
+            font-size: 1.1rem;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--slate-dark);
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 95;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem 1.5rem;
+            max-width: 850px;
+            width: 100%;
+            margin-right: auto;
+        }
+
+        /* Utility Cards */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            padding: 1.75rem;
+            margin-bottom: 1.75rem;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        /* Dashboard View */
+        .hero-section {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, var(--slate-dark) 0%, var(--slate-deep) 100%);
+            color: white;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .hero-section h2 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-section p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 500px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: all 0.25 ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--slate-deep);
+        }
+
+        .tool-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background-color: #EBF1F5;
+            color: var(--slate-deep);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-card h3 {
+            font-size: 1.1rem;
+            color: var(--slate-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .tool-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Tool Forms */
+        .tool-header {
+            margin-bottom: 1.75rem;
+        }
+
+        .tool-header h2 {
+            font-size: 1.75rem;
+            color: var(--slate-dark);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .tool-header p.problem-statement {
+            color: var(--rose-warm);
+            font-weight: 500;
+            font-size: 0.975rem;
+            background-color: #FDF0EC;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--rose-warm);
+            margin-top: 0.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--slate-dark);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #FAFAFA;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--slate-deep);
+            background-color: #FFF;
+            box-shadow: 0 0 0 3px rgba(69, 123, 157, 0.15);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider-container input[type="range"] {
+            flex: 1;
+            accent-color: var(--rose-warm);
+        }
+
+        .slider-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--rose-warm);
+            width: 32px;
+            text-align: center;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.925rem;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--slate-deep);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--slate-dark);
+        }
+
+        .btn-secondary {
+            background-color: #E2E8F0;
+            color: var(--slate-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #CBD5E1;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background: #F1F5F9;
+            color: var(--text-main);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        /* Results Output Section */
+        .results-container {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .results-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .result-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            color: var(--rose-warm);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .result-content {
+            color: var(--text-main);
+            font-size: 0.975rem;
+            line-height: 1.6;
+        }
+
+        .quote-box {
+            background-color: #F8FAF9;
+            border-left: 4px solid var(--slate-deep);
+            padding: 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            font-style: italic;
+            margin: 0.75rem 0;
+            position: relative;
+        }
+
+        .copy-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #F1F5F9;
+            padding: 0.875rem 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--slate-dark);
+            margin-top: 0.5rem;
+        }
+
+        .verdict-badge {
+            display: inline-block;
+            padding: 0.35rem 0.875rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .badge-danger {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .badge-success {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+
+        .badge-warning {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 2.5rem;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            user-select: none;
+        }
+
+        .history-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--slate-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .history-list {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .history-list.active {
+            display: block;
+        }
+
+        .history-item {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item-meta {
+            color: var(--text-muted);
+            font-size: 0.775rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--slate-dark);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        footer p {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+            }
+
+            #sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            #main-content {
+                margin-left: 0;
+                padding: 1.25rem 1rem;
+            }
+
+            .hero-section h2 {
+                font-size: 1.75rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            #toast {
+                left: 1rem;
+                right: 1rem;
+                text-align: center;
+                bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="brand">
+            <i class="fa-solid font-awesome-ghost fa-ghost" style="color: var(--rose-warm);"></i>
+            <span>Ghosted</span>
+        </div>
+        <button class="hamburger-btn" id="menuToggle" aria-label="Toggle menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div idapp-container style="display:flex; flex:1;">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-ghost"></i>
+                <h1>Ghosted</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a class="nav-link active" data-target="dashboard">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool1">
+                        <i class="fa-solid fa-anchor"></i>
+                        <span>Reality Anchor</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool2">
+                        <i class="fa-solid fa-pen-paper-plane"></i>
+                        <span>Closure Script</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool3">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Self-Protection</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool4">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i>
+                        <span>Pattern Check</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool5">
+                        <i class="fa-solid fa-compass"></i>
+                        <span>Recovery Roadmap</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Wrapper -->
+        <main id="main-content">
+
+            <!-- DASHBOARD VIEW -->
+            <section id="view-dashboard" class="view-section">
+                <div class="hero-section">
+                    <h2>Ghosted</h2>
+                    <p>Silence isn't a reflection of your worth.</p>
+                </div>
+
+                <div class="tools-grid">
+                    <div class="tool-card" onclick="navigateTo('tool1')">
+                        <div>
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-anchor"></i>
+                            </div>
+                            <h3>Reality Anchor</h3>
+                            <p>Separate facts from fiction and stop making excuses for their disappearance.</p>
+                        </div>
+                    </div>
+
+                    <div class="tool-card" onclick="navigateTo('tool2')">
+                        <div>
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-pen-paper-plane"></i>
+                            </div>
+                            <h3>Closure Script</h3>
+                            <p>Evaluate reaching out and generate dignified messages or therapeutic unsent letters.</p>
+                        </div>
+                    </div>
+
+                    <div class="tool-card" onclick="navigateTo('tool3')">
+                        <div>
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <h3>Self-Protection</h3>
+                            <p>Break the social media monitoring loop and regain control of your digital boundaries.</p>
+                        </div>
+                    </div>
+
+                    <div class="tool-card" onclick="navigateTo('tool4')">
+                        <div>
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            </div>
+                            <h3>Pattern Check</h3>
+                            <p>Identify repeat dating cycles and early warning signals to guard your heart next time.</p>
+                        </div>
+                    </div>
+
+                    <div class="tool-card" onclick="navigateTo('tool5')">
+                        <div>
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-compass"></i>
+                            </div>
+                            <h3>Recovery Roadmap</h3>
+                            <p>Assess self-esteem impact and rebuild confidence with concrete daily practices.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOL 1: REALITY ANCHOR -->
+            <section id="view-tool1" class="view-section" style="display: none;">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-anchor" style="color: var(--slate-deep);"></i> Reality Anchor</h2>
+                        <p class="problem-statement">"I keep making excuses for why they disappeared. Maybe they're hurt, busy, or lost their phone."</p>
+                    </div>
+
+                    <form id="form-tool1">
+                        <div class="form-group">
+                            <label for="t1-lastContact">Last contact detail / message:</label>
+                            <textarea id="t1-lastContact" class="form-control" placeholder="What was said, who sent it, and when?"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t1-duration">Duration of connection:</label>
+                            <select id="t1-duration" class="form-control">
+                                <option value="<1 week">&lt; 1 week</option>
+                                <option value="1-4 weeks">1 - 4 weeks</option>
+                                <option value="1-3 months">1 - 3 months</option>
+                                <option value="3-6 months">3 - 6 months</option>
+                                <option value="6+ months">6+ months</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t1-redFlags">Red flags you ignored:</label>
+                            <textarea id="t1-redFlags" class="form-control" placeholder="Hot and cold behavior, late replies, vague plans..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t1-excuses">Excuses you've made for them:</label>
+                            <textarea id="t1-excuses" class="form-control" placeholder="They're stressed with work, family emergency, app notification glitch..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t1-evidence">Evidence they received your message:</label>
+                            <select id="t1-evidence" class="form-control">
+                                <option value="Read receipt">Read receipt confirmed</option>
+                                <option value="Delivered">Delivered status</option>
+                                <option value="None">None / Unknown</option>
+                                <option value="They posted on social media after">They posted on social media after</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t1-thought">Your most common recurring thought:</label>
+                            <select id="t1-thought" class="form-control">
+                                <option value="I did something wrong">I did something wrong</option>
+                                <option value="They're going through something">They're going through something</option>
+                                <option value="They'll come back">They'll come back</option>
+                                <option value="I wasn't enough">I wasn't enough</option>
+                                <option value="This happens to me">This always happens to me</option>
+                                <option value="I need closure">I need explicit closure</option>
+                            </select>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" onclick="analyzeTool1()">
+                                <i class="fa-solid fa-calculator"></i> Analyze Situation
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()">
+                                <i class="fa-solid fa-vial"></i> Load Sample Scenario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="results-tool1" class="card results-container">
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-scale-balanced"></i> The Facts vs. Fiction</div>
+                        <div id="t1-res-facts" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-lightbulb"></i> The Likely Reasons</div>
+                        <div id="t1-res-reasons" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-key"></i> The Closure Statement</div>
+                        <div class="quote-box" id="t1-res-closure"></div>
+                        <button class="btn btn-outline btn-sm" onclick="copyText('t1-res-closure')"><i class="fa-regular fa-copy"></i> Copy Statement</button>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-hand"></i> The Stop-Checking Protocol</div>
+                        <div id="t1-res-protocol" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-arrows-spin"></i> The Pattern Check</div>
+                        <div id="t1-res-pattern" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-shield-cat"></i> The Self-Blame Interrupt</div>
+                        <div id="t1-res-selfblame" class="result-content" style="font-weight: 600; color: var(--slate-dark);">
+                            Ghosting is a reflection of their emotional capacity and communication tolerance, not your value as a human being.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="history-section">
+                    <div class="history-header" onclick="toggleHistory('tool1')">
+                        <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Analyses</span>
+                        <i class="fa-solid fa-chevron-down" id="history-arrow-tool1"></i>
+                    </div>
+                    <div class="history-list" id="history-list-tool1"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 2: CLOSURE SCRIPT -->
+            <section id="view-tool2" class="view-section" style="display: none;">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-pen-paper-plane" style="color: var(--slate-deep);"></i> Closure Script</h2>
+                        <p class="problem-statement">"I want to reach out one last time but I don't know if I should or what to say."</p>
+                    </div>
+
+                    <form id="form-tool2">
+                        <div class="form-group">
+                            <label for="t2-wantToSay">What you want to say:</label>
+                            <textarea id="t2-wantToSay" class="form-control" placeholder="Draft your thoughts here..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t2-goal">Your primary goal:</label>
+                            <select id="t2-goal" class="form-control">
+                                <option value="Get an answer">Get an explicit answer / reason</option>
+                                <option value="Say my piece">Say my piece & state boundaries</option>
+                                <option value="See if they'll reply">See if they'll reply</option>
+                                <option value="Closure">Gain emotional closure</option>
+                                <option value="Guilt them">Make them feel guilty</option>
+                                <option value="Win them back">Win them back</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t2-timeSince">Time since last contact:</label>
+                            <select id="t2-timeSince" class="form-control">
+                                <option value="<1 week">&lt; 1 week</option>
+                                <option value="1-2 weeks">1 - 2 weeks</option>
+                                <option value="2-4 weeks">2 - 4 weeks</option>
+                                <option value="1-2 months">1 - 2 months</option>
+                                <option value="2+ months">2+ months</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t2-previousAttempts">Previous outreach attempts (unanswered):</label>
+                            <select id="t2-previousAttempts" class="form-control">
+                                <option value="0">0 (Silence was immediate)</option>
+                                <option value="1">1 double-text</option>
+                                <option value="2-3">2 - 3 follow-ups</option>
+                                <option value="4+">4+ attempts</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t2-likelyResponse">Their likely response if you reach out:</label>
+                            <select id="t2-likelyResponse" class="form-control">
+                                <option value="Nothing">Absolute Silence / Nothing</option>
+                                <option value="Excuse">Vague Excuse ("been super busy")</option>
+                                <option value="Anger">Defensiveness or Anger</option>
+                                <option value="Brief apology">Brief hollow apology</option>
+                                <option value="Rekindle attempt">Breadcrumbs / Rekindle attempt</option>
+                            </select>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" onclick="analyzeTool2()">
+                                <i class="fa-solid fa-compass-drafting"></i> Evaluate & Script
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()">
+                                <i class="fa-solid fa-vial"></i> Load Sample Scenario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="results-tool2" class="card results-container">
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-gavel"></i> The Verdict</div>
+                        <div id="t2-res-verdict"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-comment-dots"></i> The Dignified Message</div>
+                        <div class="copy-box">
+                            <span id="t2-res-message"></span>
+                            <button class="btn btn-outline btn-sm" onclick="copyText('t2-res-message')"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-box-archive"></i> The Unsent Letter Prompt</div>
+                        <div id="t2-res-unsent" class="result-content" style="font-style: italic;"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-hourglass-half"></i> The Timing Rule</div>
+                        <div id="t2-res-timing" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-ban"></i> The No-Reply Protocol</div>
+                        <div id="t2-res-noreply" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-triangle-exclamation"></i> The Rekindle Trap</div>
+                        <div id="t2-res-rekindle" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="history-section">
+                    <div class="history-header" onclick="toggleHistory('tool2')">
+                        <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Analyses</span>
+                        <i class="fa-solid fa-chevron-down" id="history-arrow-tool2"></i>
+                    </div>
+                    <div class="history-list" id="history-list-tool2"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 3: SELF-PROTECTION -->
+            <section id="view-tool3" class="view-section" style="display: none;">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-shield-halved" style="color: var(--slate-deep);"></i> Self-Protection</h2>
+                        <p class="problem-statement">"I keep checking their social media and it's destroying my peace."</p>
+                    </div>
+
+                    <form id="form-tool3">
+                        <div class="form-group">
+                            <label for="t3-frequency">Checking frequency:</label>
+                            <select id="t3-frequency" class="form-control">
+                                <option value="Hourly">Hourly / Compulsive</option>
+                                <option value="Few times a day">A few times a day</option>
+                                <option value="Daily">Daily</option>
+                                <option value="Few times a week">A few times a week</option>
+                                <option value="I stopped">I've stopped / Minimal</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t3-lookingFor">What you look for:</label>
+                            <select id="t3-lookingFor" class="form-control">
+                                <option value="New posts">New posts or updates</option>
+                                <option value="Who they're with">Who they are with or following</option>
+                                <option value="If they viewed your story">If they viewed your stories</option>
+                                <option value="Relationship status">Changes in status or bio</option>
+                                <option value="Location">Location or activity tags</option>
+                                <option value="Nothing specific, just habit">Nothing specific, purely muscle memory</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t3-aftermath">Emotional aftermath after checking:</label>
+                            <select id="t3-aftermath" class="form-control">
+                                <option value="Worse every time">Worse every single time (Spiraling)</option>
+                                <option value="Sometimes worse">Sometimes worse, occasionally neutral</option>
+                                <option value="Numb">Numb / Empty</option>
+                                <option value="False hope">False hope if they posted something vague</option>
+                                <option value="Anger">Anger or resentment</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t3-blockStatus">Current block/mute status:</label>
+                            <select id="t3-blockStatus" class="form-control">
+                                <option value="Blocked">Fully Blocked</option>
+                                <option value="Muted">Muted / Hidden</option>
+                                <option value="Nothing">Nothing (Still connected)</option>
+                                <option value="I unblocked to check">I unblocked specifically to check</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t3-afraidOfMissing">What you're deeply afraid of missing:</label>
+                            <textarea id="t3-afraidOfMissing" class="form-control" placeholder="Proof they're happy without me, finding someone new, a indirect message..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" onclick="analyzeTool3()">
+                                <i class="fa-solid fa-lock"></i> Build Defense Plan
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()">
+                                <i class="fa-solid fa-vial"></i> Load Sample Scenario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="results-tool3" class="card results-container">
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-arrows-spin"></i> The Checking Loop</div>
+                        <div id="t3-res-loop" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-sliders"></i> The Block / Mute Guide</div>
+                        <div id="t3-res-guide" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-shuffle"></i> The Replacement Habit</div>
+                        <div id="t3-res-replacement" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-calendar-check"></i> The 7-Day Challenge</div>
+                        <div id="t3-res-challenge" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-eye"></i> The Fear Reality Check</div>
+                        <div id="t3-res-fear" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-broom"></i> The Digital Cleanse Protocol</div>
+                        <div id="t3-res-cleanse" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="history-section">
+                    <div class="history-header" onclick="toggleHistory('tool3')">
+                        <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Analyses</span>
+                        <i class="fa-solid fa-chevron-down" id="history-arrow-tool3"></i>
+                    </div>
+                    <div class="history-list" id="history-list-tool3"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 4: PATTERN CHECK -->
+            <section id="view-tool4" class="view-section" style="display: none;">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-magnifying-glass-chart" style="color: var(--slate-deep);"></i> Pattern Check</h2>
+                        <p class="problem-statement">"This keeps happening to me and I need to understand if I'm choosing people who disappear."</p>
+                    </div>
+
+                    <form id="form-tool4">
+                        <div class="form-group">
+                            <label for="t4-history">Ghosting history:</label>
+                            <select id="t4-history" class="form-control">
+                                <option value="First time">First time experiencing this</option>
+                                <option value="Happened before">Happened 1-2 times before</option>
+                                <option value="Happened often">Happened multiple times</option>
+                                <option value="Seems to be a pattern">Seems to be a recurring pattern</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-speed">How fast you typically connect / invest emotionally:</label>
+                            <select id="t4-speed" class="form-control">
+                                <option value="Immediately">Immediately (Instant spark / 24/7 texting)</option>
+                                <option value="Few dates">Within a few dates</option>
+                                <option value="Few weeks">Within a few weeks</option>
+                                <option value="Few months">Over a few months</option>
+                                <option value="I take it slow">I usually take it very slow</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-earlySigns">Early warning signs you noticed in hindsight:</label>
+                            <textarea id="t4-earlySigns" class="form-control" placeholder="Inconsistent communication, reluctance to make future plans, talk about exes, intense fast declarations..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-attachment">Your attachment style guess:</label>
+                            <select id="t4-attachment" class="form-control">
+                                <option value="Anxious">Anxious (Fear abandonment, seek high closeness)</option>
+                                <option value="Avoidant">Avoidant (Value extreme independence, uncomfortable with vulnerability)</option>
+                                <option value="Secure">Secure (Comfortable with intimacy and boundaries)</option>
+                                <option value="Fearful">Fearful-Avoidant (Desire connection but fear closeness)</option>
+                                <option value="Don't know">Don't know</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-hopeFix">What you hope a connection will fix or validate:</label>
+                            <textarea id="t4-hopeFix" class="form-control" placeholder="Proving I'm desirable, fixing loneliness, validating my future..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t4-picker">Your "picker" pattern:</label>
+                            <select id="t4-picker" class="form-control">
+                                <option value="I go for unavailable people">I am drawn to emotionally unavailable people</option>
+                                <option value="I move too fast">I move too fast and skip vetting</option>
+                                <option value="I ignore red flags">I notice red flags but excuse them</option>
+                                <option value="I don't know">I'm not sure</option>
+                                <option value="I choose carefully">I filter carefully but still got burned</option>
+                            </select>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" onclick="analyzeTool4()">
+                                <i class="fa-solid fa-diagram-project"></i> Unpack Pattern
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()">
+                                <i class="fa-solid fa-vial"></i> Load Sample Scenario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="results-tool4" class="card results-container">
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-tag"></i> The Pattern Name</div>
+                        <div id="t4-res-name" class="result-content" style="font-weight: 700; font-size: 1.1rem; color: var(--slate-dark);"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-heart-crack"></i> The Vulnerability Factor</div>
+                        <div id="t4-res-vulnerability" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-triangle-exclamation"></i> Early Warning Signs for Next Time</div>
+                        <div id="t4-res-warnings" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-gauge"></i> The Slow-Down Protocol</div>
+                        <div id="t4-res-pacing" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-list-check"></i> Minimum Communication Standards</div>
+                        <div id="t4-res-standards" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-gem"></i> Self-Worth Check</div>
+                        <div id="t4-res-worth" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="history-section">
+                    <div class="history-header" onclick="toggleHistory('tool4')">
+                        <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Analyses</span>
+                        <i class="fa-solid fa-chevron-down" id="history-arrow-tool4"></i>
+                    </div>
+                    <div class="history-list" id="history-list-tool4"></div>
+                </div>
+            </section>
+
+            <!-- TOOL 5: RECOVERY ROADMAP -->
+            <section id="view-tool5" class="view-section" style="display: none;">
+                <div class="card">
+                    <div class="tool-header">
+                        <h2><i class="fa-solid fa-compass" style="color: var(--slate-deep);"></i> Recovery Roadmap</h2>
+                        <p class="problem-statement">"I feel worthless and I need to rebuild my confidence."</p>
+                    </div>
+
+                    <form id="form-tool5">
+                        <div class="form-group">
+                            <label for="t5-esteemHit">Self-esteem impact (1 = Mild annoyance, 10 = Devastated / Questioning worth):</label>
+                            <div class="slider-container">
+                                <input type="range" id="t5-esteemHit" min="1" max="10" value="7" oninput="document.getElementById('slider-val').innerText = this.value">
+                                <span class="slider-value" id="slider-val">7</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t5-support">Support system around you:</label>
+                            <select id="t5-support" class="form-control">
+                                <option value="Strong">Strong (Close friends/family to talk to)</option>
+                                <option value="Moderate">Moderate (A couple of people, but feel hesitant to burden them)</option>
+                                <option value="Weak">Weak (Few connections available right now)</option>
+                                <option value="Isolated">Isolated (Feeling mostly alone in this process)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t5-rumination">Rumination level:</label>
+                            <select id="t5-rumination" class="form-control">
+                                <option value="Constant">Constant (Can't focus on work or daily tasks)</option>
+                                <option value="Frequent">Frequent (Comes up multiple times throughout the day)</option>
+                                <option value="Occasional">Occasional (Triggers happen intermittently)</option>
+                                <option value="Rare">Rare (Mostly calm, just processing)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t5-selfcare">Physical self-care status:</label>
+                            <select id="t5-selfcare" class="form-control">
+                                <option value="Good">Good (Eating, sleeping, exercising regularly)</option>
+                                <option value="Neglected">Neglected (Inconsistent sleep or appetite)</option>
+                                <option value="Nonexistent">Nonexistent (Barely eating/sleeping, stay in bed)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="t5-readiness">Readiness to date/connect again:</label>
+                            <select id="t5-readiness" class="form-control">
+                                <option value="Eager">Eager (Want a distraction immediately)</option>
+                                <option value="Cautious">Cautious (Open, but feeling guarded)</option>
+                                <option value="Not ready">Not ready (Need time to reset)</option>
+                                <option value="Never again">Never again (Feeling completely cynical)</option>
+                                <option value="Only if they approach me">Only if someone approaches me</option>
+                            </select>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" onclick="analyzeTool5()">
+                                <i class="fa-solid fa-map"></i> Generate Recovery Plan
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()">
+                                <i class="fa-solid fa-vial"></i> Load Sample Scenario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="results-tool5" class="card results-container">
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-crosshairs"></i> The Wound Location</div>
+                        <div id="t5-res-wound" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-seedling"></i> 3 Daily Practices to Rebuild</div>
+                        <div id="t5-res-practices" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-users"></i> Social Re-entry Strategy</div>
+                        <div id="t5-res-social" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-heart-pulse"></i> Dating Readiness Check</div>
+                        <div id="t5-res-readiness" class="result-content"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-arrows-rotate"></i> The Story Reframe</div>
+                        <div class="quote-box" id="t5-res-reframe">
+                            "They didn't ghost me because I'm unlovable. They ghosted because they lacked the maturity to communicate honestly."
+                        </div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-title"><i class="fa-solid fa-filter"></i> The Future Filter</div>
+                        <div id="t5-res-filter" class="result-content" style="font-weight: 600;"></div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="history-section">
+                    <div class="history-header" onclick="toggleHistory('tool5')">
+                        <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Saved Analyses</span>
+                        <i class="fa-solid fa-chevron-down" id="history-arrow-tool5"></i>
+                    </div>
+                    <div class="history-list" id="history-list-tool5"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast">Copied to clipboard!</div>
+
+    <!-- Global Footer -->
+    <footer>
+        <p>For entertainment and reflection purposes only. Not therapy or professional advice. If ghosting has triggered severe depression or anxiety, please seek professional support.</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // DOM Elements
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const viewSections = document.querySelectorAll('.view-section');
+
+        // Navigation Handling
+        function navigateTo(targetId) {
+            // Update nav styles
+            navLinks.forEach(link => {
+                if (link.dataset.target === targetId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Show view section
+            viewSections.forEach(section => {
+                if (section.id === `view-${targetId}`) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+
+            // Close mobile menu
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+
+            // Render history for active tool
+            if (targetId.startsWith('tool')) {
+                renderHistoryList(targetId);
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                navigateTo(link.dataset.target);
+            });
+        });
+
+        // Mobile Sidebar Toggle
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('active');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // Toast Helper
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg || "Copied!";
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Copy Text Helper
+        function copyText(elementId) {
+            const el = document.getElementById(elementId);
+            const textToCopy = el.innerText || el.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy");
+            });
+        }
+
+        // LocalStorage Helpers
+        function saveToHistory(toolId, data) {
+            const key = `ghosted_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            // Add timestamp
+            data.timestamp = new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            
+            // Prepend new item
+            history.unshift(data);
+            
+            // Cap at 30 items
+            if (history.length > 30) {
+                history = history.slice(0, 30);
+            }
+            
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistoryList(toolId);
+        }
+
+        function getHistory(toolId) {
+            const key = `ghosted_history_${toolId}`;
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+
+        function clearHistory(toolId) {
+            const key = `ghosted_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistoryList(toolId);
+            showToast("History cleared");
+        }
+
+        function toggleHistory(toolId) {
+            const list = document.getElementById(`history-list-${toolId}`);
+            const arrow = document.getElementById(`history-arrow-${toolId}`);
+            if (list.classList.contains('active')) {
+                list.classList.remove('active');
+                arrow.className = "fa-solid fa-chevron-down";
+            } else {
+                list.classList.add('active');
+                arrow.className = "fa-solid fa-chevron-up";
+            }
+        }
+
+        function renderHistoryList(toolId) {
+            const container = document.getElementById(`history-list-${toolId}`);
+            if (!container) return;
+            
+            const history = getHistory(toolId);
+            if (history.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem 0;">No saved analyses yet.</p>`;
+                return;
+            }
+
+            let html = `<div style="text-align: right; margin-bottom: 0.5rem;">
+                <button class="btn btn-outline btn-sm" onclick="clearHistory('${toolId}')"><i class="fa-solid fa-trash"></i> Clear History</button>
+            </div>`;
+
+            history.forEach((item, idx) => {
+                html += `
+                    <div class="history-item">
+                        <div>
+                            <strong>${item.summary || 'Saved Item #' + (idx + 1)}</strong>
+                            <div class="history-item-meta">${item.timestamp}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+
+        // ==================== TOOL 1 LOGIC ====================
+        function loadSampleTool1() {
+            document.getElementById('t1-lastContact').value = 'Had a great night out, texted "had such a great night with you!" when I got home.';
+            document.getElementById('t1-duration').value = '1-3 months';
+            document.getElementById('t1-redFlags').value = 'Sometimes took 12+ hours to reply to texts, canceled our third date last minute.';
+            document.getElementById('t1-excuses').value = 'They must be overwhelmed with their new work project or lost their phone on the weekend trip.';
+            document.getElementById('t1-evidence').value = 'They posted on social media after';
+            document.getElementById('t1-thought').value = 'I did something wrong';
+            showToast('Sample scenario loaded');
+        }
+
+        function analyzeTool1() {
+            const lastContact = document.getElementById('t1-lastContact').value || 'No detail provided';
+            const duration = document.getElementById('t1-duration').value;
+            const redFlags = document.getElementById('t1-redFlags').value || 'None listed';
+            const excuses = document.getElementById('t1-excuses').value || 'None listed';
+            const evidence = document.getElementById('t1-evidence').value;
+            const thought = document.getElementById('t1-thought').value;
+
+            // Generate Output Logic
+            let facts = `<p><strong>Known Fact:</strong> You reached out with "${lastContact.slice(0, 60)}..." and have received no response.</p>`;
+            facts += `<p><strong>Known Fact:</strong> Activity status indicator: <em>${evidence}</em>.</p>`;
+            facts += `<p style="color: var(--rose-warm); margin-top: 0.5rem;"><strong>Fiction / Projection:</strong> You are filling silence with: "${excuses}".</p>`;
+
+            let reasons = `<ul>
+                <li><strong>1. Conflict/Discomfort Avoidance:</strong> Rather than having a 2-minute uncomfortable conversation about fading interest or capacity, they chose path of zero tension for themselves.</li>
+                <li><strong>2. Shifting Priorities or Alternatives:</strong> In early connection phases (${duration}), people often juggle options and lack the courage to communicate when their attention pivots elsewhere.</li>
+                <li><strong>3. Low Emotional Maturity:</strong> Ghosting reveals a fundamental lack of interpersonal accountability, which has nothing to do with your value or what you said.</li>
+            </ul>`;
+
+            let closureStmt = `"I don't need a final text from them to know that I deserve communication, clarity, and respect."`;
+
+            let protocol = `<ol style="padding-left: 1.25rem;">
+                <li><strong>Remove Immediate Triggers:</strong> Mute or archive the chat thread so it stops bumping to the top of your app.</li>
+                <li><strong>Set a Hard Boundary:</strong> Commit to 0 further messages. Double-checking or sending a '?' decreases your peace and will not change their behavior.</li>
+                <li><strong>Acknowledge the Signal:</strong> Interpret their silence as an active choice, not a technical glitch.</li>
+            </ol>`;
+
+            let pattern = `<p>You noted red flags: <em>"${redFlags.slice(0, 80)}..."</em>. Notice how early inconsistency often foreshadows ultimate avoidance. This isn't a surprise failure; it's a continuation of an established boundary boundary level.</p>`;
+
+            document.getElementById('t1-res-facts').innerHTML = facts;
+            document.getElementById('t1-res-reasons').innerHTML = reasons;
+            document.getElementById('t1-res-closure').innerText = closureStmt;
+            document.getElementById('t1-res-protocol').innerHTML = protocol;
+            document.getElementById('t1-res-pattern').innerHTML = pattern;
+
+            document.getElementById('results-tool1').classList.add('active');
+
+            saveToHistory('tool1', {
+                summary: `Reality Anchor (${duration}) - Thought: "${thought}"`,
+                lastContact: lastContact
+            });
+        }
+
+
+        // ==================== TOOL 2 LOGIC ====================
+        function loadSampleTool2() {
+            document.getElementById('t2-wantToSay').value = 'Hey, did I do something wrong? It feels really weird that you just stopped replying after weeks of talking.';
+            document.getElementById('t2-goal').value = 'Get an answer';
+            document.getElementById('t2-timeSince').value = '2-4 weeks';
+            document.getElementById('t2-previousAttempts').value = '1';
+            document.getElementById('t2-likelyResponse').value = 'Nothing';
+            showToast('Sample scenario loaded');
+        }
+
+        function analyzeTool2() {
+            const wantToSay = document.getElementById('t2-wantToSay').value;
+            const goal = document.getElementById('t2-goal').value;
+            const timeSince = document.getElementById('t2-timeSince').value;
+            const prevAttempts = document.getElementById('t2-previousAttempts').value;
+            const response = document.getElementById('t2-likelyResponse').value;
+
+            let verdictHTML = '';
+            let dignifiedMsg = '';
+
+            if (prevAttempts === '2-3' || prevAttempts === '4+' || goal === 'Guilt them' || goal === 'Win them back') {
+                verdictHTML = `<span class="verdict-badge badge-danger">VERDICT: DO NOT SEND</span>
+                <p>Reaching out again is extremely unlikely to give you what you want. Silence is already their answer. Re-engaging risks damaging your self-respect and giving them another opportunity to ignore you.</p>`;
+                dignifiedMsg = "NO MESSAGE RECOMMENDED. Keep your energy for people who show up.";
+            } else if (prevAttempts === '1' && goal === 'Say my piece') {
+                verdictHTML = `<span class="verdict-badge badge-warning">VERDICT: SEND ONCE (BOUNDARY ONLY)</span>
+                <p>If you need to close the door for your own sanity, send one final, neutral boundary message that demands no reply.</p>`;
+                dignifiedMsg = "Hey, since I haven't heard back from you, I'm assuming you've moved on. I prefer clear communication, so I'm going to step back as well. Wish you the best.";
+            } else {
+                verdictHTML = `<span class="verdict-badge badge-success">VERDICT: OPTIONAL FINAL CLEAR-CUT TEXT</span>
+                <p>If you haven't followed up yet and it's been less than 2 weeks, you can send one clear statement to close the loop.</p>`;
+                dignifiedMsg = "Hey! Haven't heard from you in a bit, so I get the sense priorities have shifted. No worries at all, but I'm closing the door on this. Take care!";
+            }
+
+            let unsentPrompt = `<p><strong>Therapeutic Writing Exercise:</strong> Write a raw, unedited letter in your private notes detailing everything you wish they understood about how their behavior made you feel. Do NOT send it. Burn or delete it once finished.</p>`;
+
+            let timingRule = `<p><strong>Rule:</strong> Never reach out more than once after silence. If someone disappears for <strong>${timeSince}</strong>, sending multiple texts shifts the dynamic into chasing. Silence requires no response.</p>`;
+
+            let noReply = `<p>If they continue not to respond: Archive the conversation immediately, remove their phone number from your contacts list if you feel compelled to text, and do not check their profile.</p>`;
+
+            let rekindleTrap = `<p><strong>Watch Out:</strong> If they return weeks or months from now with a low-effort text ("Hey stranger...", "Thinking of you"), remember: <em>They didn't miss you; they ran out of options or needed a temporary ego boost.</em></p>`;
+
+            document.getElementById('t2-res-verdict').innerHTML = verdictHTML;
+            document.getElementById('t2-res-message').innerText = dignifiedMsg;
+            document.getElementById('t2-res-unsent').innerHTML = unsentPrompt;
+            document.getElementById('t2-res-timing').innerHTML = timingRule;
+            document.getElementById('t2-res-noreply').innerHTML = noReply;
+            document.getElementById('t2-res-rekindle').innerHTML = rekindleTrap;
+
+            document.getElementById('results-tool2').classList.add('active');
+
+            saveToHistory('tool2', {
+                summary: `Closure Script (Goal: ${goal})`,
+                goal: goal
+            });
+        }
+
+
+        // ==================== TOOL 3 LOGIC ====================
+        function loadSampleTool3() {
+            document.getElementById('t3-frequency').value = 'Daily';
+            document.getElementById('t3-lookingFor').value = 'Relationship status';
+            document.getElementById('t3-aftermath').value = 'Worse every time';
+            document.getElementById('t3-blockStatus').value = 'Nothing';
+            document.getElementById('t3-afraidOfMissing').value = "I'm terrified I'll see them dating someone new or posting like I never mattered.";
+            showToast('Sample scenario loaded');
+        }
+
+        function analyzeTool3() {
+            const freq = document.getElementById('t3-frequency').value;
+            const lookingFor = document.getElementById('t3-lookingFor').value;
+            const aftermath = document.getElementById('t3-aftermath').value;
+            const blockStatus = document.getElementById('t3-blockStatus').value;
+            const afraidOfMissing = document.getElementById('t3-afraidOfMissing').value;
+
+            let loopDesc = `<p>Checking frequency: <strong>${freq}</strong>. Each time you check, you trigger a dopamine spike (anticipation) followed by a crash of sadness or anxiety (result: <em>${aftermath}</em>). You are keeping the wound open manually.</p>`;
+
+            let blockGuide = `<p><strong>Recommended Step:</strong> ${blockStatus === 'Blocked' ? 'Keep them blocked! Do not give in to unblocking.' : 'Mute or Block their profile across all platforms immediately. Muting hides their updates without notifying them, removing the trigger.'}</p>`;
+
+            let replacement = `<ul style="padding-left: 1.25rem;">
+                <li><strong>Physical Interruption:</strong> Do 10 pushups or drop your hands into cold water the moment the urge hits.</li>
+                <li><strong>Digital Pivot:</strong> Replace the Instagram/TikTok tap with opening a puzzle game or reading an article saved in your bookmarks.</li>
+            </ul>`;
+
+            let challenge = `<div style="background: #F8FAFC; padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">
+                <p><strong>7-Day No-Check Challenge:</strong></p>
+                <p>• Day 1-2: Remove social media apps from your phone's home screen.</p>
+                <p>• Day 3-5: Replace night-time scrolling with reading or a podcast.</p>
+                <p>• Day 6-7: Notice the drastic reduction in emotional spiking.</p>
+            </div>`;
+
+            let fearCheck = `<p>You wrote: <em>"${afraidOfMissing.slice(0, 100)}..."</em></p>
+            <p><strong>Reality:</strong> Whatever they post is a curated highlight reel. Seeing them online will never bring you closure or peace—it only feeds your brain's grief cycle.</p>`;
+
+            let cleanse = `<p><strong>Digital Cleanse Protocol:</strong> Clear chat history, delete photo memories from main camera roll to hidden archive, and turn off chat notifications.</p>`;
+
+            document.getElementById('t3-res-loop').innerHTML = loopDesc;
+            document.getElementById('t3-res-guide').innerHTML = blockGuide;
+            document.getElementById('t3-res-replacement').innerHTML = replacement;
+            document.getElementById('t3-res-challenge').innerHTML = challenge;
+            document.getElementById('t3-res-fear').innerHTML = fearCheck;
+            document.getElementById('t3-res-cleanse').innerHTML = cleanse;
+
+            document.getElementById('results-tool3').classList.add('active');
+
+            saveToHistory('tool3', {
+                summary: `Self-Protection (${freq} checking)`,
+                freq: freq
+            });
+        }
+
+
+        // ==================== TOOL 4 LOGIC ====================
+        function loadSampleTool4() {
+            document.getElementById('t4-history').value = 'Happened often';
+            document.getElementById('t4-speed').value = 'Few dates';
+            document.getElementById('t4-earlySigns').value = 'They were super intense at first, calling me daily, then suddenly went quiet for days.';
+            document.getElementById('t4-attachment').value = 'Anxious';
+            document.getElementById('t4-hopeFix').value = 'I wanted to feel chosen and secure in my life.';
+            document.getElementById('t4-picker').value = 'I ignore red flags';
+            showToast('Sample scenario loaded');
+        }
+
+        function analyzeTool4() {
+            const history = document.getElementById('t4-history').value;
+            const speed = document.getElementById('t4-speed').value;
+            const earlySigns = document.getElementById('t4-earlySigns').value;
+            const attachment = document.getElementById('t4-attachment').value;
+            const picker = document.getElementById('t4-picker').value;
+
+            let patternName = "The Fast-Track & Ignore Loop";
+            if (picker === "I go for unavailable people") patternName = "The Emotional Chase Pattern";
+            if (attachment === "Anxious") patternName = "The Anxious-Avoidant Magnet";
+
+            let vulnerability = `<p>With an <strong>${attachment}</strong> attachment tendency, you likely crave intimacy quickly. When someone gives intense early attention, it feels like safety—making the sudden withdrawal feel devastating.</p>`;
+
+            let warnings = `<ul style="padding-left: 1.25rem;">
+                <li><strong>Hot & Cold Pacing:</strong> Rapid intensity followed by unexplained quiet periods.</li>
+                <li><strong>Vague Commitments:</strong> Making future plans in conversation ("we should go here someday") without locking down concrete dates.</li>
+                <li><strong>Vulnerability Imbalance:</strong> You sharing deeply while they keep conversations light or performative.</li>
+            </ul>`;
+
+            let pacing = `<p><strong>The Slow-Down Protocol:</strong> Match their energy and investment, never lead by more than 20%. Keep dates to 1-2 times per week max during the first month to allow emotional evaluation.</p>`;
+
+            let standards = `<p>1. Consistent communication within 24 hours.<br>2. Clear, respectful statements when plans change.<br>3. Mutual effort in initiating contact and planning dates.</p>`;
+
+            let worth = `<p>Remember: You do not need to perform or diminish your needs to keep someone's interest. A compatible partner appreciates clear boundaries.</p>`;
+
+            document.getElementById('t4-res-name').innerText = patternName;
+            document.getElementById('t4-res-vulnerability').innerHTML = vulnerability;
+            document.getElementById('t4-res-warnings').innerHTML = warnings;
+            document.getElementById('t4-res-pacing').innerHTML = pacing;
+            document.getElementById('t4-res-standards').innerHTML = standards;
+            document.getElementById('t4-res-worth').innerHTML = worth;
+
+            document.getElementById('results-tool4').classList.add('active');
+
+            saveToHistory('tool4', {
+                summary: `Pattern: ${patternName}`,
+                attachment: attachment
+            });
+        }
+
+
+        // ==================== TOOL 5 LOGIC ====================
+        function loadSampleTool5() {
+            document.getElementById('t5-esteemHit').value = 8;
+            document.getElementById('slider-val').innerText = '8';
+            document.getElementById('t5-support').value = 'Moderate';
+            document.getElementById('t5-rumination').value = 'Constant';
+            document.getElementById('t5-selfcare').value = 'Neglected';
+            document.getElementById('t5-readiness').value = 'Not ready';
+            showToast('Sample scenario loaded');
+        }
+
+        function analyzeTool5() {
+            const hit = document.getElementById('t5-esteemHit').value;
+            const support = document.getElementById('t5-support').value;
+            const rumination = document.getElementById('t5-rumination').value;
+            const selfcare = document.getElementById('t5-selfcare').value;
+            const readiness = document.getElementById('t5-readiness').value;
+
+            let wound = `<p>With a self-esteem hit of <strong>${hit}/10</strong>, the primary damage is to your <em>trust in your own perception</em> and <em>sense of personal value</em>. Ghosting attacks your need for closure, leaving open-ended questions.</p>`;
+
+            let practices = `<ol style="padding-left: 1.25rem;">
+                <li><strong>Physical Grounding:</strong> Re-establish basic routine—proper meals, 20 mins outside daily, and consistent sleep schedule.</li>
+                <li><strong>Thought Stopping:</strong> When rumination hits (${rumination}), speak out loud: "I am interrupting this spiral. I am safe and whole."</li>
+                <li><strong>Mastery Action:</strong> Engage in one skill or project completely unrelated to dating (gym, art, work goal).</li>
+            </ol>`;
+
+            let social = `<p>Support status: <strong>${support}</strong>. Reach out to one trusted friend and explicitly ask: "Hey, I've been going through a rough patch emotionally. Can we hang out this week, no heavy dating talk needed?"</p>`;
+
+            let readinessCheck = `<p>Current Readiness: <strong>${readiness}</strong>. Take at least 3-4 weeks off dating apps. Focus on solidifying your daily self-worth before introducing new potential connection dynamics.</p>`;
+
+            let futureFilter = `"Does this person communicate consistently when things are simple, and do I feel calm (not anxious) around them?"`;
+
+            document.getElementById('t5-res-wound').innerHTML = wound;
+            document.getElementById('t5-res-practices').innerHTML = practices;
+            document.getElementById('t5-res-social').innerHTML = social;
+            document.getElementById('t5-res-readiness').innerHTML = readinessCheck;
+            document.getElementById('t5-res-filter').innerText = futureFilter;
+
+            document.getElementById('results-tool5').classList.add('active');
+
+            saveToHistory('tool5', {
+                summary: `Recovery Roadmap (Impact: ${hit}/10)`,
+                hit: hit
+            });
+        }
+
+        // Initialize history on load for dashboard/default view
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistoryList('tool1');
+        });
+    </script>
+</body>
+</html>

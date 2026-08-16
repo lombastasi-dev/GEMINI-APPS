@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Reality Check - Grounding Toolkit</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* BASE & VARIABLE DEFINITIONS */
+        :root {
+            --charcoal: #343A40;
+            --charcoal-light: #495057;
+            --charcoal-hover: #212529;
+            --soft-sage: #A3B18A;
+            --sage-dark: #588157;
+            --sage-light: #DAD7CD;
+            --bg-gradient-start: #F8F9FA;
+            --bg-gradient-end: #F1F8F5;
+            --card-bg: #FFFFFF;
+            --border-color: #E9ECEF;
+            --text-muted: #6C757D;
+            --sidebar-width: 250px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --radius-xl: 1rem;
+            --radius-md: 0.5rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--charcoal);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* LAYOUT & STRUCTURE */
+        #app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* SIDEBAR */
+        #sidebar {
+            width: var(--sidebar-width);
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--sage-dark);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            line-height: 1.2;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 1rem 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.875rem 1.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.925rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--charcoal);
+            background: rgba(163, 177, 138, 0.1);
+        }
+
+        .nav-link.active {
+            color: var(--card-bg);
+            background: var(--charcoal);
+            border-left-color: var(--soft-sage);
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        /* MOBILE HEADER / HAMBURGER */
+        .mobile-header {
+            display: none;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--charcoal);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--charcoal);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 95;
+        }
+
+        /* MAIN CONTENT AREA */
+        #main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 800px;
+            flex: 1;
+        }
+
+        /* VIEW TOGGLING */
+        .view-panel {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* CARD COMPONENTS */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        /* HERO & DASHBOARD */
+        .hero {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding: 2rem 1rem;
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .hero h2 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p.tagline {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--soft-sage);
+        }
+
+        .dash-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .dash-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(163, 177, 138, 0.2);
+            color: var(--sage-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--charcoal);
+        }
+
+        .dash-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.25rem;
+            flex: 1;
+        }
+
+        .dash-card-btn {
+            align-self: flex-start;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--sage-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        /* FORMS & UI ELEMENTS */
+        .tool-header {
+            margin-bottom: 1.75rem;
+        }
+
+        .tool-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 0.35rem;
+        }
+
+        .tool-problem {
+            font-size: 0.975rem;
+            color: var(--text-muted);
+            font-style: italic;
+            background: rgba(163, 177, 138, 0.12);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--soft-sage);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--charcoal);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control, select.form-control {
+            width: 100%;
+            padding: 0.75rem 0.875rem;
+            font-family: inherit;
+            font-size: 0.925rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background-color: #FAF9F6;
+            color: var(--charcoal);
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .form-control:focus, select.form-control:focus {
+            outline: none;
+            border-color: var(--soft-sage);
+            background-color: #FFFFFF;
+        }
+
+        textarea.form-control {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .radio-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.875rem;
+            color: var(--charcoal);
+            cursor: pointer;
+            background: #FAF9F6;
+            padding: 0.5rem 0.875rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .radio-label:hover {
+            border-color: var(--soft-sage);
+        }
+
+        .radio-label input[type="radio"] {
+            accent-color: var(--sage-dark);
+        }
+
+        .button-bar {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--charcoal);
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--charcoal-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--charcoal);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(0,0,0,0.03);
+            border-color: var(--charcoal-light);
+        }
+
+        /* OUTPUT RESULTS AREA */
+        .output-container {
+            margin-top: 2rem;
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .output-container.active {
+            display: block;
+        }
+
+        .output-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--soft-sage);
+            padding-bottom: 0.5rem;
+        }
+
+        .output-section {
+            margin-bottom: 1.25rem;
+            background: #FAF9F6;
+            padding: 1.25rem;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .output-section h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--sage-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-section p, .output-section ul {
+            font-size: 0.925rem;
+            color: var(--charcoal);
+            line-height: 1.6;
+        }
+
+        .output-section ul {
+            padding-left: 1.25rem;
+        }
+
+        .output-section li {
+            margin-bottom: 0.35rem;
+        }
+
+        .script-box {
+            background: #FFFFFF;
+            border: 1px solid var(--soft-sage);
+            border-left: 4px solid var(--sage-dark);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.925rem;
+            color: var(--charcoal);
+            position: relative;
+            white-space: pre-wrap;
+            margin-top: 0.5rem;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: #FAF9F6;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            color: var(--charcoal);
+            background: #E9ECEF;
+        }
+
+        /* HISTORY ACCORDION */
+        .history-section {
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.25rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            user-select: none;
+        }
+
+        .history-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .history-content {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .history-content.active {
+            display: block;
+        }
+
+        .history-list {
+            list-style: none;
+        }
+
+        .history-item {
+            background: #FAF9F6;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.875rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item-meta {
+            color: var(--text-muted);
+            font-size: 0.775rem;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.775rem;
+            border-radius: 0.25rem;
+        }
+
+        /* TOAST NOTIFICATION */
+        #toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: var(--charcoal);
+            color: #fff;
+            text-align: center;
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem;
+            position: fixed;
+            z-index: 1000;
+            bottom: 30px;
+            right: 30px;
+            font-size: 0.875rem;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* FOOTER */
+        footer {
+            margin-top: 3rem;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background-color: rgba(255,255,255,0.5);
+            width: 100%;
+        }
+
+        /* RESPONSIVE MEDIA QUERIES */
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+            }
+
+            #sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            #main-content {
+                margin-left: 0;
+                padding: 1.5rem 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h2 {
+                font-size: 1.75rem;
+            }
+
+            .hero p.tagline {
+                font-size: 1rem;
+            }
+
+            .button-bar {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MOBILE HEADER -->
+    <header class="mobile-header">
+        <div class="mobile-title">
+            <i class="fa-solid fa-scale-balanced" style="color: var(--sage-dark);"></i>
+            Performance Reality Check
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- OVERLAY FOR MOBILE SIDEBAR -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div id="app-container">
+        <!-- FIXED SIDEBAR -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <h1>Grounding<br>Toolkit</h1>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a class="nav-link active" data-target="dashboard">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool1">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i>
+                        <span>Deconstructor</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool2">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span>Track Record</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool3">
+                        <i class="fa-solid fa-comments"></i>
+                        <span>Manager Script</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool4">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                        <span>Confidence Rebuild</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-target="tool5">
+                        <i class="fa-solid fa-compass"></i>
+                        <span>Strategic Decision</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <main id="main-content">
+            <div class="content-container">
+
+                <!-- DASHBOARD VIEW -->
+                <section id="dashboard" class="view-panel active">
+                    <div class="hero">
+                        <h2>Performance Reality Check</h2>
+                        <p class="tagline">You are not them. You are you. Let's figure out what that actually means.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dash-card" onclick="switchView('tool1')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-card-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                                    <h3>The Comparison Deconstructor</h3>
+                                </div>
+                                <p>Unpack unequal baselines, unfair advantages, and systemic blind spots behind the comparison.</p>
+                            </div>
+                            <span class="dash-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool2')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-card-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+                                    <h3>Your Actual Track Record</h3>
+                                </div>
+                                <p>Map your real contributions, growth, and achievements away from the star performer's shadow.</p>
+                            </div>
+                            <span class="dash-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool3')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-card-icon"><i class="fa-solid fa-comments"></i></div>
+                                    <h3>Manager Conversation Script</h3>
+                                </div>
+                                <p>Reframe comparison dynamics with your boss professionally without coming across as defensive.</p>
+                            </div>
+                            <span class="dash-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool4')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-card-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                                    <h3>The Confidence Rebuild</h3>
+                                </div>
+                                <p>Ground your self-worth, dismantle cognitive distortions, and track evidence of your capabilities.</p>
+                            </div>
+                            <span class="dash-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+
+                        <div class="dash-card" onclick="switchView('tool5')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-card-icon"><i class="fa-solid fa-compass"></i></div>
+                                    <h3>The Strategic Decision</h3>
+                                </div>
+                                <p>Evaluate whether to stay, adjust expectations, or prepare an exit toward a better environment.</p>
+                            </div>
+                            <span class="dash-card-btn">Open Tool <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: THE COMPARISON DECONSTRUCTOR -->
+                <section id="tool1" class="view-panel">
+                    <div class="tool-header">
+                        <h2>The Comparison Deconstructor</h2>
+                        <div class="tool-problem">
+                            "I keep being compared to someone and I need to understand if the comparison is even fair."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool1" onsubmit="event.preventDefault(); analyzeTool1();">
+                            <div class="form-group">
+                                <label for="t1-star-name">Who is the star performer?</label>
+                                <input type="text" id="t1-star-name" class="form-control" placeholder="e.g., Alex" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-praised-for">What are they praised for?</label>
+                                <textarea id="t1-praised-for" class="form-control" placeholder="e.g., Lightning speed on project delivery and executive relationships" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-star-tenure">How long have they been in the role?</label>
+                                <select id="t1-star-tenure" class="form-control" required>
+                                    <option value="<6mo">&lt; 6 months</option>
+                                    <option value="6mo-1yr">6 months - 1 year</option>
+                                    <option value="1-2yr">1 - 2 years</option>
+                                    <option value="2yr+">2+ years</option>
+                                    <option value="Longer than me">Significantly longer than me</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-my-tenure">How long have you been in the role?</label>
+                                <select id="t1-my-tenure" class="form-control" required>
+                                    <option value="<6mo">&lt; 6 months</option>
+                                    <option value="6mo-1yr">6 months - 1 year</option>
+                                    <option value="1-2yr">1 - 2 years</option>
+                                    <option value="2yr+">2+ years</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Do you have the same resources/support?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t1-resources" value="Yes" required> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t1-resources" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t1-resources" value="They get more"> They get more</label>
+                                    <label class="radio-label"><input type="radio" name="t1-resources" value="Not sure"> Not sure</label>
+                                </div>
+                            </div>
+
+                            <div class="button-bar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Deconstruct Comparison</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool1" class="output-container card">
+                        <div class="output-title"><i class="fa-solid fa-chart-pie"></i> Comparison Analysis</div>
+                        <div class="output-section" id="t1-out-reality"></div>
+                        <div class="output-section" id="t1-out-advantage"></div>
+                        <div class="output-section" id="t1-out-timeline"></div>
+                        <div class="output-section" id="t1-out-strengths"></div>
+                        <div class="output-section" id="t1-out-blindspot"></div>
+                    </div>
+
+                    <div class="history-section card">
+                        <div class="history-header" onclick="toggleHistory('tool1')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Previous Deconstruction Logs</h3>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-tool1"></i>
+                        </div>
+                        <div id="history-content-tool1" class="history-content">
+                            <ul id="history-list-tool1" class="history-list"></ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: YOUR ACTUAL TRACK RECORD -->
+                <section id="tool2" class="view-panel">
+                    <div class="tool-header">
+                        <h2>Your Actual Track Record</h2>
+                        <div class="tool-problem">
+                            "I feel inadequate but I need to look at what I've actually done."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool2" onsubmit="event.preventDefault(); analyzeTool2();">
+                            <div class="form-group">
+                                <label for="t2-achievements">Your achievements in this role:</label>
+                                <textarea id="t2-achievements" class="form-control" placeholder="What projects, tasks, or metrics have you delivered?" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-feedback">Feedback you've received:</label>
+                                <textarea id="t2-feedback" class="form-control" placeholder="Positive comments from peers, clients, or past reviews" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-skills">Skills you've developed:</label>
+                                <textarea id="t2-skills" class="form-control" placeholder="New tools, methodologies, or domain knowledge acquired" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-challenges">Challenges you've overcome:</label>
+                                <textarea id="t2-challenges" class="form-control" placeholder="Obstacles, resource gaps, or rocky starts you navigated" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-relationships">Relationships you've built:</label>
+                                <textarea id="t2-relationships" class="form-control" placeholder="Key stakeholders, cross-functional partners, or team trust established" required></textarea>
+                            </div>
+
+                            <div class="button-bar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-file-contract"></i> Build Evidence File</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool2" class="output-container card">
+                        <div class="output-title"><i class="fa-solid fa-folder-open"></i> Evidence Evaluation</div>
+                        <div class="output-section" id="t2-out-evidence"></div>
+                        <div class="output-section" id="t2-out-progression"></div>
+                        <div class="output-section" id="t2-out-context"></div>
+                        <div class="output-section" id="t2-out-baseline"></div>
+                        <div class="output-section" id="t2-out-assessment"></div>
+                    </div>
+
+                    <div class="history-section card">
+                        <div class="history-header" onclick="toggleHistory('tool2')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Previous Evidence Logs</h3>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-tool2"></i>
+                        </div>
+                        <div id="history-content-tool2" class="history-content">
+                            <ul id="history-list-tool2" class="history-list"></ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: THE CONVERSATION WITH YOUR MANAGER -->
+                <section id="tool3" class="view-panel">
+                    <div class="tool-header">
+                        <h2>The Conversation with Your Manager</h2>
+                        <div class="tool-problem">
+                            "I need to address the comparison with my boss without seeming defensive."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool3" onsubmit="event.preventDefault(); analyzeTool3();">
+                            <div class="form-group">
+                                <label for="t3-how-comes-up">How does the comparison come up?</label>
+                                <select id="t3-how-comes-up" class="form-control" required>
+                                    <option value="Directly">Directly ("Why can't you be more like X?")</option>
+                                    <option value="Hints">Hints & passive remarks</option>
+                                    <option value="In reviews">Explicitly during performance reviews</option>
+                                    <option value="In front of others">Publicly in front of team/others</option>
+                                    <option value="Never said but implied">Never stated directly, but heavily implied</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Your primary goal:</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t3-goal" value="Stop the comparisons" required> Stop comparisons</label>
+                                    <label class="radio-label"><input type="radio" name="t3-goal" value="Get more support"> Get support</label>
+                                    <label class="radio-label"><input type="radio" name="t3-goal" value="Clarify expectations"> Clarify expectations</label>
+                                    <label class="radio-label"><input type="radio" name="t3-goal" value="Protect my confidence"> Protect confidence</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Your boss's style:</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t3-style" value="Motivator" required> Motivator</label>
+                                    <label class="radio-label"><input type="radio" name="t3-style" value="Critic"> Critic</label>
+                                    <label class="radio-label"><input type="radio" name="t3-style" value="Avoidant"> Avoidant</label>
+                                    <label class="radio-label"><input type="radio" name="t3-style" value="Data-driven"> Data-driven</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Your relationship:</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t3-rel" value="Strong" required> Strong</label>
+                                    <label class="radio-label"><input type="radio" name="t3-rel" value="Neutral"> Neutral</label>
+                                    <label class="radio-label"><input type="radio" name="t3-rel" value="Strained"> Strained</label>
+                                </div>
+                            </div>
+
+                            <div class="button-bar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-comment-dots"></i> Generate Talking Points</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool3" class="output-container card">
+                        <div class="output-title"><i class="fa-solid fa-comments"></i> Communication Strategy & Script</div>
+                        <div class="output-section" id="t3-out-script"></div>
+                        <div class="output-section" id="t3-out-clarifier"></div>
+                        <div class="output-section" id="t3-out-resource"></div>
+                        <div class="output-section" id="t3-out-reframe"></div>
+                        <div class="output-section" id="t3-out-doubledown"></div>
+                    </div>
+
+                    <div class="history-section card">
+                        <div class="history-header" onclick="toggleHistory('tool3')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Previous Script History</h3>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-tool3"></i>
+                        </div>
+                        <div id="history-content-tool3" class="history-content">
+                            <ul id="history-list-tool3" class="history-list"></ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: THE CONFIDENCE REBUILD -->
+                <section id="tool4" class="view-panel">
+                    <div class="tool-header">
+                        <h2>The Confidence Rebuild</h2>
+                        <div class="tool-problem">
+                            "The constant comparison is destroying my self-belief."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool4" onsubmit="event.preventDefault(); analyzeTool4();">
+                            <div class="form-group">
+                                <label for="t4-feeling">How does the comparison make you feel?</label>
+                                <select id="t4-feeling" class="form-control" required>
+                                    <option value="Inadequate">Inadequate / Not enough</option>
+                                    <option value="Angry">Angry / Resentful</option>
+                                    <option value="Motivator">Motivated (but overwhelmed)</option>
+                                    <option value="Anxious">Anxious / On edge</option>
+                                    <option value="Numb">Numb / Checked out</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-belief">What do you believe about yourself because of it?</label>
+                                <textarea id="t4-belief" class="form-control" placeholder="e.g., I'm slow, incompetent, or not cut out for this field" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-friend">What would you tell a friend in this situation?</label>
+                                <textarea id="t4-friend" class="form-control" placeholder="What objective advice or compassion would you offer them?" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-outside-strengths">What are you good at that has nothing to do with this job?</label>
+                                <textarea id="t4-outside-strengths" class="form-control" placeholder="Other roles, personal talents, hobbies, mentoring, community leadership" required></textarea>
+                            </div>
+
+                            <div class="button-bar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-anchor"></i> Ground My Perspective</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool4" class="output-container card">
+                        <div class="output-title"><i class="fa-solid fa-shield-heart"></i> Grounding & Confidence Action Plan</div>
+                        <div class="output-section" id="t4-out-anchor"></div>
+                        <div class="output-section" id="t4-out-friend"></div>
+                        <div class="output-section" id="t4-out-identity"></div>
+                        <div class="output-section" id="t4-out-microwin"></div>
+                        <div class="output-section" id="t4-out-detox"></div>
+                    </div>
+
+                    <div class="history-section card">
+                        <div class="history-header" onclick="toggleHistory('tool4')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Previous Confidence Logs</h3>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-tool4"></i>
+                        </div>
+                        <div id="history-content-tool4" class="history-content">
+                            <ul id="history-list-tool4" class="history-list"></ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: THE STRATEGIC DECISION -->
+                <section id="tool5" class="view-panel">
+                    <div class="tool-header">
+                        <h2>The Strategic Decision</h2>
+                        <div class="tool-problem">
+                            "I need to know if I should keep trying here or find a place that values my actual strengths."
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <form id="form-tool5" onsubmit="event.preventDefault(); analyzeTool5();">
+                            <div class="form-group">
+                                <label>Are expectations achievable?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5-achievable" value="Yes" required> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t5-achievable" value="With support"> With support</label>
+                                    <label class="radio-label"><input type="radio" name="t5-achievable" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t5-achievable" value="Not clear"> Not clear</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Are you getting support?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5-support" value="Yes" required> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t5-support" value="Some"> Some</label>
+                                    <label class="radio-label"><input type="radio" name="t5-support" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t5-support" value="Getting worse"> Getting worse</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-try-length">How long are you willing to try?</label>
+                                <select id="t5-try-length" class="form-control" required>
+                                    <option value="3mo">3 months</option>
+                                    <option value="6mo">6 months</option>
+                                    <option value="1yr">1 year</option>
+                                    <option value="Indefinite">Indefinitely</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Do you have external options?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t5-options" value="Yes" required> Yes</label>
+                                    <label class="radio-label"><input type="radio" name="t5-options" value="Exploring"> Exploring</label>
+                                    <label class="radio-label"><input type="radio" name="t5-options" value="No"> No</label>
+                                    <label class="radio-label"><input type="radio" name="t5-options" value="Not yet"> Not yet</label>
+                                </div>
+                            </div>
+
+                            <div class="button-bar">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-map-location-dot"></i> Generate Strategic Roadmap</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="output-tool5" class="output-container card">
+                        <div class="output-title"><i class="fa-solid fa-route"></i> Career Strategy Roadmap</div>
+                        <div class="output-section" id="t5-out-stayplan"></div>
+                        <div class="output-section" id="t5-out-timeline"></div>
+                        <div class="output-section" id="t5-out-skillbuild"></div>
+                        <div class="output-section" id="t5-out-exitcriteria"></div>
+                        <div class="output-section" id="t5-out-interviewprep"></div>
+                        <div class="output-section" id="t5-out-selfacceptance"></div>
+                    </div>
+
+                    <div class="history-section card">
+                        <div class="history-header" onclick="toggleHistory('tool5')">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Previous Decision Maps</h3>
+                            <i class="fa-solid fa-chevron-down" id="history-arrow-tool5"></i>
+                        </div>
+                        <div id="history-content-tool5" class="history-content">
+                            <ul id="history-list-tool5" class="history-list"></ul>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- MANDATORY FOOTER -->
+            <footer>
+                For professional self-assessment and career reflection only. Not therapeutic or mental health advice. For severe self-esteem or anxiety concerns, consult a licensed professional.
+            </footer>
+        </main>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast">Copied to clipboard!</div>
+
+    <!-- APPLICATION LOGIC & PRE-WRITTEN TEMPLATES -->
+    <script>
+        /* GLOBAL ROUTING & UI CONTROLS */
+        document.addEventListener('DOMContentLoaded', () => {
+            setupNavigation();
+            setupMobileMenu();
+            loadAllHistories();
+        });
+
+        function switchView(targetId) {
+            document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+
+            const targetPanel = document.getElementById(targetId);
+            if(targetPanel) targetPanel.classList.add('active');
+
+            const activeLink = document.querySelector(`.nav-link[data-target="${targetId}"]`);
+            if(activeLink) activeLink.classList.add('active');
+
+            closeMobileMenu();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function setupNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = link.getAttribute('data-target');
+                    switchView(target);
+                });
+            });
+        }
+
+        function setupMobileMenu() {
+            const btn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            btn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('open');
+            });
+
+            overlay.addEventListener('click', closeMobileMenu);
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('open');
+        }
+
+        function showToast(message = "Copied to clipboard!") {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.classList.add("show");
+            setTimeout(() => { toast.classList.remove("show"); }, 2000);
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        /* LOCALSTORAGE HISTORY MANAGER */
+        const STORAGE_PREFIX = "performancerc_history_";
+
+        function saveHistory(toolId, summary, fullData) {
+            const key = STORAGE_PREFIX + toolId;
+            let history = JSON.parse(localStorage.getItem(key) || "[]");
+            const entry = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                summary: summary,
+                data: fullData
+            };
+            history.unshift(entry);
+            if(history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = STORAGE_PREFIX + toolId;
+            const history = JSON.parse(localStorage.getItem(key) || "[]");
+            const listEl = document.getElementById(`history-list-${toolId}`);
+            if(!listEl) return;
+
+            if(history.length === 0) {
+                listEl.innerHTML = '<li class="history-item" style="color:var(--text-muted);">No saved history yet.</li>';
+                return;
+            }
+
+            listEl.innerHTML = history.map(item => `
+                <li class="history-item">
+                    <div>
+                        <strong>${escapeHtml(item.summary)}</strong>
+                        <div class="history-item-meta">${item.timestamp}</div>
+                    </div>
+                    <div class="history-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="loadHistoryItem('${toolId}', ${item.id})">Reload</button>
+                        <button class="btn btn-secondary btn-sm" onclick="deleteHistoryItem('${toolId}', ${item.id})"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        function toggleHistory(toolId) {
+            const content = document.getElementById(`history-content-${toolId}`);
+            const arrow = document.getElementById(`history-arrow-${toolId}`);
+            content.classList.toggle('active');
+            if(content.classList.contains('active')) {
+                arrow.className = "fa-solid fa-chevron-up";
+            } else {
+                arrow.className = "fa-solid fa-chevron-down";
+            }
+        }
+
+        function deleteHistoryItem(toolId, id) {
+            const key = STORAGE_PREFIX + toolId;
+            let history = JSON.parse(localStorage.getItem(key) || "[]");
+            history = history.filter(item => item.id !== id);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function loadAllHistories() {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistory);
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        /* ------------------------------------------------------------------ */
+        /* TOOL 1 LOGIC & SAMPLES */
+        /* ------------------------------------------------------------------ */
+        function loadSampleTool1() {
+            document.getElementById('t1-star-name').value = "Alex";
+            document.getElementById('t1-praised-for').value = "Rapid project turnarounds, effortless client presentations, and navigating executive relationships.";
+            document.getElementById('t1-star-tenure').value = "Longer than me";
+            document.getElementById('t1-my-tenure').value = "6mo-1yr";
+            
+            const radios = document.getElementsByName('t1-resources');
+            radios.forEach(r => { if(r.value === "They get more") r.checked = true; });
+        }
+
+        function analyzeTool1() {
+            const starName = document.getElementById('t1-star-name').value || "the star performer";
+            const praised = document.getElementById('t1-praised-for').value;
+            const starTenure = document.getElementById('t1-star-tenure').value;
+            const myTenure = document.getElementById('t1-my-tenure').value;
+            const resources = document.querySelector('input[name="t1-resources"]:checked')?.value || "No";
+
+            // Reality Check Evaluation
+            let isCategoryError = (starTenure === "Longer than me" || starTenure === "2yr+") || (resources === "They get more");
+            
+            const realityHtml = `<h4>THE COMPARISON REALITY</h4>
+                <p><strong>${isCategoryError ? "Category Error Detected:" : "Contextual Mismatch:"}</strong> Comparing your output at <em>${myTenure}</em> to ${starName}'s output at <em>${starTenure}</em> is inherently flawed. You are being measured against an established baseline without the underlying context that created it.</p>`;
+
+            const advantageHtml = `<h4>THE ADVANTAGE MAP</h4>
+                <ul>
+                    <li><strong>Tenure & Compound Knowledge:</strong> ${starName} has spent ${starTenure} building implicit memory, templates, and operational shortcuts that only time provides.</li>
+                    <li><strong>Resource & Access Disparity:</strong> Resource status recorded as: <em>${resources}</em>. ${resources === "They get more" ? `${starName} operates with established structural support, executive introductions, or premium tools that shorten execution time.` : 'Structural access and legacy rapport significantly reduce friction for them.'}</li>
+                    <li><strong>Social Capital:</strong> Long-tenured employees benefit from benefit-of-the-doubt bias; errors are treated as anomalies, whereas newer team members are evaluated on raw mechanics.</li>
+                </ul>`;
+
+            const timelineHtml = `<h4>THE TIMELINE GAP</h4>
+                <p>At <strong>${myTenure}</strong>, reasonable benchmarks focus on accuracy, system mastery, and building repeatable routines. Expecting the speed or relationship depth of someone at <strong>${starTenure}</strong> ignores the learning curve required to master complex workflows.</p>`;
+
+            const strengthsHtml = `<h4>THE DIFFERENT STRENGTHS</h4>
+                <p>While ${starName} is praised for <em>"${praised}"</em>, your value profile is distinct. Newer or differently focused team members often bring thorough documentation, fresh perspective on broken workflows, process compliance, and uncompromised quality control that high-speed performers frequently overlook.</p>`;
+
+            const blindspotHtml = `<h4>THE MANAGER BLINDSPOT</h4>
+                <p>Managers often fall prey to <strong>Availability Heuristic</strong> and <strong>Outcome Bias</strong>. They remember ${starName}'s finished products, forgetting the years of coaching, mistakes, and institutional backing it took to reach that standard. They want ${starName}'s outcome without reinvesting the time to build it in you.</p>`;
+
+            document.getElementById('t1-out-reality').innerHTML = realityHtml;
+            document.getElementById('t1-out-advantage').innerHTML = advantageHtml;
+            document.getElementById('t1-out-timeline').innerHTML = timelineHtml;
+            document.getElementById('t1-out-strengths').innerHTML = strengthsHtml;
+            document.getElementById('t1-out-blindspot').innerHTML = blindspotHtml;
+
+            document.getElementById('output-tool1').classList.add('active');
+
+            saveHistory('tool1', `Compared against ${starName} (${myTenure} vs ${starTenure})`, {
+                starName, praised, starTenure, myTenure, resources
+            });
+        }
+
+        /* ------------------------------------------------------------------ */
+        /* TOOL 2 LOGIC & SAMPLES */
+        /* ------------------------------------------------------------------ */
+        function loadSampleTool2() {
+            document.getElementById('t2-achievements').value = "Streamlined the department onboarding process, cutting team setup time by 20%. Delivered 100% of weekly reports on deadline.";
+            document.getElementById('t2-feedback').value = "Described as 'highly reliable,' 'thorough,' and a 'great team collaborator' in peer reviews.";
+            document.getElementById('t2-skills').value = "Learned advanced data visualization tools, internal CRM workflows, and core presentation techniques.";
+            document.getElementById('t2-challenges').value = "Overcame a steep learning curve during product launch with limited formal training materials.";
+            document.getElementById('t2-relationships').value = "Built solid, trusted cross-functional relationships with Operations and Quality Assurance leads.";
+        }
+
+        function analyzeTool2() {
+            const achievements = document.getElementById('t2-achievements').value;
+            const feedback = document.getElementById('t2-feedback').value;
+            const skills = document.getElementById('t2-skills').value;
+            const challenges = document.getElementById('t2-challenges').value;
+            const relationships = document.getElementById('t2-relationships').value;
+
+            document.getElementById('t2-out-evidence').innerHTML = `<h4>THE EVIDENCE FILE</h4>
+                <p><strong>Direct Contributions:</strong> ${escapeHtml(achievements)}</p>
+                <p style="margin-top:0.5rem;"><strong>Validated External Feedback:</strong> ${escapeHtml(feedback)}</p>`;
+
+            document.getElementById('t2-out-progression').innerHTML = `<h4>THE PROGRESSION MAP</h4>
+                <p>You have actively expanded your capability footprint by acquiring: <em>${escapeHtml(skills)}</em>. Growth is rarely linear; mastering these capabilities represents permanent career assets regardless of current comparisons.</p>`;
+
+            document.getElementById('t2-out-context').innerHTML = `<h4>THE CONTEXT FACTOR</h4>
+                <p>Your achievements were not generated in a vacuum. You delivered these results despite: <em>${escapeHtml(challenges)}</em>. Successfully navigating these constraints demonstrates resilience that standard performance metrics routinely miss.</p>`;
+
+            document.getElementById('t2-out-baseline').innerHTML = `<h4>THE FAIR BASELINE</h4>
+                <p>A fair baseline measures: consistency, growth velocity, reliability, and relationship building. With strong cross-functional trust built with <em>${escapeHtml(relationships)}</em>, your foundational stability is solid.</p>`;
+
+            document.getElementById('t2-out-assessment').innerHTML = `<h4>THE SELF-ASSESSMENT</h4>
+                <p><strong>Verdict: You are performing, not failing.</strong> The discomfort you feel is not an output deficit—it is the distortion of being evaluated through someone else's template. Your track record confirms competence and structural progress.</p>`;
+
+            document.getElementById('output-tool2').classList.add('active');
+
+            saveHistory('tool2', `Track Record Audit: ${achievements.substring(0, 30)}...`, {
+                achievements, feedback, skills, challenges, relationships
+            });
+        }
+
+        /* ------------------------------------------------------------------ */
+        /* TOOL 3 LOGIC & SAMPLES */
+        /* ------------------------------------------------------------------ */
+        function loadSampleTool3() {
+            document.getElementById('t3-how-comes-up').value = "Hints";
+            
+            const goalRadios = document.getElementsByName('t3-goal');
+            goalRadios.forEach(r => { if(r.value === "Clarify expectations") r.checked = true; });
+
+            const styleRadios = document.getElementsByName('t3-style');
+            styleRadios.forEach(r => { if(r.value === "Data-driven") r.checked = true; });
+
+            const relRadios = document.getElementsByName('t3-rel');
+            relRadios.forEach(r => { if(r.value === "Neutral") r.checked = true; });
+        }
+
+        function analyzeTool3() {
+            const how = document.getElementById('t3-how-comes-up').value;
+            const goal = document.querySelector('input[name="t3-goal"]:checked')?.value || "Clarify expectations";
+            const style = document.querySelector('input[name="t3-style"]:checked')?.value || "Data-driven";
+            const rel = document.querySelector('input[name="t3-rel"]:checked')?.value || "Neutral";
+
+            let scriptText = "";
+            if(style === "Data-driven") {
+                scriptText = `"I'd like to align on my specific performance metrics for this quarter. When references to other team members come up, I want to make sure I'm targeting the exact objective benchmarks set for my role. Can we review my key performance indicators and define what 'exceeding expectations' looks like in measurable data for my tenure?"`;
+            } else if(style === "Motivator") {
+                scriptText = `"I really appreciate your drive to push the team to excel. To help me hit my highest potential, I'd love to pivot our focus to my specific developmental milestones. What are the 2-3 highest-leverage areas you want me focusing on over the next 90 days?"`;
+            } else if(style === "Critic") {
+                scriptText = `"I want to ensure my output meets team standards. To do that effectively, I need specific, actionable feedback on my own deliverables rather than comparative benchmarks. Let's break down where my current output stands against my role guidelines."`;
+            } else {
+                scriptText = `"I'd like to schedule 15 minutes to clarify my core priorities. I want to make sure my effort is aligned directly with my role's explicit goals and that I have clarity on what success looks like for me personally."`;
+            }
+
+            document.getElementById('t3-out-script').innerHTML = `<h4>THE SCRIPT
+                <button class="copy-btn" onclick="copyToClipboard('script-content-1')"><i class="fa-solid fa-copy"></i> Copy Script</button>
+            </h4>
+            <div class="script-box" id="script-content-1">${scriptText}</div>`;
+
+            document.getElementById('t3-out-clarifier').innerHTML = `<h4>THE EXPECTATION CLARIFIER</h4>
+                <p>Shift the conversation from <em>relative comparison</em> to <em>absolute standards</em>. Ask: "What does success look like for my role, independent of anyone else's workflow?"</p>`;
+
+            document.getElementById('t3-out-resource').innerHTML = `<h4>THE RESOURCE ASK</h4>
+                <p>If comparisons highlight gaps in speed or network, frame it as a resource request: "To reach that level of execution, I will need access to [specific software / executive exposure / onboarding documentation]. How can we enable that?"</p>`;
+
+            document.getElementById('t3-out-reframe').innerHTML = `<h4>THE REFRAME</h4>
+                <p>Reframe your position warmly but firmly: "My goal isn't to replicate [Star Name]'s style, but to maximize my unique impact on these key objectives."</p>`;
+
+            document.getElementById('t3-out-doubledown').innerHTML = `<h4>IF THEY DOUBLE DOWN</h4>
+                <p>If your manager continues comparative critiques, remain calm and state: "I hear that [Star Name] is high-performing in that area. However, to make this feedback actionable for me, I need specific steps applicable to my assignments." Protect your boundary by documenting agreed goals in writing post-meeting.</p>`;
+
+            document.getElementById('output-tool3').classList.add('active');
+
+            saveHistory('tool3', `Script for Manager (${style} style / Goal: ${goal})`, {
+                how, goal, style, rel
+            });
+        }
+
+        /* ------------------------------------------------------------------ */
+        /* TOOL 4 LOGIC & SAMPLES */
+        /* ------------------------------------------------------------------ */
+        function loadSampleTool4() {
+            document.getElementById('t4-feeling').value = "Anxious";
+            document.getElementById('t4-belief').value = "I believe I am too slow, lacking talent, and that it's only a matter of time before everyone realizes I'm not cut out for this.";
+            document.getElementById('t4-friend').value = "I would tell them that 8 months is a short time, that they are working hard without full resources, and that comparing themselves to a 3-year veteran is completely unfair.";
+            document.getElementById('t4-outside-strengths').value = "Community event organizing, creative writing, active listening, and mentoring junior team members in past roles.";
+        }
+
+        function analyzeTool4() {
+            const feeling = document.getElementById('t4-feeling').value;
+            const belief = document.getElementById('t4-belief').value;
+            const friendAdvice = document.getElementById('t4-friend').value;
+            const outsideStrengths = document.getElementById('t4-outside-strengths').value;
+
+            document.getElementById('t4-out-anchor').innerHTML = `<h4>THE REALITY ANCHOR</h4>
+                <p>Feeling <strong>${feeling}</strong> has led you to internalize: <em>"${escapeHtml(belief)}"</em>.</p>
+                <p style="margin-top:0.5rem;"><strong>The Cognitive Distortion:</strong> This is an <em>All-or-Nothing / Personalization distortion</em>. Feeling anxious or uncalibrated in a role does not equal incompetence. Disprove the thought by separating emotional discomfort from demonstrated factual skill.</p>`;
+
+            document.getElementById('t4-out-friend').innerHTML = `<h4>THE FRIEND REFRAME</h4>
+                <p>When asked what you'd say to a colleague, you wrote: <em>"${escapeHtml(friendAdvice)}"</em>.</p>
+                <p style="margin-top:0.5rem;"><strong>Application:</strong> You possess objective logic—you simply deny yourself access to it. Apply the exact standards of grace, fairness, and patience to yourself that you freely offer others.</p>`;
+
+            document.getElementById('t4-out-identity').innerHTML = `<h4>THE IDENTITY BROADENER</h4>
+                <p>Your worth and identity extend far beyond this current job's metrics. Capabilities like: <em>"${escapeHtml(outsideStrengths)}"</em> prove that your intelligence, character, and talent are multifaceted and intact.</p>`;
+
+            document.getElementById('t4-out-microwin').innerHTML = `<h4>THE MICRO-WIN PLAN</h4>
+                <ul>
+                    <li><strong>Daily Evidence Journaling:</strong> End each day recording 2 things you completed accurately, regardless of size.</li>
+                    <li><strong>Focus on Completion over Velocity:</strong> Prioritize error-free execution over artificial speed goals.</li>
+                    <li><strong>Track Personal Best Tracker:</strong> Measure today's output strictly against your output from 30 days ago.</li>
+                </ul>`;
+
+            document.getElementById('t4-out-detox').innerHTML = `<h4>THE COMPARISON DETOX</h4>
+                <p>Stop monitoring the star performer's habits, hours, or praise. When you notice yourself scanning their activity, intentionally reset your attention back to your current task queue. Their performance is noise; your execution is signal.</p>`;
+
+            document.getElementById('output-tool4').classList.add('active');
+
+            saveHistory('tool4', `Confidence Rebuild (${feeling} / Distortion Grounding)`, {
+                feeling, belief, friendAdvice, outsideStrengths
+            });
+        }
+
+        /* ------------------------------------------------------------------ */
+        /* TOOL 5 LOGIC & SAMPLES */
+        /* ------------------------------------------------------------------ */
+        function loadSampleTool5() {
+            const achRadios = document.getElementsByName('t5-achievable');
+            achRadios.forEach(r => { if(r.value === "With support") r.checked = true; });
+
+            const supRadios = document.getElementsByName('t5-support');
+            supRadios.forEach(r => { if(r.value === "Some") r.checked = true; });
+
+            document.getElementById('t5-try-length').value = "6mo";
+
+            const optRadios = document.getElementsByName('t5-options');
+            optRadios.forEach(r => { if(r.value === "Exploring") r.checked = true; });
+        }
+
+        function analyzeTool5() {
+            const achievable = document.querySelector('input[name="t5-achievable"]:checked')?.value || "With support";
+            const support = document.querySelector('input[name="t5-support"]:checked')?.value || "Some";
+            const tryLength = document.getElementById('t5-try-length').value;
+            const options = document.querySelector('input[name="t5-options"]:checked')?.value || "Exploring";
+
+            document.getElementById('t5-out-stayplan').innerHTML = `<h4>THE STAY PLAN</h4>
+                <p>Given that expectations are achievable <strong>${achievable.toLowerCase()}</strong> and support is currently <strong>${support.toLowerCase()}</strong>, your stay plan requires formalizing support requests in writing. Focus 100% of your energy on core targets while ignoring comparative feedback.</p>`;
+
+            document.getElementById('t5-out-timeline').innerHTML = `<h4>THE TIMELINE</h4>
+                <p>You have committed to a <strong>${tryLength}</strong> evaluation window. Set a calendar reminder for the end of this period. Until then, execute without daily re-evaluating whether you should leave—it drains cognitive energy.</p>`;
+
+            document.getElementById('t5-out-skillbuild').innerHTML = `<h4>THE SKILL BUILD</h4>
+                <p>Treat this role as a paid training ground. Focus on mastering transferable skills (data analysis, project leadership, stakeholder communication) that enhance your resume regardless of whether you stay or transition elsewhere.</p>`;
+
+            document.getElementById('t5-out-exitcriteria').innerHTML = `<h4>THE EXIT CRITERIA</h4>
+                <p>Prepare to transition if any of these line-in-the-sand conditions occur during your ${tryLength} window:</p>
+                <ul>
+                    <li>Support drops to zero or environment becomes punitive.</li>
+                    <li>Moving goalposts that make success mathematically impossible.</li>
+                    <li>Persistent impact on your physical health or personal life.</li>
+                </ul>`;
+
+            document.getElementById('t5-out-interviewprep').innerHTML = `<h4>THE INTERVIEW PREP</h4>
+                <p>If you choose to interview, frame your tenure constructively: <em>"I achieved strong foundational results in my current role, but I am seeking an environment that aligns with my core strengths in systematic execution and long-term value creation."</em> Never speak negatively about comparative management styles.</p>`;
+
+            document.getElementById('t5-out-selfacceptance').innerHTML = `<h4>THE SELF-ACCEPTANCE</h4>
+                <p><strong>Remember:</strong> A workplace is just an environment, not a court of law. Not thriving in a culture built around someone else's specific archetype is not a personal failure—it is simply a bad fit. You do not have to be the star to be exceptionally valuable.</p>`;
+
+            document.getElementById('output-tool5').classList.add('active');
+
+            saveHistory('tool5', `Strategic Decision (${tryLength} Window / Options: ${options})`, {
+                achievable, support, tryLength, options
+            });
+        }
+
+        function loadHistoryItem(toolId, id) {
+            const key = STORAGE_PREFIX + toolId;
+            const history = JSON.parse(localStorage.getItem(key) || "[]");
+            const item = history.find(i => i.id === id);
+            if(!item) return;
+
+            const d = item.data;
+            if(toolId === 'tool1') {
+                document.getElementById('t1-star-name').value = d.starName;
+                document.getElementById('t1-praised-for').value = d.praised;
+                document.getElementById('t1-star-tenure').value = d.starTenure;
+                document.getElementById('t1-my-tenure').value = d.myTenure;
+                document.querySelectorAll('input[name="t1-resources"]').forEach(r => r.checked = (r.value === d.resources));
+                analyzeTool1();
+            } else if(toolId === 'tool2') {
+                document.getElementById('t2-achievements').value = d.achievements;
+                document.getElementById('t2-feedback').value = d.feedback;
+                document.getElementById('t2-skills').value = d.skills;
+                document.getElementById('t2-challenges').value = d.challenges;
+                document.getElementById('t2-relationships').value = d.relationships;
+                analyzeTool2();
+            } else if(toolId === 'tool3') {
+                document.getElementById('t3-how-comes-up').value = d.how;
+                document.querySelectorAll('input[name="t3-goal"]').forEach(r => r.checked = (r.value === d.goal));
+                document.querySelectorAll('input[name="t3-style"]').forEach(r => r.checked = (r.value === d.style));
+                document.querySelectorAll('input[name="t3-rel"]').forEach(r => r.checked = (r.value === d.rel));
+                analyzeTool3();
+            } else if(toolId === 'tool4') {
+                document.getElementById('t4-feeling').value = d.feeling;
+                document.getElementById('t4-belief').value = d.belief;
+                document.getElementById('t4-friend').value = d.friendAdvice;
+                document.getElementById('t4-outside-strengths').value = d.outsideStrengths;
+                analyzeTool4();
+            } else if(toolId === 'tool5') {
+                document.querySelectorAll('input[name="t5-achievable"]').forEach(r => r.checked = (r.value === d.achievable));
+                document.querySelectorAll('input[name="t5-support"]').forEach(r => r.checked = (r.value === d.support));
+                document.getElementById('t5-try-length').value = d.tryLength;
+                document.querySelectorAll('input[name="t5-options"]').forEach(r => r.checked = (r.value === d.options));
+                analyzeTool5();
+            }
+            showToast("Reloaded log parameters.");
+        }
+    </script>
+</body>
+</html>

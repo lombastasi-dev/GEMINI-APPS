@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhereWeLive - Relationship Decision Toolkit</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-ocean: #1D3557;
+            --secondary-sand: #D4A373;
+            --sand-light: #F4A261;
+            --bg-start: #F1FAEE;
+            --bg-end: #FDF6EC;
+            --text-dark: #2B2D42;
+            --text-muted: #6C757D;
+            --card-bg: #FFFFFF;
+            --border-color: #E9ECEF;
+            --accent-red: #E63946;
+            --accent-green: #2A9D8F;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--primary-ocean);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-brand i {
+            font-size: 1.5rem;
+            color: var(--secondary-sand);
+        }
+
+        .sidebar-brand h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+        }
+
+        .nav-item button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item button:hover {
+            background-color: rgba(29, 53, 87, 0.05);
+            color: var(--primary-ocean);
+        }
+
+        .nav-item.active button {
+            background-color: var(--primary-ocean);
+            color: #ffffff;
+        }
+
+        .nav-item.active button i {
+            color: var(--secondary-sand);
+        }
+
+        .nav-item button i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        /* Mobile Header & Hamburger */
+        .mobile-header {
+            display: none;
+            height: 60px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--primary-ocean);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Main Content Area */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content {
+            flex: 1;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Cards & Components */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            padding: 28px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .tool-header {
+            margin-bottom: 24px;
+        }
+
+        .tool-header h2 {
+            font-size: 1.75rem;
+            color: var(--primary-ocean);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tool-header p.problem-statement {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-style: italic;
+            background: #F8F9FA;
+            padding: 10px 16px;
+            border-left: 4px solid var(--secondary-sand);
+            border-radius: 0 8px 8px 0;
+            margin-top: 10px;
+        }
+
+        /* Forms Styling */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--primary-ocean);
+        }
+
+        .form-control, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background-color: #FAFAFA;
+            color: var(--text-dark);
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .form-control:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-ocean);
+            background-color: #FFFFFF;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-ocean);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #14243B;
+        }
+
+        .btn-secondary {
+            background-color: #E9ECEF;
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #DEE2E6;
+        }
+
+        .btn-accent {
+            background-color: var(--secondary-sand);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background-color: #C39262;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            background-color: #F8F9FA;
+            color: var(--text-dark);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        /* Results & Analysis Containers */
+        .results-container {
+            margin-top: 32px;
+            display: none;
+        }
+
+        .results-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .analysis-section {
+            margin-bottom: 24px;
+        }
+
+        .analysis-section h3 {
+            font-size: 1.15rem;
+            color: var(--primary-ocean);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid var(--bg-start);
+            padding-bottom: 8px;
+        }
+
+        .script-box {
+            background-color: #F8F9FA;
+            border: 1px dashed var(--secondary-sand);
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+            font-family: inherit;
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            color: var(--primary-ocean);
+            border-color: var(--primary-ocean);
+        }
+
+        /* Priority Sorter Rank Items */
+        .rank-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .partner-column {
+            background: #F8F9FA;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .partner-column h4 {
+            text-align: center;
+            color: var(--primary-ocean);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .rank-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .rank-item label {
+            flex: 1;
+            font-size: 0.85rem;
+            margin-bottom: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .rank-item select {
+            width: 65px;
+            padding: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* Data Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background-color: #F8F9FA;
+            color: var(--primary-ocean);
+            font-weight: 600;
+        }
+
+        /* History Section */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            padding: 8px 0;
+        }
+
+        .history-header h4 {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-content {
+            display: none;
+            margin-top: 12px;
+        }
+
+        .history-content.open {
+            display: block;
+        }
+
+        .history-list {
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 10px 12px;
+            background: #F8F9FA;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item-date {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-ocean);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 0.9rem;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            padding: 16px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+
+        /* Dashboard Specifics */
+        .hero-card {
+            background: linear-gradient(135deg, var(--primary-ocean) 0%, #2B4C7E 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 40px 32px;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .hero-card h2 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .hero-card p {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.85);
+            font-weight: 300;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            border-color: var(--secondary-sand);
+        }
+
+        .tool-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: rgba(212, 163, 115, 0.15);
+            color: var(--secondary-sand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .tool-card h3 {
+            font-size: 1.1rem;
+            color: var(--primary-ocean);
+        }
+
+        .tool-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+                opacity: 1;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .rank-grid, .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                padding: 16px;
+            }
+
+            .hero-card {
+                padding: 24px 16px;
+            }
+
+            .hero-card h2 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="sidebar-brand" style="padding:0; border:none;">
+            <i class="fa-solid font-awesome-logo-full fa-compass"></i>
+            <h1 style="font-size: 1.1rem;">WhereWeLive</h1>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Left Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-compass"></i>
+                <h1>WhereWeLive</h1>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-target="dashboard">
+                    <button><i class="fa-solid fa-house"></i> Dashboard</button>
+                </li>
+                <li class="nav-item" data-target="tool1">
+                    <button><i class="fa-solid fa-list-ol"></i> Priority Sorter</button>
+                </li>
+                <li class="nav-item" data-target="tool2">
+                    <button><i class="fa-solid fa-scale-balanced"></i> Trade-Off Map</button>
+                </li>
+                <li class="nav-item" data-target="tool3">
+                    <button><i class="fa-solid fa-clock"></i> Timeline Negotiator</button>
+                </li>
+                <li class="nav-item" data-target="tool4">
+                    <button><i class="fa-solid fa-map-location-dot"></i> Compromise Search</button>
+                </li>
+                <li class="nav-item" data-target="tool5">
+                    <button><i class="fa-solid fa-handshake"></i> Decision Commitment</button>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <main class="main-content">
+
+                <!-- DASHBOARD -->
+                <section id="dashboard" class="view-section">
+                    <div class="hero-card">
+                        <h2>Where We Live</h2>
+                        <p>Find home without losing each other.</p>
+                    </div>
+
+                    <div class="tools-grid">
+                        <div class="tool-card" onclick="switchView('tool1')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-list-ol"></i></div>
+                            <h3>Priority Sorter</h3>
+                            <p>Map core needs vs. flexibility to understand what each priority truly represents.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchView('tool2')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+                            <h3>The Trade-Off Map</h3>
+                            <p>Analyze real costs across career, social, and financial dimensions side-by-side.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchView('tool3')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-clock"></i></div>
+                            <h3>Timeline Negotiator</h3>
+                            <p>Bridge the gap between "move now" and "stay put" with phased trial plans.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchView('tool4')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                            <h3>Compromise Search</h3>
+                            <p>Uncover creative third options, hybrid locations, and temporary arrangements.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchView('tool5')">
+                            <div class="tool-card-icon"><i class="fa-solid fa-handshake"></i></div>
+                            <h3>Decision Commitment</h3>
+                            <p>Ensure the partner making the sacrifice feels chosen, honored, and supported.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: PRIORITY SORTER -->
+                <section id="tool1" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-list-ol"></i> Priority Sorter</h2>
+                            <p class="problem-statement">"We both want different things and neither of us knows what matters most."</p>
+                        </div>
+
+                        <form id="form-tool1">
+                            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:16px;">Rank each item from 1 (Most Important) to 8 (Least Important).</p>
+                            <div class="rank-grid">
+                                <div class="partner-column">
+                                    <h4>Partner A Ranks</h4>
+                                    <div id="partnerA-ranks"></div>
+                                </div>
+                                <div class="partner-column">
+                                    <h4>Partner B Ranks</h4>
+                                    <div id="partnerB-ranks"></div>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="processTool1()">Analyze Priorities</button>
+                                <button type="button" class="btn btn-accent" onclick="loadSampleTool1()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool1" class="results-container">
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-map"></i> The Priority Map</h3>
+                                <table class="data-table" id="table-tool1">
+                                    <thead>
+                                        <tr>
+                                            <th>Category</th>
+                                            <th>Partner A</th>
+                                            <th>Partner B</th>
+                                            <th>Diff</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-circle-check" style="color:var(--accent-green)"></i> The Alignment</h3>
+                                <div id="alignment-t1" class="script-box"></div>
+                            </div>
+
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-triangle-exclamation" style="color:var(--accent-red)"></i> The Conflict</h3>
+                                <div id="conflict-t1" class="script-box"></div>
+                            </div>
+
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-key"></i> The Hidden Drivers</h3>
+                                <div id="drivers-t1" class="script-box"></div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-sliders"></i> Negotiables</h3>
+                                    <div id="negotiables-t1" class="script-box"></div>
+                                </div>
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-shield-halved"></i> Non-Negotiables</h3>
+                                    <div id="non-negotiables-t1" class="script-box"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- History -->
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool1')">
+                                <h4><i class="fa-solid fa-history"></i> Saved Analyses</h4>
+                                <i class="fa-solid fa-chevron-down" id="hist-icon-tool1"></i>
+                            </div>
+                            <div class="history-content" id="hist-content-tool1">
+                                <ul class="history-list" id="hist-list-tool1"></ul>
+                                <button class="btn btn-outline btn-sm" onclick="clearHistory('tool1')" style="margin-top:8px;">Clear History</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: TRADE-OFF MAP -->
+                <section id="tool2" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-scale-balanced"></i> The Trade-Off Map</h2>
+                            <p class="problem-statement">"We need to see what each location actually costs us."</p>
+                        </div>
+
+                        <form id="form-tool2">
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Option A (Partner A's Preference)</label>
+                                    <textarea id="t2-optA" class="form-control" placeholder="e.g., Downtown Chicago"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Option B (Partner B's Preference)</label>
+                                    <textarea id="t2-optB" class="form-control" placeholder="e.g., Hometown (Suburbs)"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Option C (Optional Alternative)</label>
+                                <textarea id="t2-optC" class="form-control" placeholder="e.g., Mid-sized coastal city"></textarea>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Career Impact of Option A</label>
+                                    <textarea id="t2-carA" class="form-control"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Career Impact of Option B</label>
+                                    <textarea id="t2-carB" class="form-control"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Social / Family Impact of Option A</label>
+                                    <textarea id="t2-socA" class="form-control"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Social / Family Impact of Option B</label>
+                                    <textarea id="t2-socB" class="form-control"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Financial Impact of Option A</label>
+                                    <textarea id="t2-finA" class="form-control"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Financial Impact of Option B</label>
+                                    <textarea id="t2-finB" class="form-control"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="processTool2()">Generate Trade-Off Map</button>
+                                <button type="button" class="btn btn-accent" onclick="loadSampleTool2()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool2" class="results-container">
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-table"></i> The Comparison Matrix</h3>
+                                <table class="data-table" id="table-tool2">
+                                    <thead>
+                                        <tr>
+                                            <th>Dimension</th>
+                                            <th id="th-optA">Option A</th>
+                                            <th id="th-optB">Option B</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-user"></i> Winner for Partner A</h3>
+                                    <div id="winnerA-t2" class="script-box"></div>
+                                </div>
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-user"></i> Winner for Partner B</h3>
+                                    <div id="winnerB-t2" class="script-box"></div>
+                                </div>
+                            </div>
+
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-heart"></i> The Relationship Winner</h3>
+                                <div id="relWinner-t2" class="script-box"></div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-hourglass-half"></i> 5-Year Projection</h3>
+                                    <div id="projection-t2" class="script-box"></div>
+                                </div>
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-rotate-left"></i> Reversibility Score</h3>
+                                    <div id="reversibility-t2" class="script-box"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- History -->
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool2')">
+                                <h4><i class="fa-solid fa-history"></i> Saved Analyses</h4>
+                                <i class="fa-solid fa-chevron-down" id="hist-icon-tool2"></i>
+                            </div>
+                            <div class="history-content" id="hist-content-tool2">
+                                <ul class="history-list" id="hist-list-tool2"></ul>
+                                <button class="btn btn-outline btn-sm" onclick="clearHistory('tool2')" style="margin-top:8px;">Clear History</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: TIMELINE NEGOTIATOR -->
+                <section id="tool3" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-clock"></i> Timeline Negotiator</h2>
+                            <p class="problem-statement">"One of us wants to move now. The other wants to stay indefinitely."</p>
+                        </div>
+
+                        <form id="form-tool3">
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Partner A's Ideal Timeline</label>
+                                    <select id="t3-timeA">
+                                        <option value="Move now">Move now</option>
+                                        <option value="Within 6 months">Within 6 months</option>
+                                        <option value="Within 1 year">Within 1 year</option>
+                                        <option value="Within 2 years">Within 2 years</option>
+                                        <option value="3-5 years">3-5 years</option>
+                                        <option value="Stay forever">Stay forever</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Partner B's Ideal Timeline</label>
+                                    <select id="t3-timeB">
+                                        <option value="Move now">Move now</option>
+                                        <option value="Within 6 months">Within 6 months</option>
+                                        <option value="Within 1 year">Within 1 year</option>
+                                        <option value="Within 2 years">Within 2 years</option>
+                                        <option value="3-5 years">3-5 years</option>
+                                        <option value="Stay forever">Stay forever</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What would make the stay-put partner consider moving?</label>
+                                <textarea id="t3-stayCond" class="form-control" placeholder="e.g., guaranteed remote job, clear safety net..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What would make the move-now partner consider waiting?</label>
+                                <textarea id="t3-moveCond" class="form-control" placeholder="e.g., concrete end-date, savings milestone..."></textarea>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Current Lease / Mortgage / Commitments</label>
+                                    <textarea id="t3-commit" class="form-control" placeholder="e.g., Lease ends in August"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Children / School Considerations (Optional)</label>
+                                    <textarea id="t3-kids" class="form-control" placeholder="e.g., Elementary school transition"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="processTool3()">Negotiate Timeline</button>
+                                <button type="button" class="btn btn-accent" onclick="loadSampleTool3()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool3" class="results-container">
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-arrows-left-right"></i> The Timeline Gap</h3>
+                                <div id="gap-t3" class="script-box"></div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-anchor"></i> The Stay Condition</h3>
+                                    <div id="stayRes-t3" class="script-box"></div>
+                                </div>
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-plane-departure"></i> The Move Condition</h3>
+                                    <div id="moveRes-t3" class="script-box"></div>
+                                </div>
+                            </div>
+
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-layer-group"></i> The Phased Plan</h3>
+                                <div id="phased-t3" class="script-box"></div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-vial"></i> The Trial Run Protocol</h3>
+                                    <div id="trial-t3" class="script-box"></div>
+                                </div>
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-calendar-check"></i> The Hard Deadline</h3>
+                                    <div id="deadline-t3" class="script-box"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- History -->
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool3')">
+                                <h4><i class="fa-solid fa-history"></i> Saved Analyses</h4>
+                                <i class="fa-solid fa-chevron-down" id="hist-icon-tool3"></i>
+                            </div>
+                            <div class="history-content" id="hist-content-tool3">
+                                <ul class="history-list" id="hist-list-tool3"></ul>
+                                <button class="btn btn-outline btn-sm" onclick="clearHistory('tool3')" style="margin-top:8px;">Clear History</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: COMPROMISE SEARCH -->
+                <section id="tool4" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-map-location-dot"></i> The Compromise Search</h2>
+                            <p class="problem-statement">"Maybe there's a third place we haven't considered."</p>
+                        </div>
+
+                        <form id="form-tool4">
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Partner A's Must-Haves</label>
+                                    <textarea id="t4-mustA" class="form-control" placeholder="e.g., Walkable, tech jobs, culture"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Partner B's Must-Haves</label>
+                                    <textarea id="t4-mustB" class="form-control" placeholder="e.g., Yard, close to nature, low stress"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Absolute Dealbreakers (Both)</label>
+                                <textarea id="t4-dealbreakers" class="form-control" placeholder="e.g., Harsh winters, high crime, extreme CoL"></textarea>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Willingness to Live Separately Temporarily?</label>
+                                    <select id="t4-sep">
+                                        <option value="No">No</option>
+                                        <option value="Maybe">Maybe (under strict conditions)</option>
+                                        <option value="Yes">Yes (if career/logistics require)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Commute / Distance Tolerance</label>
+                                    <select id="t4-commute">
+                                        <option value="<30 min">&lt;30 min</option>
+                                        <option value="30-60 min">30-60 min</option>
+                                        <option value="1-2 hr">1-2 hr</option>
+                                        <option value="Remote only">Remote only</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="processTool4()">Search Compromises</button>
+                                <button type="button" class="btn btn-accent" onclick="loadSampleTool4()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool4" class="results-container">
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-compass"></i> The Middle Ground Archetypes</h3>
+                                <div id="middle-t4" class="script-box"></div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-arrows-split-up-and-left"></i> The Split Difference</h3>
+                                    <div id="split-t4" class="script-box"></div>
+                                </div>
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-calendar-days"></i> The Alternating / Seasonal Plan</h3>
+                                    <div id="alternating-t4" class="script-box"></div>
+                                </div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-car"></i> The Nearby Radius Compromise</h3>
+                                    <div id="nearby-t4" class="script-box"></div>
+                                </div>
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-briefcase"></i> Temporary Separation Protocol</h3>
+                                    <div id="tempSep-t4" class="script-box"></div>
+                                </div>
+                            </div>
+
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-magnifying-glass"></i> The Research Assignment</h3>
+                                <div id="research-t4" class="script-box"></div>
+                            </div>
+                        </div>
+
+                        <!-- History -->
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool4')">
+                                <h4><i class="fa-solid fa-history"></i> Saved Analyses</h4>
+                                <i class="fa-solid fa-chevron-down" id="hist-icon-tool4"></i>
+                            </div>
+                            <div class="history-content" id="hist-content-tool4">
+                                <ul class="history-list" id="hist-list-tool4"></ul>
+                                <button class="btn btn-outline btn-sm" onclick="clearHistory('tool4')" style="margin-top:8px;">Clear History</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: DECISION COMMITMENT -->
+                <section id="tool5" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-handshake"></i> Decision Commitment</h2>
+                            <p class="problem-statement">"Once we decide, the 'losing' partner needs to feel chosen, not defeated."</p>
+                        </div>
+
+                        <form id="form-tool5">
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Decision Made</label>
+                                    <select id="t5-decision">
+                                        <option value="Move to A's choice">Move to Option A (Partner A's choice)</option>
+                                        <option value="Move to B's choice">Move to Option B (Partner B's choice)</option>
+                                        <option value="Third option">Third Compromise Option</option>
+                                        <option value="Stay put">Stay Put / Defer</option>
+                                        <option value="Undecided">Undecided</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Who feels they "lost"?</label>
+                                    <select id="t5-loser">
+                                        <option value="Partner A">Partner A</option>
+                                        <option value="Partner B">Partner B</option>
+                                        <option value="Both">Both (Compromise loss)</option>
+                                        <option value="Neither">Neither (Genuine alignment)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What the "losing" partner is giving up</label>
+                                <textarea id="t5-givingUp" class="form-control" placeholder="e.g., Proximity to aging parents, career trajectory..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What the "losing" partner needs to feel whole</label>
+                                <textarea id="t5-needs" class="form-control" placeholder="e.g., Guaranteed travel budget home, solo space..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Timeline for Formal Re-evaluation</label>
+                                <select id="t5-reeval">
+                                    <option value="6 months">6 months</option>
+                                    <option value="1 year">1 year</option>
+                                    <option value="2 years">2 years</option>
+                                    <option value="Never">Never (Permanent commitment)</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" onclick="processTool5()">Generate Commitment Pact</button>
+                                <button type="button" class="btn btn-accent" onclick="loadSampleTool5()">Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool5" class="results-container">
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-heart-crack" style="color:var(--accent-red)"></i> The Grief Acknowledgment</h3>
+                                <div id="grief-t5" class="script-box"></div>
+                            </div>
+
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-gift"></i> The Compensation & Balancing Plan</h3>
+                                <div id="comp-t5" class="script-box"></div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-seedling"></i> The Rebuild Plan</h3>
+                                    <div id="rebuild-t5" class="script-box"></div>
+                                </div>
+                                <div class="analysis-section">
+                                    <h3><i class="fa-solid fa-calendar-check"></i> The Review Date</h3>
+                                    <div id="review-t5" class="script-box"></div>
+                                </div>
+                            </div>
+
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-shield-cat"></i> The No-Regret Clause</h3>
+                                <div id="clause-t5" class="script-box"></div>
+                            </div>
+
+                            <div class="analysis-section">
+                                <h3><i class="fa-solid fa-quote-left"></i> The Shared Unity Statement</h3>
+                                <div id="unity-t5" class="script-box">
+                                    <button class="copy-btn" onclick="copyToClipboard('unity-script')"><i class="fa-solid fa-copy"></i> Copy Script</button>
+                                    <div id="unity-script"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- History -->
+                        <div class="history-section">
+                            <div class="history-header" onclick="toggleHistory('tool5')">
+                                <h4><i class="fa-solid fa-history"></i> Saved Analyses</h4>
+                                <i class="fa-solid fa-chevron-down" id="hist-icon-tool5"></i>
+                            </div>
+                            <div class="history-content" id="hist-content-tool5">
+                                <ul class="history-list" id="hist-list-tool5"></ul>
+                                <button class="btn btn-outline btn-sm" onclick="clearHistory('tool5')" style="margin-top:8px;">Clear History</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Footer -->
+            <footer>
+                For entertainment and reflection purposes only. Not therapy or professional advice.
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-msg">Copied!</span>
+    </div>
+
+    <script>
+        /* --- GLOBAL CONSTANTS & STATE --- */
+        const PRIORITY_CATEGORIES = [
+            "Career opportunities",
+            "Proximity to family",
+            "Cost of living",
+            "Lifestyle (urban/suburban/rural)",
+            "Schools/child environment",
+            "Community/social network",
+            "Climate/environment",
+            "Housing quality/space"
+        ];
+
+        /* --- NAVIGATION & SIDEBAR LOGIC --- */
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('open');
+        }
+
+        hamburgerBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        function switchView(targetId) {
+            document.querySelectorAll('.view-section').forEach(sec => sec.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
+            const targetSection = document.getElementById(targetId);
+            if (targetSection) targetSection.style.display = 'block';
+
+            const activeNav = document.querySelector(`.nav-item[data-target="${targetId}"]`);
+            if (activeNav) activeNav.classList.add('active');
+
+            if (sidebar.classList.contains('open')) toggleSidebar();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                switchView(item.getAttribute('data-target'));
+            });
+        });
+
+        /* --- TOAST & COPY UTILS --- */
+        function showToast(message = "Copied!") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        /* --- LOCAL STORAGE HISTORY HANDLER --- */
+        function saveToHistory(toolId, title, data) {
+            const key = `wherewelive_history_${toolId}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            const entry = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                title: title,
+                data: data
+            };
+            history.unshift(entry);
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const key = `wherewelive_history_${toolId}`;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            const listEl = document.getElementById(`hist-list-${toolId}`);
+            if (!listEl) return;
+
+            if (history.length === 0) {
+                listEl.innerHTML = '<li class="history-item"><span style="color:var(--text-muted)">No saved runs yet.</span></li>';
+                return;
+            }
+
+            listEl.innerHTML = history.map(item => `
+                <li class="history-item">
+                    <span><strong>${item.title}</strong></span>
+                    <span class="history-item-date">${item.date}</span>
+                </li>
+            `).join('');
+        }
+
+        function clearHistory(toolId) {
+            const key = `wherewelive_history_${toolId}`;
+            localStorage.removeItem(key);
+            renderHistory(toolId);
+            showToast("History cleared");
+        }
+
+        function toggleHistory(toolId) {
+            const content = document.getElementById(`hist-content-${toolId}`);
+            const icon = document.getElementById(`hist-icon-${toolId}`);
+            content.classList.toggle('open');
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        }
+
+        /* --- TOOL 1 LOGIC: PRIORITY SORTER --- */
+        function initTool1Ranks() {
+            const containerA = document.getElementById('partnerA-ranks');
+            const containerB = document.getElementById('partnerB-ranks');
+            if(!containerA || !containerB) return;
+
+            let htmlA = '', htmlB = '';
+            PRIORITY_CATEGORIES.forEach((cat, index) => {
+                const defaultVal = index + 1;
+                htmlA += `
+                    <div class="rank-item">
+                        <label title="${cat}">${cat}</label>
+                        <select id="pA_rank_${index}">
+                            ${[1,2,3,4,5,6,7,8].map(n => `<option value="${n}" ${n === defaultVal ? 'selected' : ''}>${n}</option>`).join('')}
+                        </select>
+                    </div>`;
+                htmlB += `
+                    <div class="rank-item">
+                        <label title="${cat}">${cat}</label>
+                        <select id="pB_rank_${index}">
+                            ${[1,2,3,4,5,6,7,8].map(n => `<option value="${n}" ${n === defaultVal ? 'selected' : ''}>${n}</option>`).join('')}
+                        </select>
+                    </div>`;
+            });
+            containerA.innerHTML = htmlA;
+            containerB.innerHTML = htmlB;
+        }
+
+        function loadSampleTool1() {
+            // Partner A: Career #1, Family #8
+            const sampleA = [1, 8, 4, 2, 6, 5, 7, 3];
+            // Partner B: Family #1, Career #7
+            const sampleB = [7, 1, 3, 5, 2, 4, 6, 8];
+
+            PRIORITY_CATEGORIES.forEach((_, i) => {
+                document.getElementById(`pA_rank_${i}`).value = sampleA[i];
+                document.getElementById(`pB_rank_${i}`).value = sampleB[i];
+            });
+            showToast("Loaded Sample: Career vs. Family");
+        }
+
+        function processTool1() {
+            const ranksA = PRIORITY_CATEGORIES.map((_, i) => parseInt(document.getElementById(`pA_rank_${i}`).value));
+            const ranksB = PRIORITY_CATEGORIES.map((_, i) => parseInt(document.getElementById(`pB_rank_${i}`).value));
+
+            // Populate Comparison Table
+            const tbody = document.querySelector('#table-tool1 tbody');
+            tbody.innerHTML = '';
+
+            let dataMap = PRIORITY_CATEGORIES.map((cat, i) => ({
+                category: cat,
+                rankA: ranksA[i],
+                rankB: ranksB[i],
+                diff: Math.abs(ranksA[i] - ranksB[i])
+            }));
+
+            dataMap.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${item.category}</strong></td>
+                        <td>Rank #${item.rankA}</td>
+                        <td>Rank #${item.rankB}</td>
+                        <td><span style="color: ${item.diff > 3 ? 'var(--accent-red)' : 'var(--text-dark)'}">${item.diff} ${item.diff > 3 ? ' (High Gap)' : ''}</span></td>
+                    </tr>`;
+            });
+
+            // Analysis Rules
+            const alignments = dataMap.filter(d => d.diff <= 1).map(d => d.category);
+            const conflicts = dataMap.filter(d => d.diff >= 4).sort((a,b) => b.diff - a.diff);
+            
+            // Alignment text
+            const alignBox = document.getElementById('alignment-t1');
+            if (alignments.length > 0) {
+                alignBox.innerHTML = `<p>You share strong implicit alignment on <strong>${alignments.join(', ')}</strong>. These shared foundations should serve as your anchor during discussions.</p>`;
+            } else {
+                alignBox.innerHTML = `<p>Your priority rankings diverge across most categories. This indicates distinct individual visions of lifestyle that require explicit structural integration rather than simple compromise.</p>`;
+            }
+
+            // Conflict text
+            const conflictBox = document.getElementById('conflict-t1');
+            if (conflicts.length > 0) {
+                conflictBox.innerHTML = `<p>Your highest areas of tension are <strong>${conflicts.map(c => c.category).join(', ')}</strong>. The gap here suggests fundamentally different underlying needs for security and personal fulfillment.</p>`;
+            } else {
+                conflictBox.innerHTML = `<p>No massive priority chasms detected. Your differences are minor calibration preferences rather than existential dealbreakers.</p>`;
+            }
+
+            // Hidden Drivers Dictionary
+            const driverDict = {
+                "Career opportunities": "Ambition, financial autonomy, identity validation, or fear of professional stagnation.",
+                "Proximity to family": "Need for emotional safety net, intergenerational support, fear of isolation, or cultural duty.",
+                "Cost of living": "Desire for financial resilience, freedom from debt anxiety, or early independence.",
+                "Lifestyle (urban/suburban/rural)": "Sensory stimulation preferences, pace-of-life needs, and social energy dynamics.",
+                "Schools/child environment": "Parental responsibility anxiety, generational mobility goals, and child safety instincts.",
+                "Community/social network": "Relational belonging, identity outside the partnership, and shared values.",
+                "Climate/environment": "Physical health, seasonal mood regulation, and daily outdoor affinity.",
+                "Housing quality/space": "Need for personal sanctuary, privacy, boundary control, and tangible comfort."
+            };
+
+            const topA = dataMap.find(d => d.rankA === 1).category;
+            const topB = dataMap.find(d => d.rankB === 1).category;
+
+            document.getElementById('drivers-t1').innerHTML = `
+                <p><strong>Partner A's #1 Priority (${topA}):</strong> Driven by ${driverDict[topA]}</p>
+                <p style="margin-top:8px;"><strong>Partner B's #1 Priority (${topB}):</strong> Driven by ${driverDict[topB]}</p>
+            `;
+
+            // Negotiables vs Non-Negotiables
+            const nonNegA = dataMap.filter(d => d.rankA <= 2).map(d => d.category);
+            const nonNegB = dataMap.filter(d => d.rankB <= 2).map(d => d.category);
+            const flexA = dataMap.filter(d => d.rankA >= 6).map(d => d.category);
+            const flexB = dataMap.filter(d => d.rankB >= 6).map(d => d.category);
+
+            document.getElementById('non-negotiables-t1').innerHTML = `
+                <p><strong>Partner A:</strong> ${nonNegA.join(', ')}</p>
+                <p style="margin-top:6px;"><strong>Partner B:</strong> ${nonNegB.join(', ')}</p>
+            `;
+
+            document.getElementById('negotiables-t1').innerHTML = `
+                <p><strong>Partner A Flexible On:</strong> ${flexA.join(', ')}</p>
+                <p style="margin-top:6px;"><strong>Partner B Flexible On:</strong> ${flexB.join(', ')}</p>
+            `;
+
+            document.getElementById('results-tool1').classList.add('active');
+            saveToHistory('tool1', `A: ${topA} vs B: ${topB}`, { ranksA, ranksB });
+        }
+
+        /* --- TOOL 2 LOGIC: TRADE-OFF MAP --- */
+        function loadSampleTool2() {
+            document.getElementById('t2-optA').value = "Major Metro City (Partner A's Choice)";
+            document.getElementById('t2-optB').value = "Hometown Suburb (Partner B's Choice)";
+            document.getElementById('t2-optC').value = "Mid-sized Regional Hub";
+
+            document.getElementById('t2-carA').value = "High growth, fast promotion path, major industry hub";
+            document.getElementById('t2-carB').value = "Limited local job market, potential remote transition required";
+
+            document.getElementById('t2-socA').value = "Exciting city life, but isolated from aging parents and old friends";
+            document.getElementById('t2-socB').value = "Built-in family support system, childcare help, deep rooted social tie";
+
+            document.getElementById('t2-finA').value = "High rent, high cost of living, lower short-term savings potential";
+            document.getElementById('t2-finB').value = "Affordable housing, higher disposable income, lower daily costs";
+
+            showToast("Loaded Sample: Metro vs. Hometown");
+        }
+
+        function processTool2() {
+            const optA = document.getElementById('t2-optA').value || "Option A";
+            const optB = document.getElementById('t2-optB').value || "Option B";
+            
+            const carA = document.getElementById('t2-carA').value || "N/A";
+            const carB = document.getElementById('t2-carB').value || "N/A";
+            const socA = document.getElementById('t2-socA').value || "N/A";
+            const socB = document.getElementById('t2-socB').value || "N/A";
+            const finA = document.getElementById('t2-finA').value || "N/A";
+            const finB = document.getElementById('t2-finB').value || "N/A";
+
+            document.getElementById('th-optA').innerText = optA;
+            document.getElementById('th-optB').innerText = optB;
+
+            const tbody = document.querySelector('#table-tool2 tbody');
+            tbody.innerHTML = `
+                <tr><td><strong>Career Impact</strong></td><td>${carA}</td><td>${carB}</td></tr>
+                <tr><td><strong>Social / Family Impact</strong></td><td>${socA}</td><td>${socB}</td></tr>
+                <tr><td><strong>Financial Impact</strong></td><td>${finA}</td><td>${finB}</td></tr>
+            `;
+
+            document.getElementById('winnerA-t2').innerHTML = `<p><strong>Gains:</strong> Maximum professional trajectory and urban lifestyle alignment.<br><strong>Losses:</strong> Distance from family safety net and higher financial overhead.</p>`;
+            document.getElementById('winnerB-t2').innerHTML = `<p><strong>Gains:</strong> Immediate proximity to support systems and lower stress financial footprint.<br><strong>Losses:</strong> Professional momentum and personal autonomy/novelty.</p>`;
+
+            document.getElementById('relWinner-t2').innerHTML = `<p>The option that best supports the relationship depends on your current primary stressor. If financial strain and burnout are high, <strong>${optB}</strong> protects relationship sanity. If career stagnation threatens long-term resentment, <strong>${optA}</strong> invests in future capital.</p>`;
+
+            document.getElementById('projection-t2').innerHTML = `<p><strong>In 5 Years under ${optA}:</strong> Career may flourish, but family milestone gaps (aging parents, child support) will peak.<br><strong>In 5 Years under ${optB}:</strong> Deep local stability, but potential "what if" career resentment unless actively mitigated.</p>`;
+
+            document.getElementById('reversibility-t2').innerHTML = `<p><strong>${optA}</strong> is typically more reversible short-term (rental markets allow relocating after 1-2 years). <strong>${optB}</strong> involves deeper relational integration (buying near family, career adjustments) that makes leaving harder later.</p>`;
+
+            document.getElementById('results-tool2').classList.add('active');
+            saveToHistory('tool2', `${optA} vs ${optB}`, { optA, optB });
+        }
+
+        /* --- TOOL 3 LOGIC: TIMELINE NEGOTIATOR --- */
+        function loadSampleTool3() {
+            document.getElementById('t3-timeA').value = "Move now";
+            document.getElementById('t3-timeB').value = "3-5 years";
+            document.getElementById('t3-stayCond').value = "Guaranteed remote work flexibility, clear financial buffer, and agreement on school years.";
+            document.getElementById('t3-moveCond').value = "Written commitment to move by a hard date, monthly exploratory trips, and defined savings goal.";
+            document.getElementById('t3-commit').value = "Current apartment lease ends in 6 months.";
+            document.getElementById('t3-kids').value = "Oldest child enters elementary school in 2 years.";
+
+            showToast("Loaded Sample: Immediate Move vs. 3-5 Years");
+        }
+
+        function processTool3() {
+            const timeA = document.getElementById('t3-timeA').value;
+            const timeB = document.getElementById('t3-timeB').value;
+            const stayCond = document.getElementById('t3-stayCond').value || "No specific conditions stated.";
+            const moveCond = document.getElementById('t3-moveCond').value || "No specific conditions stated.";
+            const commit = document.getElementById('t3-commit').value || "No lease/mortgage specified.";
+
+            document.getElementById('gap-t3').innerHTML = `<p>Partner A wants: <strong>${timeA}</strong>. Partner B wants: <strong>${timeB}</strong>.<br>This creates a temporal gap. The conflict is not <em>if</em> you value each other, but how you balance urgency against stability.</p>`;
+
+            document.getElementById('stayRes-t3').innerHTML = `<p>${stayCond}</p>`;
+            document.getElementById('moveRes-t3').innerHTML = `<p>${moveCond}</p>`;
+
+            document.getElementById('phased-t3').innerHTML = `
+                <p><strong>Stage 1 (Next 3-6 Months):</strong> Stay in current location. Initiate financial runway buildup and exploratory trips.<br>
+                <strong>Stage 2 (Month 6-12):</strong> Execute trial stay or short-term rental in target city during transition.<br>
+                <strong>Stage 3 (Month 12+):</strong> Formal re-evaluation and commitment to permanent relocation or long-term stay.</p>
+            `;
+
+            document.getElementById('trial-t3').innerHTML = `<p>Commit to a 4-week trial run (e.g., Airbnb during work/vacation) in the target location before signing long-term leases or selling property.</p>`;
+            
+            document.getElementById('deadline-t3').innerHTML = `<p>Based on commitments ("${commit}"), set a hard decision checkpoint on <strong>the 1st of next month prior to lease renewal</strong>. No goalposts moved after this date.</p>`;
+
+            document.getElementById('results-tool3').classList.add('active');
+            saveToHistory('tool3', `Timeline Gap: ${timeA} vs ${timeB}`, { timeA, timeB });
+        }
+
+        /* --- TOOL 4 LOGIC: COMPROMISE SEARCH --- */
+        function loadSampleTool4() {
+            document.getElementById('t4-mustA').value = "Dense job market, vibrant arts/food scene, public transit";
+            document.getElementById('t4-mustB').value = "Quiet neighborhood, close to outdoor trails, spacious housing, <1 hr to parents";
+            document.getElementById('t4-dealbreakers').value = "Severe winter weather, extreme traffic commutes over 90 mins";
+            document.getElementById('t4-sep').value = "Maybe";
+            document.getElementById('t4-commute').value = "30-60 min";
+
+            showToast("Loaded Sample: City vs. Quiet Nature");
+        }
+
+        function processTool4() {
+            const mustA = document.getElementById('t4-mustA').value || "Urban amenities";
+            const mustB = document.getElementById('t4-mustB').value || "Space and quiet";
+            const sep = document.getElementById('t4-sep').value;
+
+            document.getElementById('middle-t4').innerHTML = `
+                <p><strong>1. First-Ring Streetcar Suburbs / Urban Edges:</strong> Neighborhoods offering walkable hubs with single-family space.<br>
+                <strong>2. High-Growth Mid-Sized Tech Hubs:</strong> Secondary cities with thriving cultural scenes but proximity to nature and affordable space.<br>
+                <strong>3. College Towns:</strong> Offer rich culture, diversity, and job vitality paired with small-town transit and green space.</p>
+            `;
+
+            document.getElementById('split-t4').innerHTML = `<p>Select a location geographically situated along major transit lines 45 minutes outside the major city center. Partner A gets urban job access; Partner B gets spatial tranquility.</p>`;
+
+            document.getElementById('alternating-t4').innerHTML = `<p>If remote work allows: Spend 9 months in the primary location and negotiate a 2-3 month seasonal stay near family or in preferred environment.</p>`;
+
+            document.getElementById('nearby-t4').innerHTML = `<p>Target a 60-90 minute driving radius from family. Close enough for weekend visits and help, distant enough to preserve day-to-day nuclear family independence.</p>`;
+
+            document.getElementById('tempSep-t4').innerHTML = `<p><strong>Temporary Separation Status (${sep}):</strong> ${sep === 'No' ? 'Off the table. All plans must keep the household unified immediately.' : 'Feasible for 3-6 months MAX. Partner A relocates first to establish job/housing while Partner B wraps up local commitments.'}</p>`;
+
+            document.getElementById('research-t4').innerHTML = `
+                <p>1. Identify 3 cities matching these criteria this week.<br>
+                2. Set up Zillow/Redfin alerts for housing pricing in those 3 zip codes.<br>
+                3. Book a 3-day weekend trip to the top compromise candidate next month.</p>
+            `;
+
+            document.getElementById('results-tool4').classList.add('active');
+            saveToHistory('tool4', `Compromise Search Matrix`, { mustA, mustB });
+        }
+
+        /* --- TOOL 5 LOGIC: DECISION COMMITMENT --- */
+        function loadSampleTool5() {
+            document.getElementById('t5-decision').value = "Move to A's choice";
+            document.getElementById('t5-loser').value = "Partner B";
+            document.getElementById('t5-givingUp').value = "Living 15 minutes from my sisters and daily contact with my parents.";
+            document.getElementById('t5-needs').value = "Guaranteed flight budget home 4 times a year, dedicated home office space, and no complaints about travel costs.";
+            document.getElementById('t5-reeval').value = "1 year";
+
+            showToast("Loaded Sample: Commitment to Move to A's City");
+        }
+
+        function processTool5() {
+            const decision = document.getElementById('t5-decision').value;
+            const loser = document.getElementById('t5-loser').value;
+            const givingUp = document.getElementById('t5-givingUp').value || "Core comfort factors.";
+            const needs = document.getElementById('t5-needs').value || "Emotional and structural support.";
+            const reeval = document.getElementById('t5-reeval').value;
+
+            document.getElementById('grief-t5').innerHTML = `
+                <p>We explicitly acknowledge that <strong>${loser}</strong> is making a profound sacrifice by giving up: <em>"${givingUp}"</em>. This move is not a sign that these needs didn't matter; it is a conscious gift to the relationship's future.</p>
+            `;
+
+            document.getElementById('comp-t5').innerHTML = `
+                <p>To balance the scales, the non-sacrificing partner commits to prioritizing ${loser}'s core needs: <em>"${needs}"</em>. These items become non-negotiable budget and lifestyle line items.</p>
+            `;
+
+            document.getElementById('rebuild-t5').innerHTML = `
+                <p>1. Establish a local social ritual within 30 days of arrival.<br>
+                2. Prioritize creating a comfortable, personal sanctuary space inside the new home immediately upon arrival.</p>
+            `;
+
+            document.getElementById('review-t5').innerHTML = `
+                <p>We will hold a formal, structured check-in in <strong>${reeval}</strong>. Until that exact date, both partners agree to invest 100% into making this decision work rather than living with one foot out the door.</p>
+            `;
+
+            document.getElementById('clause-t5').innerHTML = `
+                <p>If at the ${reeval} mark ${loser} feels genuine unhappiness despite honest effort, reopening the location discussion is permitted without judgment, penalty, or accusations of "going back on your word."</p>
+            `;
+
+            const unityScript = `"We are choosing to ${decision}. This is not one person winning and the other losing; this is our team choosing a path together. We acknowledge the real sacrifices involved, particularly around ${givingUp.toLowerCase()}, and we commit to protecting each other's happiness every step of the way."`;
+            
+            document.getElementById('unity-script').innerText = unityScript;
+
+            document.getElementById('results-tool5').classList.add('active');
+            saveToHistory('tool5', `Commitment Pact: ${decision}`, { decision, loser });
+        }
+
+        /* --- INITIALIZATION --- */
+        window.addEventListener('DOMContentLoaded', () => {
+            initTool1Ranks();
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistory);
+        });
+    </script>
+</body>
+</html>

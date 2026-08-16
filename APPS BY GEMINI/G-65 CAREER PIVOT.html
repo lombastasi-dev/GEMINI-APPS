@@ -1,0 +1,2102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerPivot - Decision & Transition Toolkit</title>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-indigo: #3D5A80;
+            --primary-indigo-dark: #2c4260;
+            --primary-indigo-light: #eff4f9;
+            --warm-gold: #E9C46A;
+            --warm-gold-dark: #d4a737;
+            --warm-gold-light: #fef9e7;
+            --bg-gradient-start: #F0F4F8;
+            --bg-gradient-end: #FFF8E6;
+            --text-dark: #2B2D42;
+            --text-muted: #6C757D;
+            --border-color: #E2E8F0;
+            --white: #FFFFFF;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
+            --radius-xl: 1rem;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* Layout Structure */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--white);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 1.8rem;
+            color: var(--primary-indigo);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-indigo);
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            margin-bottom: 0.35rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 1.25rem;
+            text-align: center;
+            color: var(--text-muted);
+            transition: color 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background-color: var(--primary-indigo-light);
+            color: var(--primary-indigo);
+        }
+
+        .nav-item:hover i {
+            color: var(--primary-indigo);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-indigo);
+            color: var(--white);
+        }
+
+        .nav-item.active i {
+            color: var(--warm-gold);
+        }
+
+        /* Mobile Header & Overlay */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 1.25rem;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 999;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            color: var(--primary-indigo);
+            font-size: 1.1rem;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--primary-indigo);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 998;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Main Content Area */
+        .main-wrapper {
+            flex-grow: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .content-area {
+            flex-grow: 1;
+            padding: 2.5rem 1.5rem;
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Card Component */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Hero Banner */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-indigo) 0%, var(--primary-indigo-dark) 100%);
+            color: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: rgba(233, 196, 106, 0.15);
+            pointer-events: none;
+        }
+
+        .hero h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .dash-card {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .dash-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .dash-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--primary-indigo-light);
+            color: var(--primary-indigo);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            color: var(--primary-indigo);
+        }
+
+        .dash-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            flex-grow: 1;
+        }
+
+        .dash-card-footer {
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            color: var(--primary-indigo);
+            font-weight: 600;
+            font-size: 0.85rem;
+            gap: 0.4rem;
+        }
+
+        /* Form Elements */
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .form-header-text h2 {
+            font-size: 1.5rem;
+            color: var(--primary-indigo);
+            margin-bottom: 0.25rem;
+        }
+
+        .form-header-text p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .btn-sample {
+            background-color: var(--warm-gold-light);
+            color: #8a6508;
+            border: 1px solid var(--warm-gold);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-sample:hover {
+            background-color: var(--warm-gold);
+            color: var(--white);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            color: var(--text-dark);
+        }
+
+        .form-group label span.subtext {
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            background-color: #fafafa;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-indigo);
+            background-color: var(--white);
+            box-shadow: 0 0 0 3px rgba(61, 90, 128, 0.15);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Checkbox Grid */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 400;
+            cursor: pointer;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: #fafafa;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-label:hover {
+            background: var(--primary-indigo-light);
+            border-color: var(--primary-indigo);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary-indigo);
+            cursor: pointer;
+        }
+
+        /* Slider Custom Styling */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+            accent-color: var(--primary-indigo);
+            cursor: pointer;
+        }
+
+        .slider-val {
+            font-weight: 700;
+            color: var(--primary-indigo);
+            font-size: 1.1rem;
+            min-width: 2.5rem;
+            text-align: center;
+            background: var(--primary-indigo-light);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.4rem;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--primary-indigo);
+            color: var(--white);
+            border: none;
+            padding: 0.85rem 1.75rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: background 0.2s ease;
+            box-shadow: 0 2px 4px rgba(61, 90, 128, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-indigo-dark);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-indigo);
+            border: 1px solid var(--primary-indigo);
+            padding: 0.5rem 1rem;
+            border-radius: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary-indigo-light);
+        }
+
+        /* Output / Analysis Section */
+        .output-section {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .output-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .output-header {
+            border-bottom: 2px solid var(--warm-gold);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-header h3 {
+            font-size: 1.35rem;
+            color: var(--primary-indigo);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .output-box {
+            background: #FAFAFC;
+            border-left: 4px solid var(--primary-indigo);
+            padding: 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin-bottom: 1.25rem;
+        }
+
+        .output-box.accent-gold {
+            border-left-color: var(--warm-gold);
+            background: var(--warm-gold-light);
+        }
+
+        .output-box h4 {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--primary-indigo);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-box p, .output-box ul {
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .output-box ul {
+            padding-left: 1.2rem;
+        }
+
+        .output-box li {
+            margin-bottom: 0.35rem;
+        }
+
+        /* Copy Block Script Display */
+        .script-container {
+            position: relative;
+            background: #2B2D42;
+            color: #EDF2F4;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            margin-top: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .btn-copy-script {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border: none;
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.3rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: background 0.2s;
+        }
+
+        .btn-copy-script:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 2.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-header h4 {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-clear-history {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .btn-clear-history:hover {
+            color: #d9534f;
+        }
+
+        .history-item {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+
+        .history-item-header {
+            padding: 0.85rem 1rem;
+            background: #FAFAFC;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            user-select: none;
+        }
+
+        .history-item-header:hover {
+            background: var(--primary-indigo-light);
+        }
+
+        .history-item-body {
+            padding: 1rem;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            background: var(--white);
+            font-size: 0.9rem;
+        }
+
+        .history-item-body.open {
+            display: block;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--white);
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #2B2D42;
+            color: #fff;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            z-index: 2000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Metrics / Quick Stats Cards */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .stat-box {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-indigo);
+        }
+
+        .stat-box .lbl {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 860px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 60px;
+            }
+
+            .content-area {
+                padding: 1.25rem 1rem;
+            }
+
+            .hero {
+                padding: 1.75rem 1.25rem;
+            }
+
+            .hero h2 {
+                font-size: 1.6rem;
+            }
+
+            .hero p {
+                font-size: 0.95rem;
+            }
+
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Mobile Header Bar -->
+        <header class="mobile-header">
+            <div class="brand">
+                <i class="fa-solid fa-compass"></i>
+                <span>CareerPivot</span>
+            </div>
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </header>
+
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-compass"></i>
+                <h1>CareerPivot</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-target="dashboard">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-item" data-target="tool1">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                    <span>Pivot Audit</span>
+                </button>
+                <button class="nav-item" data-target="tool2">
+                    <i class="fa-solid fa-binoculars"></i>
+                    <span>Option Explorer</span>
+                </button>
+                <button class="nav-item" data-target="tool3">
+                    <i class="fa-solid fa-piggy-bank"></i>
+                    <span>Financial Bridge</span>
+                </button>
+                <button class="nav-item" data-target="tool4">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>Identity Shift</span>
+                </button>
+                <button class="nav-item" data-target="tool5">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Action Plan</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="main-wrapper">
+            <main class="content-area">
+
+                <!-- VIEW 0: DASHBOARD -->
+                <section id="dashboard" class="view-section active">
+                    <div class="hero">
+                        <h2>Career Pivot</h2>
+                        <p>Your current job isn't a life sentence. Plan the escape with practical, grounded strategies.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card card-hover dash-card" onclick="switchView('tool1')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-card-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                                    <h3>Pivot Audit</h3>
+                                </div>
+                                <p>Diagnose what's wrong, map transferable skills, and check fear vs. reality.</p>
+                            </div>
+                            <div class="dash-card-footer">Start Audit <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+
+                        <div class="card card-hover dash-card" onclick="switchView('tool2')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-card-icon"><i class="fa-solid fa-binoculars"></i></div>
+                                    <h3>Option Explorer</h3>
+                                </div>
+                                <p>Uncover realistic new paths, generate interview scripts, and design experiments.</p>
+                            </div>
+                            <div class="dash-card-footer">Explore Paths <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+
+                        <div class="card card-hover dash-card" onclick="switchView('tool3')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-card-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+                                    <h3>Financial Bridge</h3>
+                                </div>
+                                <p>Calculate savings runway, bridge strategies, and side hustle targets.</p>
+                            </div>
+                            <div class="dash-card-footer">Calculate Runway <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+
+                        <div class="card card-hover dash-card" onclick="switchView('tool4')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-card-icon"><i class="fa-solid fa-user-gear"></i></div>
+                                    <h3>Identity Shift</h3>
+                                </div>
+                                <p>Untangle self-worth from title, master social scripts, and navigate relationships.</p>
+                            </div>
+                            <div class="dash-card-footer">Shift Mindset <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+
+                        <div class="card card-hover dash-card" onclick="switchView('tool5')">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-card-icon"><i class="fa-solid fa-list-check"></i></div>
+                                    <h3>Action Plan</h3>
+                                </div>
+                                <p>Build a 30-60-90 day sprint, overcome blocks, and set a hard decision date.</p>
+                            </div>
+                            <div class="dash-card-footer">Build Plan <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: PIVOT AUDIT -->
+                <section id="tool1" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="form-header">
+                            <div class="form-header-text">
+                                <h2>Tool 1: Pivot Audit</h2>
+                                <p>"I know I want out but I don't know what's actually wrong or what I have to offer."</p>
+                            </div>
+                            <button class="btn-sample" onclick="loadSampleTool1()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-tool1" onsubmit="handleTool1Submit(event)">
+                            <div class="form-group">
+                                <label for="t1-role">Current role / industry:</label>
+                                <textarea id="t1-role" required placeholder="e.g. Senior Corporate Finance Analyst at a large firm"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-years">Years in current field:</label>
+                                <input type="number" id="t1-years" min="0" max="60" required placeholder="e.g. 8">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-drains">What drains you:</label>
+                                <textarea id="t1-drains" required placeholder="e.g. Endless bureaucratic approval chains, ethical conflicts with aggressive targets, lack of creativity"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-energizes">What energizes you (even rarely):</label>
+                                <textarea id="t1-energizes" required placeholder="e.g. Mentoring junior staff, teaching colleagues how to use new tools, facilitating workshops"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-skills">Skills you have:</label>
+                                <textarea id="t1-skills" required placeholder="e.g. Financial modeling, data analysis, cross-functional communication, Excel, project management"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t1-wantskills">Skills you want to use:</label>
+                                <textarea id="t1-wantskills" required placeholder="e.g. Teaching, public speaking, program curriculum design, active listening"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Fear about leaving (Select all that apply):</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-fear" value="Income drop"> Income drop</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-fear" value="Starting over"> Starting over</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-fear" value="Too old"> Too old</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-fear" value="Not qualified"> Not qualified</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-fear" value="What if new career is worse"> What if new career is worse</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-fear" value="Family pressure"> Family pressure</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-fear" value="Identity loss"> Identity loss</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-fear" value="Retirement impact"> Retirement impact</label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-primary">
+                                <i class="fa-solid fa-calculator"></i> Run Pivot Audit
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Output Container -->
+                    <div id="t1-output" class="output-section">
+                        <div class="card">
+                            <div class="output-header">
+                                <h3><i class="fa-solid fa-clipboard-check"></i> Audit Diagnosis & Insights</h3>
+                                <button class="btn-secondary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Report</button>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-stethoscope"></i> The Misfit Diagnosis</h4>
+                                <p id="t1-out-diagnosis"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-arrows-spin"></i> The Transferable Skills</h4>
+                                <p id="t1-out-skills"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-bolt"></i> The Energy Map</h4>
+                                <p id="t1-out-energymap"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-shield-halved"></i> The Fear Reality Check</h4>
+                                <div id="t1-out-fears"></div>
+                            </div>
+
+                            <div class="output-box accent-gold">
+                                <h4><i class="fa-solid fa-anchor"></i> The Identity Anchor</h4>
+                                <p id="t1-out-identity"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-gavel"></i> The Stay-or-Go Verdict</h4>
+                                <p id="t1-out-verdict"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section card">
+                        <div class="history-header">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Audit History</h4>
+                            <button class="btn-clear-history" onclick="clearToolHistory('tool1')">Clear History</button>
+                        </div>
+                        <div id="t1-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: OPTION EXPLORER -->
+                <section id="tool2" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="form-header">
+                            <div class="form-header-text">
+                                <h2>Tool 2: Option Explorer</h2>
+                                <p>"I have no idea what else I could do."</p>
+                            </div>
+                            <button class="btn-sample" onclick="loadSampleTool2()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-tool2" onsubmit="handleTool2Submit(event)">
+                            <div class="form-group">
+                                <label for="t2-industries">Industries that interest you:</label>
+                                <textarea id="t2-industries" required placeholder="e.g. Healthcare, Education, EdTech, Non-profit"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-roles">Roles you've considered:</label>
+                                <textarea id="t2-roles" required placeholder="e.g. Nursing, Instructional Design, Corporate Trainer"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-constraints">Primary Constraint:</label>
+                                <select id="t2-constraints" required>
+                                    <option value="Must maintain income">Must maintain income</option>
+                                    <option value="Can take temporary cut">Can take temporary cut</option>
+                                    <option value="Need benefits">Need immediate benefits</option>
+                                    <option value="Geographic locked">Geographically locked</option>
+                                    <option value="Family obligations">Heavy family/caregiving obligations</option>
+                                    <option value="Time to retrain">Limited time available to retrain</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-startover">Willingness to start over (1 = Not at all, 10 = Completely fine with entry level):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="t2-startover" min="1" max="10" value="3" oninput="document.getElementById('t2-startover-val').innerText = this.value">
+                                    <span class="slider-val" id="t2-startover-val">3</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-backtoschool">Willingness to go back to school:</label>
+                                <select id="t2-backtoschool" required>
+                                    <option value="Yes">Yes (Full-time / Degree)</option>
+                                    <option value="Maybe online">Maybe online / Certificates / Part-time</option>
+                                    <option value="No">No (Must leverage existing degree/skills)</option>
+                                    <option value="Already considering">Already actively considering a specific program</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t2-network">People you've talked to in target fields:</label>
+                                <select id="t2-network" required>
+                                    <option value="Several">Several (3+ people)</option>
+                                    <option value="One or two">One or two</option>
+                                    <option value="None">None</option>
+                                    <option value="Don't know anyone">Don't know anyone in those fields</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-primary">
+                                <i class="fa-solid fa-compass"></i> Explore Career Options
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Output Container -->
+                    <div id="t2-output" class="output-section">
+                        <div class="card">
+                            <div class="output-header">
+                                <h3><i class="fa-solid fa-map-location-dot"></i> Exploration Brief</h3>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-list-ol"></i> The Option Shortlist</h4>
+                                <div id="t2-out-shortlist"></div>
+                            </div>
+
+                            <div class="output-box accent-gold">
+                                <h4><i class="fa-solid fa-comments"></i> The Informational Interview Outreach</h4>
+                                <p style="margin-bottom:0.5rem; font-size:0.85rem; color:var(--text-muted);">Use this template to reach out to practitioners on LinkedIn or via email:</p>
+                                <div class="script-container">
+                                    <button class="btn-copy-script" onclick="copyScript('t2-out-script')"><i class="fa-solid fa-copy"></i> Copy</button>
+                                    <span id="t2-out-script"></span>
+                                </div>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-user-secret"></i> The Shadowing Plan</h4>
+                                <p id="t2-out-shadowing"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-graduation-cap"></i> The Retraining Calculator</h4>
+                                <p id="t2-out-retraining"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-arrows-split-up-and-left"></i> The Lateral Move Feasibility</h4>
+                                <p id="t2-out-lateral"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-vial"></i> The Low-Risk Experiment</h4>
+                                <p id="t2-out-experiment"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section card">
+                        <div class="history-header">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Option History</h4>
+                            <button class="btn-clear-history" onclick="clearToolHistory('tool2')">Clear History</button>
+                        </div>
+                        <div id="t2-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: FINANCIAL BRIDGE -->
+                <section id="tool3" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="form-header">
+                            <div class="form-header-text">
+                                <h2>Tool 3: Financial Bridge</h2>
+                                <p>"I can't afford to quit and start over. I need a money plan."</p>
+                            </div>
+                            <button class="btn-sample" onclick="loadSampleTool3()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-tool3" onsubmit="handleTool3Submit(event)">
+                            <div class="form-group">
+                                <label for="t3-income">Current monthly net income ($):</label>
+                                <input type="number" id="t3-income" min="0" required placeholder="e.g. 5000">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-expenses">Current monthly expenses ($):</label>
+                                <input type="number" id="t3-expenses" min="0" required placeholder="e.g. 4200">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-savings">Liquid liquid savings / runway fund ($):</label>
+                                <input type="number" id="t3-savings" min="0" required placeholder="e.g. 8000">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-targetincome">Target new-field starting monthly income ($): <span class="subtext">(Enter 0 if unknown)</span></label>
+                                <input type="number" id="t3-targetincome" min="0" placeholder="e.g. 3500">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-timeline">Target transition timeline:</label>
+                                <select id="t3-timeline" required>
+                                    <option value="3 months">3 months</option>
+                                    <option value="6 months">6 months</option>
+                                    <option value="1 year">1 year</option>
+                                    <option value="2 years">2 years</option>
+                                    <option value="Flexible">Flexible / Unsure</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t3-sideincome">Side income potential / skills to monetize now:</label>
+                                <textarea id="t3-sideincome" placeholder="e.g. Freelance tutoring, consulting, bookkeeping, eBay sales (Leave blank if none)"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-primary">
+                                <i class="fa-solid fa-chart-line"></i> Calculate Financial Bridge
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Output Container -->
+                    <div id="t3-output" class="output-section">
+                        <div class="card">
+                            <div class="output-header">
+                                <h3><i class="fa-solid fa-file-invoice-dollar"></i> Financial Assessment</h3>
+                            </div>
+
+                            <div class="stat-grid">
+                                <div class="stat-box">
+                                    <div class="val" id="t3-stat-runway">0 mo</div>
+                                    <div class="lbl">Zero-Income Runway</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="val" id="t3-stat-surplus">$0</div>
+                                    <div class="lbl">Monthly Savings Burn/Margin</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="val" id="t3-stat-safety">$0</div>
+                                    <div class="lbl">Target Safety Number</div>
+                                </div>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-hourglass-half"></i> The Runway Analysis</h4>
+                                <p id="t3-out-runway"></p>
+                            </div>
+
+                            <div class="output-box accent-gold">
+                                <h4><i class="fa-solid fa-bridge"></i> The Bridge Strategy</h4>
+                                <p id="t3-out-bridge"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-chart-pie"></i> The Income Gap</h4>
+                                <p id="t3-out-gap"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-coins"></i> The Side Hustle Bridge</h4>
+                                <p id="t3-out-sidehustle"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-scissors"></i> The Cost-Cut Targets</h4>
+                                <p id="t3-out-costcut"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-vault"></i> The Safety Number Breakdown</h4>
+                                <p id="t3-out-safetynumber"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section card">
+                        <div class="history-header">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Financial History</h4>
+                            <button class="btn-clear-history" onclick="clearToolHistory('tool3')">Clear History</button>
+                        </div>
+                        <div id="t3-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: IDENTITY SHIFT -->
+                <section id="tool4" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="form-header">
+                            <div class="form-header-text">
+                                <h2>Tool 4: Identity Shift</h2>
+                                <p>"I've been 'a lawyer' or 'an engineer' for so long that I don't know who I am without it."</p>
+                            </div>
+                            <button class="btn-sample" onclick="loadSampleTool4()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-tool4" onsubmit="handleTool4Submit(event)">
+                            <div class="form-group">
+                                <label for="t4-introduce">How you currently introduce yourself:</label>
+                                <textarea id="t4-introduce" required placeholder="e.g. 'I'm a Corporate Litigation Lawyer at Smith & Partners.'"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-job says">What your current job says about you to the world:</label>
+                                <textarea id="t4-jobsays" required placeholder="e.g. It says I'm successful, smart, hard-working, and financially stable."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-others think">What you're afraid others will think if you leave:</label>
+                                <textarea id="t4-othersthink" required placeholder="e.g. That I couldn't hack it, that I failed, or that I made a reckless decision."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-selfthink">What you're afraid you'll think about yourself:</label>
+                                <textarea id="t4-selfthink" required placeholder="e.g. That I wasted 7 years of law school and training, and threw away my prestige."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-nonwork">Non-work identities you have or cherish:</label>
+                                <textarea id="t4-nonwork" required placeholder="e.g. Parent, avid trail runner, community gardener, sourdough baker, mentor"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t4-support">Level of support from family / partner:</label>
+                                <select id="t4-support" required>
+                                    <option value="Enthusiastic">Enthusiastic & Fully Supportive</option>
+                                    <option value="Cautious">Cautious / Anxious about security</option>
+                                    <option value="Opposed">Opposed / Skeptical</option>
+                                    <option value="Silent">Silent / Disengaged</option>
+                                    <option value="They don't know">They don't know yet</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-primary">
+                                <i class="fa-solid fa-brain"></i> Reframe Identity & Scripts
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Output Container -->
+                    <div id="t4-output" class="output-section">
+                        <div class="card">
+                            <div class="output-header">
+                                <h3><i class="fa-solid fa-heart-pulse"></i> Identity Reset Toolkit</h3>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-id-card"></i> The Identity Attachment Diagnosis</h4>
+                                <p id="t4-out-attachment"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-arrows-spin"></i> The Narrative Shift</h4>
+                                <p id="t4-out-narrative"></p>
+                            </div>
+
+                            <div class="output-box accent-gold">
+                                <h4><i class="fa-solid fa-comments"></i> The Social Script (For Friends & Colleagues)</h4>
+                                <p style="margin-bottom:0.5rem; font-size:0.85rem; color:var(--text-muted);">Use this when casual acquaintances ask "What are you up to these days?":</p>
+                                <div class="script-container">
+                                    <button class="btn-copy-script" onclick="copyScript('t4-out-socialscript')"><i class="fa-solid fa-copy"></i> Copy</button>
+                                    <span id="t4-out-socialscript"></span>
+                                </div>
+                            </div>
+
+                            <div class="output-box accent-gold">
+                                <h4><i class="fa-solid fa-people-arrows"></i> The Partner Conversation Script</h4>
+                                <p style="margin-bottom:0.5rem; font-size:0.85rem; color:var(--text-muted);">Framing the transition constructively without triggering panic:</p>
+                                <div class="script-container">
+                                    <button class="btn-copy-script" onclick="copyScript('t4-out-partnerscript')"><i class="fa-solid fa-copy"></i> Copy</button>
+                                    <span id="t4-out-partnerscript"></span>
+                                </div>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-feather"></i> The Failure Reframe</h4>
+                                <p id="t4-out-failurereframe"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-signature"></i> The New Intro Practice</h4>
+                                <p id="t4-out-newintro"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section card">
+                        <div class="history-header">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Identity History</h4>
+                            <button class="btn-clear-history" onclick="clearToolHistory('tool4')">Clear History</button>
+                        </div>
+                        <div id="t4-history-list"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: ACTION PLAN -->
+                <section id="tool5" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="form-header">
+                            <div class="form-header-text">
+                                <h2>Tool 5: Action Plan</h2>
+                                <p>"I need concrete steps so this doesn't stay a fantasy for another year."</p>
+                            </div>
+                            <button class="btn-sample" onclick="loadSampleTool5()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Scenario
+                            </button>
+                        </div>
+
+                        <form id="form-tool5" onsubmit="handleTool5Submit(event)">
+                            <div class="form-group">
+                                <label for="t5-direction">Chosen direction (or top two target paths):</label>
+                                <textarea id="t5-direction" required placeholder="e.g. UX Design and Technical Writing"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-firststep">First step already taken (if any):</label>
+                                <select id="t5-firststep" required>
+                                    <option value="None">None yet</option>
+                                    <option value="Research">Online research & reading</option>
+                                    <option value="Talked to someone">Talked to someone in the field</option>
+                                    <option value="Applied to program">Applied to or enrolled in a course/program</option>
+                                    <option value="Updated resume">Updated resume / LinkedIn profile</option>
+                                    <option value="Side project">Started a small side project</option>
+                                    <option value="Quit">Already handed in notice / quit</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-obstacle">Biggest current obstacle:</label>
+                                <select id="t5-obstacle" required>
+                                    <option value="Fear">Fear & Overwhelm</option>
+                                    <option value="Money">Money / Financial tightness</option>
+                                    <option value="Time">Lack of time after work</option>
+                                    <option value="Qualifications">Lack of formal qualifications</option>
+                                    <option value="Age">Age discrimination anxiety</option>
+                                    <option value="Family">Family resistance or commitments</option>
+                                    <option value="Don't know where to start">Don't know where to start</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-hours">Weekly hours available for transition work:</label>
+                                <select id="t5-hours" required>
+                                    <option value="<2">Less than 2 hours/week</option>
+                                    <option value="2-5">2 to 5 hours/week</option>
+                                    <option value="5-10">5 to 10 hours/week</option>
+                                    <option value="10+">10+ hours/week</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="t5-accountability">Accountability support available:</label>
+                                <select id="t5-accountability" required>
+                                    <option value="None">None right now</option>
+                                    <option value="Partner">Partner / Spouse</option>
+                                    <option value="Friend">Trusted Friend / Peer</option>
+                                    <option value="Coach">Career Coach / Mentor</option>
+                                    <option value="Online community">Online Learning Community / Group</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-primary">
+                                <i class="fa-solid fa-rocket"></i> Generate 90-Day Transition Plan
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Output Container -->
+                    <div id="t5-output" class="output-section">
+                        <div class="card">
+                            <div class="output-header">
+                                <h3><i class="fa-solid fa-route"></i> Your Roadmap & Milestones</h3>
+                            </div>
+
+                            <div class="output-box accent-gold">
+                                <h4><i class="fa-solid fa-person-running"></i> The 30-Day Sprint (Month 1)</h4>
+                                <ul id="t5-out-sprint"></ul>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-flag"></i> The 60-Day Milestone (Month 2)</h4>
+                                <ul id="t5-out-m60"></ul>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-bullseye"></i> The 90-Day Decision Checkpoint (Month 3)</h4>
+                                <ul id="t5-out-m90"></ul>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-shield-cat"></i> The Obstacle Elimination Plan</h4>
+                                <p id="t5-out-obstacleplan"></p>
+                            </div>
+
+                            <div class="output-box">
+                                <h4><i class="fa-solid fa-users-gear"></i> The Accountability System</h4>
+                                <p id="t5-out-accountabilityplan"></p>
+                            </div>
+
+                            <div class="output-box accent-gold">
+                                <h4><i class="fa-solid fa-calendar-check"></i> The Hard Go / No-Go Date</h4>
+                                <p id="t5-out-gonogodate"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="history-section card">
+                        <div class="history-header">
+                            <h4><i class="fa-solid fa-clock-rotate-left"></i> Action Plan History</h4>
+                            <button class="btn-clear-history" onclick="clearToolHistory('tool5')">Clear History</button>
+                        </div>
+                        <div id="t5-history-list"></div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Global Footer -->
+            <footer>
+                <p>For entertainment and reflection purposes only. Not career counseling or professional advice. For major career decisions, consider working with a certified career coach.</p>
+                <p style="margin-top: 0.3rem;">&copy; CareerPivot Transition Toolkit. Self-contained & private.</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check" style="color: var(--warm-gold);"></i>
+        <span id="toast-msg">Copied to clipboard!</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* --- NAVIGATION & SIDEBAR --- */
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const navItems = document.querySelectorAll('.nav-item');
+        const viewSections = document.querySelectorAll('.view-section');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('mobile-open');
+        }
+
+        menuToggle.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        function switchView(targetId) {
+            navItems.forEach(item => {
+                if (item.getAttribute('data-target') === targetId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            viewSections.forEach(section => {
+                if (section.id === targetId) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+
+            if (sidebar.classList.contains('mobile-open')) {
+                toggleSidebar();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const target = item.getAttribute('data-target');
+                switchView(target);
+            });
+        });
+
+        /* --- TOAST NOTIFICATION --- */
+        function showToast(msg = "Copied to clipboard!") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function copyScript(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(err => {
+                showToast("Failed to copy text.");
+            });
+        }
+
+        /* --- LOCALSTORAGE HISTORY MANAGER --- */
+        const MAX_HISTORY = 30;
+
+        function getHistory(toolId) {
+            try {
+                const data = localStorage.getItem(`careerpivot_history_${toolId}`);
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveHistory(toolId, item) {
+            try {
+                let history = getHistory(toolId);
+                history.unshift({
+                    id: Date.now(),
+                    timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                    ...item
+                });
+                if (history.length > MAX_HISTORY) {
+                    history = history.slice(0, MAX_HISTORY);
+                }
+                localStorage.setItem(`careerpivot_history_${toolId}`, JSON.stringify(history));
+                renderHistory(toolId);
+            } catch (e) {
+                console.error('LocalStorage write error', e);
+            }
+        }
+
+        function clearToolHistory(toolId) {
+            if (confirm("Are you sure you want to clear history for this tool?")) {
+                localStorage.removeItem(`careerpivot_history_${toolId}`);
+                renderHistory(toolId);
+                showToast("History cleared");
+            }
+        }
+
+        function renderHistory(toolId) {
+            const historyList = document.getElementById(`${toolId.replace('tool', 't')}-history-list`);
+            if (!historyList) return;
+
+            const items = getHistory(toolId);
+
+            if (items.length === 0) {
+                historyList.innerHTML = `<p style="font-size:0.85rem; color:var(--text-muted); font-style:italic;">No saved entries yet.</p>`;
+                return;
+            }
+
+            historyList.innerHTML = items.map((item, index) => {
+                return `
+                    <div class="history-item">
+                        <div class="history-item-header" onclick="toggleHistoryItem('${toolId}', ${index})">
+                            <span><i class="fa-solid fa-file-lines" style="color:var(--primary-indigo); margin-right:0.4rem;"></i> ${item.title || 'Saved Analysis'}</span>
+                            <span style="font-size:0.75rem; color:var(--text-muted);">${item.timestamp} <i class="fa-solid fa-chevron-down" style="margin-left:0.3rem;"></i></span>
+                        </div>
+                        <div class="history-item-body" id="hist-${toolId}-${index}">
+                            ${item.htmlContent}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleHistoryItem(toolId, index) {
+            const el = document.getElementById(`hist-${toolId}-${index}`);
+            if (el) {
+                el.classList.toggle('open');
+            }
+        }
+
+        /* --- TOOL 1: PIVOT AUDIT LOGIC --- */
+        function loadSampleTool1() {
+            document.getElementById('t1-role').value = "Senior Corporate Finance Analyst";
+            document.getElementById('t1-years').value = "8";
+            document.getElementById('t1-drains').value = "Endless corporate bureaucracy, strict budget slashing, lack of creative problem-solving, ethical friction over sales targets.";
+            document.getElementById('t1-energizes').value = "Teaching junior colleagues financial tools, presenting strategy breakdowns in simple terms, organizing department knowledge bases.";
+            document.getElementById('t1-skills').value = "Financial modeling, data analysis, Excel/SQL, executive reporting, cross-functional project management.";
+            document.getElementById('t1-wantskills').value = "Mentoring, curriculum design, workshop facilitation, clear visual presentation, empathetic coaching.";
+            
+            // Check specific boxes
+            const fears = ["Income drop", "Starting over"];
+            document.querySelectorAll('input[name="t1-fear"]').forEach(cb => {
+                cb.checked = fears.includes(cb.value);
+            });
+        }
+
+        function handleTool1Submit(e) {
+            e.preventDefault();
+            const role = document.getElementById('t1-role').value.trim();
+            const years = parseInt(document.getElementById('t1-years').value) || 0;
+            const drains = document.getElementById('t1-drains').value.trim();
+            const energizes = document.getElementById('t1-energizes').value.trim();
+            const skills = document.getElementById('t1-skills').value.trim();
+            const wantSkills = document.getElementById('t1-wantskills').value.trim();
+            
+            const selectedFears = Array.from(document.querySelectorAll('input[name="t1-fear"]:checked')).map(cb => cb.value);
+
+            // Diagnosis Logic
+            let diagnosisText = "";
+            if (drains.toLowerCase().includes('bureaucracy') || drains.toLowerCase().includes('culture') || drains.toLowerCase().includes('management')) {
+                diagnosisText = `Your primary friction is likely <strong>Environment & Culture Misfit</strong> rather than complete skill misalignment. After ${years} year(s) as a ${role}, you are burnt out by process and culture, not necessarily core problem-solving.`;
+            } else if (drains.toLowerCase().includes('ethics') || drains.toLowerCase().includes('meaning') || drains.toLowerCase().includes('boring')) {
+                diagnosisText = `Your friction stems from a <strong>Value & Mission Misfit</strong>. You have outgrown the intrinsic purpose of your current sector (${role}) and need a field that aligns with personal integrity and human impact.`;
+            } else {
+                diagnosisText = `You are experiencing a <strong>Role / Task Misfit</strong>. The daily functional tasks in ${role} no longer match your evolving core strengths and interests after ${years} year(s).`;
+            }
+
+            // Transferable skills reframe
+            const skillList = skills.split(',').map(s => s.trim()).filter(s => s);
+            const transferableText = `Your ${years} years of background give you high-value hard & soft portable assets: <strong>${skillList.slice(0, 3).join(', ')}</strong>. These do NOT reset to zero when you pivot; they serve as a premium multiplier in a new domain.`;
+
+            // Energy map
+            const energyText = `Your energy sparks around: <em>"${energizes}"</em>. In your next transition, look specifically for roles that center around <strong>${wantSkills}</strong>. Eliminate roles that require heavy involvement in: <em>"${drains.substring(0, 80)}..."</em>`;
+
+            // Fear reality check
+            let fearHtml = "<ul>";
+            if (selectedFears.length === 0) {
+                fearHtml += "<li><strong>Low Fear Barrier:</strong> You have minimal explicit fear barriers selected. Focus primarily on clear action planning!</li>";
+            } else {
+                selectedFears.forEach(f => {
+                    if (f === "Income drop") {
+                        fearHtml += "<li><strong>Income drop:</strong> <em>Solvable.</em> Pivots rarely mean starting at baseline pay if you move laterally into a field that values your existing industry domain expertise.</li>";
+                    } else if (f === "Starting over") {
+                        fearHtml += "<li><strong>Starting over:</strong> <em>Reframe.</em> You are not starting over; you are building on top of a " + years + "-year foundation. You are starting from experience, not scratch.</li>";
+                    } else if (f === "Too old") {
+                        fearHtml += "<li><strong>Too old:</strong> <em>Myth.</em> Modern careers are multi-stage (40-50 year spans). Maturity brings strategic judgment and emotional resilience that younger candidates lack.</li>";
+                    } else if (f === "Not qualified") {
+                        fearHtml += "<li><strong>Not qualified:</strong> <em>Solvable.</em> Bridge qualifications can often be built via targeted certificates or micro-projects in 3-6 months.</li>";
+                    } else {
+                        fearHtml += `<li><strong>${f}:</strong> <em>Manageable.</em> Break this fear down into a specific scenario: "What is the absolute worst outcome, and how would I recover within 90 days?"</li>`;
+                    }
+                });
+            }
+            fearHtml += "</ul>";
+
+            // Identity Reframe
+            const identityText = `Remember: You are a talented professional who currently happens to work as a ${role}. You are NOT your job title. Your worth is tied to your problem-solving capacity, adaptability, and character.`;
+
+            // Verdict
+            let verdictText = "";
+            if (years >= 5 && selectedFears.includes("Income drop")) {
+                verdictText = `<strong>RECOMMENDED STRATEGY: Smart Lateral Pivot or Parallel Bridge.</strong> Do not quit abruptly. Leverage your senior status in ${role} to pivot laterally into an adjacent function (e.g., enablement, consulting, or edtech) where your domain knowledge commands market value.`;
+            } else {
+                verdictText = `<strong>RECOMMENDED STRATEGY: Clean Transition / Exploration.</strong> Your energy profile indicates a strong pull toward new methodologies. Focus on testing new fields through low-risk experiments while maintaining your baseline stability.`;
+            }
+
+            // Render Output
+            document.getElementById('t1-out-diagnosis').innerHTML = diagnosisText;
+            document.getElementById('t1-out-skills').innerHTML = transferableText;
+            document.getElementById('t1-out-energymap').innerHTML = energyText;
+            document.getElementById('t1-out-fears').innerHTML = fearHtml;
+            document.getElementById('t1-out-identity').innerHTML = identityText;
+            document.getElementById('t1-out-verdict').innerHTML = verdictText;
+
+            const outputSec = document.getElementById('t1-output');
+            outputSec.classList.add('active');
+            outputSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Save to LocalStorage
+            const htmlToSave = `
+                <p><strong>Role:</strong> ${role} (${years} yrs)</p>
+                <p><strong>Diagnosis:</strong> ${diagnosisText}</p>
+                <p><strong>Verdict:</strong> ${verdictText}</p>
+            `;
+            saveHistory('tool1', {
+                title: `Audit: ${role}`,
+                htmlContent: htmlToSave
+            });
+        }
+
+        /* --- TOOL 2: OPTION EXPLORER LOGIC --- */
+        function loadSampleTool2() {
+            document.getElementById('t2-industries').value = "Healthcare, Corporate Training, Higher Education, EdTech";
+            document.getElementById('t2-roles').value = "Nursing, Instructional Designer, Corporate L&D Specialist, Talent Development Manager";
+            document.getElementById('t2-constraints').value = "Must maintain income";
+            document.getElementById('t2-startover').value = "3";
+            document.getElementById('t2-startover-val').innerText = "3";
+            document.getElementById('t2-backtoschool').value = "Maybe online";
+            document.getElementById('t2-network').value = "None";
+        }
+
+        function handleTool2Submit(e) {
+            e.preventDefault();
+            const industries = document.getElementById('t2-industries').value.trim();
+            const roles = document.getElementById('t2-roles').value.trim();
+            const constraint = document.getElementById('t2-constraints').value;
+            const startOver = parseInt(document.getElementById('t2-startover').value);
+            const school = document.getElementById('t2-backtoschool').value;
+            const network = document.getElementById('t2-network').value;
+
+            const roleList = roles.split(',').map(r => r.trim()).filter(r => r);
+            const targetRole1 = roleList[0] || "Target Role A";
+            const targetRole2 = roleList[1] || "Target Role B";
+
+            // Shortlist generator based on willingness to start over & school
+            let shortlistHtml = "<ul>";
+            if (startOver <= 4) {
+                shortlistHtml += `<li><strong>Primary Recommendation (High-Feasibility Lateral):</strong> Focus on <em>${targetRole2 || targetRole1}</em>. This role utilizes existing organizational skills without forcing you to entry-level pay scales.</li>`;
+                shortlistHtml += `<li><strong>Secondary Path (Hybrid/Enabling):</strong> Explore corporate or tech-adjacent roles in <em>${industries.split(',')[0]}</em> (e.g., Operations Specialist or Customer Success Manager).</li>`;
+            } else {
+                shortlistHtml += `<li><strong>Primary Recommendation (Direct Pivot):</strong> Pursue <em>${targetRole1}</em> directly. Your willingness to start fresh gives you high flexibility.</li>`;
+                shortlistHtml += `<li><strong>Secondary Path:</strong> Specialized practitioner in <em>${targetRole2 || industries}</em> after accelerated credentialing.</li>`;
+            }
+            shortlistHtml += "</ul>";
+
+            // Informational Interview Script
+            const outreachScript = `Hi [Name],
+
+I noticed your impressive background in [Target Field/Role] and saw that you transitioned into this field. I am currently exploring a strategic career transition into ${targetRole1} after working in my current domain.
+
+I’m not looking for a job application or referral—I’m simply conducting brief informational interviews to understand what the day-to-day reality of ${targetRole1} looks like, and what skills truly matter.
+
+Would you be open to a 15-minute virtual cup of coffee in the next couple of weeks? I'd be incredibly grateful for your perspective.
+
+Best regards,
+[Your Name]`;
+
+            // Shadowing plan
+            const shadowingText = `Since you answered "${network}" for network contacts: Send 5 personalized LinkedIn outreach messages using the script above. Ask for a 15-minute informational chat. At the end of every chat, ask: <em>"Is there one project or meeting I could passively observe for an hour to see how your team works?"</em>`;
+
+            // Retraining Calculator
+            let retrainingText = "";
+            if (school === "Yes") {
+                retrainingText = `<strong>Full Retraining Route:</strong> Estimated 1-2 years full-time degree/diploma. Cost: $15,000 - $40,000. Potential income disruption: High. <em>Ensure high ROI before committing.</em>`;
+            } else if (school === "Maybe online") {
+                retrainingText = `<strong>Accelerated / Online Certificate Route:</strong> Estimated 3-6 months self-paced (5-10 hrs/wk). Cost: $300 - $2,500 (e.g., Coursera, Bootcamps, University Extensions). Minimal income disruption.`;
+            } else {
+                retrainingText = `<strong>Zero-Education Skill Bridge:</strong> 0 months formal school. Time: 4-8 weeks building 2 portfolio projects demonstrating transferable skills. Cost: $0 - $100.`;
+            }
+
+            // Lateral move feasibility
+            let lateralText = "";
+            if (constraint === "Must maintain income") {
+                lateralText = `Because you <strong>must maintain income</strong>, avoid entry-level clinical or junior roles. Target roles at companies where your former industry knowledge is considered a competitive advantage (e.g., pivoting from Corporate Finance into EdTech Finance or L&D for Financial Firms).`;
+            } else {
+                lateralText = `Your constraints allow for financial flexibility. You can consider mid-tier entry points or paid apprenticeships to gain immediate traction without long delays.`;
+            }
+
+            // Experiment
+            const experimentText = `<strong>The 14-Day Micro-Experiment:</strong> Before applying anywhere, complete ONE real-world deliverable required in ${targetRole1} (e.g., design a 5-page training module or audit a public dataset). Notice if the work energizes or drains you.`;
+
+            // Render Output
+            document.getElementById('t2-out-shortlist').innerHTML = shortlistHtml;
+            document.getElementById('t2-out-script').innerText = outreachScript;
+            document.getElementById('t2-out-shadowing').innerHTML = shadowingText;
+            document.getElementById('t2-out-retraining').innerHTML = retrainingText;
+            document.getElementById('t2-out-lateral').innerHTML = lateralText;
+            document.getElementById('t2-out-experiment').innerHTML = experimentText;
+
+            const outputSec = document.getElementById('t2-output');
+            outputSec.classList.add('active');
+            outputSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Save to LocalStorage
+            saveHistory('tool2', {
+                title: `Explorer: ${targetRole1}`,
+                htmlContent: `<p><strong>Target Roles:</strong> ${roles}</p><p><strong>Constraint:</strong> ${constraint}</p><p><strong>Shortlist:</strong> ${shortlistHtml}</p>`
+            });
+        }
+
+        /* --- TOOL 3: FINANCIAL BRIDGE LOGIC --- */
+        function loadSampleTool3() {
+            document.getElementById('t3-income').value = "5000";
+            document.getElementById('t3-expenses').value = "4200";
+            document.getElementById('t3-savings').value = "8000";
+            document.getElementById('t3-targetincome').value = "3600";
+            document.getElementById('t3-timeline').value = "1 year";
+            document.getElementById('t3-sideincome').value = "Freelance consulting, tutoring math/finance online.";
+        }
+
+        function handleTool3Submit(e) {
+            e.preventDefault();
+            const income = parseFloat(document.getElementById('t3-income').value) || 0;
+            const expenses = parseFloat(document.getElementById('t3-expenses').value) || 0;
+            const savings = parseFloat(document.getElementById('t3-savings').value) || 0;
+            const targetIncome = parseFloat(document.getElementById('t3-targetincome').value) || 0;
+            const timeline = document.getElementById('t3-timeline').value;
+            const sideIncome = document.getElementById('t3-sideincome').value.trim();
+
+            const monthlySurplus = income - expenses;
+            const zeroIncomeRunway = expenses > 0 ? (savings / expenses).toFixed(1) : "N/A";
+            const safetyNumber = (expenses * 6).toFixed(0);
+
+            // Update Stats
+            document.getElementById('t3-stat-runway').innerText = `${zeroIncomeRunway} mos`;
+            document.getElementById('t3-stat-surplus').innerText = `$${monthlySurplus.toLocaleString()}`;
+            document.getElementById('t3-stat-safety').innerText = `$${parseInt(safetyNumber).toLocaleString()}`;
+
+            // Runway text
+            let runwayText = "";
+            if (parseFloat(zeroIncomeRunway) < 3) {
+                runwayText = `Your liquid savings ($${savings.toLocaleString()}) cover <strong>${zeroIncomeRunway} months</strong> of baseline living costs ($${expenses.toLocaleString()}/mo). <em>Warning: Quitting cold turkey without a guaranteed offer is high-risk right now.</em>`;
+            } else if (parseFloat(zeroIncomeRunway) >= 6) {
+                runwayText = `You have a healthy cushion of <strong>${zeroIncomeRunway} months</strong> of emergency living expenses ($${expenses.toLocaleString()}/mo). This provides psychological safety to explore options without desperation.`;
+            } else {
+                runwayText = `Your savings cover <strong>${zeroIncomeRunway} months</strong> of living expenses. This is a moderate cushion—suitable for a stay-and-build approach.`;
+            }
+
+            // Bridge Strategy
+            let bridgeText = "";
+            if (monthlySurplus > 0) {
+                const yearlySavingsPotential = monthlySurplus * 12;
+                bridgeText = `<strong>Stay-and-Build Strategy:</strong> You currently save <strong>$${monthlySurplus.toLocaleString()}/month</strong>. Over your ${timeline} timeline, you can bank an additional <strong>$${yearlySavingsPotential.toLocaleString()}</strong> into a dedicated "Pivot Launch Fund". Do NOT quit yet—use your salary to finance your transition education/networking.`;
+            } else {
+                bridgeText = `<strong>Immediate Expense Restructure Required:</strong> Your current expenses equal or exceed your income. You cannot build a pivot buffer until you create a monthly surplus. Focus on aggressive cost reduction before taking career risks.`;
+            }
+
+            // Income Gap
+            let gapText = "";
+            if (targetIncome > 0 && targetIncome < expenses) {
+                const gap = expenses - targetIncome;
+                gapText = `Your projected entry pay ($${targetIncome.toLocaleString()}/mo) falls short of your expenses ($${expenses.toLocaleString()}/mo) by <strong>$${gap.toLocaleString()}/month</strong>. You will need a supplementary side stream or temporary expense reduction to bridge this $${gap.toLocaleString()} gap.`;
+            } else if (targetIncome >= expenses) {
+                gapText = `Great news! Your estimated starting income in the new field ($${targetIncome.toLocaleString()}/mo) fully covers your monthly expense baseline ($${expenses.toLocaleString()}/mo). Your financial gap is zero once landed.`;
+            } else {
+                gapText = `Target starting income was not specified. Assume an initial 15-20% pay drop when calculating worst-case models.`;
+            }
+
+            // Side Hustle Bridge
+            let sideHustleText = "";
+            if (sideIncome) {
+                sideHustleText = `You noted: <em>"${sideIncome}"</em>. Target generating just $500–$1,000/month from this side activity while employed. That extra cash goes directly into your runway buffer, accelerating your independence.`;
+            } else {
+                sideHustleText = `No current side income identified. Consider micro-freelancing (5 hrs/week) in your current skill domain to build a dedicated $200–$500/month pivot buffer.`;
+            }
+
+            // Cost-cut targets
+            const cutTarget = (expenses * 0.15).toFixed(0);
+            const costCutText = `To boost your runway, identify a 15% temporary "Pivot Trim" on non-essential spending. Trimming <strong>$${cutTarget}/month</strong> extends your cash runway and lowers the baseline income required in your new field.`;
+
+            // Safety Number
+            const safetyText = `Your ideal 6-month Safety Cushion is <strong>$${parseInt(safetyNumber).toLocaleString()}</strong>. You currently have $${savings.toLocaleString()}. Gap to full security cushion: <strong>$${Math.max(0, parseInt(safetyNumber) - savings).toLocaleString()}</strong>.`;
+
+            // Render Output
+            document.getElementById('t3-out-runway').innerHTML = runwayText;
+            document.getElementById('t3-out-bridge').innerHTML = bridgeText;
+            document.getElementById('t3-out-gap').innerHTML = gapText;
+            document.getElementById('t3-out-sidehustle').innerHTML = sideHustleText;
+            document.getElementById('t3-out-costcut').innerHTML = costCutText;
+            document.getElementById('t3-out-safetynumber').innerHTML = safetyText;
+
+            const outputSec = document.getElementById('t3-output');
+            outputSec.classList.add('active');
+            outputSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Save to LocalStorage
+            saveHistory('tool3', {
+                title: `Financial: $${income}/mo -> $${targetIncome}/mo`,
+                htmlContent: `<p><strong>Zero-Income Runway:</strong> ${zeroIncomeRunway} months</p><p><strong>Monthly Surplus:</strong> $${monthlySurplus}</p><p><strong>Safety Target:</strong> $${parseInt(safetyNumber).toLocaleString()}</p>`
+            });
+        }
+
+        /* --- TOOL 4: IDENTITY SHIFT LOGIC --- */
+        function loadSampleTool4() {
+            document.getElementById('t4-introduce').value = "I'm a Senior Corporate Litigation Lawyer at a mid-size firm.";
+            document.getElementById('t4-jobsays').value = "It tells people I'm smart, successful, financially high-earning, and prestigious.";
+            document.getElementById('t4-othersthink').value = "I'm terrified they'll think I burned out, couldn't hack the partner track, or made a foolish mistake.";
+            document.getElementById('t4-selfthink').value = "I'm afraid I'll feel like a failure who wasted 7 years of law school and training.";
+            document.getElementById('t4-nonwork').value = "Parent, endurance runner, community organizer, youth sports volunteer.";
+            document.getElementById('t4-support').value = "Cautious";
+        }
+
+        function handleTool4Submit(event) {
+            event.preventDefault();
+            const introduce = document.getElementById('t4-introduce').value.trim();
+            const jobSays = document.getElementById('t4-jobsays').value.trim();
+            const othersThink = document.getElementById('t4-othersthink').value.trim();
+            const selfThink = document.getElementById('t4-selfthink').value.trim();
+            const nonWork = document.getElementById('t4-nonwork').value.trim();
+            const support = document.getElementById('t4-support').value;
+
+            // Identity attachment diagnosis
+            const attachmentText = `You currently experience high <strong>"Identity Fusion"</strong> with your profession. When you say <em>"${introduce}"</em>, your career acts as an external anchor for status (${jobSays}). Uncoupling your human self-worth from a corporate job title is essential for long-term psychological freedom.`;
+
+            // Narrative shift
+            const narrativeText = `Replace internal victim language (<em>"I'm quitting/failing"</em>) with active growth language (<em>"I am intentionally auditing my professional portfolio"</em>). Your past training is an asset you own, not a prison that owns you.`;
+
+            // Social Script
+            const socialScript = `"I'm actually in an exciting transition phase right now! After several years in my current role, I'm taking a deliberate approach to shift my expertise toward new challenges in strategy and human-centered work. I'm currently consulting and exploring a few targeted paths."`;
+
+            // Partner Script
+            let partnerScript = "";
+            if (support === "Cautious" || support === "Opposed") {
+                partnerScript = `"I know how important our financial stability and security are, and I am not planning any rash moves or sudden quits. However, my current role is taking a heavy toll on my well-being. I want to build a realistic 6-to-12-month bridge plan together where we protect our income while I systematically build my next step. Can we look at the numbers together this weekend?"`;
+            } else {
+                partnerScript = `"I am so grateful for your support. As I begin taking concrete steps toward this career pivot, I want to keep you in the loop on my timelines and budget. Let's do a brief monthly check-in so we stay aligned on our shared goals."`;
+            }
+
+            // Failure reframe
+            const failureReframeText = `<strong>The Sunk Cost Fallacy:</strong> You expressed fear that <em>"${selfThink}"</em>. Spending another 5 years in an ill-fitting field to justify past time spent is compounding the loss. Pivot isn't waste; it's compound interest on your life experience.`;
+
+            // New Intro Practice
+            const nonWorkList = nonWork.split(',')[0] || "creative professional";
+            const newIntroText = `Practice saying this out loud: <em>"I specialize in analytical problem solving and communication. Outside of work, I'm a passionate ${nonWorkList}. Right now, I'm pivoting my skill set into new growth domains."</em>`;
+
+            // Render Output
+            document.getElementById('t4-out-attachment').innerHTML = attachmentText;
+            document.getElementById('t4-out-narrative').innerHTML = narrativeText;
+            document.getElementById('t4-out-socialscript').innerText = socialScript;
+            document.getElementById('t4-out-partnerscript').innerText = partnerScript;
+            document.getElementById('t4-out-failurereframe').innerHTML = failureReframeText;
+            document.getElementById('t4-out-newintro').innerHTML = newIntroText;
+
+            const outputSec = document.getElementById('t4-output');
+            outputSec.classList.add('active');
+            outputSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Save to LocalStorage
+            saveHistory('tool4', {
+                title: `Identity Reframe`,
+                htmlContent: `<p><strong>Current Identity:</strong> ${introduce}</p><p><strong>Partner Stance:</strong> ${support}</p><p><strong>Reframe:</strong> ${narrativeText}</p>`
+            });
+        }
+
+        /* --- TOOL 5: ACTION PLAN LOGIC --- */
+        function loadSampleTool5() {
+            document.getElementById('t5-direction').value = "UX Design and Technical Writing";
+            document.getElementById('t5-firststep').value = "None";
+            document.getElementById('t5-obstacle').value = "Fear";
+            document.getElementById('t5-hours').value = "2-5";
+            document.getElementById('t5-accountability').value = "None";
+        }
+
+        function handleTool5Submit(e) {
+            e.preventDefault();
+            const direction = document.getElementById('t5-direction').value.trim();
+            const firstStep = document.getElementById('t5-firststep').value;
+            const obstacle = document.getElementById('t5-obstacle').value;
+            const hours = document.getElementById('t5-hours').value;
+            const accountability = document.getElementById('t5-accountability').value;
+
+            // 30 Day Sprint
+            let sprintItems = [];
+            sprintItems.push(`<strong>Week 1:</strong> Dedicated 1-hour calendar blocks (${hours} hrs/week total). Conduct initial audit of target roles in <em>${direction}</em>.`);
+            sprintItems.push(`<strong>Week 2:</strong> Reach out to 3 people currently working in ${direction} using the Tool 2 Outreach Script.`);
+            sprintItems.push(`<strong>Week 3:</strong> Complete 1 introductory online course module or skill tutorial.`);
+            sprintItems.push(`<strong>Week 4:</strong> Review monthly baseline expenses and set up a dedicated transition savings sub-account.`);
+
+            // 60 Day Milestone
+            let m60Items = [];
+            m60Items.push(`Conduct 2 informational interviews and synthesize key skill requirements.`);
+            m60Items.push(`Complete 1 mini portfolio sample or practice project relevant to ${direction}.`);
+            m60Items.push(`Tailor resume and LinkedIn headline to highlight transferable skills.`);
+
+            // 90 Day Milestone
+            let m90Items = [];
+            m90Items.push(`Apply for 5 strategic roles, hybrid positions, or freelance bridge gigs.`);
+            m90Items.push(`Evaluate financial bridge fund progress against target safety numbers.`);
+            m90Items.push(`Execute Go / No-Go decision check-in.`);
+
+            // Obstacle Plan
+            let obstacleText = "";
+            switch(obstacle) {
+                case "Fear":
+                    obstacleText = `<strong>Overcoming Fear:</strong> Fear is caused by ambiguity. Shrink the target: Commit to just 15 minutes of pivot work per day. You don't need to see the whole staircase—just the next step.`;
+                    break;
+                case "Money":
+                    obstacleText = `<strong>Overcoming Money Constraints:</strong> Focus 80% of your energy on low-cost learning resources (YouTube, books, free certifications) and 20% on aggressive expense optimization.`;
+                    break;
+                case "Time":
+                    obstacleText = `<strong>Overcoming Time Scarcity:</strong> Audit your weekly schedule. Protect a non-negotiable "Pivot Power Hour" on Saturday mornings before family or social obligations begin.`;
+                    break;
+                case "Qualifications":
+                    obstacleText = `<strong>Overcoming Qualification Gaps:</strong> Build a proof-of-work project instead of waiting for a degree. Showing actual work output trumps credentials in modern hiring.`;
+                    break;
+                default:
+                    obstacleText = `<strong>Overcoming ${obstacle}:</strong> Break down this barrier into 3 micro-actions that take less than 10 minutes each. Action creates momentum, which dissolves overwhelm.`;
+            }
+
+            // Accountability System
+            let accountabilityText = "";
+            if (accountability === "None") {
+                accountabilityText = `You currently have no accountability partner. <strong>Action Required:</strong> Find an "accountability buddy" or join an online peer group by Day 14. Schedule a recurring 15-minute weekly check-in.`;
+            } else {
+                accountabilityText = `Set up a weekly recurring check-in with your <strong>${accountability}</strong>. Share 3 specific commitments every Sunday and report back on Friday.`;
+            }
+
+            // Go/No-Go Date Calculation (90 days from today)
+            const targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + 90);
+            const dateStr = targetDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+            const goNoGoText = `Mark <strong>${dateStr}</strong> on your calendar as your official 90-Day Pivot Review. On this date, evaluate your progress: If you've hit your milestones, commit to the next phase; if not, re-adjust your timeline or strategy without self-judgment.`;
+
+            // Render Output
+            document.getElementById('t5-out-sprint').innerHTML = sprintItems.map(i => `<li>${i}</li>`).join('');
+            document.getElementById('t5-out-m60').innerHTML = m60Items.map(i => `<li>${i}</li>`).join('');
+            document.getElementById('t5-out-m90').innerHTML = m90Items.map(i => `<li>${i}</li>`).join('');
+            document.getElementById('t5-out-obstacleplan').innerHTML = obstacleText;
+            document.getElementById('t5-out-accountabilityplan').innerHTML = accountabilityText;
+            document.getElementById('t5-out-gonogodate').innerHTML = goNoGoText;
+
+            const outputSec = document.getElementById('t5-output');
+            outputSec.classList.add('active');
+            outputSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Save to LocalStorage
+            saveHistory('tool5', {
+                title: `Action Plan: ${direction}`,
+                htmlContent: `<p><strong>Target Direction:</strong> ${direction}</p><p><strong>90-Day Review Date:</strong> ${dateStr}</p>`
+            });
+        }
+
+        // Initialize history on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderHistory('tool1');
+            renderHistory('tool2');
+            renderHistory('tool3');
+            renderHistory('tool4');
+            renderHistory('tool5');
+        });
+    </script>
+</body>
+</html>

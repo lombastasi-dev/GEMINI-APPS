@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusReset — Concentration Recovery Toolkit</title>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --forest-green: #2D6A4F;
+            --forest-green-hover: #21513C;
+            --forest-green-light: #E8F3EE;
+            --soft-cream: #FFF3E0;
+            --bg-gradient-start: #F1F8F5;
+            --bg-gradient-end: #FFF8E7;
+            --text-dark: #2C3E50;
+            --text-muted: #6C757D;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --accent-orange: #E67E22;
+            --radius-xl: 1rem;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --transition-fast: all 0.2s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 240px;
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--forest-green);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--forest-green);
+            letter-spacing: -0.02em;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 1rem 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 0.25rem 0.75rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.925rem;
+            transition: var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background-color: var(--forest-green-light);
+            color: var(--forest-green);
+        }
+
+        .nav-link.active {
+            background-color: var(--forest-green);
+            color: #FFFFFF;
+        }
+
+        .nav-link.active i {
+            color: #FFFFFF;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+            color: var(--forest-green);
+            transition: var(--transition-fast);
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            height: 60px;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 1.25rem;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 90;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            color: var(--forest-green);
+            font-size: 1.1rem;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 95;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Main Content Area */
+        .main-wrapper {
+            flex: 1;
+            margin-left: 240px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - 240px);
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 2rem 1.5rem;
+        }
+
+        /* Card System */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Dashboard View */
+        .dashboard-hero {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, var(--forest-green) 0%, #1B4332 100%);
+            color: white;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .dashboard-hero h2 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .dashboard-hero p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: var(--transition-fast);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--forest-green);
+        }
+
+        .tool-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background-color: var(--forest-green-light);
+            color: var(--forest-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .tool-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            flex: 1;
+        }
+
+        /* Tool Headers & Forms */
+        .tool-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--forest-green);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .tool-problem {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-style: italic;
+            background-color: var(--soft-cream);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--accent-orange);
+            margin-top: 0.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label.form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            font-size: 0.925rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background-color: #FAFAFA;
+            color: var(--text-dark);
+            outline: none;
+            transition: var(--transition-fast);
+        }
+
+        .form-control:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--forest-green);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.15);
+        }
+
+        .checkbox-group, .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 0.4rem 0.6rem;
+            border-radius: 0.375rem;
+            border: 1px solid transparent;
+            transition: var(--transition-fast);
+            background-color: #F8FAFC;
+        }
+
+        .checkbox-label:hover, .radio-label:hover {
+            background-color: var(--forest-green-light);
+        }
+
+        .checkbox-label input, .radio-label input {
+            accent-color: var(--forest-green);
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.65rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: var(--transition-fast);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--forest-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--forest-green-hover);
+        }
+
+        .btn-secondary {
+            background-color: #E2E8F0;
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #CBD5E1;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--forest-green);
+            color: var(--forest-green);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--forest-green-light);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        /* Output Results Styling */
+        .results-container {
+            margin-top: 2rem;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-header {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--forest-green);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--forest-green-light);
+            padding-bottom: 0.5rem;
+        }
+
+        .output-card {
+            background-color: #FAFAFA;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--forest-green);
+            position: relative;
+        }
+
+        .output-title {
+            font-size: 0.825rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--forest-green);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .output-value {
+            font-size: 1rem;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .output-value strong {
+            color: var(--forest-green);
+        }
+
+        .copy-box {
+            background-color: #282C34;
+            color: #ABB2BF;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            position: relative;
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: rgba(255,255,255,0.1);
+            color: #FFF;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .copy-btn:hover {
+            background-color: rgba(255,255,255,0.25);
+        }
+
+        /* History Accordion */
+        .history-section {
+            margin-top: 2.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .history-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            background-color: #FFFFFF;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 0.85rem 1rem;
+            background-color: #F8FAFC;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            font-size: 0.875rem;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: var(--forest-green-light);
+        }
+
+        .accordion-content {
+            padding: 1rem;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            background-color: #FAFAFA;
+            font-size: 0.875rem;
+        }
+
+        .accordion-content.show {
+            display: block;
+        }
+
+        /* Footer */
+        .app-footer {
+            margin-top: auto;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: #2D3748;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-md);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 60px;
+            }
+
+            .main-content {
+                padding: 1.25rem 1rem;
+            }
+
+            .dashboard-hero {
+                padding: 1.75rem 1rem;
+            }
+
+            .dashboard-hero h2 {
+                font-size: 1.75rem;
+            }
+
+            .checkbox-group, .radio-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Mobile Navigation Header -->
+        <header class="mobile-header">
+            <div class="mobile-brand">
+                <i class="fa-solid fa-compass"></i> FocusReset
+            </div>
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </header>
+
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Left Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-compass"></i>
+                <h1>FocusReset</h1>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a class="nav-link active" data-view="dashboard">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-view="tool1">
+                        <i class="fa-solid fa-bell-slash"></i>
+                        <span>Interruption Audit</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-view="tool2">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Deep Work Blocker</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-view="tool3">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                        <span>Notification Detox</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-view="tool4">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Task Batching</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-view="tool5">
+                        <i class="fa-solid fa-battery-half"></i>
+                        <span>Attention Recovery</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <main class="main-content">
+
+                <!-- DASHBOARD VIEW -->
+                <section id="view-dashboard" class="view-section">
+                    <div class="dashboard-hero">
+                        <h2>Focus Reset</h2>
+                        <p>Reclaim your attention from the chaos.</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="tool-card" onclick="switchView('tool1')">
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-bell-slash"></i>
+                            </div>
+                            <h3>Interruption Audit</h3>
+                            <p>Calculate the hidden cost of daily distractions and target your worst focus-breaker.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchView('tool2')">
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <h3>Deep Work Blocker</h3>
+                            <p>Design non-negotiable focus blocks and scripts to protect your calendar gracefully.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchView('tool3')">
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-mobile-screen-button"></i>
+                            </div>
+                            <h3>Notification Detox</h3>
+                            <p>Tame noisy channels and create a structured checking schedule that calms anxiety.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchView('tool4')">
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                            <h3>Task Batching Planner</h3>
+                            <p>Stop rapid task-switching by grouping similar work into high-energy batch blocks.</p>
+                        </div>
+
+                        <div class="tool-card" onclick="switchView('tool5')">
+                            <div class="tool-card-icon">
+                                <i class="fa-solid fa-battery-half"></i>
+                            </div>
+                            <h3>Attention Recovery</h3>
+                            <p>Restore mental capacity, fix broken breaks, and systematically rebuild focus depth.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TOOL 1: INTERRUPTION AUDIT -->
+                <section id="view-tool1" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-bell-slash"></i> Interruption Audit</h2>
+                            <div class="tool-problem">
+                                "I don't even know what's breaking my focus. Let me count."
+                            </div>
+                        </div>
+
+                        <form id="form-tool1" onsubmit="handleTool1Submit(event)">
+                            <div class="form-group">
+                                <label class="form-label">How many times are you interrupted per hour?</label>
+                                <select class="form-select" id="t1-freq" required>
+                                    <option value="1-2">1-2 times</option>
+                                    <option value="3-5">3-5 times</option>
+                                    <option value="6-10">6-10 times</option>
+                                    <option value="10+">10+ times</option>
+                                    <option value="cant-count">I can't count</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What interrupts you? (Select all that apply)</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-source" value="Email notifications"> Email notifications</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-source" value="Chat messages"> Chat messages</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-source" value="Phone"> Phone calls</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-source" value="Colleague"> Colleague drop-ins</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-source" value="Boss"> Boss requests</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-source" value="My own phone"> My own phone</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-source" value="Noise"> Environmental noise</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t1-source" value="Thoughts/worry"> Thoughts / worry</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">How long to refocus after an interruption?</label>
+                                <select class="form-select" id="t1-refocus" required>
+                                    <option value="<2min">&lt; 2 minutes</option>
+                                    <option value="2-5min">2 - 5 minutes</option>
+                                    <option value="5-15min">5 - 15 minutes</option>
+                                    <option value="15min+">15+ minutes</option>
+                                    <option value="never">I never get back in flow</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">When are you naturally most focused?</label>
+                                <select class="form-select" id="t1-peak" required>
+                                    <option value="Early morning">Early morning</option>
+                                    <option value="Mid-morning">Mid-morning</option>
+                                    <option value="Afternoon">Afternoon</option>
+                                    <option value="Evening">Evening</option>
+                                    <option value="Never">Never feel focused</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Audit My Focus</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool1()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool1" class="results-container" style="display: none;"></div>
+                        <div id="history-tool1" class="history-section"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 2: DEEP WORK BLOCKER -->
+                <section id="view-tool2" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-shield-halved"></i> Deep Work Blocker</h2>
+                            <div class="tool-problem">
+                                "I need to create space for focused work and communicate it to others."
+                            </div>
+                        </div>
+
+                        <form id="form-tool2" onsubmit="handleTool2Submit(event)">
+                            <div class="form-group">
+                                <label class="form-label">Your ideal deep work block duration:</label>
+                                <select class="form-select" id="t2-duration" required>
+                                    <option value="30min">30 minutes</option>
+                                    <option value="1hr">1 hour</option>
+                                    <option value="2hr">2 hours</option>
+                                    <option value="3hr">3 hours</option>
+                                    <option value="Half day">Half day (4 hrs)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">How many blocks per week do you need?</label>
+                                <input type="number" class="form-control" id="t2-blocks" min="1" max="20" value="4" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Who interrupts you most?</label>
+                                <select class="form-select" id="t2-interrupter" required>
+                                    <option value="Boss">Direct Manager / Boss</option>
+                                    <option value="Team">Team / Peers</option>
+                                    <option value="Self">Myself (Self-distraction)</option>
+                                    <option value="Clients">Clients / External Partners</option>
+                                    <option value="Notifications">App Notifications</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Can you control your calendar layout?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t2-control" value="Yes" checked> Yes, complete control</label>
+                                    <label class="radio-label"><input type="radio" name="t2-control" value="Somewhat"> Somewhat / Shared calendar</label>
+                                    <label class="radio-label"><input type="radio" name="t2-control" value="No"> No, meetings are pushed on me</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Where do you work best?</label>
+                                <select class="form-select" id="t2-location" required>
+                                    <option value="Home office">Home office</option>
+                                    <option value="Coffee shop">Coffee shop / Third place</option>
+                                    <option value="Library">Quiet Library</option>
+                                    <option value="Quiet office">Quiet office room / Pod</option>
+                                    <option value="Anywhere">Anywhere with headphones</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-lock"></i> Build Protection Plan</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool2()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool2" class="results-container" style="display: none;"></div>
+                        <div id="history-tool2" class="history-section"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 3: NOTIFICATION DETOX -->
+                <section id="view-tool3" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-mobile-screen-button"></i> Notification Detox</h2>
+                            <div class="tool-problem">
+                                "My apps are screaming at me all day and I can't stop checking."
+                            </div>
+                        </div>
+
+                        <form id="form-tool3" onsubmit="handleTool3Submit(event)">
+                            <div class="form-group">
+                                <label class="form-label">Apps that notify you regularly: (Select all that apply)</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-apps" value="Email"> Email</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-apps" value="Slack/Teams"> Slack / Teams</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-apps" value="Text"> Text / WhatsApp</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-apps" value="Calendar"> Calendar popups</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-apps" value="Social media"> Social media</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-apps" value="News"> News alerts</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="t3-apps" value="Other work apps"> Other work apps</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">How often do you check your phone / communications?</label>
+                                <select class="form-select" id="t3-frequency" required>
+                                    <option value="Every few min">Every few minutes</option>
+                                    <option value="Every 15min">Every 15 minutes</option>
+                                    <option value="Every hour">Every hour</option>
+                                    <option value="A few times a day">A few times a day</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Which channel causes the most anxiety?</label>
+                                <select class="form-select" id="t3-anxiety" required>
+                                    <option value="Email">Email</option>
+                                    <option value="Chat">Slack / Teams Chat</option>
+                                    <option value="Text">Text Messages</option>
+                                    <option value="Calendar">Calendar Reminders</option>
+                                    <option value="All equally">All of them equally</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Have you tried notification restrictions before?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="t3-history" value="Yes, worked"> Yes, and it worked well</label>
+                                    <label class="radio-label"><input type="radio" name="t3-history" value="Yes, didn't stick" checked> Yes, but didn't stick</label>
+                                    <label class="radio-label"><input type="radio" name="t3-history" value="No"> No, never tried</label>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-filter font-icon"></i> Generate Detox Protocol</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool3()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool3" class="results-container" style="display: none;"></div>
+                        <div id="history-tool3" class="history-section"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 4: TASK BATCHING PLANNER -->
+                <section id="view-tool4" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-layer-group"></i> Task Batching Planner</h2>
+                            <div class="tool-problem">
+                                "I'm jumping between 12 different types of work and finishing none of them."
+                            </div>
+                        </div>
+
+                        <form id="form-tool4" onsubmit="handleTool4Submit(event)">
+                            <div class="form-group">
+                                <label class="form-label">Your main daily task types (e.g. email, coding, meetings, admin):</label>
+                                <textarea class="form-textarea" id="t4-types" rows="3" placeholder="e.g., Answering client emails, writing proposals, code review, status meetings, filing expense reports" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">How do you currently organize your day?</label>
+                                <select class="form-select" id="t4-current" required>
+                                    <option value="As tasks come in">Reactively as tasks come in</option>
+                                    <option value="By deadline">By closest deadline</option>
+                                    <option value="By project">By specific project</option>
+                                    <option value="No system">No structured system</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Which tasks require intense, focused mental energy?</label>
+                                <textarea class="form-textarea" id="t4-deep" rows="2" placeholder="e.g., Writing strategy docs, deep data analysis, coding new features" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Which tasks can be done easily even when tired/distracted?</label>
+                                <textarea class="form-textarea" id="t4-shallow" rows="2" placeholder="e.g., Sorting inbox, organizing folders, scheduling meetings, quick approvals" required></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calendar-days"></i> Generate Batch Schedule</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool4()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool4" class="results-container" style="display: none;"></div>
+                        <div id="history-tool4" class="history-section"></div>
+                    </div>
+                </section>
+
+                <!-- TOOL 5: ATTENTION RECOVERY -->
+                <section id="view-tool5" class="view-section" style="display: none;">
+                    <div class="card">
+                        <div class="tool-header">
+                            <h2><i class="fa-solid fa-battery-half"></i> Attention Recovery</h2>
+                            <div class="tool-problem">
+                                "My brain feels fried and I can't concentrate even when I have time."
+                            </div>
+                        </div>
+
+                        <form id="form-tool5" onsubmit="handleTool5Submit(event)">
+                            <div class="form-group">
+                                <label class="form-label">How long is your attention span right now before wanting to switch?</label>
+                                <select class="form-select" id="t5-span" required>
+                                    <option value="<10min">&lt; 10 minutes</option>
+                                    <option value="10-20min">10 - 20 minutes</option>
+                                    <option value="20-40min">20 - 40 minutes</option>
+                                    <option value="40min+">40+ minutes</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">How do you feel at the end of the workday?</label>
+                                <select class="form-select" id="t5-feeling" required>
+                                    <option value="Energized">Energized and satisfied</option>
+                                    <option value="Tired but okay">Tired but okay</option>
+                                    <option value="Exhausted">Completely exhausted</option>
+                                    <option value="Numb">Brain-numb / Brain fog</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">What do you usually do during work breaks?</label>
+                                <select class="form-select" id="t5-breaks" required>
+                                    <option value="Scroll phone">Scroll social media / news on phone</option>
+                                    <option value="Walk">Take a physical walk / step outside</option>
+                                    <option value="Eat">Eat snacks or drink coffee at desk</option>
+                                    <option value="Nothing">Sit quietly / zone out</option>
+                                    <option value="More work">Switch to lightweight work (reading articles/chats)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">How is your sleep quality currently?</label>
+                                <select class="form-select" id="t5-sleep" required>
+                                    <option value="Great">Great (Restful & 7-8 hrs)</option>
+                                    <option value="Okay">Okay (Restless occasionally)</option>
+                                    <option value="Poor">Poor (Wake up tired / hard to sleep)</option>
+                                    <option value="Terrible">Terrible (Chronic insomnia or bad sleep)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-heart-pulse"></i> Generate Recovery Roadmap</button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSampleTool5()"><i class="fa-solid fa-vial"></i> Load Sample Scenario</button>
+                            </div>
+                        </form>
+
+                        <div id="results-tool5" class="results-container" style="display: none;"></div>
+                        <div id="history-tool5" class="history-section"></div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Mandatory Footer -->
+            <footer class="app-footer">
+                For productivity and focus management only. Not medical or therapeutic advice. For attention-related health concerns, consult a healthcare professional.
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <script>
+        // Global State & Navigation Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            initHistoryAll();
+        });
+
+        function switchView(viewId) {
+            // Hide all views
+            document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+            
+            // Show target view
+            const target = document.getElementById('view-' + viewId);
+            if (target) {
+                target.style.display = 'block';
+            }
+
+            // Update nav active states
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.dataset.view === viewId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Close mobile menu if open
+            closeMobileMenu();
+
+            // Scroll top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function initNavigation() {
+            // Nav link click events
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchView(link.dataset.view);
+                });
+            });
+
+            // Mobile menu handlers
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+            hamburgerBtn.addEventListener('click', toggleMobileMenu);
+            sidebarOverlay.addEventListener('click', closeMobileMenu);
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('show');
+        }
+
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('show');
+        }
+
+        // Copy Utility & Toast Notification
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied!");
+            }).catch(err => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast("Copied!");
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // LocalStorage & History System
+        function saveToHistory(toolId, summary, detailsHtml) {
+            const key = 'focus_history_' + toolId;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const newItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                summary: summary,
+                detailsHtml: detailsHtml
+            };
+
+            // Max 30 items
+            history.unshift(newItem);
+            if (history.length > 30) {
+                history = history.slice(0, 30);
+            }
+
+            localStorage.setItem(key, JSON.stringify(history));
+            renderHistory(toolId);
+        }
+
+        function renderHistory(toolId) {
+            const container = document.getElementById('history-' + toolId);
+            if (!container) return;
+
+            const key = 'focus_history_' + toolId;
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+            if (history.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <div class="history-header">
+                    <span class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Previous Audits (${history.length})</span>
+                    <button class="btn btn-outline btn-sm" onclick="clearHistory('${toolId}')"><i class="fa-solid fa-trash"></i> Clear History</button>
+                </div>
+            `;
+
+            history.forEach((item, index) => {
+                html += `
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion('${toolId}-${item.id}')">
+                            <span><strong>${item.timestamp}</strong> — ${escapeHtml(item.summary)}</span>
+                            <i class="fa-solid fa-chevron-down" id="icon-${toolId}-${item.id}"></i>
+                        </div>
+                        <div class="accordion-content" id="content-${toolId}-${item.id}">
+                            ${item.detailsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleAccordion(id) {
+            const content = document.getElementById('content-' + id);
+            const icon = document.getElementById('icon-' + id);
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                icon.className = 'fa-solid fa-chevron-down';
+            } else {
+                content.classList.add('show');
+                icon.className = 'fa-solid fa-chevron-up';
+            }
+        }
+
+        function clearHistory(toolId) {
+            if (confirm("Clear history for this tool?")) {
+                localStorage.removeItem('focus_history_' + toolId);
+                renderHistory(toolId);
+            }
+        }
+
+        function initHistoryAll() {
+            ['tool1', 'tool2', 'tool3', 'tool4', 'tool5'].forEach(renderHistory);
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+            });
+        }
+
+
+        // ==========================================
+        // TOOL 1: INTERRUPTION AUDIT LOGIC
+        // ==========================================
+        function loadSampleTool1() {
+            document.getElementById('t1-freq').value = '6-10';
+            
+            // Checkboxes
+            const checkboxes = document.querySelectorAll('input[name="t1-source"]');
+            checkboxes.forEach(cb => {
+                cb.checked = ['Chat messages', 'Colleague', 'My own phone'].includes(cb.value);
+            });
+
+            document.getElementById('t1-refocus').value = '5-15min';
+            document.getElementById('t1-peak').value = 'Early morning';
+        }
+
+        function handleTool1Submit(e) {
+            e.preventDefault();
+            
+            const freq = document.getElementById('t1-freq').value;
+            const sources = Array.from(document.querySelectorAll('input[name="t1-source"]:checked')).map(c => c.value);
+            const refocus = document.getElementById('t1-refocus').value;
+            const peak = document.getElementById('t1-peak').value;
+
+            if (sources.length === 0) {
+                alert("Please select at least one interruption source.");
+                return;
+            }
+
+            // Calculations
+            let hourlyCount = 4;
+            if (freq === '1-2') hourlyCount = 1.5;
+            if (freq === '3-5') hourlyCount = 4;
+            if (freq === '6-10') hourlyCount = 8;
+            if (freq === '10+') hourlyCount = 12;
+            if (freq === 'cant-count') hourlyCount = 15;
+
+            const dailyInterruptions = Math.round(hourlyCount * 8);
+
+            let recoveryMins = 5;
+            if (refocus === '<2min') recoveryMins = 2;
+            if (refocus === '2-5min') recoveryMins = 3.5;
+            if (refocus === '5-15min') recoveryMins = 10;
+            if (refocus === '15min+') recoveryMins = 20;
+            if (refocus === 'never') recoveryMins = 25;
+
+            const hoursLostPerWeek = ((dailyInterruptions * recoveryMins * 5) / 60).toFixed(1);
+
+            const worstOffender = sources[0] || "Unspecified Distractions";
+
+            let quickFix = "";
+            if (worstOffender.includes("Chat")) {
+                quickFix = "Set status to 'In Flow (Async)' and close desktop chat popups. Batch chat responses every 90 minutes.";
+            } else if (worstOffender.includes("Email")) {
+                quickFix = "Turn off desktop badge notifications and restrict inbox checks to 10:00 AM and 3:00 PM.";
+            } else if (worstOffender.includes("phone") || worstOffender.includes("Phone")) {
+                quickFix = "Place phone out of physical reach (in drawer or another room) during deep focus windows.";
+            } else if (worstOffender.includes("Colleague") || worstOffender.includes("Boss")) {
+                quickFix = "Establish physical/visual signals (headphones on / door closed) and hold a daily 15-min sync to catch quick items.";
+            } else {
+                quickFix = "Implement a 2-minute delay rule before responding to any non-urgent ping.";
+            }
+
+            const resultsHtml = `
+                <div class="results-header"><i class="fa-solid fa-chart-bar"></i> Audit Analysis Results</div>
+
+                <div class="output-card">
+                    <div class="output-title">1. Interruption Tally</div>
+                    <div class="output-value">Estimated <strong>${dailyInterruptions} interruptions per day</strong> (~${hourlyCount} per hour).</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">2. The Cost</div>
+                    <div class="output-value">You lose approximately <strong>${hoursLostPerWeek} hours per week</strong> (~${(hoursLostPerWeek/5).toFixed(1)} hrs/day) simply regaining context and focus after disruptions.</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">3. The Worst Offender</div>
+                    <div class="output-value">Primary Focus Breaker: <strong>${worstOffender}</strong> (${sources.join(', ')}).</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">4. The Protected Window</div>
+                    <div class="output-value">Defend your prime focus time: <strong>${peak}</strong>. Block this period on your calendar as non-negotiable solo focus time.</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">5. The Quick Fix</div>
+                    <div class="output-value"><strong>High-Impact Step:</strong> ${quickFix}</div>
+                </div>
+            `;
+
+            const resultsContainer = document.getElementById('results-tool1');
+            resultsContainer.innerHTML = resultsHtml;
+            resultsContainer.style.display = 'block';
+
+            // Save to history
+            const summary = `${dailyInterruptions} inter/day | ${hoursLostPerWeek}h lost/wk | Top: ${worstOffender}`;
+            saveToHistory('tool1', summary, resultsHtml);
+        }
+
+
+        // ==========================================
+        // TOOL 2: DEEP WORK BLOCKER LOGIC
+        // ==========================================
+        function loadSampleTool2() {
+            document.getElementById('t2-duration').value = '2hr';
+            document.getElementById('t2-blocks').value = 4;
+            document.getElementById('t2-interrupter').value = 'Team';
+            document.querySelector('input[name="t2-control"][value="Somewhat"]').checked = true;
+            document.getElementById('t2-location').value = 'Quiet office';
+        }
+
+        function handleTool2Submit(e) {
+            e.preventDefault();
+
+            const duration = document.getElementById('t2-duration').value;
+            const blocks = document.getElementById('t2-blocks').value;
+            const interrupter = document.getElementById('t2-interrupter').value;
+            const control = document.querySelector('input[name="t2-control"]:checked').value;
+            const location = document.getElementById('t2-location').value;
+
+            // Template outputs
+            const calendarTitle = `[Focus Block] Core Execution Time - Non-Interruptible`;
+            const statusMsg = `I am currently in a scheduled Deep Work Block until [Time]. Checking messages periodically. If urgent (system outage / critical blocker), call my cell or flag emergency in Slack.`;
+            
+            let physicalSignal = "";
+            if (location.includes("Home")) physicalSignal = "Put on over-ear noise-canceling headphones and close office door. Set indicator light/sign to red.";
+            else if (location.includes("office") || location.includes("Office")) physicalSignal = "Wear prominent noise-canceling headphones and place a custom sign on desktop: 'Focusing on execution until [Time].'";
+            else physicalSignal = "Headphones on, phone stored away, Laptop screen angled away from main walkways.";
+
+            let teamScript = "";
+            if (interrupter === "Boss") {
+                teamScript = `"Hi [Boss], to ensure I deliver high-quality output on [Key Project], I'm scheduling ${blocks} protected focus blocks (${duration} each) weekly. I'll summarize progress right after each block."`;
+            } else if (interrupter === "Team") {
+                teamScript = `"Hey team! I'm testing ${duration} uninterrupted focus blocks ${blocks}x a week to speed up [Project]. If you need anything non-urgent, drop it in chat and I'll review immediately when my block ends."`;
+            } else {
+                teamScript = `"To increase throughput on key deliverables, I've reserved scheduled focus blocks. For urgent escalations, please ping me with [URGENT] in the header."`;
+            }
+
+            const recoveryProtocol = `When someone pings or interrupts during your block: 
+1. Pause & acknowledge: "I'm right in the middle of a focus block finishing [Task]."
+2. Deflect gracefully: "Can I get back to you at [End Time of Block] or ping you right after?"
+3. Re-anchor: Jot down where you stopped and return immediately to your task.`;
+
+            const resultsHtml = `
+                <div class="results-header"><i class="fa-solid fa-shield-cat"></i> Protection Plan Generated</div>
+
+                <div class="output-card">
+                    <div class="output-title">1. Calendar Blocks</div>
+                    <div class="output-value">Create <strong>${blocks} recurring ${duration} events</strong> in your calendar titled:<br>
+                    <code style="background:#E2E8F0; padding:2px 6px; border-radius:4px; font-weight:600;">${calendarTitle}</code></div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">
+                        2. The Status Message 
+                        <button class="btn btn-outline btn-sm" onclick="copyToClipboard('${escapeHtml(statusMsg)}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                    </div>
+                    <div class="copy-box">${statusMsg}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">3. Physical Signal</div>
+                    <div class="output-value">${physicalSignal}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">
+                        4. Team Conversation Script
+                        <button class="btn btn-outline btn-sm" onclick="copyToClipboard('${escapeHtml(teamScript)}')"><i class="fa-solid fa-copy"></i> Copy</button>
+                    </div>
+                    <div class="output-value"><em>${teamScript}</em></div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">5. Recovery Protocol</div>
+                    <div class="output-value" style="white-space: pre-line;">${recoveryProtocol}</div>
+                </div>
+            `;
+
+            const resultsContainer = document.getElementById('results-tool2');
+            resultsContainer.innerHTML = resultsHtml;
+            resultsContainer.style.display = 'block';
+
+            // Save history
+            const summary = `${blocks}x ${duration} blocks | Target: ${interrupter} | Loc: ${location}`;
+            saveToHistory('tool2', summary, resultsHtml);
+        }
+
+
+        // ==========================================
+        // TOOL 3: NOTIFICATION DETOX LOGIC
+        // ==========================================
+        function loadSampleTool3() {
+            const apps = document.querySelectorAll('input[name="t3-apps"]');
+            apps.forEach(a => {
+                a.checked = ['Email', 'Slack/Teams', 'Text', 'Calendar'].includes(a.value);
+            });
+            document.getElementById('t3-frequency').value = 'Every few min';
+            document.getElementById('t3-anxiety').value = 'Chat';
+            document.querySelector('input[name="t3-history"][value="Yes, didn't stick"]').checked = true;
+        }
+
+        function handleTool3Submit(e) {
+            e.preventDefault();
+
+            const apps = Array.from(document.querySelectorAll('input[name="t3-apps"]:checked')).map(c => c.value);
+            const freq = document.getElementById('t3-frequency').value;
+            const anxiety = document.getElementById('t3-anxiety').value;
+            const history = document.querySelector('input[name="t3-history"]:checked').value;
+
+            if (apps.length === 0) {
+                alert("Please select at least one app.");
+                return;
+            }
+
+            // Prescription mapping
+            let appSettings = apps.map(app => {
+                if (app === 'Email') return "• <strong>Email:</strong> Turn OFF desktop popups & sound. Disable phone push notifications.";
+                if (app === 'Slack/Teams') return "• <strong>Slack/Teams:</strong> Mute non-essential channels. Enable notifications only for direct @mentions.";
+                if (app === 'Text') return "• <strong>Text/WhatsApp:</strong> Mute group chats; keep VIP callers on bypass.";
+                if (app === 'Calendar') return "• <strong>Calendar:</strong> Set alerts to 5 mins prior instead of 15 mins.";
+                return `• <strong>${app}:</strong> Disable lock screen notifications and turn off sound/vibration badges.`;
+            }).join('<br>');
+
+            const batchSchedule = `• <strong>Morning Window:</strong> 10:00 AM – 10:20 AM (First deep batch)<br>
+• <strong>Midday Window:</strong> 1:30 PM – 2:00 PM (Post-lunch batch)<br>
+• <strong>End-of-day Window:</strong> 4:30 PM – 5:00 PM (Final sweep & wrap up)`;
+
+            const phoneSetup = `1. <strong>Grayscale Mode:</strong> Turn on phone Grayscale (Accessibility Settings) to remove visual rewards.<br>
+2. <strong>Folder Isolation:</strong> Move ${apps[0] || 'work'} apps into a subfolder on Page 2.<br>
+3. <strong>Scheduled Summary:</strong> Enable iOS/Android Scheduled Notification Summary for non-critical tools.`;
+
+            const accountability = history.includes("didn't stick") ? 
+                "<strong>The Friction Rule:</strong> Change passwords or log out of distracting apps at the start of deep blocks. Force a 30-second friction barrier whenever you impulse-check." :
+                "<strong>Public Commitment:</strong> Tell your team your fixed window check times so expectations align.";
+
+            const emergencyPath = `Set up <strong>Emergency Bypass</strong> on your phone for immediate family and direct boss only. Instruct team: <em>"If a critical emergency occurs, call phone directly—2 consecutive calls will bypass Do Not Disturb."</em>`;
+
+            const resultsHtml = `
+                <div class="results-header"><i class="fa-solid fa-sliders"></i> Notification Detox Protocol</div>
+
+                <div class="output-card">
+                    <div class="output-title">1. Notification Prescription</div>
+                    <div class="output-value">${appSettings}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">2. Batch Schedule</div>
+                    <div class="output-value">${batchSchedule}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">3. Phone Setup</div>
+                    <div class="output-value">${phoneSetup}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">4. Accountability System</div>
+                    <div class="output-value">${accountability}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">5. Emergency Path</div>
+                    <div class="output-value">${emergencyPath}</div>
+                </div>
+            `;
+
+            const resultsContainer = document.getElementById('results-tool3');
+            resultsContainer.innerHTML = resultsHtml;
+            resultsContainer.style.display = 'block';
+
+            // Save history
+            const summary = `${apps.length} apps detoxed | Anxiety source: ${anxiety}`;
+            saveToHistory('tool3', summary, resultsHtml);
+        }
+
+
+        // ==========================================
+        // TOOL 4: TASK BATCHING PLANNER LOGIC
+        // ==========================================
+        function loadSampleTool4() {
+            document.getElementById('t4-types').value = 'Email, writing proposals, code review, status meetings, filing expense reports';
+            document.getElementById('t4-current').value = 'As tasks come in';
+            document.getElementById('t4-deep').value = 'Writing proposals, complex analysis, architectural design';
+            document.getElementById('t4-shallow').value = 'Answering email, filing expenses, updating tickets';
+        }
+
+        function handleTool4Submit(e) {
+            e.preventDefault();
+
+            const types = document.getElementById('t4-types').value;
+            const current = document.getElementById('t4-current').value;
+            const deepTasks = document.getElementById('t4-deep').value;
+            const shallowTasks = document.getElementById('t4-shallow').value;
+
+            const batchSchedule = `
+• <strong>08:30 - 09:00 AM | Warm-up & Triage:</strong> Scan urgent communications, review daily goals.<br>
+• <strong>09:00 - 11:30 AM | DEEP BATCH:</strong> Focus exclusively on high-value mental energy work: <em>(${escapeHtml(deepTasks)})</em>.<br>
+• <strong>11:30 - 12:30 PM | Communication Batch:</strong> Process emails, chat messages, return calls.<br>
+• <strong>01:30 - 03:30 PM | Collaboration / Project Execution:</strong> Meetings, group discussions, task coordination.<br>
+• <strong>03:30 - 05:00 PM | SHALLOW BATCH:</strong> Group administrative and low-energy items: <em>(${escapeHtml(shallowTasks)})</em>.
+            `;
+
+            const transitionBuffer = `<strong>10-Minute Reset Ritual between Deep & Shallow work:</strong><br>
+1. Close all browser tabs related to the previous task.<br>
+2. Stand up, stretch, drink a glass of water, step away from screens.<br>
+3. Write a 1-sentence note on where you will resume your deep task tomorrow.`;
+
+            const adminSlots = `Daily at <strong>11:30 AM</strong> & <strong>03:30 PM</strong>. Never process shallow work during prime morning focus hours.`;
+            const deepSlots = `Daily at <strong>09:00 AM – 11:30 AM</strong> (Peak focus zone). Guard this window fiercely.`;
+            
+            const fridayReview = `<strong>10-Minute Friday Ritual:</strong><br>
+1. Review completed batches.<br>
+2. Sort next week's incoming tasks into 2 buckets: [Deep Focus] and [Shallow Admin].<br>
+3. Pre-place them into calendar batch blocks for Mon-Fri.`;
+
+            const resultsHtml = `
+                <div class="results-header"><i class="fa-solid fa-diagram-project"></i> Task Batching System</div>
+
+                <div class="output-card">
+                    <div class="output-title">1. Master Batch Schedule</div>
+                    <div class="output-value">${batchSchedule}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">2. Transition Buffer</div>
+                    <div class="output-value">${transitionBuffer}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">3. Admin Slots</div>
+                    <div class="output-value">${adminSlots}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">4. Deep Slots</div>
+                    <div class="output-value">${deepSlots}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">5. The Friday Review Ritual</div>
+                    <div class="output-value">${fridayReview}</div>
+                </div>
+            `;
+
+            const resultsContainer = document.getElementById('results-tool4');
+            resultsContainer.innerHTML = resultsHtml;
+            resultsContainer.style.display = 'block';
+
+            // Save history
+            const summary = `Organized ${types.substring(0, 30)}... into Deep/Shallow batches`;
+            saveToHistory('tool4', summary, resultsHtml);
+        }
+
+
+        // ==========================================
+        // TOOL 5: ATTENTION RECOVERY LOGIC
+        // ==========================================
+        function loadSampleTool5() {
+            document.getElementById('t5-span').value = '10-20min';
+            document.getElementById('t5-feeling').value = 'Exhausted';
+            document.getElementById('t5-breaks').value = 'Scroll phone';
+            document.getElementById('t5-sleep').value = 'Poor';
+        }
+
+        function handleTool5Submit(e) {
+            e.preventDefault();
+
+            const span = document.getElementById('t5-span').value;
+            const feeling = document.getElementById('t5-feeling').value;
+            const breaks = document.getElementById('t5-breaks').value;
+            const sleep = document.getElementById('t5-sleep').value;
+
+            let diagnosis = "";
+            if (breaks.includes("Scroll")) {
+                diagnosis = "<strong>Attention Fragmented by 'Junk Light' Breaks:</strong> Scrolling during breaks prevents cognitive rest, keeping the brain's default mode network overstimulated.";
+            } else {
+                diagnosis = "<strong>Systemic Cognitive Exhaustion:</strong> High context-switching combined with sub-optimal recovery leads to mental saturation early in the day.";
+            }
+
+            const microRecovery = `<strong>2-Minute Box Breathing Reset:</strong><br>
+Inhale through nose for 4s → Hold for 4s → Exhale slowly for 4s → Hold empty for 4s. Repeat 4 cycles before switching tasks to clear residual cognitive load.`;
+
+            let breakUpgrade = "";
+            if (breaks.includes("Scroll")) {
+                breakUpgrade = "<strong>Replace Phone Scrolling with 'Non-Screen Restoration':</strong> Step away from your desk. Walk to get water, look out a window at distant objects (panoramic vision reduces autonomic arousal), or stretch.";
+            } else {
+                breakUpgrade = "<strong>Physical Movement Break:</strong> Do a 3-minute light walk or posture reset. Do not absorb new digital input during rest.";
+            }
+
+            let sleepConnection = "";
+            if (sleep === 'Poor' || sleep === 'Terrible') {
+                sleepConnection = "Poor sleep directly impairs the prefrontal cortex—the brain region responsible for impulse control and deep focus. Prioritize a strict 30-min screen-free wind-down before bed.";
+            } else {
+                sleepConnection = "Sleep appears stable. Focus recovery can be accelerated rapidly by fixing mid-day break quality.";
+            }
+
+            const rebuildPlan = `
+<strong>Week 1: Foundations & Rest Stops</strong><br>
+• Enforce 0 screen scrolling during short work breaks.<br>
+• Practice 25-minute Pomodoro focus windows (10-min build up from current span).<br><br>
+<strong>Week 2: Stamina Expansion</strong><br>
+• Expand focus blocks to 40 uninterrupted minutes.<br>
+• Implement one 15-minute outdoors walk midday without phone or podcast.
+            `;
+
+            const resultsHtml = `
+                <div class="results-header"><i class="fa-solid fa-heart-pulse"></i> Attention Recovery Plan</div>
+
+                <div class="output-card">
+                    <div class="output-title">1. Attention Diagnosis</div>
+                    <div class="output-value">${diagnosis}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">2. Micro-Recovery Technique</div>
+                    <div class="output-value">${microRecovery}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">3. Break Upgrade</div>
+                    <div class="output-value">${breakUpgrade}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">4. Sleep Connection</div>
+                    <div class="output-value">${sleepConnection}</div>
+                </div>
+
+                <div class="output-card">
+                    <div class="output-title">5. Gradual Rebuild Plan (2-Week Roadmap)</div>
+                    <div class="output-value">${rebuildPlan}</div>
+                </div>
+            `;
+
+            const resultsContainer = document.getElementById('results-tool5');
+            resultsContainer.innerHTML = resultsHtml;
+            resultsContainer.style.display = 'block';
+
+            // Save history
+            const summary = `Current Span: ${span} | Feel: ${feeling} | Sleep: ${sleep}`;
+            saveToHistory('tool5', summary, resultsHtml);
+        }
+    </script>
+</body>
+</html>
